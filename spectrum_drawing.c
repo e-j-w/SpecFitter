@@ -1,6 +1,32 @@
 
-#define ZOOM_X  100.0
-#define ZOOM_Y  100.0
+void getPlotLimits(){
+    if(zoomLevel <= 1.0){
+        //set zoomed out
+        zoomLevel = 1.0;
+        lowerLimit = 0;
+        upperLimit = S32K - 1;
+        return;
+    }else if(zoomLevel > 1000.0){
+        zoomLevel = 1000.0; //set maximum zoom level
+    }
+
+    int numChansToDisp = (int)(1.0*S32K/zoomLevel);
+    lowerLimit = xChanFocus - numChansToDisp/2;
+    //clamp to lower limit of 0 if needed
+    if(lowerLimit < 0){
+        lowerLimit = 0;
+        upperLimit = numChansToDisp - 1;
+        return;
+    }
+    upperLimit = xChanFocus + numChansToDisp/2;
+    //clamp to upper limit of S32K-1 if needed
+    if(upperLimit > (S32K-1)){
+        upperLimit=S32K-1;
+        lowerLimit=S32K-1-numChansToDisp;
+        return;
+    }
+}
+
 
 //get the bin position in the histogram plot
 float getXPos(int bin, float clip_x1, float clip_x2){
@@ -24,19 +50,19 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 		return;
 	}
 
-	GdkRectangle da;            // GtkDrawingArea size
+	GdkRectangle dasize;  // GtkDrawingArea size
     gdouble clip_x1 = 0.0, clip_y1 = 0.0, clip_x2 = 0.0, clip_y2 = 0.0;
     GdkWindow *window = gtk_widget_get_window(widget);
 
     // Determine GtkDrawingArea dimensions
-    gdk_window_get_geometry (window, &da.x, &da.y, &da.width, &da.height);
+    gdk_window_get_geometry (window, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
 
     // Draw the background colour
     cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
     cairo_paint (cr);
 
     // transform the coordinate system
-    cairo_translate (cr, 0.0, da.height); //so that the origin is at the lower left
+    cairo_translate (cr, 0.0, dasize.height); //so that the origin is at the lower left
     cairo_scale (cr, 1.0, -1.0); //so that positive y values go up
 
     /* Determine the data points to calculate (ie. those in the clipping zone */
@@ -44,7 +70,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
     cairo_clip_extents (cr, &clip_x1, &clip_y1, &clip_x2, &clip_y2);
     cairo_set_line_width (cr, 3.0);
 
-    
+    getPlotLimits(); //setup the x range to plot over
 
 	//draw histogram
 	int i;

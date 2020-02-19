@@ -35,6 +35,8 @@ int openedSp; //0=not opened, 1=opened
 int dispSp; //# of the spectrum to display
 int lowerLimit, upperLimit; //lower and upper limits to plot spectrum
 float yScaling; //y axis scaling
+int xChanFocus; //x channel to focus on when zooming
+float zoomLevel; //1.0 = zoomed out fully
 
 #endif
 

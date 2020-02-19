@@ -46,11 +46,26 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data
 void on_spectrum_scroll(GtkWidget *drawing_area, GdkEventScroll *e)
 {
   if(e->direction == 1){
-    printf("Scrolling down at %f %f!\n",e->x,e->y);
+    //printf("Scrolling down at %f %f!\n",e->x,e->y);
+    if(zoomLevel < 10.0){
+      zoomLevel -= 1.0;
+    }else if(zoomLevel < 50.0){
+      zoomLevel -= 2.0;
+    }else{
+      zoomLevel -= 5.0;
+    }
+    
   }else{
-    printf("Scrolling up at %f %f!\n",e->x,e->y);
+    //printf("Scrolling up at %f %f!\n",e->x,e->y);
+    if(zoomLevel < 10.0){
+      zoomLevel += 1.0;
+    }else if(zoomLevel < 50.0){
+      zoomLevel += 2.0;
+    }else{
+      zoomLevel += 5.0;
+    }
   }
-  
+  gtk_widget_queue_draw(GTK_WIDGET(window));
 }
 
 int main(int argc, char *argv[])
@@ -83,6 +98,8 @@ int main(int argc, char *argv[])
   lowerLimit = 0;
   upperLimit = S32K - 1;
   yScaling = 1.0;
+  xChanFocus = 0;
+  zoomLevel = 1.0;
   gtk_adjustment_set_lower(spectrum_selector_adjustment, 0);
   gtk_adjustment_set_upper(spectrum_selector_adjustment, 0);
 
