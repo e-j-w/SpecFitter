@@ -12,7 +12,7 @@ Use `make` to compile.  Requires `gcc`.
 
 ### Dependencies
 
-* Gtk3
+* Gtk3 (`gtk3-devel` in CentOS)
 * Cairo (used for drawing spectra)
 
 ## Future plans
