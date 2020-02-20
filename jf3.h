@@ -11,8 +11,11 @@
 #include <ctype.h>
 #include <math.h>
 
+#define BIG_NUMBER    1E10
+#define SMALL_NUMBER -1E10
+
 //spectrum data file specs
-#define S32K 32768
+#define S32K   32768
 #define NSPECT 100
 
 //GUI globals
@@ -34,9 +37,10 @@ double hist[NSPECT][S32K]; //spectrum histogram data
 int openedSp; //0=not opened, 1=opened
 int dispSp; //# of the spectrum to display
 int lowerLimit, upperLimit; //lower and upper limits to plot spectrum
-float yScaling; //y axis scaling
 int xChanFocus; //x channel to focus on when zooming
-float zoomLevel; //1.0 = zoomed out fully
+float zoomLevel; //1.0 = zoomed out fully (on x axis)
+int autoScale; //0=don't autoscale y axis, 1=autoscale y axis
+float scaleLevel; //the y scale value, ie. the maximum value to show on the y axis
 
 #endif
 
