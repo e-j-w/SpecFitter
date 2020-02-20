@@ -78,11 +78,11 @@ int main(int argc, char *argv[])
   g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL); //quit the program when closing the window
   gtk_builder_connect_signals(builder, NULL);                           //build the (button/widget) signal table from the glade XML data
 
-  fixedgrid1 = GTK_WIDGET(gtk_builder_get_object(builder, "fixedgrid1"));
+  box1 = GTK_WIDGET(gtk_builder_get_object(builder, "box1"));
   open_button = GTK_WIDGET(gtk_builder_get_object(builder, "open_button"));
   spectrum_selector = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spectrumselector"));
   spectrum_selector_adjustment = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "spectrum_selector_adjustment"));
-  no_sp_label = GTK_WIDGET(gtk_builder_get_object(builder, "nosplabel"));
+  status_label = GTK_LABEL(gtk_builder_get_object(builder, "statuslabel"));
   spectrum_drawing_area = GTK_WIDGET(gtk_builder_get_object(builder, "spectrumdrawingarea"));
 
   //connect signals

@@ -25,36 +25,90 @@
     <property name="title" translatable="yes">jf3 Spectrum Viewer</property>
     <property name="window_position">center</property>
     <property name="default_width">600</property>
-    <property name="default_height">250</property>
+    <property name="default_height">400</property>
     <property name="gravity">center</property>
     <child type="titlebar">
       <placeholder/>
     </child>
     <child>
-      <object class="GtkFixed" id="fixedgrid1">
+      <object class="GtkBox" id="box1">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
         <child>
-          <object class="GtkButton" id="open_button">
-            <property name="label" translatable="yes">Open Spectrum</property>
-            <property name="width_request">140</property>
+          <object class="GtkBox">
             <property name="height_request">40</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Open a spectrum file (.mca, .fmca, .spe format).</property>
+            <property name="can_focus">False</property>
             <property name="margin_left">10</property>
             <property name="margin_top">10</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkButton" id="open_button">
+                <property name="label" translatable="yes">Open File</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Open a file containing spectra (.mca, .fmca, .spe format).</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Spectrum #:</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="spectrumselector">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="tooltip_text" translatable="yes">Select the spectrum to display.</property>
+                <property name="max_length">3</property>
+                <property name="input_purpose">digits</property>
+                <property name="adjustment">spectrum_selector_adjustment</property>
+                <property name="snap_to_ticks">True</property>
+                <property name="numeric">True</property>
+                <property name="wrap">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
           </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
         </child>
         <child>
-          <object class="GtkViewport" id="spectrumview">
+          <object class="GtkViewport">
             <property name="width_request">800</property>
             <property name="height_request">400</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="halign">start</property>
-            <property name="valign">start</property>
             <property name="margin_left">10</property>
             <property name="margin_right">10</property>
             <property name="margin_top">10</property>
@@ -69,90 +123,32 @@
             </child>
           </object>
           <packing>
-            <property name="y">50</property>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
-          <object class="GtkSpinButton" id="spectrumselector">
-            <property name="width_request">100</property>
-            <property name="height_request">40</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="tooltip_text" translatable="yes">The spectrum number to display.</property>
-            <property name="margin_left">10</property>
-            <property name="margin_top">10</property>
-            <property name="input_purpose">digits</property>
-            <property name="adjustment">spectrum_selector_adjustment</property>
-            <property name="climb_rate">1</property>
-            <property name="snap_to_ticks">True</property>
-            <property name="numeric">True</property>
-            <property name="wrap">True</property>
-            <property name="update_policy">if-valid</property>
-          </object>
-          <packing>
-            <property name="x">250</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="spectrum_number_label">
-            <property name="width_request">100</property>
-            <property name="height_request">40</property>
+          <object class="GtkViewport">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_left">10</property>
-            <property name="margin_top">10</property>
-            <property name="label" translatable="yes">Spectrum #</property>
+            <property name="margin_right">10</property>
+            <property name="margin_bottom">10</property>
+            <property name="shadow_type">none</property>
+            <child>
+              <object class="GtkLabel" id="statuslabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">start</property>
+                <property name="label" translatable="yes">No spectrum loaded</property>
+              </object>
+            </child>
           </object>
           <packing>
-            <property name="x">150</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="nosplabel">
-            <property name="width_request">400</property>
-            <property name="height_request">40</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="label" translatable="yes">glade preview mode</property>
-            <property name="justify">center</property>
-            <attributes>
-              <attribute name="font-desc" value="Sans 20"/>
-              <attribute name="foreground" value="#000000000000"/>
-            </attributes>
-          </object>
-          <packing>
-            <property name="x">210</property>
-            <property name="y">222</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkScale" id="contract_scale">
-            <property name="width_request">300</property>
-            <property name="height_request">40</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="margin_left">10</property>
-            <property name="margin_top">10</property>
-            <property name="adjustment">contract_adjustment</property>
-            <property name="round_digits">1</property>
-            <property name="value_pos">right</property>
-          </object>
-          <packing>
-            <property name="x">450</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="contract_label">
-            <property name="width_request">40</property>
-            <property name="height_request">40</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="margin_left">10</property>
-            <property name="margin_top">10</property>
-            <property name="label" translatable="yes">Contract</property>
-          </object>
-          <packing>
-            <property name="x">380</property>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>

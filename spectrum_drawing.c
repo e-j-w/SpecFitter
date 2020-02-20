@@ -38,9 +38,9 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 {
 
 	if(openedSp){
-		gtk_label_set_text(GTK_LABEL(no_sp_label), (const gchar *)"");
+		gtk_label_set_text(status_label, (const gchar *)"Spectrum loaded.");
 	}else{
-		gtk_label_set_text(GTK_LABEL(no_sp_label), (const gchar *)"No spectrum loaded");
+		gtk_label_set_text(status_label, (const gchar *)"No spectrum loaded.");
 		return;
 	}
 

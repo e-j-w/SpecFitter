@@ -17,13 +17,13 @@
 
 //GUI globals
 GtkWindow *window;
-GtkWidget *fixedgrid1;
+GtkWidget *box1;
 GtkWidget *open_button;
 GtkWidget *reload_button;
 GtkSpinButton *spectrum_selector;
 GtkScale *contract_scale;
 GtkAdjustment *spectrum_selector_adjustment, *contract_adjustment;
-GtkWidget *no_sp_label;
+GtkLabel *status_label;
 GtkWidget *spectrum_drawing_area;
 GtkWidget *file_open_dialog;
 GtkFileFilter *file_filter;
