@@ -5,8 +5,6 @@
 
 void on_open_button_clicked(GtkButton *b)
 {
-  
-
   file_open_dialog = gtk_file_chooser_dialog_new ("Open Spectrum File", window, GTK_FILE_CHOOSER_ACTION_OPEN, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, NULL);
   file_filter = gtk_file_filter_new();
   gtk_file_filter_set_name(file_filter,"Spectra (.mca, .fmca, .spe)");
@@ -59,6 +57,7 @@ int main(int argc, char *argv[])
   spectrum_selector_adjustment = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "spectrum_selector_adjustment"));
   status_label = GTK_LABEL(gtk_builder_get_object(builder, "statuslabel"));
   spectrum_drawing_area = GTK_WIDGET(gtk_builder_get_object(builder, "spectrumdrawingarea"));
+  spectrum_drag_gesture = gtk_gesture_drag_new(spectrum_drawing_area);
 
   //connect signals
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "draw", G_CALLBACK (drawSpectrumArea), NULL);
@@ -66,6 +65,8 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (open_button), "clicked", G_CALLBACK (on_open_button_clicked), NULL);
   g_signal_connect (G_OBJECT (spectrum_selector), "value-changed", G_CALLBACK (on_spectrum_selector_changed), NULL);
   gtk_widget_set_events(spectrum_drawing_area, GDK_SCROLL_MASK); //allow mouse scrolling over the drawing area
+  g_signal_connect (G_OBJECT (spectrum_drag_gesture), "drag-begin", G_CALLBACK (on_spectrum_drag_begin), NULL);
+  g_signal_connect (G_OBJECT (spectrum_drag_gesture), "drag-update", G_CALLBACK (on_spectrum_drag_update), NULL);
 
   //set default values
   openedSp = 0;

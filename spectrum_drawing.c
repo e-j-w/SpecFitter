@@ -1,36 +1,43 @@
-
-void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e)
+void on_spectrum_drag_begin(GtkGestureDrag *gesture, gdouble start_x, gdouble start_y, gpointer user_data)
 {
-
+  //do stuff here!
+  //printf("Drag started!\n");
+  dragstartul=upperLimit;
+  dragstartll=lowerLimit;
+}
+void on_spectrum_drag_update(GtkGestureDrag *gesture, gdouble offset_x, gdouble offset_y, gpointer user_data)
+{
+  //printf("Drag updated!\n");
   GdkRectangle dasize;  // GtkDrawingArea size
-  GdkWindow *wwindow = gtk_widget_get_window(widget);
+  GdkWindow *wwindow = gtk_gesture_get_window(GTK_GESTURE(gesture));
   // Determine GtkDrawingArea dimensions
   gdk_window_get_geometry (wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
-  xChanFocus = lowerLimit + (e->x/dasize.width)*(upperLimit - lowerLimit);
+  upperLimit = dragstartul - ((2.*offset_x/(dasize.width))*(upperLimit-lowerLimit));
+  lowerLimit = dragstartll - ((2.*offset_x/(dasize.width))*(upperLimit-lowerLimit));
+  xChanFocus = lowerLimit + (upperLimit - lowerLimit)/2.;
+  //printf("focus = %i\n",xChanFocus);
+  gtk_widget_queue_draw(GTK_WIDGET(window));
+}
 
+//function handling mouse wheel scrolling to zoom the displayed spectrum
+void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e)
+{
   if(e->direction == 1){
     //printf("Scrolling down at %f %f!\n",e->x,e->y);
-    if(zoomLevel < 10.0){
-      zoomLevel -= 1.0;
-    }else if(zoomLevel < 50.0){
-      zoomLevel -= 2.0;
-    }else{
-      zoomLevel -= 5.0;
-    }
-    
+    zoomLevel *= 0.5; 
   }else{
     //printf("Scrolling up at %f %f!\n",e->x,e->y);
-    if(zoomLevel < 10.0){
-      zoomLevel += 1.0;
-    }else if(zoomLevel < 50.0){
-      zoomLevel += 2.0;
-    }else{
-      zoomLevel += 5.0;
-    }
+    zoomLevel *= 2.0;
+    GdkRectangle dasize;  // GtkDrawingArea size
+    GdkWindow *wwindow = gtk_widget_get_window(widget);
+    // Determine GtkDrawingArea dimensions
+    gdk_window_get_geometry (wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
+    xChanFocus = lowerLimit + (e->x/dasize.width)*(upperLimit - lowerLimit);
   }
   gtk_widget_queue_draw(GTK_WIDGET(window));
 }
 
+//function setting the plotting limits for the spectrum based on the zoom level
 void getPlotLimits(){
     if(zoomLevel <= 1.0){
         //set zoomed out

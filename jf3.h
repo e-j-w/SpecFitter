@@ -28,6 +28,7 @@ GtkScale *contract_scale;
 GtkAdjustment *spectrum_selector_adjustment, *contract_adjustment;
 GtkLabel *status_label;
 GtkWidget *spectrum_drawing_area;
+GtkGesture *spectrum_drag_gesture;
 GtkWidget *file_open_dialog;
 GtkFileFilter *file_filter;
 GtkBuilder *builder;
@@ -41,6 +42,8 @@ int xChanFocus; //x channel to focus on when zooming
 float zoomLevel; //1.0 = zoomed out fully (on x axis)
 int autoScale; //0=don't autoscale y axis, 1=autoscale y axis
 float scaleLevel; //the y scale value, ie. the maximum value to show on the y axis
+
+float dragstartul, dragstartll; //click and drag position storage parameters
 
 #endif
 
