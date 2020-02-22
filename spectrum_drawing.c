@@ -235,6 +235,10 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
     for(i=0;i<S32K;i+=200){
       drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2);
     }
+  }else if(upperLimit - lowerLimit > 1000){
+    for(i=0;i<S32K;i+=100){
+      drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2);
+    }
   }else if(upperLimit - lowerLimit > 500){
     for(i=0;i<S32K;i+=50){
       drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2);

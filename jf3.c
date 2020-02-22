@@ -1,5 +1,6 @@
 #include "jf3.h"
 
+#include "jf3-resources.c"
 #include "read_data.c"
 #include "spectrum_drawing.c"
 
@@ -26,6 +27,10 @@ void on_open_button_clicked(GtkButton *b)
       //select the 0th spectrum by default
       gtk_spin_button_set_value(spectrum_selector, 0);
       dispSp = 0;
+      gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),TRUE);
+      if(numSp > 1){
+        gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
+      }
       gtk_widget_queue_draw(GTK_WIDGET(window));
     } 
     g_free(filename);
@@ -45,7 +50,7 @@ int main(int argc, char *argv[])
 {
   gtk_init(&argc, &argv); //initialize Gtk
 
-  builder = gtk_builder_new_from_file("jf3.glade"); //get UI layout from glade XML file
+  builder = gtk_builder_new_from_resource("/resources/jf3.glade"); //get UI layout from glade XML file
 
   window = GTK_WINDOW(gtk_builder_get_object(builder, "window"));
   g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL); //quit the program when closing the window
@@ -82,6 +87,10 @@ int main(int argc, char *argv[])
   autoScale = 1;
   gtk_adjustment_set_lower(spectrum_selector_adjustment, 0);
   gtk_adjustment_set_upper(spectrum_selector_adjustment, 0);
+
+  //'gray out' widgets that can't be used yet
+  gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
+  gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),FALSE);
 
   //setup UI element appearance at startup
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autoscale_button), autoScale);
