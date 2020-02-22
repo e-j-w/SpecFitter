@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
   open_button = GTK_WIDGET(gtk_builder_get_object(builder, "open_button"));
   spectrum_selector = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spectrumselector"));
   spectrum_selector_adjustment = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "spectrum_selector_adjustment"));
+  autoscale_button = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "autoscalebutton"));
   status_label = GTK_LABEL(gtk_builder_get_object(builder, "statuslabel"));
   spectrum_drawing_area = GTK_WIDGET(gtk_builder_get_object(builder, "spectrumdrawingarea"));
   spectrum_drag_gesture = gtk_gesture_drag_new(spectrum_drawing_area);
@@ -64,6 +65,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "scroll-event", G_CALLBACK (on_spectrum_scroll), NULL);
   g_signal_connect (G_OBJECT (open_button), "clicked", G_CALLBACK (on_open_button_clicked), NULL);
   g_signal_connect (G_OBJECT (spectrum_selector), "value-changed", G_CALLBACK (on_spectrum_selector_changed), NULL);
+  g_signal_connect (G_OBJECT (autoscale_button), "toggled", G_CALLBACK (on_toggle_autoscale), NULL);
   gtk_widget_set_events(spectrum_drawing_area, GDK_SCROLL_MASK); //allow mouse scrolling over the drawing area
   g_signal_connect (G_OBJECT (spectrum_drag_gesture), "drag-begin", G_CALLBACK (on_spectrum_drag_begin), NULL);
   g_signal_connect (G_OBJECT (spectrum_drag_gesture), "drag-update", G_CALLBACK (on_spectrum_drag_update), NULL);

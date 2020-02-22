@@ -24,6 +24,7 @@ GtkWidget *box1;
 GtkWidget *open_button;
 GtkWidget *reload_button;
 GtkSpinButton *spectrum_selector;
+GtkCheckButton *autoscale_button;
 GtkScale *contract_scale;
 GtkAdjustment *spectrum_selector_adjustment, *contract_adjustment;
 GtkLabel *status_label;
@@ -43,7 +44,7 @@ float zoomLevel; //1.0 = zoomed out fully (on x axis)
 int autoScale; //0=don't autoscale y axis, 1=autoscale y axis
 float scaleLevel; //the y scale value, ie. the maximum value to show on the y axis
 
-float dragstartul, dragstartll; //click and drag position storage parameters
+int dragstartul, dragstartll; //click and drag position storage parameters
 
 #endif
 

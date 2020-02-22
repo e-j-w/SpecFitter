@@ -1,21 +1,30 @@
+void on_toggle_autoscale(GtkToggleButton *togglebutton, gpointer user_data)
+{
+  if(gtk_toggle_button_get_active(togglebutton))
+    autoScale=1;
+  else
+    autoScale=0;
+  gtk_widget_queue_draw(GTK_WIDGET(window));
+}
+
+//dragging gesture for spectra (left<->right panning)
 void on_spectrum_drag_begin(GtkGestureDrag *gesture, gdouble start_x, gdouble start_y, gpointer user_data)
 {
-  //do stuff here!
-  //printf("Drag started!\n");
   dragstartul=upperLimit;
   dragstartll=lowerLimit;
+  //printf("Drag started! dragstartll=%i, dragstartul=%i\n",dragstartll,dragstartul);
 }
 void on_spectrum_drag_update(GtkGestureDrag *gesture, gdouble offset_x, gdouble offset_y, gpointer user_data)
 {
   //printf("Drag updated!\n");
   GdkRectangle dasize;  // GtkDrawingArea size
-  GdkWindow *wwindow = gtk_gesture_get_window(GTK_GESTURE(gesture));
+  GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
   // Determine GtkDrawingArea dimensions
-  gdk_window_get_geometry (wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
+  gdk_window_get_geometry (gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
   upperLimit = dragstartul - ((2.*offset_x/(dasize.width))*(upperLimit-lowerLimit));
   lowerLimit = dragstartll - ((2.*offset_x/(dasize.width))*(upperLimit-lowerLimit));
   xChanFocus = lowerLimit + (upperLimit - lowerLimit)/2.;
-  //printf("focus = %i\n",xChanFocus);
+  //printf("lowerlimit = %i, upperlimit = %i, width = %i, focus = %i\n",lowerLimit,upperLimit,dasize.width,xChanFocus);
   gtk_widget_queue_draw(GTK_WIDGET(window));
 }
 
@@ -74,7 +83,7 @@ float getXPos(int bin, float clip_x1, float clip_x2){
 
 float getYPos(float val, float minVal, float maxVal, float clip_y1, float clip_y2){
     if(autoScale){
-        return clip_y1 + ((val/(maxVal*1.1))*(clip_y2-clip_y1));
+        scaleLevel = maxVal*1.1;
     }
 	return clip_y1 + ((val/scaleLevel)*(clip_y2-clip_y1));
 }
