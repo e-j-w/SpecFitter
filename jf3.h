@@ -42,7 +42,7 @@ int lowerLimit, upperLimit; //lower and upper limits to plot spectrum
 int xChanFocus; //x channel to focus on when zooming
 float zoomLevel; //1.0 = zoomed out fully (on x axis)
 int autoScale; //0=don't autoscale y axis, 1=autoscale y axis
-float scaleLevel; //the y scale value, ie. the maximum value to show on the y axis
+float scaleLevelMax, scaleLevelMin; //the y scale values, ie. the maximum and minimum values to show on the y axis
 
 int dragstartul, dragstartll; //click and drag position storage parameters
 

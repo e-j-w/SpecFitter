@@ -75,12 +75,16 @@ int main(int argc, char *argv[])
   dispSp = 0;
   lowerLimit = 0;
   upperLimit = S32K - 1;
-  scaleLevel = 1000.0;
+  scaleLevelMax = 1000.0;
+  scaleLevelMin = 0.0;
   xChanFocus = 0;
   zoomLevel = 1.0;
   autoScale = 1;
   gtk_adjustment_set_lower(spectrum_selector_adjustment, 0);
   gtk_adjustment_set_upper(spectrum_selector_adjustment, 0);
+
+  //setup UI element appearance at startup
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autoscale_button), autoScale);
 
   //startup UI
   gtk_widget_show(GTK_WIDGET(window)); //show the window

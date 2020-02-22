@@ -128,6 +128,7 @@
             <property name="margin_bottom">10</property>
             <property name="hexpand">True</property>
             <property name="vexpand">True</property>
+            <property name="shadow_type">none</property>
             <child>
               <object class="GtkDrawingArea" id="spectrumdrawingarea">
                 <property name="visible">True</property>
