@@ -20,6 +20,7 @@
 
 //GUI globals
 GtkWindow *window, *calibrate_window;
+GtkHeaderBar *header_bar;
 GtkWidget *box1;
 GtkWidget *open_button;
 GtkWidget *calibrate_button, *fit_button, *contract_button, *multiplot_button;
@@ -29,7 +30,6 @@ GtkSpinButton *spectrum_selector;
 GtkCheckButton *autoscale_button;
 GtkScale *contract_scale;
 GtkAdjustment *spectrum_selector_adjustment, *contract_adjustment;
-GtkLabel *status_label;
 GtkWidget *spectrum_drawing_area;
 GtkGesture *spectrum_drag_gesture;
 GtkWidget *file_open_dialog;

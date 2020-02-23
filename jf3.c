@@ -8,7 +8,7 @@ void on_open_button_clicked(GtkButton *b)
 {
   file_open_dialog = gtk_file_chooser_dialog_new ("Open Spectrum File", window, GTK_FILE_CHOOSER_ACTION_OPEN, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, NULL);
   file_filter = gtk_file_filter_new();
-  gtk_file_filter_set_name(file_filter,"Spectra (.mca, .fmca, .spe)");
+  gtk_file_filter_set_name(file_filter,"Spectrum Data (.mca, .fmca, .spe)");
   gtk_file_filter_add_pattern(file_filter,"*.mca");
   gtk_file_filter_add_pattern(file_filter,"*.fmca");
   gtk_file_filter_add_pattern(file_filter,"*.spe");
@@ -21,6 +21,8 @@ void on_open_button_clicked(GtkButton *b)
     int numSp = readSpectrumDataFile(filename,hist);
     if(numSp > 0){ //see read_data.c
       openedSp = 1;
+      //set the title of the opened spectrum in the header bar
+      gtk_header_bar_set_subtitle(header_bar,filename);
       //set the range of selectable spectra values
       gtk_adjustment_set_lower(spectrum_selector_adjustment, 0);
       gtk_adjustment_set_upper(spectrum_selector_adjustment, numSp - 1);
@@ -80,7 +82,7 @@ void on_calibrate_ok_button_clicked(GtkButton *b)
   if(!((calpar0 == 0.0)&&(calpar1==0.0)&&(calpar2==0.0))){
     //not all calibration parameters are zero, calibration is valid
     calMode=1;
-    printf("Calibration parameters: %f %f %f, calMode: %i, calUnit: %s\n",calpar0,calpar1,calpar2,calMode,calUnit);
+    //printf("Calibration parameters: %f %f %f, calMode: %i, calUnit: %s\n",calpar0,calpar1,calpar2,calMode,calUnit);
     gtk_widget_hide(GTK_WIDGET(calibrate_window)); //close the calibration window
     gtk_widget_queue_draw(GTK_WIDGET(window));
   }else{
@@ -116,7 +118,8 @@ int main(int argc, char *argv[])
   g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL); //quit the program when closing the window
   calibrate_window = GTK_WINDOW(gtk_builder_get_object(builder, "calibration_window"));
   gtk_window_set_transient_for(calibrate_window, window); //center calibrate window on main window
-  gtk_builder_connect_signals(builder, NULL);                           //build the (button/widget) signal table from the glade XML data
+  
+  header_bar = GTK_HEADER_BAR(gtk_builder_get_object(builder, "header_bar"));
 
   box1 = GTK_WIDGET(gtk_builder_get_object(builder, "box1"));
   open_button = GTK_WIDGET(gtk_builder_get_object(builder, "open_button"));
@@ -130,7 +133,6 @@ int main(int argc, char *argv[])
   spectrum_selector = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spectrumselector"));
   spectrum_selector_adjustment = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "spectrum_selector_adjustment"));
   autoscale_button = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "autoscalebutton"));
-  status_label = GTK_LABEL(gtk_builder_get_object(builder, "statuslabel"));
   spectrum_drawing_area = GTK_WIDGET(gtk_builder_get_object(builder, "spectrumdrawingarea"));
   spectrum_drag_gesture = gtk_gesture_drag_new(spectrum_drawing_area);
   cal_entry_unit = GTK_ENTRY(gtk_builder_get_object(builder, "calibration_unit_entry"));
