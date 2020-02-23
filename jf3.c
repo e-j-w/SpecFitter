@@ -28,6 +28,7 @@ void on_open_button_clicked(GtkButton *b)
       gtk_spin_button_set_value(spectrum_selector, 0);
       dispSp = 0;
       gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(contract_button),TRUE);
       if(numSp > 1){
         gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
       }
@@ -79,9 +80,18 @@ void on_calibrate_ok_button_clicked(GtkButton *b)
   if(!((calpar0 == 0.0)&&(calpar1==0.0)&&(calpar2==0.0))){
     //not all calibration parameters are zero, calibration is valid
     calMode=1;
+    printf("Calibration parameters: %f %f %f, calMode: %i, calUnit: %s\n",calpar0,calpar1,calpar2,calMode,calUnit);
+    gtk_widget_hide(GTK_WIDGET(calibrate_window)); //close the calibration window
+    gtk_widget_queue_draw(GTK_WIDGET(window));
+  }else{
+    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+    GtkWidget *message_dialog = gtk_message_dialog_new(calibrate_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Invalid calibration!");
+    gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"At least one of the calibration parameters must be non-zero.");
+    gtk_dialog_run (GTK_DIALOG (message_dialog));
+    gtk_widget_destroy (message_dialog);
+    //gtk_window_set_transient_for(message_dialog, calibrate_window); //center massage dialog on calibrate window
   }
-  printf("Calibration parameters: %f %f %f, calMode: %i, calUnit: %s\n",calpar0,calpar1,calpar2,calMode,calUnit);
-  gtk_widget_hide(GTK_WIDGET(calibrate_window)); //close the window
+  
 }
 
 void on_calibrate_cancel_button_clicked(GtkButton *b)
@@ -105,13 +115,15 @@ int main(int argc, char *argv[])
   window = GTK_WINDOW(gtk_builder_get_object(builder, "window"));
   g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL); //quit the program when closing the window
   calibrate_window = GTK_WINDOW(gtk_builder_get_object(builder, "calibration_window"));
-  gtk_window_set_transient_for(calibrate_window, window); //center options window on main window
+  gtk_window_set_transient_for(calibrate_window, window); //center calibrate window on main window
   gtk_builder_connect_signals(builder, NULL);                           //build the (button/widget) signal table from the glade XML data
 
   box1 = GTK_WIDGET(gtk_builder_get_object(builder, "box1"));
   open_button = GTK_WIDGET(gtk_builder_get_object(builder, "open_button"));
   calibrate_button = GTK_WIDGET(gtk_builder_get_object(builder, "calibrate_button"));
+  fit_button = GTK_WIDGET(gtk_builder_get_object(builder, "fit_button"));
   contract_button = GTK_WIDGET(gtk_builder_get_object(builder, "contract_button"));
+  multiplot_button = GTK_WIDGET(gtk_builder_get_object(builder, "multiplot_button"));
   contract_popover = GTK_POPOVER(gtk_builder_get_object(builder, "contract_popover"));
   calibrate_ok_button = GTK_WIDGET(gtk_builder_get_object(builder, "options_ok_button"));
   calibrate_cancel_button = GTK_WIDGET(gtk_builder_get_object(builder, "options_cancel_button"));
@@ -160,6 +172,9 @@ int main(int argc, char *argv[])
   //'gray out' widgets that can't be used yet
   gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),FALSE);
+  gtk_widget_set_sensitive(GTK_WIDGET(fit_button),FALSE);
+  gtk_widget_set_sensitive(GTK_WIDGET(contract_button),FALSE);
+  gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),FALSE);
 
   //setup UI element appearance at startup
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autoscale_button), autoScale);

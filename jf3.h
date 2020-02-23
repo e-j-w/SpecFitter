@@ -22,7 +22,7 @@
 GtkWindow *window, *calibrate_window;
 GtkWidget *box1;
 GtkWidget *open_button;
-GtkWidget *calibrate_button, *contract_button;
+GtkWidget *calibrate_button, *fit_button, *contract_button, *multiplot_button;
 GtkPopover *contract_popover;
 GtkWidget *calibrate_ok_button, *calibrate_cancel_button;
 GtkSpinButton *spectrum_selector;
@@ -44,7 +44,7 @@ int dragstartul, dragstartll; //click and drag position storage parameters
 double hist[NSPECT][S32K]; //spectrum histogram data
 int openedSp; //0=not opened, 1=opened
 int dispSp; //# of the spectrum to display
-int lowerLimit, upperLimit; //lower and upper limits to plot spectrum
+int lowerLimit, upperLimit; //lower and upper limits to plot spectrum (in uncalibrated units ie. channels)
 int xChanFocus; //x channel to focus on when zooming
 float zoomLevel; //1.0 = zoomed out fully (on x axis)
 int autoScale; //0=don't autoscale y axis, 1=autoscale y axis

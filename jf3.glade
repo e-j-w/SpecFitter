@@ -47,6 +47,7 @@
             <child>
               <object class="GtkButton" id="open_button">
                 <property name="label" translatable="yes">Open File</property>
+                <property name="width_request">100</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -304,42 +305,13 @@
                 <property name="can_focus">False</property>
                 <property name="margin_top">30</property>
                 <property name="margin_bottom">10</property>
-                <property name="spacing">50</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">10</property>
                 <child>
-                  <object class="GtkBox">
+                  <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="orientation">vertical</property>
-                    <property name="spacing">10</property>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Select calibration type:</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkComboBoxText" id="calibration_type_combobox">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="active">0</property>
-                        <items>
-                          <item translatable="yes">Proportional</item>
-                          <item translatable="yes">Linear</item>
-                          <item translatable="yes">Quadratic</item>
-                        </items>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
+                    <property name="label" translatable="yes">Enter calibration parameter values:</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -351,13 +323,18 @@
                   <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="orientation">vertical</property>
                     <property name="spacing">10</property>
                     <child>
-                      <object class="GtkLabel">
+                      <object class="GtkEntry" id="cal_entry_const">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Enter calibration parameter values:</property>
+                        <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">The constant calibration parameter.</property>
+                        <property name="max_length">50</property>
+                        <property name="width_chars">10</property>
+                        <property name="truncate_multiline">True</property>
+                        <property name="caps_lock_warning">False</property>
+                        <property name="placeholder_text" translatable="yes">0.0</property>
+                        <property name="input_purpose">number</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -366,38 +343,10 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="spacing">10</property>
-                        <child>
-                          <object class="GtkEntry" id="cal_entry_const">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="max_length">50</property>
-                            <property name="truncate_multiline">True</property>
-                            <property name="caps_lock_warning">False</property>
-                            <property name="placeholder_text" translatable="yes">Enter value...</property>
-                            <property name="input_purpose">number</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">* 1</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
+                        <property name="label" translatable="yes">+</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -406,50 +355,16 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtkEntry" id="cal_entry_lin">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="spacing">10</property>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">+</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="cal_entry_lin">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="max_length">50</property>
-                            <property name="truncate_multiline">True</property>
-                            <property name="caps_lock_warning">False</property>
-                            <property name="placeholder_text" translatable="yes">Enter value...</property>
-                            <property name="input_purpose">number</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">* channel #</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">2</property>
-                          </packing>
-                        </child>
+                        <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">The linear calibration parameter.</property>
+                        <property name="max_length">50</property>
+                        <property name="width_chars">10</property>
+                        <property name="truncate_multiline">True</property>
+                        <property name="caps_lock_warning">False</property>
+                        <property name="placeholder_text" translatable="yes">0.0</property>
+                        <property name="input_purpose">number</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -458,55 +373,45 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="spacing">10</property>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">+</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="cal_entry_quad">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="max_length">50</property>
-                            <property name="truncate_multiline">True</property>
-                            <property name="caps_lock_warning">False</property>
-                            <property name="placeholder_text" translatable="yes">Enter value...</property>
-                            <property name="input_purpose">number</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">* (channel #)^2</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">2</property>
-                          </packing>
-                        </child>
+                        <property name="label" translatable="yes">* (channel #)  +</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="cal_entry_quad">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">The quadratic calibration parameter.</property>
+                        <property name="max_length">50</property>
+                        <property name="width_chars">10</property>
+                        <property name="truncate_multiline">True</property>
+                        <property name="caps_lock_warning">False</property>
+                        <property name="placeholder_text" translatable="yes">0.0</property>
+                        <property name="input_purpose">number</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">* (channel #)^2</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">5</property>
                       </packing>
                     </child>
                   </object>
@@ -535,19 +440,20 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="halign">end</property>
-            <property name="margin_right">10</property>
             <property name="margin_top">10</property>
             <property name="margin_bottom">10</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkButton" id="options_cancel_button">
-                <property name="label" translatable="yes">Cancel</property>
+                <property name="label">gtk-cancel</property>
                 <property name="width_request">100</property>
                 <property name="height_request">40</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Discard all changes.</property>
+                <property name="halign">end</property>
+                <property name="use_stock">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -557,14 +463,15 @@
             </child>
             <child>
               <object class="GtkButton" id="options_ok_button">
-                <property name="label" translatable="yes">Ok</property>
+                <property name="label">gtk-ok</property>
                 <property name="width_request">100</property>
                 <property name="height_request">40</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Apply all changes and return.</property>
-                <property name="halign">start</property>
+                <property name="halign">end</property>
+                <property name="use_stock">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>

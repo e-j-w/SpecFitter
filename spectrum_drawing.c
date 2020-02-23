@@ -1,4 +1,5 @@
 //function setting the plotting limits for the spectrum based on the zoom level
+//the plotting limits are in UNCALIBRATED units ie. channels
 void getPlotLimits(){
     if(zoomLevel <= 1.0){
         //set zoomed out
@@ -94,10 +95,17 @@ float getYPos(float val, float minVal, float maxVal, float clip_y1, float clip_y
 
 //axis tick drawing
 float getAxisXPos(int axisVal, float clip_x1, float clip_x2){
-  if((axisVal < lowerLimit)||(axisVal >= upperLimit))
+  int calLowerLimit = lowerLimit;
+  int calUpperLimit = upperLimit;
+  if(calMode==1){
+    //calibrate
+    calLowerLimit = calpar0 + calpar1*lowerLimit + calpar2*lowerLimit*lowerLimit;
+    calUpperLimit = calpar0 + calpar1*upperLimit + calpar2*upperLimit*upperLimit;
+  }
+  if((axisVal < calLowerLimit)||(axisVal >= calUpperLimit))
     return -1; //value is off the visible axis
   
-  return (clip_x2-clip_x1)*0.1 + 0.9*(clip_x2-clip_x1)*(axisVal - lowerLimit)/(upperLimit - lowerLimit);
+  return (clip_x2-clip_x1)*0.1 + 0.9*(clip_x2-clip_x1)*(axisVal - calLowerLimit)/(calUpperLimit - calLowerLimit);
 }
 void drawXAxisTick(int axisVal, cairo_t *cr, float clip_x1, float clip_x2, float clip_y1, float clip_y2){
   int axisPos = getAxisXPos(axisVal,clip_x1,clip_x2);
@@ -142,6 +150,18 @@ void drawYAxisTick(float axisVal, cairo_t *cr, float clip_x1, float clip_x2, flo
   }
 }
 
+//get the x range of the plot in terms of x axis units, 
+//taking into account whether or not a calibration is in use
+int getPlotRangeXUnits(){
+  int calLowerLimit = lowerLimit;
+  int calUpperLimit = upperLimit;
+  if(calMode==1){
+    //calibrate
+    calLowerLimit = calpar0 + calpar1*lowerLimit + calpar2*lowerLimit*lowerLimit;
+    calUpperLimit = calpar0 + calpar1*upperLimit + calpar2*upperLimit*upperLimit;
+  }
+  return calUpperLimit - calLowerLimit;
+}
 
 //draw a spectrum
 void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
@@ -182,7 +202,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 
   getPlotLimits(); //setup the x range to plot over
 
-  //get the maximum/minimum x values of the displayed region
+  //get the maximum/minimum y values of the displayed region
   float maxVal = SMALL_NUMBER;
   float minVal = BIG_NUMBER;
   for(i=0;i<(upperLimit-lowerLimit-1);i++){
@@ -215,35 +235,35 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 
   //draw ticks
   cairo_scale(cr, 1.0, -1.0); //remove axis inversion, so that text is the right way up
-  if(upperLimit - lowerLimit > 20000){
+  if(getPlotRangeXUnits() > 20000){
     for(i=0;i<S32K;i+=5000){
       drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2);
     }
-  }else if(upperLimit - lowerLimit > 10000){
+  }else if(getPlotRangeXUnits() > 10000){
     for(i=0;i<S32K;i+=2000){
       drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2);
     }
-  }else if(upperLimit - lowerLimit > 5000){
+  }else if(getPlotRangeXUnits() > 5000){
     for(i=0;i<S32K;i+=500){
       drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2);
     }
-  }else if(upperLimit - lowerLimit > 3000){
+  }else if(getPlotRangeXUnits() > 3000){
     for(i=0;i<S32K;i+=300){
       drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2);
     }
-  }else if(upperLimit - lowerLimit > 2000){
+  }else if(getPlotRangeXUnits() > 2000){
     for(i=0;i<S32K;i+=200){
       drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2);
     }
-  }else if(upperLimit - lowerLimit > 1000){
+  }else if(getPlotRangeXUnits() > 1000){
     for(i=0;i<S32K;i+=100){
       drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2);
     }
-  }else if(upperLimit - lowerLimit > 500){
+  }else if(getPlotRangeXUnits() > 500){
     for(i=0;i<S32K;i+=50){
       drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2);
     }
-  }else if(upperLimit - lowerLimit > 50){
+  }else if(getPlotRangeXUnits() > 50){
     for(i=0;i<S32K;i+=20){
       drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2);
     }
@@ -275,13 +295,17 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 
   //draw axis labels
   cairo_set_source_rgb (cr, 0.3, 0.3, 0.3);
-  char axisLabel[12];
+  char axisLabel[16];
   cairo_text_extents_t extents; //for getting dimensions needed to center text labels
   //x axis
-  sprintf(axisLabel,"Channel #"); //set string for label
+  if(calMode == 0){
+    sprintf(axisLabel,"Channel #"); //set string for label
+  }else{
+    strcpy(axisLabel,calUnit); //set label to calibrated units
+  }
   cairo_text_extents(cr, axisLabel, &extents);
   cairo_set_font_size(cr, 14);
-  cairo_move_to(cr, (clip_x2-clip_x1)*0.55 - extents.width, (clip_y1-clip_y2)*0.005);
+  cairo_move_to(cr, (clip_x2-clip_x1)*0.55 - (extents.width/2), (clip_y1-clip_y2)*0.005);
   cairo_show_text(cr, axisLabel);
   //y axis
   sprintf(axisLabel,"Counts"); //set string for label
