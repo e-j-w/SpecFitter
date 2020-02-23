@@ -39,6 +39,27 @@ void on_open_button_clicked(GtkButton *b)
   gtk_widget_destroy(file_open_dialog);
 }
 
+void on_contract_button_clicked(GtkButton *b)
+{
+  gtk_popover_popup(contract_popover); //show the popover menu
+}
+
+void on_calibrate_button_clicked(GtkButton *b)
+{
+  gtk_window_present(calibrate_window); //show the window
+}
+
+void on_calibrate_ok_button_clicked(GtkButton *b)
+{
+  //apply settings here!
+  gtk_widget_hide(GTK_WIDGET(calibrate_window)); //close the window
+}
+
+void on_calibrate_cancel_button_clicked(GtkButton *b)
+{
+  gtk_widget_hide(GTK_WIDGET(calibrate_window)); //close the window
+}
+
 void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data)
 {
   dispSp = gtk_spin_button_get_value_as_int(spin_button);
@@ -54,21 +75,33 @@ int main(int argc, char *argv[])
 
   window = GTK_WINDOW(gtk_builder_get_object(builder, "window"));
   g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL); //quit the program when closing the window
+  calibrate_window = GTK_WINDOW(gtk_builder_get_object(builder, "calibration_window"));
+  gtk_window_set_transient_for(calibrate_window, window); //center options window on main window
   gtk_builder_connect_signals(builder, NULL);                           //build the (button/widget) signal table from the glade XML data
 
   box1 = GTK_WIDGET(gtk_builder_get_object(builder, "box1"));
   open_button = GTK_WIDGET(gtk_builder_get_object(builder, "open_button"));
+  calibrate_button = GTK_WIDGET(gtk_builder_get_object(builder, "calibrate_button"));
+  contract_button = GTK_WIDGET(gtk_builder_get_object(builder, "contract_button"));
+  contract_popover = GTK_POPOVER(gtk_builder_get_object(builder, "contract_popover"));
+  calibrate_ok_button = GTK_WIDGET(gtk_builder_get_object(builder, "options_ok_button"));
+  calibrate_cancel_button = GTK_WIDGET(gtk_builder_get_object(builder, "options_cancel_button"));
   spectrum_selector = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spectrumselector"));
   spectrum_selector_adjustment = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "spectrum_selector_adjustment"));
   autoscale_button = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "autoscalebutton"));
   status_label = GTK_LABEL(gtk_builder_get_object(builder, "statuslabel"));
   spectrum_drawing_area = GTK_WIDGET(gtk_builder_get_object(builder, "spectrumdrawingarea"));
   spectrum_drag_gesture = gtk_gesture_drag_new(spectrum_drawing_area);
+  options_notebook = GTK_NOTEBOOK(gtk_builder_get_object(builder, "options_notebook"));
 
   //connect signals
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "draw", G_CALLBACK (drawSpectrumArea), NULL);
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "scroll-event", G_CALLBACK (on_spectrum_scroll), NULL);
   g_signal_connect (G_OBJECT (open_button), "clicked", G_CALLBACK (on_open_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (calibrate_button), "clicked", G_CALLBACK (on_calibrate_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (contract_button), "clicked", G_CALLBACK (on_contract_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (calibrate_ok_button), "clicked", G_CALLBACK (on_calibrate_ok_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (calibrate_cancel_button), "clicked", G_CALLBACK (on_calibrate_cancel_button_clicked), NULL);
   g_signal_connect (G_OBJECT (spectrum_selector), "value-changed", G_CALLBACK (on_spectrum_selector_changed), NULL);
   g_signal_connect (G_OBJECT (autoscale_button), "toggled", G_CALLBACK (on_toggle_autoscale), NULL);
   gtk_widget_set_events(spectrum_drawing_area, GDK_SCROLL_MASK); //allow mouse scrolling over the drawing area

@@ -19,10 +19,12 @@
 #define NSPECT 100
 
 //GUI globals
-GtkWindow *window;
+GtkWindow *window, *calibrate_window;
 GtkWidget *box1;
 GtkWidget *open_button;
-GtkWidget *reload_button;
+GtkWidget *calibrate_button, *contract_button;
+GtkPopover *contract_popover;
+GtkWidget *calibrate_ok_button, *calibrate_cancel_button;
 GtkSpinButton *spectrum_selector;
 GtkCheckButton *autoscale_button;
 GtkScale *contract_scale;
@@ -32,6 +34,7 @@ GtkWidget *spectrum_drawing_area;
 GtkGesture *spectrum_drag_gesture;
 GtkWidget *file_open_dialog;
 GtkFileFilter *file_filter;
+GtkNotebook *options_notebook;
 GtkBuilder *builder;
 
 //spectrum drawing globals
