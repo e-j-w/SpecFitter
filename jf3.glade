@@ -243,7 +243,7 @@
         <property name="margin_right">10</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkBox" id="tab1_box2">
+          <object class="GtkBox" id="tab1_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
@@ -266,9 +266,12 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="calibration_unit_entry1">
+                  <object class="GtkEntry" id="calibration_unit_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="tooltip_text" translatable="yes">The units that will be displayed after calibrating the spectrum.</property>
+                    <property name="max_length">12</property>
+                    <property name="placeholder_text" translatable="yes">Enter units...</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -321,7 +324,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkComboBoxText" id="calibration_type_combobox1">
+                      <object class="GtkComboBoxText" id="calibration_type_combobox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="active">0</property>
@@ -368,10 +371,14 @@
                         <property name="can_focus">False</property>
                         <property name="spacing">10</property>
                         <child>
-                          <object class="GtkEntry" id="cal_entry_const1">
+                          <object class="GtkEntry" id="cal_entry_const">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="input_purpose">digits</property>
+                            <property name="max_length">50</property>
+                            <property name="truncate_multiline">True</property>
+                            <property name="caps_lock_warning">False</property>
+                            <property name="placeholder_text" translatable="yes">Enter value...</property>
+                            <property name="input_purpose">number</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -416,10 +423,14 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="cal_entry_lin1">
+                          <object class="GtkEntry" id="cal_entry_lin">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="input_purpose">digits</property>
+                            <property name="max_length">50</property>
+                            <property name="truncate_multiline">True</property>
+                            <property name="caps_lock_warning">False</property>
+                            <property name="placeholder_text" translatable="yes">Enter value...</property>
+                            <property name="input_purpose">number</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -464,10 +475,14 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="cal_entry_quad1">
+                          <object class="GtkEntry" id="cal_entry_quad">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="input_purpose">digits</property>
+                            <property name="max_length">50</property>
+                            <property name="truncate_multiline">True</property>
+                            <property name="caps_lock_warning">False</property>
+                            <property name="placeholder_text" translatable="yes">Enter value...</property>
+                            <property name="input_purpose">number</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>

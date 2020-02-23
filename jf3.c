@@ -49,9 +49,38 @@ void on_calibrate_button_clicked(GtkButton *b)
   gtk_window_present(calibrate_window); //show the window
 }
 
+void on_cal_par_activate (GtkEntry *entry, gpointer  user_data){
+  const gchar *entryText;
+  entryText = gtk_entry_get_text(cal_entry_const);
+  if(strtod(entryText,NULL)==0.){
+    gtk_entry_set_text (cal_entry_const, "");
+  }
+  entryText = gtk_entry_get_text(cal_entry_lin);
+  if(strtod(entryText,NULL)==0.){
+    gtk_entry_set_text (cal_entry_lin, "");
+  }
+  entryText = gtk_entry_get_text(cal_entry_quad);
+  if(strtod(entryText,NULL)==0.){
+    gtk_entry_set_text (cal_entry_quad, "");
+  }
+  g_free((gchar*)entryText);
+}
+
 void on_calibrate_ok_button_clicked(GtkButton *b)
 {
   //apply settings here!
+  strcpy(calUnit,gtk_entry_get_text(cal_entry_unit));
+  if(strcmp(calUnit,"")==0){
+    strcpy(calUnit,"Cal. Units");
+  }
+  calpar0 = (float)strtod(gtk_entry_get_text(cal_entry_const),NULL);
+  calpar1 = (float)strtod(gtk_entry_get_text(cal_entry_lin),NULL);
+  calpar2 = (float)strtod(gtk_entry_get_text(cal_entry_quad),NULL);
+  if(!((calpar0 == 0.0)&&(calpar1==0.0)&&(calpar2==0.0))){
+    //not all calibration parameters are zero, calibration is valid
+    calMode=1;
+  }
+  printf("Calibration parameters: %f %f %f, calMode: %i, calUnit: %s\n",calpar0,calpar1,calpar2,calMode,calUnit);
   gtk_widget_hide(GTK_WIDGET(calibrate_window)); //close the window
 }
 
@@ -92,7 +121,10 @@ int main(int argc, char *argv[])
   status_label = GTK_LABEL(gtk_builder_get_object(builder, "statuslabel"));
   spectrum_drawing_area = GTK_WIDGET(gtk_builder_get_object(builder, "spectrumdrawingarea"));
   spectrum_drag_gesture = gtk_gesture_drag_new(spectrum_drawing_area);
-  options_notebook = GTK_NOTEBOOK(gtk_builder_get_object(builder, "options_notebook"));
+  cal_entry_unit = GTK_ENTRY(gtk_builder_get_object(builder, "calibration_unit_entry"));
+  cal_entry_const = GTK_ENTRY(gtk_builder_get_object(builder, "cal_entry_const"));
+  cal_entry_lin = GTK_ENTRY(gtk_builder_get_object(builder, "cal_entry_lin"));
+  cal_entry_quad = GTK_ENTRY(gtk_builder_get_object(builder, "cal_entry_quad"));
 
   //connect signals
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "draw", G_CALLBACK (drawSpectrumArea), NULL);
@@ -107,6 +139,9 @@ int main(int argc, char *argv[])
   gtk_widget_set_events(spectrum_drawing_area, GDK_SCROLL_MASK); //allow mouse scrolling over the drawing area
   g_signal_connect (G_OBJECT (spectrum_drag_gesture), "drag-begin", G_CALLBACK (on_spectrum_drag_begin), NULL);
   g_signal_connect (G_OBJECT (spectrum_drag_gesture), "drag-update", G_CALLBACK (on_spectrum_drag_update), NULL);
+  g_signal_connect (G_OBJECT (cal_entry_const), "preedit-changed", G_CALLBACK (on_cal_par_activate), NULL);
+  g_signal_connect (G_OBJECT (cal_entry_lin), "preedit-changed", G_CALLBACK (on_cal_par_activate), NULL);
+  g_signal_connect (G_OBJECT (cal_entry_quad), "preedit-changed", G_CALLBACK (on_cal_par_activate), NULL);
 
   //set default values
   openedSp = 0;
@@ -118,6 +153,7 @@ int main(int argc, char *argv[])
   xChanFocus = 0;
   zoomLevel = 1.0;
   autoScale = 1;
+  calMode = 0;
   gtk_adjustment_set_lower(spectrum_selector_adjustment, 0);
   gtk_adjustment_set_upper(spectrum_selector_adjustment, 0);
 

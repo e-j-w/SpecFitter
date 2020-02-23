@@ -34,8 +34,11 @@ GtkWidget *spectrum_drawing_area;
 GtkGesture *spectrum_drag_gesture;
 GtkWidget *file_open_dialog;
 GtkFileFilter *file_filter;
-GtkNotebook *options_notebook;
+GtkEntry *cal_entry_unit, *cal_entry_const, *cal_entry_lin, *cal_entry_quad;
 GtkBuilder *builder;
+
+//non-GTK GUI globals
+int dragstartul, dragstartll; //click and drag position storage parameters
 
 //spectrum drawing globals
 double hist[NSPECT][S32K]; //spectrum histogram data
@@ -47,7 +50,10 @@ float zoomLevel; //1.0 = zoomed out fully (on x axis)
 int autoScale; //0=don't autoscale y axis, 1=autoscale y axis
 float scaleLevelMax, scaleLevelMin; //the y scale values, ie. the maximum and minimum values to show on the y axis
 
-int dragstartul, dragstartll; //click and drag position storage parameters
+//calibration globals
+int calMode; //0=no calibration, 1=calibration enabled
+float calpar0,calpar1,calpar2; //0th, 1st, and 2nd order calibration parameters
+char calUnit[16]; //name of the unit used for calibration
 
 #endif
 
