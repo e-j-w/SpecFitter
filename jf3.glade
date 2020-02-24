@@ -12,7 +12,7 @@
   </object>
   <object class="GtkAdjustment" id="pan_adjustment">
     <property name="upper">100</property>
-    <property name="step_increment">1</property>
+    <property name="step_increment">0.01</property>
     <property name="page_increment">10</property>
   </object>
   <object class="GtkAdjustment" id="spectrum_selector_adjustment">
@@ -121,21 +121,6 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="contract_button">
-                <property name="label" translatable="yes">Contract...</property>
-                <property name="width_request">110</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Change the contraction factor of the spectrum (number of channels per bin).</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">4</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkButton" id="multiplot_button">
                 <property name="label" translatable="yes">MultiPlot...</property>
                 <property name="width_request">110</property>
@@ -147,22 +132,25 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">5</property>
+                <property name="position">4</property>
               </packing>
             </child>
             <child>
-              <object class="GtkCheckButton" id="autoscalebutton">
-                <property name="label" translatable="yes"> Autoscale</property>
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkButton" id="display_button">
+                <property name="label" translatable="yes">Display...</property>
+                <property name="width_request">110</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="tooltip_text" translatable="yes">If checked, the displayed spectrum will be automatically scaled on the vertical axis to fit visible features.</property>
-                <property name="active">True</property>
-                <property name="draw_indicator">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Change display parameters for the loaded spectrum (zoom/pan/contraction factor).</property>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
+                <property name="pack_type">end</property>
                 <property name="position">6</property>
               </packing>
             </child>
@@ -207,7 +195,7 @@
   </object>
   <object class="GtkWindow" id="calibration_window">
     <property name="can_focus">False</property>
-    <property name="title" translatable="yes">Calibration</property>
+    <property name="title" translatable="yes">Calibration Settings</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="window_position">center-always</property>
@@ -470,9 +458,9 @@
       </object>
     </child>
   </object>
-  <object class="GtkPopover" id="contract_popover">
+  <object class="GtkPopover" id="display_popover">
     <property name="can_focus">False</property>
-    <property name="relative_to">contract_button</property>
+    <property name="relative_to">display_button</property>
     <property name="position">bottom</property>
     <child>
       <object class="GtkBox">
@@ -485,10 +473,14 @@
         <property name="orientation">vertical</property>
         <property name="spacing">10</property>
         <child>
-          <object class="GtkLabel">
+          <object class="GtkCheckButton" id="autoscalebutton">
+            <property name="label" translatable="yes"> Vertical Autoscale</property>
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="label" translatable="yes">Channels per bin:</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="tooltip_text" translatable="yes">If checked, the displayed spectrum will be automatically scaled on the vertical axis to fit visible features.</property>
+            <property name="active">True</property>
+            <property name="draw_indicator">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -497,14 +489,9 @@
           </packing>
         </child>
         <child>
-          <object class="GtkScale" id="contract_scale">
-            <property name="width_request">300</property>
+          <object class="GtkSeparator">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="adjustment">contract_adjustment</property>
-            <property name="show_fill_level">True</property>
-            <property name="round_digits">0</property>
-            <property name="value_pos">right</property>
+            <property name="can_focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -512,7 +499,138 @@
             <property name="position">1</property>
           </packing>
         </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="tooltip_text" translatable="yes">Zoom the spectrum in and out.</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Zoom factor</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScale" id="zoom_scale">
+                <property name="width_request">300</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="adjustment">zoom_adjustment</property>
+                <property name="show_fill_level">True</property>
+                <property name="digits">0</property>
+                <property name="draw_value">False</property>
+                <property name="value_pos">right</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="tooltip_text" translatable="yes">Pan the spectrum horizontally.</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Pan control</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScale" id="pan_scale">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="adjustment">pan_adjustment</property>
+                <property name="show_fill_level">True</property>
+                <property name="draw_value">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="tooltip_text" translatable="yes">Change the contraction factor of the spectrum (number of channels per bin).</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Rebinning factor (channels per bin):</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScale" id="contract_scale">
+                <property name="width_request">300</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="adjustment">contract_adjustment</property>
+                <property name="show_fill_level">True</property>
+                <property name="round_digits">0</property>
+                <property name="digits">0</property>
+                <property name="value_pos">right</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">4</property>
+          </packing>
+        </child>
       </object>
     </child>
+  </object>
+  <object class="GtkAdjustment" id="zoom_adjustment">
+    <property name="upper">10</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">1</property>
   </object>
 </interface>

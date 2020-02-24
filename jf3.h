@@ -23,12 +23,12 @@ GtkWindow *window, *calibrate_window;
 GtkHeaderBar *header_bar;
 GtkWidget *box1;
 GtkWidget *open_button;
-GtkWidget *calibrate_button, *fit_button, *contract_button, *multiplot_button;
-GtkPopover *contract_popover;
+GtkWidget *calibrate_button, *fit_button, *display_button, *multiplot_button;
+GtkPopover *display_popover;
 GtkWidget *calibrate_ok_button, *calibrate_cancel_button;
 GtkSpinButton *spectrum_selector;
 GtkCheckButton *autoscale_button;
-GtkScale *contract_scale;
+GtkScale *contract_scale, *zoom_scale, *pan_scale;
 GtkAdjustment *spectrum_selector_adjustment, *contract_adjustment;
 GtkWidget *spectrum_drawing_area;
 GtkGesture *spectrum_drag_gesture;
@@ -49,6 +49,7 @@ int xChanFocus; //x channel to focus on when zooming
 float zoomLevel; //1.0 = zoomed out fully (on x axis)
 int autoScale; //0=don't autoscale y axis, 1=autoscale y axis
 float scaleLevelMax, scaleLevelMin; //the y scale values, ie. the maximum and minimum values to show on the y axis
+int contractFactor; //the number of channels per bin (default=1)
 
 //calibration globals
 int calMode; //0=no calibration, 1=calibration enabled

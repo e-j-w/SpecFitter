@@ -1,3 +1,15 @@
+int getFirstNonemptySpectrum(int numSp){
+  int i,j;
+  for(i=0;i<numSp;i++){
+    for(j=0;j<S32K;j++){
+      if(hist[i][j]!=0.0){
+        return i;
+      }
+    }
+  }
+  return -1;
+}
+
 //function setting the plotting limits for the spectrum based on the zoom level
 //the plotting limits are in UNCALIBRATED units ie. channels
 void getPlotLimits(){
@@ -7,12 +19,13 @@ void getPlotLimits(){
         lowerLimit = 0;
         upperLimit = S32K - 1;
         return;
-    }else if(zoomLevel > 1000.0){
-        zoomLevel = 1000.0; //set maximum zoom level
+    }else if(zoomLevel > 1024.0){
+        zoomLevel = 1024.0; //set maximum zoom level
     }
 
     int numChansToDisp = (int)(1.0*S32K/zoomLevel);
     lowerLimit = xChanFocus - numChansToDisp/2;
+    lowerLimit = lowerLimit - (lowerLimit % contractFactor); //round to nearest multiple of contraction factor
     //clamp to lower limit of 0 if needed
     if(lowerLimit < 0){
         lowerLimit = 0;
@@ -20,6 +33,7 @@ void getPlotLimits(){
         return;
     }
     upperLimit = xChanFocus + numChansToDisp/2;
+    upperLimit = upperLimit - (upperLimit % contractFactor); //round to nearest multiple of contraction factor
     //clamp to upper limit of S32K-1 if needed
     if(upperLimit > (S32K-1)){
         upperLimit=S32K-1;
@@ -177,7 +191,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 		return;
 	}
 
-  int i;
+  int i,j;
 	GdkRectangle dasize;  // GtkDrawingArea size
   gdouble clip_x1 = 0.0, clip_y1 = 0.0, clip_x2 = 0.0, clip_y2 = 0.0;
   GdkWindow *wwindow = gtk_widget_get_window(widget);
@@ -202,21 +216,32 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   //get the maximum/minimum y values of the displayed region
   float maxVal = SMALL_NUMBER;
   float minVal = BIG_NUMBER;
-  for(i=0;i<(upperLimit-lowerLimit-1);i++){
-      if(hist[dispSp][lowerLimit+i] > maxVal){
-          maxVal = hist[dispSp][lowerLimit+i];
-      }
-      if(hist[dispSp][lowerLimit+i] < minVal){
-          minVal = hist[dispSp][lowerLimit+i];
-      }
+  for(i=0;i<(upperLimit-lowerLimit-1);i+=contractFactor){
+    float currentVal = 0.;
+    for(j=0;j<contractFactor;j++){
+      currentVal += hist[dispSp][lowerLimit+i+j];
+    }
+    if(currentVal > maxVal){
+        maxVal = currentVal;
+    }
+    if(currentVal < minVal){
+        minVal = currentVal;
+    }
   }
+  //printf("maxVal = %f, minVal = %f\n",maxVal,minVal);
 
-	//draw histogram
-	for(i=0;i<(upperLimit-lowerLimit-1);i++){
+	//draw the actual histogram
+	for(i=0;i<(upperLimit-lowerLimit-1);i+=contractFactor){
+    float currentVal = 0.;
+    float nextVal = 0.;
+    for(j=0;j<contractFactor;j++){
+      currentVal += hist[dispSp][lowerLimit+i+j];
+      nextVal += hist[dispSp][lowerLimit+i+j+contractFactor];
+    }
 		//printf("Here! x=%f,y=%f,yorig=%f xclip=%f %f\n",getXPos(i,clip_x1,clip_x2), hist[dispSp][lowerLimit+i],hist[dispSp][lowerLimit+i],clip_x1,clip_x2);
-		cairo_move_to (cr, getXPos(i,clip_x1,clip_x2), getYPos(hist[dispSp][lowerLimit+i],minVal,maxVal,clip_y1,clip_y2));
-		cairo_line_to (cr, getXPos(i+1,clip_x1,clip_x2), getYPos(hist[dispSp][lowerLimit+i],minVal,maxVal,clip_y1,clip_y2));
-		cairo_line_to (cr, getXPos(i+1,clip_x1,clip_x2), getYPos(hist[dispSp][lowerLimit+i+1],minVal,maxVal,clip_y1,clip_y2));
+		cairo_move_to (cr, getXPos(i,clip_x1,clip_x2), getYPos(currentVal,minVal,maxVal,clip_y1,clip_y2));
+		cairo_line_to (cr, getXPos(i+contractFactor,clip_x1,clip_x2), getYPos(currentVal,minVal,maxVal,clip_y1,clip_y2));
+		cairo_line_to (cr, getXPos(i+contractFactor,clip_x1,clip_x2), getYPos(nextVal,minVal,maxVal,clip_y1,clip_y2));
 	}
   cairo_set_source_rgb (cr, 1.0, 0.0, 0.0);
   cairo_stroke(cr);

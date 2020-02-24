@@ -14,6 +14,7 @@ void on_open_button_clicked(GtkButton *b)
   gtk_file_filter_add_pattern(file_filter,"*.spe");
   gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(file_open_dialog),file_filter);
 
+  int openErr = 0; //to track if there are any errors when opening spectra
   if (gtk_dialog_run(GTK_DIALOG(file_open_dialog)) == GTK_RESPONSE_ACCEPT)
   {
     char *filename;
@@ -26,25 +27,64 @@ void on_open_button_clicked(GtkButton *b)
       //set the range of selectable spectra values
       gtk_adjustment_set_lower(spectrum_selector_adjustment, 0);
       gtk_adjustment_set_upper(spectrum_selector_adjustment, numSp - 1);
-      //select the 0th spectrum by default
-      gtk_spin_button_set_value(spectrum_selector, 0);
-      dispSp = 0;
-      gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),TRUE);
-      gtk_widget_set_sensitive(GTK_WIDGET(contract_button),TRUE);
-      if(numSp > 1){
-        gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
+      //select the first non-empty spectrum by default
+      int sel = getFirstNonemptySpectrum(numSp);
+      if(sel >=0){
+        gtk_spin_button_set_value(spectrum_selector, sel);
+        dispSp = sel;
+        gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),TRUE);
+        gtk_widget_set_sensitive(GTK_WIDGET(display_button),TRUE);
+        if(numSp > 1){
+          gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
+        }
+        gtk_widget_queue_draw(GTK_WIDGET(window));
+      }else{
+        //no spectra with any data in the selected file
+        openErr = 2;
       }
-      gtk_widget_queue_draw(GTK_WIDGET(window));
+    }else{
+      //improper file format
+      openErr = 1;
     } 
     g_free(filename);
   }
-
   gtk_widget_destroy(file_open_dialog);
+  if(openErr>0){
+    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+    GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error opening spectrum data!");
+    switch (openErr)
+    {
+      case 2:
+        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"All spectrum data in file is empty.");
+        break;
+      default:
+        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Data in file is incorrectly formatted.");
+        break;
+    }
+    gtk_dialog_run (GTK_DIALOG (message_dialog));
+    gtk_widget_destroy (message_dialog);
+  }
 }
 
-void on_contract_button_clicked(GtkButton *b)
+void on_display_button_clicked(GtkButton *b)
 {
-  gtk_popover_popup(contract_popover); //show the popover menu
+  gtk_range_set_value(GTK_RANGE(zoom_scale),log(zoomLevel)/log(2.));//base 2 log of zoom
+  gtk_range_set_value(GTK_RANGE(pan_scale),(xChanFocus*100.0/S32K));
+  gtk_range_set_value(GTK_RANGE(contract_scale),contractFactor);
+  gtk_popover_popup(display_popover); //show the popover menu
+}
+
+void on_zoom_scale_changed(GtkRange *range, gpointer user_data){
+  zoomLevel = pow(2,gtk_range_get_value(range)); //modify the zoom level
+  gtk_widget_queue_draw(GTK_WIDGET(window)); //redraw the spectrum
+}
+void on_pan_scale_changed(GtkRange *range, gpointer user_data){
+  xChanFocus = (S32K/100.0)*gtk_range_get_value(range); //modify the pan level
+  gtk_widget_queue_draw(GTK_WIDGET(window)); //redraw the spectrum
+}
+void on_contract_scale_changed(GtkRange *range, gpointer user_data){
+  contractFactor = (int)gtk_range_get_value(range); //modify the contraction factor
+  gtk_widget_queue_draw(GTK_WIDGET(window)); //redraw the spectrum
 }
 
 void on_calibrate_button_clicked(GtkButton *b)
@@ -125,9 +165,9 @@ int main(int argc, char *argv[])
   open_button = GTK_WIDGET(gtk_builder_get_object(builder, "open_button"));
   calibrate_button = GTK_WIDGET(gtk_builder_get_object(builder, "calibrate_button"));
   fit_button = GTK_WIDGET(gtk_builder_get_object(builder, "fit_button"));
-  contract_button = GTK_WIDGET(gtk_builder_get_object(builder, "contract_button"));
+  display_button = GTK_WIDGET(gtk_builder_get_object(builder, "display_button"));
   multiplot_button = GTK_WIDGET(gtk_builder_get_object(builder, "multiplot_button"));
-  contract_popover = GTK_POPOVER(gtk_builder_get_object(builder, "contract_popover"));
+  display_popover = GTK_POPOVER(gtk_builder_get_object(builder, "display_popover"));
   calibrate_ok_button = GTK_WIDGET(gtk_builder_get_object(builder, "options_ok_button"));
   calibrate_cancel_button = GTK_WIDGET(gtk_builder_get_object(builder, "options_cancel_button"));
   spectrum_selector = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spectrumselector"));
@@ -139,13 +179,16 @@ int main(int argc, char *argv[])
   cal_entry_const = GTK_ENTRY(gtk_builder_get_object(builder, "cal_entry_const"));
   cal_entry_lin = GTK_ENTRY(gtk_builder_get_object(builder, "cal_entry_lin"));
   cal_entry_quad = GTK_ENTRY(gtk_builder_get_object(builder, "cal_entry_quad"));
+  zoom_scale = GTK_SCALE(gtk_builder_get_object(builder, "zoom_scale"));
+  pan_scale = GTK_SCALE(gtk_builder_get_object(builder, "pan_scale"));
+  contract_scale = GTK_SCALE(gtk_builder_get_object(builder, "contract_scale"));
 
   //connect signals
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "draw", G_CALLBACK (drawSpectrumArea), NULL);
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "scroll-event", G_CALLBACK (on_spectrum_scroll), NULL);
   g_signal_connect (G_OBJECT (open_button), "clicked", G_CALLBACK (on_open_button_clicked), NULL);
   g_signal_connect (G_OBJECT (calibrate_button), "clicked", G_CALLBACK (on_calibrate_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (contract_button), "clicked", G_CALLBACK (on_contract_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (display_button), "clicked", G_CALLBACK (on_display_button_clicked), NULL);
   g_signal_connect (G_OBJECT (calibrate_ok_button), "clicked", G_CALLBACK (on_calibrate_ok_button_clicked), NULL);
   g_signal_connect (G_OBJECT (calibrate_cancel_button), "clicked", G_CALLBACK (on_calibrate_cancel_button_clicked), NULL);
   g_signal_connect (G_OBJECT (spectrum_selector), "value-changed", G_CALLBACK (on_spectrum_selector_changed), NULL);
@@ -156,6 +199,9 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (cal_entry_const), "preedit-changed", G_CALLBACK (on_cal_par_activate), NULL);
   g_signal_connect (G_OBJECT (cal_entry_lin), "preedit-changed", G_CALLBACK (on_cal_par_activate), NULL);
   g_signal_connect (G_OBJECT (cal_entry_quad), "preedit-changed", G_CALLBACK (on_cal_par_activate), NULL);
+  g_signal_connect (G_OBJECT (zoom_scale), "value-changed", G_CALLBACK (on_zoom_scale_changed), NULL);
+  g_signal_connect (G_OBJECT (pan_scale), "value-changed", G_CALLBACK (on_pan_scale_changed), NULL);
+  g_signal_connect (G_OBJECT (contract_scale), "value-changed", G_CALLBACK (on_contract_scale_changed), NULL);
 
   //set default values
   openedSp = 0;
@@ -166,6 +212,7 @@ int main(int argc, char *argv[])
   scaleLevelMin = 0.0;
   xChanFocus = 0;
   zoomLevel = 1.0;
+  contractFactor = 1;
   autoScale = 1;
   calMode = 0;
   gtk_adjustment_set_lower(spectrum_selector_adjustment, 0);
@@ -175,7 +222,7 @@ int main(int argc, char *argv[])
   gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(fit_button),FALSE);
-  gtk_widget_set_sensitive(GTK_WIDGET(contract_button),FALSE);
+  gtk_widget_set_sensitive(GTK_WIDGET(display_button),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),FALSE);
 
   //setup UI element appearance at startup
