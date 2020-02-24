@@ -35,7 +35,7 @@
     <property name="type_hint">dialog</property>
     <property name="attached_to">window</property>
     <property name="program_name">jf3 Spectrum Viewer</property>
-    <property name="copyright" translatable="yes">© 2020 Jonathan Williams and contributors</property>
+    <property name="copyright" translatable="yes">© 2020 jf3 contributors</property>
     <property name="comments" translatable="yes">A 1D spectrum viewer application.</property>
     <property name="website">https://github.com/e-j-w/jf3</property>
     <property name="authors">Jonathan Williams</property>
@@ -552,7 +552,6 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="title" translatable="yes">jf3 Spectrum Viewer</property>
-        <property name="spacing">10</property>
         <property name="show_close_button">True</property>
         <child>
           <object class="GtkButton" id="open_button">

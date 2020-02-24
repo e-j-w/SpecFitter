@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <math.h>
+#include <libgen.h>
 
 #define BIG_NUMBER    1E10
 #define SMALL_NUMBER -1E10
@@ -44,6 +45,7 @@ int dragstartul, dragstartll; //click and drag position storage parameters
 
 //spectrum drawing globals
 double hist[NSPECT][S32K]; //spectrum histogram data
+char histComment[NSPECT][256]; //spectrum description/comment
 int openedSp; //0=not opened, 1=opened
 int dispSp; //# of the spectrum to display
 int lowerLimit, upperLimit; //lower and upper limits to plot spectrum (in uncalibrated units ie. channels)

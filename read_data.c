@@ -32,9 +32,11 @@ int readMCA(const char *filename, double outHist[NSPECT][S32K])
 				printf("Verify that the format and number of spectra in the file are correct.\n");
 				exit(-1);
 			}
-			else
+			else{
 				for (j = 0; j < S32K; j++)
 					outHist[i][j] = (double)tmpHist[j];
+				sprintf(histComment[i],"%s, spectrum %i",basename((char*)filename),i);
+			}	
 		}
 	}
 
@@ -77,8 +79,12 @@ int readFMCA(const char *filename, double outHist[NSPECT][S32K])
 				exit(-1);
 			}
 			else
+			{
 				for (j = 0; j < S32K; j++)
 					outHist[i][j] = (double)tmpHist[j];
+				sprintf(histComment[i],"%s, spectrum %i",basename((char*)filename),i);
+				printf("Comment %i: %s\n",i,histComment[i]);
+			}	
 		}
 	}
 
@@ -121,6 +127,8 @@ int readSPE(const char *filename, double outHist[NSPECT][S32K])
 		outHist[0][i] = (double)inpHist[i];
 	for (i = 4096; i < S32K; i++)
 		outHist[0][i] = 0.;
+	
+	sprintf(histComment[0],"%s",basename((char*)filename));
 
 	fclose(inp);
 	return 1;
