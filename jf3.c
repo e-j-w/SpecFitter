@@ -136,16 +136,16 @@ void on_calibrate_ok_button_clicked(GtkButton *b)
   
 }
 
-void on_calibrate_cancel_button_clicked(GtkButton *b)
-{
-  gtk_widget_hide(GTK_WIDGET(calibrate_window)); //close the window
-}
-
 void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data)
 {
   dispSp = gtk_spin_button_get_value_as_int(spin_button);
   //printf("Set selected spectrum to %i\n",dispSp);
   gtk_widget_queue_draw(GTK_WIDGET(window));
+}
+
+void on_about_button_clicked(GtkButton *b)
+{
+  gtk_window_present(GTK_WINDOW(about_dialog)); //show the window
 }
 
 int main(int argc, char *argv[])
@@ -158,6 +158,8 @@ int main(int argc, char *argv[])
   g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL); //quit the program when closing the window
   calibrate_window = GTK_WINDOW(gtk_builder_get_object(builder, "calibration_window"));
   gtk_window_set_transient_for(calibrate_window, window); //center calibrate window on main window
+  about_dialog = GTK_ABOUT_DIALOG(gtk_builder_get_object(builder, "about_dialog"));
+  gtk_window_set_transient_for(GTK_WINDOW(about_dialog), window); //center about dialog on main window
   
   header_bar = GTK_HEADER_BAR(gtk_builder_get_object(builder, "header_bar"));
 
@@ -169,7 +171,6 @@ int main(int argc, char *argv[])
   multiplot_button = GTK_WIDGET(gtk_builder_get_object(builder, "multiplot_button"));
   display_popover = GTK_POPOVER(gtk_builder_get_object(builder, "display_popover"));
   calibrate_ok_button = GTK_WIDGET(gtk_builder_get_object(builder, "options_ok_button"));
-  calibrate_cancel_button = GTK_WIDGET(gtk_builder_get_object(builder, "options_cancel_button"));
   spectrum_selector = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spectrumselector"));
   spectrum_selector_adjustment = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "spectrum_selector_adjustment"));
   autoscale_button = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "autoscalebutton"));
@@ -182,6 +183,7 @@ int main(int argc, char *argv[])
   zoom_scale = GTK_SCALE(gtk_builder_get_object(builder, "zoom_scale"));
   pan_scale = GTK_SCALE(gtk_builder_get_object(builder, "pan_scale"));
   contract_scale = GTK_SCALE(gtk_builder_get_object(builder, "contract_scale"));
+  about_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "about_button"));
 
   //connect signals
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "draw", G_CALLBACK (drawSpectrumArea), NULL);
@@ -190,7 +192,6 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (calibrate_button), "clicked", G_CALLBACK (on_calibrate_button_clicked), NULL);
   g_signal_connect (G_OBJECT (display_button), "clicked", G_CALLBACK (on_display_button_clicked), NULL);
   g_signal_connect (G_OBJECT (calibrate_ok_button), "clicked", G_CALLBACK (on_calibrate_ok_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (calibrate_cancel_button), "clicked", G_CALLBACK (on_calibrate_cancel_button_clicked), NULL);
   g_signal_connect (G_OBJECT (spectrum_selector), "value-changed", G_CALLBACK (on_spectrum_selector_changed), NULL);
   g_signal_connect (G_OBJECT (autoscale_button), "toggled", G_CALLBACK (on_toggle_autoscale), NULL);
   gtk_widget_set_events(spectrum_drawing_area, GDK_SCROLL_MASK); //allow mouse scrolling over the drawing area
@@ -202,6 +203,9 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (zoom_scale), "value-changed", G_CALLBACK (on_zoom_scale_changed), NULL);
   g_signal_connect (G_OBJECT (pan_scale), "value-changed", G_CALLBACK (on_pan_scale_changed), NULL);
   g_signal_connect (G_OBJECT (contract_scale), "value-changed", G_CALLBACK (on_contract_scale_changed), NULL);
+  g_signal_connect (G_OBJECT (about_button), "clicked", G_CALLBACK (on_about_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (calibrate_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect (G_OBJECT (about_dialog), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
 
   //set default values
   openedSp = 0;

@@ -266,22 +266,26 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2);
     }
   }else if(getPlotRangeXUnits() > 5000){
-    for(i=0;i<S32K;i+=500){
+    for(i=0;i<S32K;i+=1000){
       drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2);
     }
   }else if(getPlotRangeXUnits() > 3000){
-    for(i=0;i<S32K;i+=300){
+    for(i=0;i<S32K;i+=500){
       drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2);
     }
   }else if(getPlotRangeXUnits() > 2000){
-    for(i=0;i<S32K;i+=200){
+    for(i=0;i<S32K;i+=300){
       drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2);
     }
   }else if(getPlotRangeXUnits() > 1000){
-    for(i=0;i<S32K;i+=100){
+    for(i=0;i<S32K;i+=200){
       drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2);
     }
   }else if(getPlotRangeXUnits() > 500){
+    for(i=0;i<S32K;i+=100){
+      drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2);
+    }
+  }else if(getPlotRangeXUnits() > 200){
     for(i=0;i<S32K;i+=50){
       drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2);
     }
@@ -290,7 +294,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2);
     }
   }else{
-    for(i=0;i<S32K;i+=10){
+    for(i=0;i<S32K;i+=5){
       drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2);
     }
   }

@@ -25,7 +25,7 @@ GtkWidget *box1;
 GtkWidget *open_button;
 GtkWidget *calibrate_button, *fit_button, *display_button, *multiplot_button;
 GtkPopover *display_popover;
-GtkWidget *calibrate_ok_button, *calibrate_cancel_button;
+GtkWidget *calibrate_ok_button;
 GtkSpinButton *spectrum_selector;
 GtkCheckButton *autoscale_button;
 GtkScale *contract_scale, *zoom_scale, *pan_scale;
@@ -35,6 +35,8 @@ GtkGesture *spectrum_drag_gesture;
 GtkWidget *file_open_dialog;
 GtkFileFilter *file_filter;
 GtkEntry *cal_entry_unit, *cal_entry_const, *cal_entry_lin, *cal_entry_quad;
+GtkAboutDialog *about_dialog;
+GtkModelButton *about_button;
 GtkBuilder *builder;
 
 //non-GTK GUI globals
