@@ -115,17 +115,19 @@ int readSPE(const char *filename, double outHist[NSPECT][S32K])
 		printf("Verify that the format of the file is correct.\n");
 		exit(-1);
 	}
-	if (fread(inpHist, 4096 * sizeof(float), 1, inp) != 1)
+	int numElementsRead = fread(inpHist, sizeof(float), 4096, inp);
+	if (numElementsRead < 1)
 	{
 		printf("ERROR: Cannot read spectrum from the .spe file: %s\n", filename);
+		printf("fread code: %i\n",numElementsRead);
 		printf("Verify that the format of the file is correct.\n");
 		exit(-1);
 	}
 
 	//convert input data to double
-	for (i = 0; i < 4096; i++)
+	for (i = 0; i < numElementsRead; i++)
 		outHist[0][i] = (double)inpHist[i];
-	for (i = 4096; i < S32K; i++)
+	for (i = numElementsRead; i < S32K; i++)
 		outHist[0][i] = 0.;
 	
 	sprintf(histComment[0],"%s",basename((char*)filename));
