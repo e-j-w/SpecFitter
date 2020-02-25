@@ -83,7 +83,7 @@ int readFMCA(const char *filename, double outHist[NSPECT][S32K])
 				for (j = 0; j < S32K; j++)
 					outHist[i][j] = (double)tmpHist[j];
 				sprintf(histComment[i],"%s, spectrum %i",basename((char*)filename),i);
-				printf("Comment %i: %s\n",i,histComment[i]);
+				//printf("Comment %i: %s\n",i,histComment[i]);
 			}	
 		}
 	}

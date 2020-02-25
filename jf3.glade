@@ -43,7 +43,6 @@
     <property name="type_hint">dialog</property>
     <property name="attached_to">window</property>
     <property name="program_name">jf3 Spectrum Viewer</property>
-    <property name="copyright" translatable="yes">© 2020 jf3 contributors</property>
     <property name="comments" translatable="yes">A 1D spectrum viewer application.</property>
     <property name="website">https://github.com/e-j-w/jf3</property>
     <property name="authors">Jonathan Williams</property>
@@ -80,6 +79,7 @@
     <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="window_position">center-always</property>
+    <property name="type_hint">dialog</property>
     <property name="gravity">center</property>
     <property name="attached_to">window</property>
     <child type="titlebar">
@@ -600,6 +600,7 @@
     <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="window_position">center-always</property>
+    <property name="type_hint">dialog</property>
     <property name="gravity">center</property>
     <property name="attached_to">window</property>
     <child type="titlebar">
@@ -632,35 +633,52 @@
               </packing>
             </child>
             <child>
-              <object class="GtkTreeView" id="multiplot_tree_view">
-                <property name="width_request">500</property>
-                <property name="height_request">100</property>
+              <object class="GtkScrolledWindow">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="model">multiplot_liststore</property>
-                <child internal-child="selection">
-                  <object class="GtkTreeSelection" id="multiplot_tree_selection"/>
-                </child>
+                <property name="hscrollbar_policy">never</property>
+                <property name="shadow_type">in</property>
+                <property name="min_content_height">200</property>
                 <child>
-                  <object class="GtkTreeViewColumn" id="multiplot_column1">
-                    <property name="spacing">6</property>
-                    <property name="title" translatable="yes">Spectrum Name</property>
-                    <property name="sort_indicator">True</property>
-                    <property name="sort_column_id">0</property>
+                  <object class="GtkViewport">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkCellRendererText" id="multiplot_cr1"/>
-                      <attributes>
-                        <attribute name="text">0</attribute>
-                      </attributes>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkTreeViewColumn" id="multiplot_column2">
-                    <property name="spacing">6</property>
-                    <property name="title" translatable="yes">Plot?</property>
-                    <child>
-                      <object class="GtkCellRendererToggle" id="multiplot_cr2"/>
+                      <object class="GtkTreeView" id="multiplot_tree_view">
+                        <property name="width_request">500</property>
+                        <property name="height_request">100</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="model">multiplot_liststore</property>
+                        <property name="search_column">0</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection"/>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="multiplot_column1">
+                            <property name="spacing">6</property>
+                            <property name="title" translatable="yes">Spectrum Name</property>
+                            <property name="clickable">True</property>
+                            <property name="sort_indicator">True</property>
+                            <property name="sort_column_id">0</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="multiplot_cr1"/>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="multiplot_column2">
+                            <property name="spacing">6</property>
+                            <property name="title" translatable="yes">Plot?</property>
+                            <child>
+                              <object class="GtkCellRendererToggle" id="multiplot_cr2"/>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
                     </child>
                   </object>
                 </child>
@@ -668,7 +686,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">1</property>
+                <property name="position">2</property>
               </packing>
             </child>
             <child>
@@ -694,6 +712,7 @@
                     <property name="can_focus">False</property>
                     <property name="active">0</property>
                     <items>
+                      <item translatable="yes">Sum Spectra</item>
                       <item translatable="yes">Overlay (common scaling)</item>
                       <item translatable="yes">Overlay (independent scaling)</item>
                       <item translatable="yes">Stacked View</item>
@@ -709,7 +728,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="position">3</property>
               </packing>
             </child>
           </object>
@@ -750,7 +769,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>
