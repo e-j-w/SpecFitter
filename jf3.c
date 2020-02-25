@@ -36,7 +36,9 @@ void on_open_button_clicked(GtkButton *b)
         gtk_widget_set_sensitive(GTK_WIDGET(display_button),TRUE);
         if(numSp > 1){
           gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
+          gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
         }
+        numSpOpened = numSp;
         gtk_widget_queue_draw(GTK_WIDGET(window));
       }else{
         //no spectra with any data in the selected file
@@ -136,6 +138,37 @@ void on_calibrate_ok_button_clicked(GtkButton *b)
   
 }
 
+void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
+  GtkTreeIter iter;
+  gboolean val = FALSE;
+  GtkTreeModel *model = gtk_tree_view_get_model(multiplot_tree_view);
+  gtk_tree_model_get_iter_from_string(model, &iter, path_string);
+  gtk_tree_model_get(model,&iter,1,&val,-1); //get the boolean value
+  if(val==FALSE){
+    val=TRUE;
+  }else{
+    val=FALSE;
+  }
+  gtk_list_store_set(multiplot_liststore,&iter,1,val,-1); //set the boolean value (change checkbox value)
+  //printf("toggled %i\n",val);
+  //gtk_widget_queue_draw(GTK_WIDGET(multiplot_window));
+}
+
+void on_multiplot_button_clicked(GtkButton *b)
+{
+  GtkTreeIter iter;
+  int i;
+  gtk_tree_view_column_add_attribute(multiplot_column2,multiplot_cr2, "active",1);
+  gtk_list_store_clear(multiplot_liststore);
+  for(i=0;i<numSpOpened;i++){
+    gtk_list_store_append(multiplot_liststore,&iter);
+    gtk_list_store_set(multiplot_liststore, &iter, 0, histComment[i], -1);
+    gtk_list_store_set(multiplot_liststore, &iter, 1, FALSE, -1);
+  }
+  
+  gtk_window_present(multiplot_window); //show the window
+}
+
 void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data)
 {
   dispSp = gtk_spin_button_get_value_as_int(spin_button);
@@ -158,6 +191,8 @@ int main(int argc, char *argv[])
   g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL); //quit the program when closing the window
   calibrate_window = GTK_WINDOW(gtk_builder_get_object(builder, "calibration_window"));
   gtk_window_set_transient_for(calibrate_window, window); //center calibrate window on main window
+  multiplot_window = GTK_WINDOW(gtk_builder_get_object(builder, "multiplot_window"));
+  gtk_window_set_transient_for(multiplot_window, window); //center multiplot window on main window
   about_dialog = GTK_ABOUT_DIALOG(gtk_builder_get_object(builder, "about_dialog"));
   gtk_window_set_transient_for(GTK_WINDOW(about_dialog), window); //center about dialog on main window
   
@@ -184,12 +219,19 @@ int main(int argc, char *argv[])
   pan_scale = GTK_SCALE(gtk_builder_get_object(builder, "pan_scale"));
   contract_scale = GTK_SCALE(gtk_builder_get_object(builder, "contract_scale"));
   about_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "about_button"));
+  multiplot_liststore = GTK_LIST_STORE(gtk_builder_get_object(builder, "multiplot_liststore"));
+  multiplot_tree_view = GTK_TREE_VIEW(gtk_builder_get_object(builder, "multiplot_tree_view"));
+  multiplot_column1 = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder, "multiplot_column1"));
+  multiplot_column2 = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder, "multiplot_column2"));
+  multiplot_cr1 = GTK_CELL_RENDERER(gtk_builder_get_object(builder, "multiplot_cr1"));
+  multiplot_cr2 = GTK_CELL_RENDERER(gtk_builder_get_object(builder, "multiplot_cr2"));
 
   //connect signals
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "draw", G_CALLBACK (drawSpectrumArea), NULL);
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "scroll-event", G_CALLBACK (on_spectrum_scroll), NULL);
   g_signal_connect (G_OBJECT (open_button), "clicked", G_CALLBACK (on_open_button_clicked), NULL);
   g_signal_connect (G_OBJECT (calibrate_button), "clicked", G_CALLBACK (on_calibrate_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (multiplot_button), "clicked", G_CALLBACK (on_multiplot_button_clicked), NULL);
   g_signal_connect (G_OBJECT (display_button), "clicked", G_CALLBACK (on_display_button_clicked), NULL);
   g_signal_connect (G_OBJECT (calibrate_ok_button), "clicked", G_CALLBACK (on_calibrate_ok_button_clicked), NULL);
   g_signal_connect (G_OBJECT (spectrum_selector), "value-changed", G_CALLBACK (on_spectrum_selector_changed), NULL);
@@ -204,7 +246,9 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (pan_scale), "value-changed", G_CALLBACK (on_pan_scale_changed), NULL);
   g_signal_connect (G_OBJECT (contract_scale), "value-changed", G_CALLBACK (on_contract_scale_changed), NULL);
   g_signal_connect (G_OBJECT (about_button), "clicked", G_CALLBACK (on_about_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (multiplot_cr2), "toggled", G_CALLBACK (on_multiplot_cell_toggled), NULL);
   g_signal_connect (G_OBJECT (calibrate_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect (G_OBJECT (multiplot_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (about_dialog), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
 
   //set default values
@@ -219,6 +263,7 @@ int main(int argc, char *argv[])
   contractFactor = 1;
   autoScale = 1;
   calMode = 0;
+  numSpOpened = 0;
   gtk_adjustment_set_lower(spectrum_selector_adjustment, 0);
   gtk_adjustment_set_upper(spectrum_selector_adjustment, 0);
 

@@ -19,12 +19,12 @@
 #define S32K   32768
 #define NSPECT 100
 
-//GUI globals
-GtkWindow *window, *calibrate_window;
+/* GUI globals */
+GtkWindow *window;
 GtkHeaderBar *header_bar;
 GtkWidget *box1;
 GtkWidget *open_button;
-GtkWidget *calibrate_button, *fit_button, *display_button, *multiplot_button;
+GtkWidget *fit_button, *display_button;
 GtkPopover *display_popover;
 GtkWidget *calibrate_ok_button;
 GtkSpinButton *spectrum_selector;
@@ -35,9 +35,22 @@ GtkWidget *spectrum_drawing_area;
 GtkGesture *spectrum_drag_gesture;
 GtkWidget *file_open_dialog;
 GtkFileFilter *file_filter;
+//Calibration dialog
+GtkWidget *calibrate_button;
+GtkWindow *calibrate_window;
 GtkEntry *cal_entry_unit, *cal_entry_const, *cal_entry_lin, *cal_entry_quad;
+//'About' dialog
 GtkAboutDialog *about_dialog;
 GtkModelButton *about_button;
+//MultiPlot dialog
+GtkWidget *multiplot_button;
+GtkWindow *multiplot_window;
+GtkListStore *multiplot_liststore;
+GtkTreeView *multiplot_tree_view;
+GtkTreeViewColumn *multiplot_column1, *multiplot_column2;
+GtkTreeSelection *multiplot_tree_selection;
+GtkCellRenderer *multiplot_cr1, *multiplot_cr2;
+//builder
 GtkBuilder *builder;
 
 //non-GTK GUI globals
@@ -47,6 +60,7 @@ int dragstartul, dragstartll; //click and drag position storage parameters
 double hist[NSPECT][S32K]; //spectrum histogram data
 char histComment[NSPECT][256]; //spectrum description/comment
 int openedSp; //0=not opened, 1=opened
+int numSpOpened; //number of spectra in the opened file(s)
 int dispSp; //# of the spectrum to display
 int lowerLimit, upperLimit; //lower and upper limits to plot spectrum (in uncalibrated units ie. channels)
 int xChanFocus; //x channel to focus on when zooming

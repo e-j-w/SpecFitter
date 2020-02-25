@@ -14,6 +14,14 @@
     <property name="page_increment">10</property>
     <property name="page_size">1</property>
   </object>
+  <object class="GtkListStore" id="multiplot_liststore">
+    <columns>
+      <!-- column-name Name -->
+      <column type="gchararray"/>
+      <!-- column-name Enabled -->
+      <column type="gboolean"/>
+    </columns>
+  </object>
   <object class="GtkAdjustment" id="pan_adjustment">
     <property name="upper">100</property>
     <property name="step_increment">0.01</property>
@@ -500,6 +508,168 @@
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">4</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="multiplot_window">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">MultiPlot Settings</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-always</property>
+    <property name="gravity">center</property>
+    <property name="attached_to">window</property>
+    <child type="titlebar">
+      <placeholder/>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="margin_left">10</property>
+        <property name="margin_right">10</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">start</property>
+                <property name="label" translatable="yes">Select spectra to plot simultaneously:</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkTreeView" id="multiplot_tree_view">
+                <property name="width_request">500</property>
+                <property name="height_request">100</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="model">multiplot_liststore</property>
+                <child internal-child="selection">
+                  <object class="GtkTreeSelection" id="multiplot_tree_selection"/>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="multiplot_column1">
+                    <property name="spacing">6</property>
+                    <property name="title" translatable="yes">Spectrum Name</property>
+                    <property name="sort_indicator">True</property>
+                    <property name="sort_column_id">0</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="multiplot_cr1"/>
+                      <attributes>
+                        <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="multiplot_column2">
+                    <property name="spacing">6</property>
+                    <property name="title" translatable="yes">Plot?</property>
+                    <child>
+                      <object class="GtkCellRendererToggle" id="multiplot_cr2"/>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="spacing">10</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Select plotting mode:</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkComboBoxText" id="multiplot_mode_combobox">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="active">0</property>
+                    <items>
+                      <item translatable="yes">Overlay (common scaling)</item>
+                      <item translatable="yes">Overlay (independent scaling)</item>
+                      <item translatable="yes">Stacked View</item>
+                    </items>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="padding">6</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="halign">end</property>
+            <property name="margin_top">10</property>
+            <property name="margin_bottom">10</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkButton" id="options_ok_button1">
+                <property name="label">gtk-apply</property>
+                <property name="width_request">100</property>
+                <property name="height_request">40</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Apply all changes and return.</property>
+                <property name="halign">end</property>
+                <property name="use_stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
           </packing>
         </child>
       </object>
