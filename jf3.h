@@ -60,7 +60,7 @@ int dragstartul, dragstartll; //click and drag position storage parameters
 double hist[NSPECT][S32K]; //spectrum histogram data
 char histComment[NSPECT][256]; //spectrum description/comment
 int openedSp; //0=not opened, 1=opened
-int numSpOpened; //number of spectra in the opened file(s)
+int glob_numSpOpened; //number of spectra in the opened file(s)
 int dispSp; //# of the spectrum to display
 int lowerLimit, upperLimit; //lower and upper limits to plot spectrum (in uncalibrated units ie. channels)
 int xChanFocus; //x channel to focus on when zooming

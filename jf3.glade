@@ -862,7 +862,7 @@
         <property name="show_close_button">True</property>
         <child>
           <object class="GtkButton" id="open_button">
-            <property name="label" translatable="yes">Open File</property>
+            <property name="label" translatable="yes">Open File(s)</property>
             <property name="width_request">100</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>

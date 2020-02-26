@@ -1,6 +1,9 @@
-int getFirstNonemptySpectrum(int numSp){
+int getFirstNonemptySpectrum(int numSpOpened){
+  if(numSpOpened>=NSPECT){
+    return -1;
+  }
   int i,j;
-  for(i=0;i<numSp;i++){
+  for(i=0;i<numSpOpened;i++){
     for(j=0;j<S32K;j++){
       if(hist[i][j]!=0.0){
         return i;
