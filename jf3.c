@@ -34,13 +34,11 @@ void on_open_button_clicked(GtkButton *b)
           //printf("Comment %i: %s\n",j,histComment[j]);
         }
         glob_numSpOpened += numSp;
-        //set the title of the opened spectrum in the header bar
-        gtk_header_bar_set_subtitle(header_bar,filename);
         //select the first non-empty spectrum by default
         int sel = getFirstNonemptySpectrum(glob_numSpOpened);
         if(sel >=0){
           gtk_spin_button_set_value(spectrum_selector, sel);
-          dispSp = sel;
+          glob_multiPlots[0] = sel;
           gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),TRUE);
           gtk_widget_set_sensitive(GTK_WIDGET(display_button),TRUE);
           if(numSp > 1){
@@ -87,6 +85,14 @@ void on_open_button_clicked(GtkButton *b)
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),errMsg);
       gtk_dialog_run (GTK_DIALOG (message_dialog));
       gtk_widget_destroy (message_dialog);
+    }
+    //set the title of the opened spectrum in the header bar
+    if(g_slist_length(file_list) > 1){
+      char headerBarSub[256];
+      snprintf(headerBarSub,256,"%i files loaded",g_slist_length(file_list));
+      gtk_header_bar_set_subtitle(header_bar,headerBarSub);
+    }else{
+      gtk_header_bar_set_subtitle(header_bar,filename);
     }
     g_slist_free(file_list);
     g_free(filename);
@@ -202,7 +208,7 @@ void on_multiplot_button_clicked(GtkButton *b)
 
 void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data)
 {
-  dispSp = gtk_spin_button_get_value_as_int(spin_button);
+  glob_multiPlots[0] = gtk_spin_button_get_value_as_int(spin_button);
   //printf("Set selected spectrum to %i\n",dispSp);
   gtk_widget_queue_draw(GTK_WIDGET(window));
 }
@@ -284,7 +290,6 @@ int main(int argc, char *argv[])
 
   //set default values
   openedSp = 0;
-  dispSp = 0;
   lowerLimit = 0;
   upperLimit = S32K - 1;
   scaleLevelMax = 1000.0;
@@ -295,6 +300,8 @@ int main(int argc, char *argv[])
   autoScale = 1;
   calMode = 0;
   glob_numSpOpened = 0;
+  glob_multiplotMode = 0;
+  glob_numMultiplotSp = 1;
   gtk_adjustment_set_lower(spectrum_selector_adjustment, 0);
   gtk_adjustment_set_upper(spectrum_selector_adjustment, 0);
 

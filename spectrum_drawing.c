@@ -188,9 +188,9 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 		return;
 	}
 
-	if (dispSp >= NSPECT)
+	if (glob_multiPlots[0] >= NSPECT)
 	{
-		printf("Spectrum number too high (%i)!\n", dispSp);
+		printf("Spectrum number too high (%i)!\n", glob_multiPlots[0]);
 		return;
 	}
 
@@ -222,7 +222,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   for(i=0;i<(upperLimit-lowerLimit-1);i+=contractFactor){
     float currentVal = 0.;
     for(j=0;j<contractFactor;j++){
-      currentVal += hist[dispSp][lowerLimit+i+j];
+      currentVal += hist[glob_multiPlots[0]][lowerLimit+i+j];
     }
     if(currentVal > maxVal){
         maxVal = currentVal;
@@ -238,10 +238,10 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
     float currentVal = 0.;
     float nextVal = 0.;
     for(j=0;j<contractFactor;j++){
-      currentVal += hist[dispSp][lowerLimit+i+j];
-      nextVal += hist[dispSp][lowerLimit+i+j+contractFactor];
+      currentVal += hist[glob_multiPlots[0]][lowerLimit+i+j];
+      nextVal += hist[glob_multiPlots[0]][lowerLimit+i+j+contractFactor];
     }
-		//printf("Here! x=%f,y=%f,yorig=%f xclip=%f %f\n",getXPos(i,clip_x1,clip_x2), hist[dispSp][lowerLimit+i],hist[dispSp][lowerLimit+i],clip_x1,clip_x2);
+		//printf("Here! x=%f,y=%f,yorig=%f xclip=%f %f\n",getXPos(i,clip_x1,clip_x2), hist[glob_multiPlots[0]][lowerLimit+i],hist[glob_multiPlots[0]][lowerLimit+i],clip_x1,clip_x2);
 		cairo_move_to (cr, getXPos(i,clip_x1,clip_x2), getYPos(currentVal,minVal,maxVal,clip_y1,clip_y2));
 		cairo_line_to (cr, getXPos(i+contractFactor,clip_x1,clip_x2), getYPos(currentVal,minVal,maxVal,clip_y1,clip_y2));
 		cairo_line_to (cr, getXPos(i+contractFactor,clip_x1,clip_x2), getYPos(nextVal,minVal,maxVal,clip_y1,clip_y2));

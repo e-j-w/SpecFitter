@@ -2,8 +2,6 @@
 
 **A Spectrum Viewer in GTK3**
 
-Developer/Maintainer: Jonathan Williams
-
 ## Description
 
 An attempt at writing a (1D) spectrum viewer app using GTK, with functionality inspired by the `gf3` program in RadWare (https://radware.phy.ornl.gov/).  This is still in the early stages: spectra appear to be drawing correctly but many functions are not usable yet.
@@ -38,3 +36,7 @@ So far the program has only been tested with Linux-based systems.  A Makefile is
 * Plotting of multiple spectra
 * Peak labels?
 * Peak fitting?
+
+## Credits
+
+Developer/Maintainer: Jonathan Williams
