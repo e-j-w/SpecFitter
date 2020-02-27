@@ -43,13 +43,14 @@ GtkEntry *cal_entry_unit, *cal_entry_const, *cal_entry_lin, *cal_entry_quad;
 GtkAboutDialog *about_dialog;
 GtkModelButton *about_button;
 //MultiPlot dialog
-GtkWidget *multiplot_button;
+GtkWidget *multiplot_button, *multiplot_ok_button;
 GtkWindow *multiplot_window;
 GtkListStore *multiplot_liststore;
 GtkTreeView *multiplot_tree_view;
 GtkTreeViewColumn *multiplot_column1, *multiplot_column2;
 GtkTreeSelection *multiplot_tree_selection;
 GtkCellRenderer *multiplot_cr1, *multiplot_cr2;
+GtkComboBoxText *multiplot_mode_combobox;
 //builder
 GtkBuilder *builder;
 

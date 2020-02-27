@@ -10,7 +10,7 @@ An attempt at writing a (1D) spectrum viewer app using GTK, with functionality i
 
 ### Support for various file formats
 
-* **.mca** - An .mca file is simply a 2D array of integers, with the first index denoting a spectrum number (up to 100) and the second index denoting a bin number (up to 32768).
+* **.mca** - An .mca file is simply a 2D array of integers, with the first index denoting a spectrum number (array length up to 100) and the second index denoting a bin number (array length 32768 ie. 2<sup>15</sup>).
 * **.fmca** - An .fmca file has the same format as .mca except it uses floats rather than integers.
 * **.spe** -  Spectrum format used by the RadWare software package (available at: https://radware.phy.ornl.gov/), for example when using the 'ws' command in `gf3`.
 

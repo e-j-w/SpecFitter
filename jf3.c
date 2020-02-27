@@ -195,20 +195,67 @@ void on_multiplot_button_clicked(GtkButton *b)
 {
   GtkTreeIter iter;
   int i;
-  gtk_tree_view_column_add_attribute(multiplot_column2,multiplot_cr2, "active",1);
   gtk_list_store_clear(multiplot_liststore);
   for(i=0;i<glob_numSpOpened;i++){
     gtk_list_store_append(multiplot_liststore,&iter);
     gtk_list_store_set(multiplot_liststore, &iter, 0, histComment[i], -1);
     gtk_list_store_set(multiplot_liststore, &iter, 1, FALSE, -1);
+    gtk_list_store_set(multiplot_liststore, &iter, 2, i, -1);
   }
   
   gtk_window_present(multiplot_window); //show the window
 }
 
+void on_multiplot_ok_button_clicked(GtkButton *b)
+{
+  GtkTreeIter iter;
+  gboolean readingTreeModel;
+  gboolean val = FALSE;
+  int spInd = 0;
+  int selectedSpCount = 0;
+  GtkTreeModel *model = gtk_tree_view_get_model(multiplot_tree_view);
+  readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
+  while (readingTreeModel)
+  {
+    gtk_tree_model_get(model,&iter,1,&val,2,&spInd,-1); //get whether the spectrum is selected and the spectrum index
+    if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
+      if(val==TRUE){
+        glob_multiPlots[selectedSpCount]=spInd;
+        selectedSpCount++;
+      }
+    }
+    readingTreeModel = gtk_tree_model_iter_next (model, &iter);
+  }
+  glob_numMultiplotSp = selectedSpCount;
+  glob_multiplotMode = gtk_combo_box_get_active(GTK_COMBO_BOX(multiplot_mode_combobox));
+  if((glob_multiplotMode < 0)||(glob_numMultiplotSp < 2)){
+    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+    GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Invalid selection!");
+    if(glob_multiplotMode < 0)
+      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Please select a plotting mode.");
+    if(glob_numMultiplotSp < 2)
+      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Please select at least two spectra to plot together.");
+    glob_multiplotMode = 0; //reset the value
+    gtk_dialog_run (GTK_DIALOG (message_dialog));
+    gtk_widget_destroy (message_dialog);
+  }else{
+    glob_multiplotMode++; //value of 0 means no multiplot
+    printf("Number of spectra selected for plotting: %i.  Selected spectra: ", glob_numMultiplotSp);
+    int i;
+    for(i=0;i<glob_numMultiplotSp;i++){
+      printf("%i ",glob_multiPlots[i]);
+    }
+    printf(", multiplot mode: %i\n",glob_multiplotMode);
+    gtk_widget_hide(GTK_WIDGET(multiplot_window)); //close the multiplot window
+    gtk_widget_queue_draw(GTK_WIDGET(window)); //redraw the spectrum
+  }
+  
+}
+
 void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data)
 {
   glob_multiPlots[0] = gtk_spin_button_get_value_as_int(spin_button);
+  glob_multiplotMode = 0;//unset multiplot, if it is being used
   //printf("Set selected spectrum to %i\n",dispSp);
   gtk_widget_queue_draw(GTK_WIDGET(window));
 }
@@ -256,12 +303,14 @@ int main(int argc, char *argv[])
   pan_scale = GTK_SCALE(gtk_builder_get_object(builder, "pan_scale"));
   contract_scale = GTK_SCALE(gtk_builder_get_object(builder, "contract_scale"));
   about_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "about_button"));
+  multiplot_ok_button = GTK_WIDGET(gtk_builder_get_object(builder, "multiplot_ok_button"));
   multiplot_liststore = GTK_LIST_STORE(gtk_builder_get_object(builder, "multiplot_liststore"));
   multiplot_tree_view = GTK_TREE_VIEW(gtk_builder_get_object(builder, "multiplot_tree_view"));
   multiplot_column1 = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder, "multiplot_column1"));
   multiplot_column2 = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder, "multiplot_column2"));
   multiplot_cr1 = GTK_CELL_RENDERER(gtk_builder_get_object(builder, "multiplot_cr1"));
   multiplot_cr2 = GTK_CELL_RENDERER(gtk_builder_get_object(builder, "multiplot_cr2"));
+  multiplot_mode_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "multiplot_mode_combobox"));
 
   //connect signals
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "draw", G_CALLBACK (drawSpectrumArea), NULL);
@@ -283,10 +332,14 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (pan_scale), "value-changed", G_CALLBACK (on_pan_scale_changed), NULL);
   g_signal_connect (G_OBJECT (contract_scale), "value-changed", G_CALLBACK (on_contract_scale_changed), NULL);
   g_signal_connect (G_OBJECT (about_button), "clicked", G_CALLBACK (on_about_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (multiplot_ok_button), "clicked", G_CALLBACK (on_multiplot_ok_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_cr2), "toggled", G_CALLBACK (on_multiplot_cell_toggled), NULL);
   g_signal_connect (G_OBJECT (calibrate_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (multiplot_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (about_dialog), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+
+  //set attributes
+  gtk_tree_view_column_add_attribute(multiplot_column2,multiplot_cr2, "active",1);
 
   //set default values
   openedSp = 0;
