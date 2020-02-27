@@ -194,7 +194,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 		return;
 	}
 
-  int i,j;
+  int i,j,k;
 	GdkRectangle dasize;  // GtkDrawingArea size
   gdouble clip_x1 = 0.0, clip_y1 = 0.0, clip_x2 = 0.0, clip_y2 = 0.0;
   GdkWindow *wwindow = gtk_widget_get_window(widget);
@@ -222,7 +222,17 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   for(i=0;i<(upperLimit-lowerLimit-1);i+=contractFactor){
     float currentVal = 0.;
     for(j=0;j<contractFactor;j++){
-      currentVal += hist[glob_multiPlots[0]][lowerLimit+i+j];
+      switch(glob_multiplotMode){
+        case 1:
+          //sum spectra
+          for(k=0;k<glob_numMultiplotSp;k++){
+            currentVal += hist[glob_multiPlots[k]][lowerLimit+i+j];
+          }
+        default:
+          //no multiplot
+          currentVal += hist[glob_multiPlots[0]][lowerLimit+i+j];
+          break;
+      }
     }
     if(currentVal > maxVal){
         maxVal = currentVal;
@@ -238,8 +248,22 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
     float currentVal = 0.;
     float nextVal = 0.;
     for(j=0;j<contractFactor;j++){
-      currentVal += hist[glob_multiPlots[0]][lowerLimit+i+j];
-      nextVal += hist[glob_multiPlots[0]][lowerLimit+i+j+contractFactor];
+      switch(glob_multiplotMode){
+        case 1:
+          //sum spectra
+          for(k=0;k<glob_numMultiplotSp;k++){
+            currentVal += hist[glob_multiPlots[k]][lowerLimit+i+j];
+            nextVal += hist[glob_multiPlots[k]][lowerLimit+i+j+contractFactor];
+          }
+          break;
+        default:
+          //no multiplot
+          currentVal += hist[glob_multiPlots[0]][lowerLimit+i+j];
+          nextVal += hist[glob_multiPlots[0]][lowerLimit+i+j+contractFactor];
+          break;
+      }
+
+      
     }
 		//printf("Here! x=%f,y=%f,yorig=%f xclip=%f %f\n",getXPos(i,clip_x1,clip_x2), hist[glob_multiPlots[0]][lowerLimit+i],hist[glob_multiPlots[0]][lowerLimit+i],clip_x1,clip_x2);
 		cairo_move_to (cr, getXPos(i,clip_x1,clip_x2), getYPos(currentVal,minVal,maxVal,clip_y1,clip_y2));
