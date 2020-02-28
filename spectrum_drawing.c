@@ -101,10 +101,10 @@ float getXPos(int bin, float clip_x1, float clip_x2){
 float getYPos(float val, float minVal, float maxVal, float clip_y1, float clip_y2){
 
   if(autoScale){
-      scaleLevelMax = maxVal*1.1;
-      scaleLevelMin = minVal;
+      glob_scaleLevelMax = maxVal*1.1;
+      glob_scaleLevelMin = minVal;
   }
-  float pos = clip_y1 + (clip_y2-clip_y1)*0.1 + 0.9*(((val - scaleLevelMin)/(scaleLevelMax - scaleLevelMin))*(clip_y2-clip_y1));
+  float pos = clip_y1 + (clip_y2-clip_y1)*(0.1 + 0.9*(((val - glob_scaleLevelMin)/(glob_scaleLevelMax - glob_scaleLevelMin))));
   if(pos < clip_y1 + (clip_y2-clip_y1)*0.1)
     pos = clip_y1 + (clip_y2-clip_y1)*0.1;
 	return pos;
@@ -141,14 +141,14 @@ void drawXAxisTick(int axisVal, cairo_t *cr, float clip_x1, float clip_x2, float
 }
 float getAxisYPos(float axisVal, float clip_y1, float clip_y2){
   
-  return (clip_y1-clip_y2)*0.1 + 0.9*(clip_y1-clip_y2)*(axisVal - scaleLevelMin)/(scaleLevelMax - scaleLevelMin);
+  return (clip_y1-clip_y2)*0.1 + 0.9*(clip_y1-clip_y2)*(axisVal - glob_scaleLevelMin)/(glob_scaleLevelMax - glob_scaleLevelMin);
 }
 void drawYAxisTick(float axisVal, cairo_t *cr, float clip_x1, float clip_x2, float clip_y1, float clip_y2){
-  if((axisVal < scaleLevelMin)||(axisVal >= scaleLevelMax)){
-    //printf("axisval:%f,scalemin:%f,scalemax:%f\n",axisVal,scaleLevelMin,scaleLevelMax);
+  if((axisVal < glob_scaleLevelMin)||(axisVal >= glob_scaleLevelMax)){
+    //printf("axisval:%f,scalemin:%f,scalemax:%f\n",axisVal,glob_scaleLevelMin,glob_scaleLevelMax);
     return; //invalid axis value
   }
-  if((axisVal!=0.0)&&(fabs(axisVal - 0) < (scaleLevelMax - scaleLevelMin)/20.0)){
+  if((axisVal!=0.0)&&(fabs(axisVal - 0) < (glob_scaleLevelMax - glob_scaleLevelMin)/20.0)){
     //tick is too close to zero, don't draw
     return;
   }
@@ -164,6 +164,31 @@ void drawYAxisTick(float axisVal, cairo_t *cr, float clip_x1, float clip_x2, flo
     cairo_set_font_size(cr, 13);
     cairo_move_to(cr, (clip_x2-clip_x1)*0.08 - extents.width, axisPos + extents.height/2.);
     cairo_show_text(cr, tickLabel);
+  }
+}
+
+void drawPlotLabel(cairo_t *cr, float clip_x1, float clip_x2, float clip_y1, float clip_y2){
+  char plotLabel[256];
+  cairo_text_extents_t extents; //get dimensions needed to justify text labels
+  switch(glob_multiplotMode){
+    case 0:
+      //single plot mose
+      strcpy(plotLabel, glob_histComment[glob_multiPlots[0]]);
+      cairo_text_extents(cr, plotLabel, &extents);
+      cairo_set_font_size(cr, 13);
+      cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, (clip_y1-clip_y2)*0.9);
+      cairo_show_text(cr, plotLabel);
+      break;
+    case 1:
+      //summed spectra
+      sprintf(plotLabel,"Sum of %i spectra",glob_numMultiplotSp); //set string for label
+      cairo_text_extents(cr, plotLabel, &extents);
+      cairo_set_font_size(cr, 13);
+      cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, (clip_y1-clip_y2)*0.9);
+      cairo_show_text(cr, plotLabel);
+      break;
+    default:
+      break;
   }
 }
 
@@ -228,9 +253,12 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
           for(k=0;k<glob_numMultiplotSp;k++){
             currentVal += hist[glob_multiPlots[k]][lowerLimit+i+j];
           }
-        default:
+          break;
+        case 0:
           //no multiplot
           currentVal += hist[glob_multiPlots[0]][lowerLimit+i+j];
+          break;
+        default:
           break;
       }
     }
@@ -256,10 +284,12 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
             nextVal += hist[glob_multiPlots[k]][lowerLimit+i+j+contractFactor];
           }
           break;
-        default:
+        case 0:
           //no multiplot
           currentVal += hist[glob_multiPlots[0]][lowerLimit+i+j];
           nextVal += hist[glob_multiPlots[0]][lowerLimit+i+j+contractFactor];
+          break;
+        default:
           break;
       }
 
@@ -270,7 +300,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 		cairo_line_to (cr, getXPos(i+contractFactor,clip_x1,clip_x2), getYPos(currentVal,minVal,maxVal,clip_y1,clip_y2));
 		cairo_line_to (cr, getXPos(i+contractFactor,clip_x1,clip_x2), getYPos(nextVal,minVal,maxVal,clip_y1,clip_y2));
 	}
-  cairo_set_source_rgb (cr, 1.0, 0.0, 0.0);
+  cairo_set_source_rgb (cr, glob_spColors[0], glob_spColors[1], glob_spColors[2]);
   cairo_stroke(cr);
 
   // draw axes
@@ -325,20 +355,21 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2);
     }
   }
-  if(scaleLevelMax - scaleLevelMin > 10.0){
+  if(glob_scaleLevelMax - glob_scaleLevelMin > 10.0){
     for(i=0;i<10;i++){
-      drawYAxisTick(scaleLevelMin + (scaleLevelMax - scaleLevelMin)*i/10.0, cr, clip_x1, clip_x2, clip_y1, clip_y2);
+      drawYAxisTick(glob_scaleLevelMin + (glob_scaleLevelMax - glob_scaleLevelMin)*i/10.0, cr, clip_x1, clip_x2, clip_y1, clip_y2);
     }
   }else{
-    for(i=0;i<(int)(scaleLevelMax - scaleLevelMin);i++){
-      drawYAxisTick(scaleLevelMin + (scaleLevelMax - scaleLevelMin)*i/(scaleLevelMax - scaleLevelMin), cr, clip_x1, clip_x2, clip_y1, clip_y2);
+    for(i=0;i<(int)(glob_scaleLevelMax - glob_scaleLevelMin);i++){
+      drawYAxisTick(glob_scaleLevelMin + (glob_scaleLevelMax - glob_scaleLevelMin)*i/(glob_scaleLevelMax - glob_scaleLevelMin), cr, clip_x1, clip_x2, clip_y1, clip_y2);
     }
   }
   drawYAxisTick(0.0, cr, clip_x1, clip_x2, clip_y1, clip_y2); //always draw the zero label on the y axis
+  drawPlotLabel(cr,clip_x1,clip_x2,clip_y1,clip_y2); //draw plot label(s)
   cairo_stroke(cr);
 
   //draw the zero line if applicable
-  if((scaleLevelMin < 0.0) && (scaleLevelMax > 0.0)){
+  if((glob_scaleLevelMin < 0.0) && (glob_scaleLevelMax > 0.0)){
     cairo_set_line_width(cr, 1.0);
     cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
     cairo_move_to (cr, (clip_x2-clip_x1)*0.1, getAxisYPos(0.0,clip_y1,clip_y2));

@@ -59,7 +59,7 @@ int dragstartul, dragstartll; //click and drag position storage parameters
 
 //spectrum drawing globals
 double hist[NSPECT][S32K]; //spectrum histogram data
-char histComment[NSPECT][256]; //spectrum description/comment
+char glob_histComment[NSPECT][256]; //spectrum description/comment
 int openedSp; //0=not opened, 1=opened
 int glob_numSpOpened; //number of spectra in the opened file(s)
 //int dispSp; //# of the spectrum to display
@@ -67,11 +67,12 @@ int lowerLimit, upperLimit; //lower and upper limits to plot spectrum (in uncali
 int xChanFocus; //x channel to focus on when zooming
 float zoomLevel; //1.0 = zoomed out fully (on x axis)
 int autoScale; //0=don't autoscale y axis, 1=autoscale y axis
-float scaleLevelMax, scaleLevelMin; //the y scale values, ie. the maximum and minimum values to show on the y axis
+float glob_scaleLevelMax, glob_scaleLevelMin; //the y scale values, ie. the maximum and minimum values to show on the y axis
 int contractFactor; //the number of channels per bin (default=1)
 int glob_multiplotMode; //0=no multiplot, 1=summed spectra, 2=overlay spectra (common scaling), 3=overlay spectra (independent scaling), 4=stacked view
 int glob_numMultiplotSp; //number of spectra to show in multiplot mode
 int glob_multiPlots[NSPECT]; //indices of all the spectra to show in multiplot mode
+float glob_spColors[18] = {0.8,0.0,0.0, 0.0,0.0,0.8, 0.0,0.8,0.0, 0.0,0.8,0.8, 0.8,0.8,0.0, 0.8,0.0,0.8}; //colors for displayed spectra
 
 //calibration globals
 int calMode; //0=no calibration, 1=calibration enabled

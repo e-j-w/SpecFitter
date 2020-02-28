@@ -30,14 +30,13 @@ void on_open_button_clicked(GtkButton *b)
         openedSp = 1;
         //set comments for spectra just opened
         for (j = glob_numSpOpened; j < (glob_numSpOpened+numSp); j++){
-          snprintf(histComment[j],256,"%s, spectrum %i",basename((char*)filename),j-glob_numSpOpened);
-          //printf("Comment %i: %s\n",j,histComment[j]);
+          snprintf(glob_histComment[j],256,"Spectrum %i of %s",j-glob_numSpOpened,basename((char*)filename));
+          //printf("Comment %i: %s\n",j,glob_histComment[j]);
         }
         glob_numSpOpened += numSp;
         //select the first non-empty spectrum by default
         int sel = getFirstNonemptySpectrum(glob_numSpOpened);
         if(sel >=0){
-          gtk_spin_button_set_value(spectrum_selector, sel);
           glob_multiPlots[0] = sel;
           gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),TRUE);
           gtk_widget_set_sensitive(GTK_WIDGET(display_button),TRUE);
@@ -48,6 +47,7 @@ void on_open_button_clicked(GtkButton *b)
           //set the range of selectable spectra values
           gtk_adjustment_set_lower(spectrum_selector_adjustment, 0);
           gtk_adjustment_set_upper(spectrum_selector_adjustment, glob_numSpOpened - 1);
+          gtk_spin_button_set_value(spectrum_selector, sel);
         }else{
           //no spectra with any data in the selected file
           openErr = 2;
@@ -198,7 +198,7 @@ void on_multiplot_button_clicked(GtkButton *b)
   gtk_list_store_clear(multiplot_liststore);
   for(i=0;i<glob_numSpOpened;i++){
     gtk_list_store_append(multiplot_liststore,&iter);
-    gtk_list_store_set(multiplot_liststore, &iter, 0, histComment[i], -1);
+    gtk_list_store_set(multiplot_liststore, &iter, 0, glob_histComment[i], -1);
     gtk_list_store_set(multiplot_liststore, &iter, 1, FALSE, -1);
     gtk_list_store_set(multiplot_liststore, &iter, 2, i, -1);
   }
@@ -345,8 +345,8 @@ int main(int argc, char *argv[])
   openedSp = 0;
   lowerLimit = 0;
   upperLimit = S32K - 1;
-  scaleLevelMax = 1000.0;
-  scaleLevelMin = 0.0;
+  glob_scaleLevelMax = 1000.0;
+  glob_scaleLevelMin = 0.0;
   xChanFocus = 0;
   zoomLevel = 1.0;
   contractFactor = 1;
