@@ -413,7 +413,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Plot multiple spectra from the same file at once.</property>
+                <property name="tooltip_text" translatable="yes">Plot multiple spectra from the opened file(s) at once.</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -440,15 +440,42 @@
           </packing>
         </child>
         <child>
-          <object class="GtkCheckButton" id="autoscalebutton">
-            <property name="label" translatable="yes"> Vertical Autoscale</property>
+          <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">False</property>
-            <property name="tooltip_text" translatable="yes">If checked, the displayed spectrum will be automatically scaled on the vertical axis to fit visible features.</property>
-            <property name="halign">start</property>
-            <property name="active">True</property>
-            <property name="draw_indicator">True</property>
+            <property name="can_focus">False</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkCheckButton" id="autoscalebutton">
+                <property name="label" translatable="yes"> Vertical Autoscale</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">If checked, the displayed spectrum will be automatically scaled on the vertical axis to fit visible features.</property>
+                <property name="halign">start</property>
+                <property name="active">True</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="cursordrawbutton">
+                <property name="label" translatable="yes">Show Cursor</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">If checked, will show a vertical cursor on the plot indicating the mouse position.</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>

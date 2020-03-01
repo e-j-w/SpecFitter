@@ -29,7 +29,7 @@ GtkWidget *fit_button, *display_button;
 GtkPopover *display_popover;
 GtkWidget *calibrate_ok_button;
 GtkSpinButton *spectrum_selector;
-GtkCheckButton *autoscale_button;
+GtkCheckButton *autoscale_button, *cursor_draw_button;
 GtkScale *contract_scale, *zoom_scale; //*pan_scale;
 GtkAdjustment *spectrum_selector_adjustment, *contract_adjustment;
 GtkLabel *bottom_info_text;
@@ -61,7 +61,7 @@ int glob_draggingSp; //0 if no drag motion, 1 if dragging
 int glob_dragstartul, glob_dragstartll; //click and drag position storage parameters
 float glob_dragStartX; //start cursor position when dragging
 float glob_cursorPosX, glob_cursorPosY; //cursor position
-int glob_drawSpCursor; //0 = don't draw vertical cursor on spectrum, 1=draw
+int glob_drawSpCursor; //0 = don't draw vertical cursor on spectrum, 1=draw, -1=drawing disabled
 int glob_drawingAreaMode; //0=normal drawing, 1=draw verticlal cursor only
 
 //spectrum drawing globals

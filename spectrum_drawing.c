@@ -94,6 +94,16 @@ void on_toggle_autoscale(GtkToggleButton *togglebutton, gpointer user_data)
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
 }
 
+void on_toggle_cursor(GtkToggleButton *togglebutton, gpointer user_data)
+{
+  if(gtk_toggle_button_get_active(togglebutton))
+    glob_drawSpCursor=0;
+  else
+    glob_drawSpCursor=-1;
+  gtk_widget_queue_draw(GTK_WIDGET(cursor_drawing_area));
+}
+
+
 //function handling mouse wheel scrolling to zoom the displayed spectrum
 void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e)
 {
@@ -134,7 +144,8 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
     if(glob_draggingSp == 0){
       //start drag
       glob_draggingSp = 1;
-      glob_drawSpCursor = 0; //hide vertical cursor while dragging
+      if(glob_drawSpCursor == 1)
+        glob_drawSpCursor = 0; //hide vertical cursor while dragging
       glob_dragstartul=glob_upperLimit;
       glob_dragstartll=glob_lowerLimit;
       glob_dragStartX = event->x;
@@ -169,24 +180,54 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
 
     //print cursor position on status bar
     char posLabel[256];
-    if(glob_calMode == 1){
-      int cursorChanEnd = cursorChan + contractFactor;
-      float cal_lowerChanLimit = glob_calpar0 + glob_calpar1*cursorChan + glob_calpar2*cursorChan*cursorChan;
-      float cal_upperChanLimit = glob_calpar0 + glob_calpar1*cursorChanEnd + glob_calpar2*cursorChanEnd*cursorChanEnd;
-      snprintf(posLabel,256,"%s: %0.1f - %0.1f, Value: %0.1f", glob_calUnit, cal_lowerChanLimit, cal_upperChanLimit, getDispSpBinVal(0,cursorChan-glob_lowerLimit));
-    }else{
-      if(contractFactor <= 1){
-        snprintf(posLabel,256,"Channel: %i, Value: %0.1f",cursorChan,getDispSpBinVal(0,cursorChan-glob_lowerLimit));
-      }else{
-        snprintf(posLabel,256,"Channels: %i - %i, Value: %0.1f",cursorChan, cursorChan + contractFactor - 1, getDispSpBinVal(0,cursorChan-glob_lowerLimit));
-      }
+    char *posLabelp = posLabel;
+    int i;
+    switch(glob_multiplotMode){
+      case 4:
+      case 3:
+      case 2:
+        //multiple visible plots
+        if(glob_calMode == 1){
+          int cursorChanEnd = cursorChan + contractFactor;
+          float cal_lowerChanLimit = glob_calpar0 + glob_calpar1*cursorChan + glob_calpar2*cursorChan*cursorChan;
+          float cal_upperChanLimit = glob_calpar0 + glob_calpar1*cursorChanEnd + glob_calpar2*cursorChanEnd*cursorChanEnd;
+          posLabelp += snprintf(posLabelp,50,"%s: %0.1f - %0.1f, Values:", glob_calUnit, cal_lowerChanLimit, cal_upperChanLimit);
+        }else{
+          if(contractFactor <= 1){
+            posLabelp += snprintf(posLabel,50,"Channel: %i, Values:",cursorChan);
+          }else{
+            snprintf(posLabel,256,"Channels: %i - %i, Values:",cursorChan, cursorChan + contractFactor - 1);
+          }
+        }
+        for(i=0;i<(glob_numMultiplotSp-1);i++){
+          posLabelp += snprintf(posLabelp,17," %0.1f,", getDispSpBinVal(i,cursorChan-glob_lowerLimit));
+        }
+        posLabelp += snprintf(posLabelp,17," %0.1f", getDispSpBinVal(glob_numMultiplotSp-1,cursorChan-glob_lowerLimit));
+        break;
+      case 1:
+      case 0:
+      default:
+        //single plot
+        if(glob_calMode == 1){
+          int cursorChanEnd = cursorChan + contractFactor;
+          float cal_lowerChanLimit = glob_calpar0 + glob_calpar1*cursorChan + glob_calpar2*cursorChan*cursorChan;
+          float cal_upperChanLimit = glob_calpar0 + glob_calpar1*cursorChanEnd + glob_calpar2*cursorChanEnd*cursorChanEnd;
+          snprintf(posLabel,256,"%s: %0.1f - %0.1f, Value: %0.1f", glob_calUnit, cal_lowerChanLimit, cal_upperChanLimit, getDispSpBinVal(0,cursorChan-glob_lowerLimit));
+        }else{
+          if(contractFactor <= 1){
+            snprintf(posLabel,256,"Channel: %i, Value: %0.1f",cursorChan,getDispSpBinVal(0,cursorChan-glob_lowerLimit));
+          }else{
+            snprintf(posLabel,256,"Channels: %i - %i, Value: %0.1f",cursorChan, cursorChan + contractFactor - 1, getDispSpBinVal(0,cursorChan-glob_lowerLimit));
+          }
+        }
+        break;
     }
     gtk_label_set_text(bottom_info_text,posLabel);
 
     //draw cursor on plot (expensive, requires redraw of plot itself)
-    if(glob_draggingSp == 0){
+    if((glob_draggingSp == 0)&&(glob_drawSpCursor != -1)){
       //don't redraw if the cursor hasn't moved, that would be st00pid
-      if(glob_cursorPosX != event->x){
+      if(fabs(glob_cursorPosX - event->x) >= 1.0){
         glob_cursorPosX = event->x;
         glob_drawSpCursor = 1; //draw vertical cursor
         gtk_widget_queue_draw(GTK_WIDGET(cursor_drawing_area));
@@ -386,7 +427,7 @@ void drawCursorArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 		return;
 	}
 
-  if(!glob_drawSpCursor){
+  if(glob_drawSpCursor != 1){
     return;
   }
 
