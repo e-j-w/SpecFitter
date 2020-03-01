@@ -183,10 +183,14 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
     }
     gtk_label_set_text(bottom_info_text,posLabel);
 
+    //draw cursor on plot (expensive, requires redraw of plot itself)
     if(glob_draggingSp == 0){
-      glob_cursorPosX = event->x;
-      glob_drawSpCursor = 1; //draw vertical cursor
-      gtk_widget_queue_draw(GTK_WIDGET(cursor_drawing_area));
+      //don't redraw if the cursor hasn't moved, that would be st00pid
+      if(glob_cursorPosX != event->x){
+        glob_cursorPosX = event->x;
+        glob_drawSpCursor = 1; //draw vertical cursor
+        gtk_widget_queue_draw(GTK_WIDGET(cursor_drawing_area));
+      }
     }
 
   }else{
