@@ -38,6 +38,7 @@ void on_open_button_clicked(GtkButton *b)
         int sel = getFirstNonemptySpectrum(glob_numSpOpened);
         if(sel >=0){
           glob_multiPlots[0] = sel;
+          glob_multiplotMode = 0; //files just opened, disable multiplot
           gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),TRUE);
           gtk_widget_set_sensitive(GTK_WIDGET(display_button),TRUE);
           gtk_widget_set_sensitive(GTK_WIDGET(zoom_scale),TRUE);
@@ -229,13 +230,18 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
   }
   glob_numMultiplotSp = selectedSpCount;
   glob_multiplotMode = gtk_combo_box_get_active(GTK_COMBO_BOX(multiplot_mode_combobox));
-  if((glob_multiplotMode < 0)||(glob_numMultiplotSp < 2)){
+  if((glob_numMultiplotSp > MAX_DISP_SP)||(glob_numMultiplotSp < 2)){
     GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
     GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Invalid selection!");
     if(glob_multiplotMode < 0)
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Please select a plotting mode.");
     if(glob_numMultiplotSp < 2)
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Please select at least two spectra to plot together.");
+    if(glob_numMultiplotSp > MAX_DISP_SP){
+      char errStr[256];
+      snprintf(errStr,256,"The maximum number of spectra that may be plotted at once is %i\n.",MAX_DISP_SP);
+      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),errStr);
+    }
     glob_multiplotMode = 0; //reset the value
     gtk_dialog_run (GTK_DIALOG (message_dialog));
     gtk_widget_destroy (message_dialog);
@@ -355,8 +361,8 @@ int main(int argc, char *argv[])
   openedSp = 0;
   glob_lowerLimit = 0;
   glob_upperLimit = S32K - 1;
-  glob_scaleLevelMax = 1000.0;
-  glob_scaleLevelMin = 0.0;
+  glob_scaleLevelMax[0] = 0.0;
+  glob_scaleLevelMin[0] = 0.0;
   glob_xChanFocus = 0;
   zoomLevel = 1.0;
   contractFactor = 1;

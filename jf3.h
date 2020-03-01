@@ -71,7 +71,7 @@ int glob_lowerLimit, glob_upperLimit; //lower and upper limits to plot spectrum 
 int glob_xChanFocus; //x channel to focus on when zooming
 float zoomLevel; //1.0 = zoomed out fully (on x axis)
 int autoScale; //0=don't autoscale y axis, 1=autoscale y axis
-float glob_scaleLevelMax, glob_scaleLevelMin; //the y scale values, ie. the maximum and minimum values to show on the y axis
+float glob_scaleLevelMax[MAX_DISP_SP], glob_scaleLevelMin[MAX_DISP_SP]; //the y scale values, ie. the maximum and minimum values to show on the y axis
 int contractFactor; //the number of channels per bin (default=1)
 int glob_multiplotMode; //0=no multiplot, 1=summed spectra, 2=overlay spectra (common scaling), 3=overlay spectra (independent scaling), 4=stacked view
 int glob_numMultiplotSp; //number of spectra to show in multiplot mode
