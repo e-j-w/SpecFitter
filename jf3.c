@@ -102,7 +102,7 @@ void on_open_button_clicked(GtkButton *b)
   }else{
     gtk_widget_destroy(file_open_dialog);
   }
-  gtk_widget_queue_draw(GTK_WIDGET(window));
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
   
   
 }
@@ -116,15 +116,15 @@ void on_display_button_clicked(GtkButton *b)
 
 void on_zoom_scale_changed(GtkRange *range, gpointer user_data){
   zoomLevel = pow(2,gtk_range_get_value(range)); //modify the zoom level
-  gtk_widget_queue_draw(GTK_WIDGET(window)); //redraw the spectrum
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
 }
 void on_pan_scale_changed(GtkRange *range, gpointer user_data){
   glob_xChanFocus = (S32K/100.0)*gtk_range_get_value(range); //modify the pan level
-  gtk_widget_queue_draw(GTK_WIDGET(window)); //redraw the spectrum
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
 }
 void on_contract_scale_changed(GtkRange *range, gpointer user_data){
   contractFactor = (int)gtk_range_get_value(range); //modify the contraction factor
-  gtk_widget_queue_draw(GTK_WIDGET(window)); //redraw the spectrum
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
 }
 
 void on_calibrate_button_clicked(GtkButton *b)
@@ -164,7 +164,7 @@ void on_calibrate_ok_button_clicked(GtkButton *b)
     glob_calMode=1;
     //printf("Calibration parameters: %f %f %f, glob_calMode: %i, glob_calUnit: %s\n",glob_calpar0,glob_calpar1,glob_calpar2,glob_calMode,glob_calUnit);
     gtk_widget_hide(GTK_WIDGET(calibrate_window)); //close the calibration window
-    gtk_widget_queue_draw(GTK_WIDGET(window));
+    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
   }else{
     glob_calMode=0;
     GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
@@ -254,7 +254,7 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
     }
     printf(", multiplot mode: %i\n",glob_multiplotMode);
     gtk_widget_hide(GTK_WIDGET(multiplot_window)); //close the multiplot window
-    gtk_widget_queue_draw(GTK_WIDGET(window)); //redraw the spectrum
+    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
   }
   
 }
@@ -264,7 +264,7 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data
   glob_multiPlots[0] = gtk_spin_button_get_value_as_int(spin_button);
   glob_multiplotMode = 0;//unset multiplot, if it is being used
   //printf("Set selected spectrum to %i\n",dispSp);
-  gtk_widget_queue_draw(GTK_WIDGET(window));
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
 }
 
 void on_about_button_clicked(GtkButton *b)
@@ -274,6 +274,7 @@ void on_about_button_clicked(GtkButton *b)
 
 int main(int argc, char *argv[])
 {
+  
   gtk_init(&argc, &argv); //initialize Gtk
 
   builder = gtk_builder_new_from_resource("/resources/jf3.glade"); //get UI layout from glade XML file
@@ -304,6 +305,7 @@ int main(int argc, char *argv[])
   spectrum_selector_adjustment = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "spectrum_selector_adjustment"));
   autoscale_button = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "autoscalebutton"));
   spectrum_drawing_area = GTK_WIDGET(gtk_builder_get_object(builder, "spectrumdrawingarea"));
+  cursor_drawing_area = GTK_WIDGET(gtk_builder_get_object(builder, "cursordrawingarea"));
   spectrum_drag_gesture = gtk_gesture_drag_new(spectrum_drawing_area); //without this, cannot click away from menus onto the drawing area, needs further investigation
   zoom_scale = GTK_SCALE(gtk_builder_get_object(builder, "zoom_scale"));
   about_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "about_button"));
@@ -334,6 +336,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "draw", G_CALLBACK (drawSpectrumArea), NULL);
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "scroll-event", G_CALLBACK (on_spectrum_scroll), NULL);
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "motion-notify-event", G_CALLBACK (on_spectrum_cursor_motion), NULL);
+  g_signal_connect (G_OBJECT (cursor_drawing_area), "draw", G_CALLBACK (drawCursorArea), NULL);
   g_signal_connect (G_OBJECT (open_button), "clicked", G_CALLBACK (on_open_button_clicked), NULL);
   g_signal_connect (G_OBJECT (calibrate_button), "clicked", G_CALLBACK (on_calibrate_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_button), "clicked", G_CALLBACK (on_multiplot_button_clicked), NULL);
@@ -372,6 +375,7 @@ int main(int argc, char *argv[])
   glob_multiplotMode = 0;
   glob_numMultiplotSp = 1;
   glob_draggingSp = 0;
+  glob_drawSpCursor = 0;
   gtk_adjustment_set_lower(spectrum_selector_adjustment, 0);
   gtk_adjustment_set_upper(spectrum_selector_adjustment, 0);
   gtk_label_set_text(bottom_info_text,"No spectrum loaded.");

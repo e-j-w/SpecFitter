@@ -33,7 +33,7 @@ GtkCheckButton *autoscale_button;
 GtkScale *contract_scale, *zoom_scale; //*pan_scale;
 GtkAdjustment *spectrum_selector_adjustment, *contract_adjustment;
 GtkLabel *bottom_info_text;
-GtkWidget *spectrum_drawing_area;
+GtkWidget *spectrum_drawing_area, *cursor_drawing_area;
 GtkGesture *spectrum_drag_gesture;
 GtkWidget *file_open_dialog;
 GtkFileFilter *file_filter;
@@ -60,6 +60,9 @@ GtkBuilder *builder;
 int glob_draggingSp; //0 if no drag motion, 1 if dragging
 int glob_dragstartul, glob_dragstartll; //click and drag position storage parameters
 float glob_dragStartX; //start cursor position when dragging
+float glob_cursorPosX, glob_cursorPosY; //cursor position
+int glob_drawSpCursor; //0 = don't draw vertical cursor on spectrum, 1=draw
+int glob_drawingAreaMode; //0=normal drawing, 1=draw verticlal cursor only
 
 //spectrum drawing globals
 double hist[NSPECT][S32K]; //spectrum histogram data

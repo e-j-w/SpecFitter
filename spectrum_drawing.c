@@ -91,7 +91,7 @@ void on_toggle_autoscale(GtkToggleButton *togglebutton, gpointer user_data)
     autoScale=1;
   else
     autoScale=0;
-  gtk_widget_queue_draw(GTK_WIDGET(window));
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
 }
 
 //function handling mouse wheel scrolling to zoom the displayed spectrum
@@ -119,7 +119,7 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e)
     glob_xChanFocus = glob_lowerLimit + (((e->x)-80.0)/(dasize.width-80.0))*(glob_upperLimit - glob_lowerLimit);
   }
   gtk_range_set_value(GTK_RANGE(zoom_scale),log(zoomLevel)/log(2.));//base 2 log of zoom
-  gtk_widget_queue_draw(GTK_WIDGET(window));
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
 }
 
 void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data){
@@ -128,12 +128,13 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
 		return;
 	}
 
-  //printf("Cursor pos: %f %f, ",event->x,event->y);
+  //printf("Cursor pos: %f %f\n",event->x,event->y);
   if (event->state & GDK_BUTTON1_MASK){
     //button being pressed
     if(glob_draggingSp == 0){
       //start drag
       glob_draggingSp = 1;
+      glob_drawSpCursor = 0; //hide vertical cursor while dragging
       glob_dragstartul=glob_upperLimit;
       glob_dragstartll=glob_lowerLimit;
       glob_dragStartX = event->x;
@@ -150,18 +151,19 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
       glob_lowerLimit = glob_dragstartll - ((2.*(event->x - glob_dragStartX)/(dasize.width))*limitWidth);
       glob_xChanFocus = glob_lowerLimit + (glob_upperLimit - glob_lowerLimit)/2.;
       //printf("startx = %f, x = %f, glob_lowerLimit = %i, glob_upperLimit = %i, width = %i, focus = %i\n",glob_dragStartX,event->x,glob_lowerLimit,glob_upperLimit,dasize.width,glob_xChanFocus);
-      gtk_widget_queue_draw(GTK_WIDGET(window));
+      gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
     }
   }else{
     //no button press
     glob_draggingSp = 0;
   }
 
-  if(event->x > 80.0){
-    GdkRectangle dasize;  // GtkDrawingArea size
-    GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
-    // Determine GtkDrawingArea dimensions
-    gdk_window_get_geometry (gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
+  GdkRectangle dasize;  // GtkDrawingArea size
+  GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
+  // Determine GtkDrawingArea dimensions
+  gdk_window_get_geometry (gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
+  if((event->x > 80.0)&&(event->y < (dasize.height - 40.0))){
+    
     int cursorChan = glob_lowerLimit + (((event->x)-80.0)/(dasize.width-80.0))*(glob_upperLimit - glob_lowerLimit);
     cursorChan = cursorChan - fmod(cursorChan,contractFactor);
 
@@ -179,18 +181,22 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
         snprintf(posLabel,256,"Channels: %i - %i, Value: %0.1f",cursorChan, cursorChan + contractFactor - 1, getDispSpBinVal(0,cursorChan-glob_lowerLimit));
       }
     }
-    
     gtk_label_set_text(bottom_info_text,posLabel);
+
+    if(glob_draggingSp == 0){
+      glob_cursorPosX = event->x;
+      glob_drawSpCursor = 1; //draw vertical cursor
+      gtk_widget_queue_draw(GTK_WIDGET(cursor_drawing_area));
+    }
+
   }else{
     gtk_label_set_text(bottom_info_text,"");
+    if(glob_drawSpCursor == 1){
+      glob_drawSpCursor = 0; //hide vertical cursor
+      gtk_widget_queue_draw(GTK_WIDGET(cursor_drawing_area));
+    }
   }
-  //draw cursor position if applicable
-  /*if((xCursorPos>(clip_x1+80.0))&&(xCursorPos<clip_x2)){
-    cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
-    cairo_set_line_width(cr, 1.0);
-    cairo_move_to (cr, xCursorPos, clip_y1+40.0);
-    cairo_line_to (cr, xCursorPos, clip_y2);
-  }*/
+
   return;
 }
 
@@ -343,7 +349,7 @@ void drawPlotLabel(cairo_t *cr, float clip_x1, float clip_x2, float clip_y2, dou
       }
       break;
     case 0:
-      //single plot mose
+      //single plot mode
       cairo_set_source_rgb (cr, 0.3, 0.3, 0.3);
       strcpy(plotLabel, glob_histComment[glob_multiPlots[0]]);
       cairo_text_extents(cr, plotLabel, &extents);
@@ -368,6 +374,32 @@ int getPlotRangeXUnits(){
   return cal_upperLimit - cal_lowerLimit;
 }
 
+//draw a cursor over the spectrum
+void drawCursorArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
+{
+
+	if(!openedSp){
+		return;
+	}
+
+  if(!glob_drawSpCursor){
+    return;
+  }
+
+  //printf("Drawing cursor!\n");
+
+  GdkRectangle dasize;  // GtkDrawingArea size
+  GdkWindow *wwindow = gtk_widget_get_window(widget);
+  // Determine GtkDrawingArea dimensions
+  gdk_window_get_geometry(wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
+  cairo_set_line_width(cr, 1.0);
+  cairo_set_source_rgb (cr, 0.3, 0.3, 0.3);
+  cairo_move_to(cr, glob_cursorPosX, 0.0);
+  cairo_line_to(cr, glob_cursorPosX, dasize.height-40.0);
+  cairo_stroke(cr);
+
+}
+
 //draw a spectrum
 void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 {
@@ -376,6 +408,13 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 		return;
 	}
 
+  //printf("Drawing spectrum!\n");
+
+  GdkRectangle dasize;  // GtkDrawingArea size
+  GdkWindow *wwindow = gtk_widget_get_window(widget);
+  // Determine GtkDrawingArea dimensions
+  gdk_window_get_geometry(wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
+
 	if (glob_multiPlots[0] >= NSPECT)
 	{
 		printf("Spectrum number too high (%i)!\n", glob_multiPlots[0]);
@@ -383,13 +422,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 	}
 
   int i,j;
-	GdkRectangle dasize;  // GtkDrawingArea size
-  gdouble clip_x1 = 0.0, clip_y1 = 0.0, clip_x2 = 0.0, clip_y2 = 0.0;
-  GdkWindow *wwindow = gtk_widget_get_window(widget);
-
-  // Determine GtkDrawingArea dimensions
-  gdk_window_get_geometry(wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
-
+	
   // Draw the background colour
   //cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
   //cairo_paint(cr);
@@ -399,6 +432,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   cairo_scale(cr, 1.0, -1.0); //so that positive y values go up
 
   // Determine the data points to calculate (ie. those in the clipping zone
+  gdouble clip_x1 = 0.0, clip_y1 = 0.0, clip_x2 = 0.0, clip_y2 = 0.0;
   cairo_clip_extents(cr, &clip_x1, &clip_y1, &clip_x2, &clip_y2);
   cairo_set_line_width(cr, 2.0);
 
@@ -486,6 +520,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   int binSkipFactor = (glob_upperLimit-glob_lowerLimit)/(maxDrawBins);
   if(binSkipFactor <= contractFactor)
     binSkipFactor = contractFactor;
+  //printf("binskipfactor: %i\n",binSkipFactor);
   //for smooth scrolling of interpolated spectra, have the start bin always
   //be a multiple of the skip factor
   int startBin = 0 - (glob_lowerLimit % binSkipFactor);
@@ -677,7 +712,6 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 
   drawPlotLabel(cr,clip_x1,clip_x2,clip_y2, plotFontSize); //draw plot label(s)
   cairo_stroke(cr);
-
   
 
   //draw axis labels
