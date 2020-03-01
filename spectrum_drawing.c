@@ -478,7 +478,18 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
     }
   }
   //printf("maxVal = %f, minVal = %f\n",maxVal[0],minVal[0]);
-  
+
+  //interpolate (ie. limit the number of bins drawn) in the next step, 
+  //to help drawing performance
+  int maxDrawBins = (clip_x2 - clip_x1)*1.5;
+  //printf("maximum bins to draw: %i\n",maxDrawBins);
+  int binSkipFactor = (glob_upperLimit-glob_lowerLimit)/(maxDrawBins);
+  if(binSkipFactor <= contractFactor)
+    binSkipFactor = contractFactor;
+  //for smooth scrolling of interpolated spectra, have the start bin always
+  //be a multiple of the skip factor
+  int startBin = 0 - (glob_lowerLimit % binSkipFactor);
+
 	//draw the actual histogram
   switch(glob_multiplotMode){
     case 4:
@@ -486,12 +497,12 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
     case 3:
       //overlay (independent scaling)
       for(i=0;i<glob_numMultiplotSp;i++){
-        for(j=0;j<(glob_upperLimit-glob_lowerLimit-1);j+=contractFactor){
+        for(j=startBin;j<(glob_upperLimit-glob_lowerLimit-1);j+=binSkipFactor){
           float currentVal = getDispSpBinVal(i, j);
-          float nextVal = getDispSpBinVal(i, j+contractFactor);
+          float nextVal = getDispSpBinVal(i, j+binSkipFactor);
           cairo_move_to (cr, getXPos(j,clip_x1,clip_x2), getYPos(currentVal,i,clip_y1,clip_y2));
-          cairo_line_to (cr, getXPos(j+contractFactor,clip_x1,clip_x2), getYPos(currentVal,i,clip_y1,clip_y2));
-          cairo_line_to (cr, getXPos(j+contractFactor,clip_x1,clip_x2), getYPos(nextVal,i,clip_y1,clip_y2));
+          cairo_line_to (cr, getXPos(j+binSkipFactor,clip_x1,clip_x2), getYPos(currentVal,i,clip_y1,clip_y2));
+          cairo_line_to (cr, getXPos(j+binSkipFactor,clip_x1,clip_x2), getYPos(nextVal,i,clip_y1,clip_y2));
         }
         //choose color
         cairo_set_source_rgb (cr, glob_spColors[3*i], glob_spColors[3*i + 1], glob_spColors[3*i + 2]);
@@ -501,12 +512,12 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
     case 2:
       //overlay (common scaling)
       for(i=0;i<glob_numMultiplotSp;i++){
-        for(j=0;j<(glob_upperLimit-glob_lowerLimit-1);j+=contractFactor){
+        for(j=startBin;j<(glob_upperLimit-glob_lowerLimit-1);j+=binSkipFactor){
           float currentVal = getDispSpBinVal(i, j);
-          float nextVal = getDispSpBinVal(i, j+contractFactor);
+          float nextVal = getDispSpBinVal(i, j+binSkipFactor);
           cairo_move_to (cr, getXPos(j,clip_x1,clip_x2), getYPos(currentVal,0,clip_y1,clip_y2));
-          cairo_line_to (cr, getXPos(j+contractFactor,clip_x1,clip_x2), getYPos(currentVal,0,clip_y1,clip_y2));
-          cairo_line_to (cr, getXPos(j+contractFactor,clip_x1,clip_x2), getYPos(nextVal,0,clip_y1,clip_y2));
+          cairo_line_to (cr, getXPos(j+binSkipFactor,clip_x1,clip_x2), getYPos(currentVal,0,clip_y1,clip_y2));
+          cairo_line_to (cr, getXPos(j+binSkipFactor,clip_x1,clip_x2), getYPos(nextVal,0,clip_y1,clip_y2));
         }
         //choose color
         cairo_set_source_rgb (cr, glob_spColors[3*i], glob_spColors[3*i + 1], glob_spColors[3*i + 2]);
@@ -516,13 +527,13 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
     case 1:
       //summed
     case 0:
-      for(i=0;i<(glob_upperLimit-glob_lowerLimit-1);i+=contractFactor){
+      for(i=startBin;i<(glob_upperLimit-glob_lowerLimit-1);i+=binSkipFactor){
         float currentVal = getDispSpBinVal(0, i);
-        float nextVal = getDispSpBinVal(0, i+contractFactor);
+        float nextVal = getDispSpBinVal(0, i+binSkipFactor);
         //printf("Here! x=%f,y=%f,yorig=%f xclip=%f %f\n",getXPos(i,clip_x1,clip_x2), hist[glob_multiPlots[0]][glob_lowerLimit+i],hist[glob_multiPlots[0]][glob_lowerLimit+i],clip_x1,clip_x2);
         cairo_move_to (cr, getXPos(i,clip_x1,clip_x2), getYPos(currentVal,0,clip_y1,clip_y2));
-        cairo_line_to (cr, getXPos(i+contractFactor,clip_x1,clip_x2), getYPos(currentVal,0,clip_y1,clip_y2));
-        cairo_line_to (cr, getXPos(i+contractFactor,clip_x1,clip_x2), getYPos(nextVal,0,clip_y1,clip_y2));
+        cairo_line_to (cr, getXPos(i+binSkipFactor,clip_x1,clip_x2), getYPos(currentVal,0,clip_y1,clip_y2));
+        cairo_line_to (cr, getXPos(i+binSkipFactor,clip_x1,clip_x2), getYPos(nextVal,0,clip_y1,clip_y2));
       }
       cairo_set_source_rgb (cr, glob_spColors[0], glob_spColors[1], glob_spColors[2]);
       cairo_stroke(cr);

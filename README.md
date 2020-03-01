@@ -4,7 +4,9 @@
 
 ## Description
 
-An attempt at writing a (1D) spectrum viewer app using GTK, with functionality inspired by the `gf3` program in RadWare (https://radware.phy.ornl.gov/).  This is still in the early stages: spectra appear to be drawing correctly but many functions are not usable yet.
+A (1D) spectrum viewer app using GTK3, with functionality inspired by the `gf3` program for gamma-ray spectroscopy in the RadWare software package (https://radware.phy.ornl.gov/).
+
+NOTE: This is still in the early stages - spectra appear to be drawing correctly but some functions are not usable yet.
 
 ## Features
 
@@ -16,8 +18,16 @@ An attempt at writing a (1D) spectrum viewer app using GTK, with functionality i
 
 ### Various spectrum display options
 
-* Zooming and panning, using the mouse (mouse wheel, click and drag) or manual controls.
-* Rebinning of spectra, with results displayed in real time.
+* Import spectra from multiple files and plot multiple spectra simultaneously:
+    * Sum spectra together.
+    * Overlay spectra, with either common or independent scaling on the y-axis.
+    * Show spectra in a "stacked" view (tiled vertically with a common x-axis).
+* Zoom and pan using the mouse (mouse wheel, click and drag).
+* Rebin spectra, with results displayed in real time.
+
+### Cool user interface
+
+* Designed to be as simple and intuitive as possible given the supported featureset.
 
 ## How to install
 
@@ -33,7 +43,6 @@ So far the program has only been tested with Linux-based systems.  A Makefile is
 
 ## Future plans
 
-* Plotting of multiple spectra
 * Peak labels?
 * Peak fitting?
 

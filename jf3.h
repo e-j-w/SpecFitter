@@ -76,7 +76,7 @@ int contractFactor; //the number of channels per bin (default=1)
 int glob_multiplotMode; //0=no multiplot, 1=summed spectra, 2=overlay spectra (common scaling), 3=overlay spectra (independent scaling), 4=stacked view
 int glob_numMultiplotSp; //number of spectra to show in multiplot mode
 int glob_multiPlots[NSPECT]; //indices of all the spectra to show in multiplot mode
-float glob_spColors[MAX_DISP_SP*3] = {0.8,0.0,0.0, 0.0,0.0,0.8, 0.0,0.8,0.0, 0.0,0.8,0.8, 0.8,0.8,0.0, 0.8,0.0,0.8,
+float glob_spColors[MAX_DISP_SP*3] = {0.8,0.0,0.0, 0.0,0.0,0.8, 0.0,0.8,0.0, 0.0,0.8,0.8, 0.7,0.7,0.0, 0.8,0.0,0.8,
                            0.2,0.0,0.0, 0.0,0.0,0.2, 0.0,0.2,0.0, 0.0,0.2,0.2, 0.2,0.2,0.0, 0.2,0.0,0.8}; //colors for displayed spectra
 
 //calibration globals
