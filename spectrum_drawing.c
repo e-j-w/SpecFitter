@@ -109,7 +109,7 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e)
   if(e->direction == 1){
     //printf("Scrolling down at %f %f!\n",e->x,e->y);
     zoomLevel *= 0.5; 
-  }else{
+  }else if(zoomLevel < 1024.0){
     //printf("Scrolling up at %f %f!\n",e->x,e->y);
     zoomLevel *= 2.0;
     GdkRectangle dasize;  // GtkDrawingArea size
@@ -604,8 +604,12 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
     for(i=0;i<S32K;i+=50){
       drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
     }
-  }else if(getPlotRangeXUnits() > 50){
+  }else if(getPlotRangeXUnits() > 100){
     for(i=0;i<S32K;i+=20){
+      drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
+    }
+  }else if(getPlotRangeXUnits() > 50){
+    for(i=0;i<S32K;i+=10){
       drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
     }
   }else{
@@ -616,10 +620,11 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   cairo_stroke(cr);
   
   //draw y axis ticks
-  int numTickPerSp = (clip_y2 - clip_y1)/(40.0*glob_numMultiplotSp) + 1;
+  int numTickPerSp;
   switch(glob_multiplotMode){
     case 4:
       //stacked
+      numTickPerSp = (clip_y2 - clip_y1)/(40.0*glob_numMultiplotSp) + 1;
       for(i=0;i<glob_numMultiplotSp;i++){
         cairo_set_source_rgb (cr, glob_spColors[3*i], glob_spColors[3*i + 1], glob_spColors[3*i + 2]);
         for(j=0;j<numTickPerSp;j++){
@@ -651,6 +656,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
     case 0:
       //modes with a single scale
       cairo_set_source_rgb (cr, 0.3, 0.3, 0.3);
+      numTickPerSp = (clip_y2 - clip_y1)/40.0 + 1;
       for(i=0;i<numTickPerSp;i++){
         drawYAxisTick(glob_scaleLevelMin[0] + (glob_scaleLevelMax[0] - glob_scaleLevelMin[0])*i/(numTickPerSp*1.), 0, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
       }
