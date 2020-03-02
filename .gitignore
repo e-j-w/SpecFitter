@@ -4,3 +4,4 @@ jf3-resources.c
 *.mca
 *.fmca
 *.spe
+*.out

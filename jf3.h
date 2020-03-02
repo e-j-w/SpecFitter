@@ -33,10 +33,15 @@ GtkCheckButton *autoscale_button, *cursor_draw_button;
 GtkScale *contract_scale, *zoom_scale; //*pan_scale;
 GtkAdjustment *spectrum_selector_adjustment, *contract_adjustment;
 GtkLabel *bottom_info_text;
-GtkWidget *spectrum_drawing_area, *cursor_drawing_area;
-GtkGesture *spectrum_drag_gesture;
 GtkWidget *file_open_dialog;
 GtkFileFilter *file_filter;
+//spectrum drawing
+GtkWidget *spectrum_drawing_area, *cursor_drawing_area;
+GtkGesture *spectrum_drag_gesture;
+//spectrum overlay
+GtkInfoBar *overlay_info_bar;
+GtkLabel *overlay_info_label;
+GtkButton *fit_cancel_button, *fit_fit_button;
 //Calibration dialog
 GtkWidget *calibrate_button;
 GtkWindow *calibrate_window;

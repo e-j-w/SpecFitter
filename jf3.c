@@ -39,6 +39,7 @@ void on_open_button_clicked(GtkButton *b)
         if(sel >=0){
           glob_multiPlots[0] = sel;
           glob_multiplotMode = 0; //files just opened, disable multiplot
+          gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
           gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),TRUE);
           gtk_widget_set_sensitive(GTK_WIDGET(display_button),TRUE);
           gtk_widget_set_sensitive(GTK_WIDGET(zoom_scale),TRUE);
@@ -253,6 +254,12 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
       printf("%i ",glob_multiPlots[i]);
     }
     printf(", multiplot mode: %i\n",glob_multiplotMode);
+    if(glob_multiplotMode >= 2){
+      //multiple spectra displayed simultaneously, cannot fit
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_button),FALSE);
+    }else{
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
+    }
     gtk_widget_hide(GTK_WIDGET(multiplot_window)); //close the multiplot window
     gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
   }
@@ -265,6 +272,23 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data
   glob_multiplotMode = 0;//unset multiplot, if it is being used
   //printf("Set selected spectrum to %i\n",dispSp);
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+}
+
+void on_fit_button_clicked(GtkButton *b)
+{
+  gtk_widget_set_sensitive(GTK_WIDGET(open_button),FALSE);
+  gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),FALSE);
+  gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
+  gtk_label_set_text(overlay_info_label,"Right-click to set fit region lower and upper bounds.");
+  gtk_info_bar_set_revealed(overlay_info_bar, TRUE);
+}
+
+void on_fit_cancel_button_clicked(GtkButton *b)
+{
+  gtk_widget_set_sensitive(GTK_WIDGET(open_button),TRUE);
+  gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
+  gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
+  gtk_info_bar_set_revealed(overlay_info_bar, FALSE);
 }
 
 void on_about_button_clicked(GtkButton *b)
@@ -311,6 +335,10 @@ int main(int argc, char *argv[])
   zoom_scale = GTK_SCALE(gtk_builder_get_object(builder, "zoom_scale"));
   about_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "about_button"));
   bottom_info_text = GTK_LABEL(gtk_builder_get_object(builder, "bottom_info_text"));
+  overlay_info_bar = GTK_INFO_BAR(gtk_builder_get_object(builder, "overlay_info_bar"));
+  overlay_info_label = GTK_LABEL(gtk_builder_get_object(builder, "overlay_info_label"));
+  fit_cancel_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_cancel_button"));
+  fit_fit_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_fit_button"));
 
   //calibration window UI elements
   cal_entry_unit = GTK_ENTRY(gtk_builder_get_object(builder, "calibration_unit_entry"));
@@ -341,6 +369,8 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (open_button), "clicked", G_CALLBACK (on_open_button_clicked), NULL);
   g_signal_connect (G_OBJECT (calibrate_button), "clicked", G_CALLBACK (on_calibrate_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_button), "clicked", G_CALLBACK (on_multiplot_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (fit_button), "clicked", G_CALLBACK (on_fit_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (fit_cancel_button), "clicked", G_CALLBACK (on_fit_cancel_button_clicked), NULL);
   g_signal_connect (G_OBJECT (display_button), "clicked", G_CALLBACK (on_display_button_clicked), NULL);
   g_signal_connect (G_OBJECT (calibrate_ok_button), "clicked", G_CALLBACK (on_calibrate_ok_button_clicked), NULL);
   g_signal_connect (G_OBJECT (spectrum_selector), "value-changed", G_CALLBACK (on_spectrum_selector_changed), NULL);
@@ -381,14 +411,18 @@ int main(int argc, char *argv[])
   gtk_adjustment_set_lower(spectrum_selector_adjustment, 0);
   gtk_adjustment_set_upper(spectrum_selector_adjustment, 0);
   gtk_label_set_text(bottom_info_text,"No spectrum loaded.");
-
+  
   //'gray out' widgets that can't be used yet
   gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(fit_button),FALSE);
+  gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(display_button),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(zoom_scale),FALSE);
+
+  //hide widgets that can't be seen yet
+  gtk_info_bar_set_revealed(overlay_info_bar,FALSE);
 
   //setup UI element appearance at startup
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autoscale_button), autoScale);
