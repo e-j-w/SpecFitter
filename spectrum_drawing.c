@@ -560,7 +560,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 
   //interpolate (ie. limit the number of bins drawn) in the next step, 
   //to help drawing performance
-  int maxDrawBins = (clip_x2 - clip_x1)*1.5;
+  int maxDrawBins = (clip_x2 - clip_x1)*2;
   //printf("maximum bins to draw: %i\n",maxDrawBins);
   int binSkipFactor = (glob_upperLimit-glob_lowerLimit)/(maxDrawBins);
   if(binSkipFactor <= contractFactor)

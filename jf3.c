@@ -280,6 +280,7 @@ void on_fit_button_clicked(GtkButton *b)
   gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
   gtk_label_set_text(overlay_info_label,"Right-click to set fit region lower and upper bounds.");
+  gtk_widget_show(GTK_WIDGET(overlay_info_bar));
   gtk_info_bar_set_revealed(overlay_info_bar, TRUE);
 }
 
@@ -289,6 +290,7 @@ void on_fit_cancel_button_clicked(GtkButton *b)
   gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
   gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
   gtk_info_bar_set_revealed(overlay_info_bar, FALSE);
+  gtk_widget_hide(GTK_WIDGET(overlay_info_bar));
 }
 
 void on_about_button_clicked(GtkButton *b)
@@ -423,6 +425,7 @@ int main(int argc, char *argv[])
 
   //hide widgets that can't be seen yet
   gtk_info_bar_set_revealed(overlay_info_bar,FALSE);
+  gtk_widget_hide(GTK_WIDGET(overlay_info_bar));
 
   //setup UI element appearance at startup
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autoscale_button), autoScale);
