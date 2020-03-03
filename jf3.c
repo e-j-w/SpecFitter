@@ -25,9 +25,9 @@ void on_open_button_clicked(GtkButton *b)
     GSList *file_list = gtk_file_chooser_get_filenames(GTK_FILE_CHOOSER(file_open_dialog));
     for(i=0;i<g_slist_length(file_list);i++){
       filename = g_slist_nth_data(file_list,i);
-      int numSp = readSpectrumDataFile(filename,hist,glob_numSpOpened);
+      int numSp = readSpectrumDataFile(filename,glob_hist,glob_numSpOpened);
       if(numSp > 0){ //see read_data.c
-        openedSp = 1;
+        glob_openedSp = 1;
         //set comments for spectra just opened
         for (j = glob_numSpOpened; j < (glob_numSpOpened+numSp); j++){
           snprintf(glob_histComment[j],256,"Spectrum %i of %s",j-glob_numSpOpened,basename((char*)filename));
@@ -111,12 +111,12 @@ void on_open_button_clicked(GtkButton *b)
 void on_display_button_clicked(GtkButton *b)
 {
   //gtk_range_set_value(GTK_RANGE(pan_scale),(glob_xChanFocus*100.0/S32K));
-  gtk_range_set_value(GTK_RANGE(contract_scale),contractFactor);
+  gtk_range_set_value(GTK_RANGE(contract_scale),glob_contractFactor);
   gtk_popover_popup(display_popover); //show the popover menu
 }
 
 void on_zoom_scale_changed(GtkRange *range, gpointer user_data){
-  zoomLevel = pow(2,gtk_range_get_value(range)); //modify the zoom level
+  glob_zoomLevel = pow(2,gtk_range_get_value(range)); //modify the zoom level
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
 }
 void on_pan_scale_changed(GtkRange *range, gpointer user_data){
@@ -124,7 +124,7 @@ void on_pan_scale_changed(GtkRange *range, gpointer user_data){
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
 }
 void on_contract_scale_changed(GtkRange *range, gpointer user_data){
-  contractFactor = (int)gtk_range_get_value(range); //modify the contraction factor
+  glob_contractFactor = (int)gtk_range_get_value(range); //modify the contraction factor
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
 }
 
@@ -395,15 +395,15 @@ int main(int argc, char *argv[])
   gtk_tree_view_column_add_attribute(multiplot_column2,multiplot_cr2, "active",1);
 
   //set default values
-  openedSp = 0;
+  glob_openedSp = 0;
   glob_lowerLimit = 0;
   glob_upperLimit = S32K - 1;
   glob_scaleLevelMax[0] = 0.0;
   glob_scaleLevelMin[0] = 0.0;
   glob_xChanFocus = 0;
-  zoomLevel = 1.0;
-  contractFactor = 1;
-  autoScale = 1;
+  glob_zoomLevel = 1.0;
+  glob_contractFactor = 1;
+  glob_autoScale = 1;
   glob_calMode = 0;
   glob_numSpOpened = 0;
   glob_multiplotMode = 0;
@@ -428,7 +428,7 @@ int main(int argc, char *argv[])
   gtk_widget_hide(GTK_WIDGET(overlay_info_bar));
 
   //setup UI element appearance at startup
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autoscale_button), autoScale);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autoscale_button), glob_autoScale);
 
   //startup UI
   gtk_widget_show(GTK_WIDGET(window)); //show the window

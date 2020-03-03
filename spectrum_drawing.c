@@ -5,7 +5,7 @@ int getFirstNonemptySpectrum(int numSpOpened){
   int i,j;
   for(i=0;i<numSpOpened;i++){
     for(j=0;j<S32K;j++){
-      if(hist[i][j]!=0.0){
+      if(glob_hist[i][j]!=0.0){
         return i;
       }
     }
@@ -27,12 +27,12 @@ float getDispSpBinVal(int dispSpNum, int bin){
 
   int j,k;
   float val = 0.;
-    for(j=0;j<contractFactor;j++){
+    for(j=0;j<glob_contractFactor;j++){
       switch(glob_multiplotMode){
         case 1:
           //sum spectra
           for(k=0;k<glob_numMultiplotSp;k++){
-            val += hist[glob_multiPlots[k]][glob_lowerLimit+bin+j];
+            val += glob_hist[glob_multiPlots[k]][glob_lowerLimit+bin+j];
           }
           break;
         case 4:
@@ -43,7 +43,7 @@ float getDispSpBinVal(int dispSpNum, int bin){
           //overlay (common scaling)
         case 0:
           //no multiplot
-          val += hist[glob_multiPlots[dispSpNum]][glob_lowerLimit+bin+j];
+          val += glob_hist[glob_multiPlots[dispSpNum]][glob_lowerLimit+bin+j];
           break;
         default:
           break;
@@ -56,19 +56,19 @@ float getDispSpBinVal(int dispSpNum, int bin){
 //function setting the plotting limits for the spectrum based on the zoom level
 //the plotting limits are in UNCALIBRATED units ie. channels
 void getPlotLimits(){
-    if(zoomLevel <= 1.0){
+    if(glob_zoomLevel <= 1.0){
         //set zoomed out
-        zoomLevel = 1.0;
+        glob_zoomLevel = 1.0;
         glob_lowerLimit = 0;
         glob_upperLimit = S32K - 1;
         return;
-    }else if(zoomLevel > 1024.0){
-        zoomLevel = 1024.0; //set maximum zoom level
+    }else if(glob_zoomLevel > 1024.0){
+        glob_zoomLevel = 1024.0; //set maximum zoom level
     }
 
-    int numChansToDisp = (int)(1.0*S32K/zoomLevel);
+    int numChansToDisp = (int)(1.0*S32K/glob_zoomLevel);
     glob_lowerLimit = glob_xChanFocus - numChansToDisp/2;
-    glob_lowerLimit = glob_lowerLimit - (glob_lowerLimit % contractFactor); //round to nearest multiple of contraction factor
+    glob_lowerLimit = glob_lowerLimit - (glob_lowerLimit % glob_contractFactor); //round to nearest multiple of contraction factor
     //clamp to lower limit of 0 if needed
     if(glob_lowerLimit < 0){
         glob_lowerLimit = 0;
@@ -76,7 +76,7 @@ void getPlotLimits(){
         return;
     }
     glob_upperLimit = glob_xChanFocus + numChansToDisp/2;
-    glob_upperLimit = glob_upperLimit - (glob_upperLimit % contractFactor); //round to nearest multiple of contraction factor
+    glob_upperLimit = glob_upperLimit - (glob_upperLimit % glob_contractFactor); //round to nearest multiple of contraction factor
     //clamp to upper limit of S32K-1 if needed
     if(glob_upperLimit > (S32K-1)){
         glob_upperLimit=S32K-1;
@@ -88,9 +88,9 @@ void getPlotLimits(){
 void on_toggle_autoscale(GtkToggleButton *togglebutton, gpointer user_data)
 {
   if(gtk_toggle_button_get_active(togglebutton))
-    autoScale=1;
+    glob_autoScale=1;
   else
-    autoScale=0;
+    glob_autoScale=0;
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
 }
 
@@ -107,7 +107,7 @@ void on_toggle_cursor(GtkToggleButton *togglebutton, gpointer user_data)
 //function handling mouse wheel scrolling to zoom the displayed spectrum
 void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e)
 {
-  if(!openedSp){
+  if(!glob_openedSp){
 		return;
 	}
 
@@ -118,23 +118,23 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e)
 
   if(e->direction == 1){
     //printf("Scrolling down at %f %f!\n",e->x,e->y);
-    zoomLevel *= 0.5; 
-  }else if(zoomLevel < 1024.0){
+    glob_zoomLevel *= 0.5; 
+  }else if(glob_zoomLevel < 1024.0){
     //printf("Scrolling up at %f %f!\n",e->x,e->y);
-    zoomLevel *= 2.0;
+    glob_zoomLevel *= 2.0;
     GdkRectangle dasize;  // GtkDrawingArea size
     GdkWindow *wwindow = gtk_widget_get_window(widget);
     // Determine GtkDrawingArea dimensions
     gdk_window_get_geometry (wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
     glob_xChanFocus = glob_lowerLimit + (((e->x)-80.0)/(dasize.width-80.0))*(glob_upperLimit - glob_lowerLimit);
   }
-  gtk_range_set_value(GTK_RANGE(zoom_scale),log(zoomLevel)/log(2.));//base 2 log of zoom
+  gtk_range_set_value(GTK_RANGE(zoom_scale),log(glob_zoomLevel)/log(2.));//base 2 log of zoom
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
 }
 
 void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data){
 
-  if(!openedSp){
+  if(!glob_openedSp){
 		return;
 	}
 
@@ -176,7 +176,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
   if((event->x > 80.0)&&(event->y < (dasize.height - 40.0))){
     
     int cursorChan = glob_lowerLimit + (((event->x)-80.0)/(dasize.width-80.0))*(glob_upperLimit - glob_lowerLimit);
-    cursorChan = cursorChan - fmod(cursorChan,contractFactor);
+    cursorChan = cursorChan - fmod(cursorChan,glob_contractFactor);
 
     //print cursor position on status bar
     char posLabel[256];
@@ -188,15 +188,15 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
       case 2:
         //multiple visible plots
         if(glob_calMode == 1){
-          int cursorChanEnd = cursorChan + contractFactor;
+          int cursorChanEnd = cursorChan + glob_contractFactor;
           float cal_lowerChanLimit = glob_calpar0 + glob_calpar1*cursorChan + glob_calpar2*cursorChan*cursorChan;
           float cal_upperChanLimit = glob_calpar0 + glob_calpar1*cursorChanEnd + glob_calpar2*cursorChanEnd*cursorChanEnd;
           posLabelp += snprintf(posLabelp,50,"%s: %0.1f - %0.1f, Values:", glob_calUnit, cal_lowerChanLimit, cal_upperChanLimit);
         }else{
-          if(contractFactor <= 1){
+          if(glob_contractFactor <= 1){
             posLabelp += snprintf(posLabel,50,"Channel: %i, Values:",cursorChan);
           }else{
-            snprintf(posLabel,256,"Channels: %i - %i, Values:",cursorChan, cursorChan + contractFactor - 1);
+            snprintf(posLabel,256,"Channels: %i - %i, Values:",cursorChan, cursorChan + glob_contractFactor - 1);
           }
         }
         for(i=0;i<(glob_numMultiplotSp-1);i++){
@@ -209,15 +209,15 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
       default:
         //single plot
         if(glob_calMode == 1){
-          int cursorChanEnd = cursorChan + contractFactor;
+          int cursorChanEnd = cursorChan + glob_contractFactor;
           float cal_lowerChanLimit = glob_calpar0 + glob_calpar1*cursorChan + glob_calpar2*cursorChan*cursorChan;
           float cal_upperChanLimit = glob_calpar0 + glob_calpar1*cursorChanEnd + glob_calpar2*cursorChanEnd*cursorChanEnd;
           snprintf(posLabel,256,"%s: %0.1f - %0.1f, Value: %0.1f", glob_calUnit, cal_lowerChanLimit, cal_upperChanLimit, getDispSpBinVal(0,cursorChan-glob_lowerLimit));
         }else{
-          if(contractFactor <= 1){
+          if(glob_contractFactor <= 1){
             snprintf(posLabel,256,"Channel: %i, Value: %0.1f",cursorChan,getDispSpBinVal(0,cursorChan-glob_lowerLimit));
           }else{
-            snprintf(posLabel,256,"Channels: %i - %i, Value: %0.1f",cursorChan, cursorChan + contractFactor - 1, getDispSpBinVal(0,cursorChan-glob_lowerLimit));
+            snprintf(posLabel,256,"Channels: %i - %i, Value: %0.1f",cursorChan, cursorChan + glob_contractFactor - 1, getDispSpBinVal(0,cursorChan-glob_lowerLimit));
           }
         }
         break;
@@ -423,7 +423,7 @@ int getPlotRangeXUnits(){
 void drawCursorArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 {
 
-	if(!openedSp){
+	if(!glob_openedSp){
 		return;
 	}
 
@@ -449,7 +449,7 @@ void drawCursorArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 {
 
-	if(!openedSp){
+	if(!glob_openedSp){
 		return;
 	}
 
@@ -492,7 +492,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
     minVal[i] = BIG_NUMBER;
     maxVal[i] = SMALL_NUMBER;
   }
-  for(i=0;i<(glob_upperLimit-glob_lowerLimit-1);i+=contractFactor){
+  for(i=0;i<(glob_upperLimit-glob_lowerLimit-1);i+=glob_contractFactor){
     float currentVal[MAX_DISP_SP];
     switch(glob_multiplotMode){
       case 4:
@@ -537,7 +537,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
     }
   }
   //setup autoscaling
-  if((autoScale)||(glob_scaleLevelMax[0] <= glob_scaleLevelMin[0])){
+  if((glob_autoScale)||(glob_scaleLevelMax[0] <= glob_scaleLevelMin[0])){
     switch(glob_multiplotMode){
       case 4:
       case 3:
@@ -563,8 +563,8 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   int maxDrawBins = (clip_x2 - clip_x1)*2;
   //printf("maximum bins to draw: %i\n",maxDrawBins);
   int binSkipFactor = (glob_upperLimit-glob_lowerLimit)/(maxDrawBins);
-  if(binSkipFactor <= contractFactor)
-    binSkipFactor = contractFactor;
+  if(binSkipFactor <= glob_contractFactor)
+    binSkipFactor = glob_contractFactor;
   //printf("binskipfactor: %i\n",binSkipFactor);
   //for smooth scrolling of interpolated spectra, have the start bin always
   //be a multiple of the skip factor
@@ -610,7 +610,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       for(i=startBin;i<(glob_upperLimit-glob_lowerLimit-1);i+=binSkipFactor){
         float currentVal = getDispSpBinVal(0, i);
         float nextVal = getDispSpBinVal(0, i+binSkipFactor);
-        //printf("Here! x=%f,y=%f,yorig=%f xclip=%f %f\n",getXPos(i,clip_x1,clip_x2), hist[glob_multiPlots[0]][glob_lowerLimit+i],hist[glob_multiPlots[0]][glob_lowerLimit+i],clip_x1,clip_x2);
+        //printf("Here! x=%f,y=%f,yorig=%f xclip=%f %f\n",getXPos(i,clip_x1,clip_x2), glob_hist[glob_multiPlots[0]][glob_lowerLimit+i],glob_hist[glob_multiPlots[0]][glob_lowerLimit+i],clip_x1,clip_x2);
         cairo_move_to (cr, getXPos(i,clip_x1,clip_x2), getYPos(currentVal,0,clip_y1,clip_y2));
         cairo_line_to (cr, getXPos(i+binSkipFactor,clip_x1,clip_x2), getYPos(currentVal,0,clip_y1,clip_y2));
         cairo_line_to (cr, getXPos(i+binSkipFactor,clip_x1,clip_x2), getYPos(nextVal,0,clip_y1,clip_y2));

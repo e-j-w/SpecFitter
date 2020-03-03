@@ -71,17 +71,17 @@ int glob_drawSpCursor; //0 = don't draw vertical cursor on spectrum, 1=draw, -1=
 int glob_drawingAreaMode; //0=normal drawing, 1=draw verticlal cursor only
 
 //spectrum drawing globals
-double hist[NSPECT][S32K]; //spectrum histogram data
+double glob_hist[NSPECT][S32K]; //spectrum histogram data
 char glob_histComment[NSPECT][256]; //spectrum description/comment
-int openedSp; //0=not opened, 1=opened
+int glob_openedSp; //0=not opened, 1=opened
 int glob_numSpOpened; //number of spectra in the opened file(s)
 //int dispSp; //# of the spectrum to display
 int glob_lowerLimit, glob_upperLimit; //lower and upper limits to plot spectrum (in uncalibrated units ie. channels)
 int glob_xChanFocus; //x channel to focus on when zooming
-float zoomLevel; //1.0 = zoomed out fully (on x axis)
-int autoScale; //0=don't autoscale y axis, 1=autoscale y axis
+float glob_zoomLevel; //1.0 = zoomed out fully (on x axis)
+int glob_autoScale; //0=don't autoscale y axis, 1=autoscale y axis
 float glob_scaleLevelMax[MAX_DISP_SP], glob_scaleLevelMin[MAX_DISP_SP]; //the y scale values, ie. the maximum and minimum values to show on the y axis
-int contractFactor; //the number of channels per bin (default=1)
+int glob_contractFactor; //the number of channels per bin (default=1)
 int glob_multiplotMode; //0=no multiplot, 1=summed spectra, 2=overlay spectra (common scaling), 3=overlay spectra (independent scaling), 4=stacked view
 int glob_numMultiplotSp; //number of spectra to show in multiplot mode
 int glob_multiPlots[NSPECT]; //indices of all the spectra to show in multiplot mode
