@@ -41,6 +41,11 @@ So far the program has only been tested with Linux-based systems.  A Makefile is
 * GLib
 * Cairo (used for drawing spectra)
 
+## Tips and tricks
+
+When running the program from the command line, it is possible to automatically open a file by specifying the filename as an argument (ie. `jf3 /path/to/file`).
+
+
 ## Future plans
 
 * Peak labels?

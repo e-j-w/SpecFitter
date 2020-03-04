@@ -159,10 +159,9 @@ int readSpectrumDataFile(const char *filename, double outHist[NSPECT][S32K], int
 		numSpec = readSPE(filename, outHist, outHistStartSp);
 	else
 	{
-		printf("Improper type of input file: %s\n", filename);
-		printf("Integer array (.mca), float array (.fmca), or radware (.spe) files are supported.\n");
+		//printf("Improper format of input file: %s\n", filename);
+		//printf("Supported file formats are: integer array (.mca), float array (.fmca), or radware (.spe) files.\n");
 		return 0;
-		//exit(-1);
 	}
 
 	printf("Opened file: %s, number of spectra read in: %i\n", filename, numSpec);

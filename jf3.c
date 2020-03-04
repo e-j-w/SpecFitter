@@ -4,6 +4,71 @@
 #include "read_data.c"
 #include "spectrum_drawing.c"
 
+//function for opening a single file without UI (ie. from the command line)
+void openSingleFile(char *filename){
+  int i;
+  int openErr = 0;
+  int numSp = readSpectrumDataFile(filename,hist,glob_numSpOpened);
+  if(numSp > 0){ //see read_data.c
+      openedSp = 1;
+      //set comments for spectra just opened
+      for (i = glob_numSpOpened; i < (glob_numSpOpened+numSp); i++){
+        snprintf(glob_histComment[i],256,"Spectrum %i of %s",i-glob_numSpOpened,basename((char*)filename));
+        //printf("Comment %i: %s\n",j,glob_histComment[j]);
+      }
+      glob_numSpOpened = numSp;
+      //select the first non-empty spectrum by default
+      int sel = getFirstNonemptySpectrum(glob_numSpOpened);
+      if(sel >=0){
+        glob_multiPlots[0] = sel;
+        glob_multiplotMode = 0; //file just opened, disable multiplot
+        gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
+        gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),TRUE);
+        gtk_widget_set_sensitive(GTK_WIDGET(display_button),TRUE);
+        gtk_widget_set_sensitive(GTK_WIDGET(zoom_scale),TRUE);
+        gtk_label_set_text(bottom_info_text,"");
+        if(numSp > 1){
+          gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
+          gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
+        }
+        //set the range of selectable spectra values
+        gtk_adjustment_set_lower(spectrum_selector_adjustment, 0);
+        gtk_adjustment_set_upper(spectrum_selector_adjustment, glob_numSpOpened - 1);
+        gtk_spin_button_set_value(spectrum_selector, sel);
+      }else{
+        //no spectra with any data in the selected file
+        openErr = 2;
+      }
+    }else if (numSp == -1){
+      //too many files opened
+      openErr = 3;
+    }else{
+      //improper file format
+      openErr = 1;
+    }
+  
+  if(openErr>0){
+    char errMsg[256];
+    switch (openErr)
+    {
+      case 2:
+        snprintf(errMsg,256,"All spectrum data in file %s is empty.",filename);
+        break;
+      case 3:
+        snprintf(errMsg,256,"You are trying to open too many files at once.  Maximum number of individual spectra which may be imported is %i.",NSPECT);
+        break;
+      default:
+        snprintf(errMsg,256,"Data in file %s is incorrectly formatted.",filename);
+        break;
+    }
+    printf("ERROR: %s\n",errMsg);
+    exit(-1);
+  }
+
+  //set the title of the opened spectrum in the header bar
+  gtk_header_bar_set_subtitle(header_bar,filename);
+}
+
 void on_open_button_clicked(GtkButton *b)
 {
   int i,j;
@@ -429,6 +494,11 @@ int main(int argc, char *argv[])
 
   //setup UI element appearance at startup
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autoscale_button), autoScale);
+
+  //open a file if requested from the command line
+  if(argc > 1){
+    openSingleFile(argv[1]);
+  }
 
   //startup UI
   gtk_widget_show(GTK_WIDGET(window)); //show the window
