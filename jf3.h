@@ -89,14 +89,18 @@ float glob_spColors[MAX_DISP_SP*3] = {0.8,0.0,0.0, 0.0,0.0,0.8, 0.0,0.8,0.0, 0.0
                            0.2,0.0,0.0, 0.0,0.0,0.2, 0.0,0.2,0.0, 0.0,0.2,0.2, 0.2,0.2,0.0, 0.2,0.0,0.8}; //colors for displayed spectra
 
 //calibration globals
-int glob_calMode; //0=no calibration, 1=calibration enabled
-float glob_calpar0,glob_calpar1,glob_calpar2; //0th, 1st, and 2nd order calibration parameters
-char glob_calUnit[16]; //name of the unit used for calibration
+struct {
+  int calMode; //0=no calibration, 1=calibration enabled
+  float calpar0,calpar1,calpar2; //0th, 1st, and 2nd order calibration parameters
+  char calUnit[16]; //name of the unit used for calibration
+} calpar;
 
 //fitting globals
-int glob_fitStartCh, glob_fitEndCh; //upper and lower channel bounds for fitting
-float glob_fitPeakInitGuess[MAX_FIT_PK]; //initial guess of peak positions, in channels
-float glob_fitParVal[6+(3*MAX_FIT_PK)]; //paramter values found by the fitter
+struct {
+  int fitStartCh, fitEndCh; //upper and lower channel bounds for fitting
+  float fitPeakInitGuess[MAX_FIT_PK]; //initial guess of peak positions, in channels
+  float fitParVal[6+(3*MAX_FIT_PK)]; //paramter values found by the fitter
+} fitpar;
 
 #endif
 

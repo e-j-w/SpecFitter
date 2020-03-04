@@ -187,11 +187,11 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
       case 3:
       case 2:
         //multiple visible plots
-        if(glob_calMode == 1){
+        if(calpar.calMode == 1){
           int cursorChanEnd = cursorChan + glob_contractFactor;
-          float cal_lowerChanLimit = glob_calpar0 + glob_calpar1*cursorChan + glob_calpar2*cursorChan*cursorChan;
-          float cal_upperChanLimit = glob_calpar0 + glob_calpar1*cursorChanEnd + glob_calpar2*cursorChanEnd*cursorChanEnd;
-          posLabelp += snprintf(posLabelp,50,"%s: %0.1f - %0.1f, Values:", glob_calUnit, cal_lowerChanLimit, cal_upperChanLimit);
+          float cal_lowerChanLimit = calpar.calpar0 + calpar.calpar1*cursorChan + calpar.calpar2*cursorChan*cursorChan;
+          float cal_upperChanLimit = calpar.calpar0 + calpar.calpar1*cursorChanEnd + calpar.calpar2*cursorChanEnd*cursorChanEnd;
+          posLabelp += snprintf(posLabelp,50,"%s: %0.1f - %0.1f, Values:", calpar.calUnit, cal_lowerChanLimit, cal_upperChanLimit);
         }else{
           if(glob_contractFactor <= 1){
             posLabelp += snprintf(posLabel,50,"Channel: %i, Values:",cursorChan);
@@ -208,11 +208,11 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
       case 0:
       default:
         //single plot
-        if(glob_calMode == 1){
+        if(calpar.calMode == 1){
           int cursorChanEnd = cursorChan + glob_contractFactor;
-          float cal_lowerChanLimit = glob_calpar0 + glob_calpar1*cursorChan + glob_calpar2*cursorChan*cursorChan;
-          float cal_upperChanLimit = glob_calpar0 + glob_calpar1*cursorChanEnd + glob_calpar2*cursorChanEnd*cursorChanEnd;
-          snprintf(posLabel,256,"%s: %0.1f - %0.1f, Value: %0.1f", glob_calUnit, cal_lowerChanLimit, cal_upperChanLimit, getDispSpBinVal(0,cursorChan-glob_lowerLimit));
+          float cal_lowerChanLimit = calpar.calpar0 + calpar.calpar1*cursorChan + calpar.calpar2*cursorChan*cursorChan;
+          float cal_upperChanLimit = calpar.calpar0 + calpar.calpar1*cursorChanEnd + calpar.calpar2*cursorChanEnd*cursorChanEnd;
+          snprintf(posLabel,256,"%s: %0.1f - %0.1f, Value: %0.1f", calpar.calUnit, cal_lowerChanLimit, cal_upperChanLimit, getDispSpBinVal(0,cursorChan-glob_lowerLimit));
         }else{
           if(glob_contractFactor <= 1){
             snprintf(posLabel,256,"Channel: %i, Value: %0.1f",cursorChan,getDispSpBinVal(0,cursorChan-glob_lowerLimit));
@@ -277,10 +277,10 @@ float getYPos(float val, int multiplotSpNum, float clip_y1, float clip_y2){
 float getAxisXPos(int axisVal, float clip_x1, float clip_x2){
   int cal_lowerLimit = glob_lowerLimit;
   int cal_upperLimit = glob_upperLimit;
-  if(glob_calMode==1){
+  if(calpar.calMode==1){
     //calibrate
-    cal_lowerLimit = glob_calpar0 + glob_calpar1*glob_lowerLimit + glob_calpar2*glob_lowerLimit*glob_lowerLimit;
-    cal_upperLimit = glob_calpar0 + glob_calpar1*glob_upperLimit + glob_calpar2*glob_upperLimit*glob_upperLimit;
+    cal_lowerLimit = calpar.calpar0 + calpar.calpar1*glob_lowerLimit + calpar.calpar2*glob_lowerLimit*glob_lowerLimit;
+    cal_upperLimit = calpar.calpar0 + calpar.calpar1*glob_upperLimit + calpar.calpar2*glob_upperLimit*glob_upperLimit;
   }
   if((axisVal < cal_lowerLimit)||(axisVal >= cal_upperLimit))
     return -1; //value is off the visible axis
@@ -411,10 +411,10 @@ void drawPlotLabel(cairo_t *cr, float clip_x1, float clip_x2, float clip_y2, dou
 int getPlotRangeXUnits(){
   int cal_lowerLimit = glob_lowerLimit;
   int cal_upperLimit = glob_upperLimit;
-  if(glob_calMode==1){
+  if(calpar.calMode==1){
     //calibrate
-    cal_lowerLimit = glob_calpar0 + glob_calpar1*glob_lowerLimit + glob_calpar2*glob_lowerLimit*glob_lowerLimit;
-    cal_upperLimit = glob_calpar0 + glob_calpar1*glob_upperLimit + glob_calpar2*glob_upperLimit*glob_upperLimit;
+    cal_lowerLimit = calpar.calpar0 + calpar.calpar1*glob_lowerLimit + calpar.calpar2*glob_lowerLimit*glob_lowerLimit;
+    cal_upperLimit = calpar.calpar0 + calpar.calpar1*glob_upperLimit + calpar.calpar2*glob_upperLimit*glob_upperLimit;
   }
   return cal_upperLimit - cal_lowerLimit;
 }
@@ -764,10 +764,10 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   char axisLabel[16];
   cairo_text_extents_t extents; //for getting dimensions needed to center text labels
   //x axis
-  if(glob_calMode == 0){
+  if(calpar.calMode == 0){
     sprintf(axisLabel,"Channel #"); //set string for label
   }else{
-    strcpy(axisLabel,glob_calUnit); //set label to calibrated units
+    strcpy(axisLabel,calpar.calUnit); //set label to calibrated units
   }
   cairo_text_extents(cr, axisLabel, &extents);
   cairo_set_font_size(cr, plotFontSize*1.2);

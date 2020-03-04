@@ -3,6 +3,7 @@
 #include "jf3-resources.c"
 #include "read_data.c"
 #include "spectrum_drawing.c"
+#include "fit_data.c"
 
 //function for opening a single file without UI (ie. from the command line)
 void openSingleFile(char *filename){
@@ -218,21 +219,21 @@ void on_cal_par_activate (GtkEntry *entry, gpointer  user_data){
 void on_calibrate_ok_button_clicked(GtkButton *b)
 {
   //apply settings here!
-  strcpy(glob_calUnit,gtk_entry_get_text(cal_entry_unit));
-  if(strcmp(glob_calUnit,"")==0){
-    strcpy(glob_calUnit,"Cal. Units");
+  strcpy(calpar.calUnit,gtk_entry_get_text(cal_entry_unit));
+  if(strcmp(calpar.calUnit,"")==0){
+    strcpy(calpar.calUnit,"Cal. Units");
   }
-  glob_calpar0 = (float)strtod(gtk_entry_get_text(cal_entry_const),NULL);
-  glob_calpar1 = (float)strtod(gtk_entry_get_text(cal_entry_lin),NULL);
-  glob_calpar2 = (float)strtod(gtk_entry_get_text(cal_entry_quad),NULL);
-  if(!((glob_calpar0 == 0.0)&&(glob_calpar1==0.0)&&(glob_calpar2==0.0))){
+  calpar.calpar0 = (float)strtod(gtk_entry_get_text(cal_entry_const),NULL);
+  calpar.calpar1 = (float)strtod(gtk_entry_get_text(cal_entry_lin),NULL);
+  calpar.calpar2 = (float)strtod(gtk_entry_get_text(cal_entry_quad),NULL);
+  if(!((calpar.calpar0 == 0.0)&&(calpar.calpar1==0.0)&&(calpar.calpar2==0.0))){
     //not all calibration parameters are zero, calibration is valid
-    glob_calMode=1;
-    //printf("Calibration parameters: %f %f %f, glob_calMode: %i, glob_calUnit: %s\n",glob_calpar0,glob_calpar1,glob_calpar2,glob_calMode,glob_calUnit);
+    calpar.calMode=1;
+    //printf("Calibration parameters: %f %f %f, glob_calMode: %i, calpar.calUnit: %s\n",calpar.calpar0,calpar.calpar1,calpar.calpar2,glob_calMode,glob_calUnit);
     gtk_widget_hide(GTK_WIDGET(calibrate_window)); //close the calibration window
     gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
   }else{
-    glob_calMode=0;
+    calpar.calMode=0;
     GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
     GtkWidget *message_dialog = gtk_message_dialog_new(calibrate_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Invalid calibration!");
     gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"At least one of the calibration parameters must be non-zero.");
@@ -469,7 +470,7 @@ int main(int argc, char *argv[])
   glob_zoomLevel = 1.0;
   glob_contractFactor = 1;
   glob_autoScale = 1;
-  glob_calMode = 0;
+  calpar.calMode = 0;
   glob_numSpOpened = 0;
   glob_multiplotMode = 0;
   glob_numMultiplotSp = 1;
