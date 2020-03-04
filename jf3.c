@@ -8,9 +8,9 @@
 void openSingleFile(char *filename){
   int i;
   int openErr = 0;
-  int numSp = readSpectrumDataFile(filename,hist,glob_numSpOpened);
+  int numSp = readSpectrumDataFile(filename,glob_hist,glob_numSpOpened);
   if(numSp > 0){ //see read_data.c
-      openedSp = 1;
+      glob_openedSp = 1;
       //set comments for spectra just opened
       for (i = glob_numSpOpened; i < (glob_numSpOpened+numSp); i++){
         snprintf(glob_histComment[i],256,"Spectrum %i of %s",i-glob_numSpOpened,basename((char*)filename));
