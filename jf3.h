@@ -12,6 +12,8 @@
 #include <math.h>
 #include <libgen.h>
 
+#include "lin_eq_solver.h"
+
 #define BIG_NUMBER    1E10
 #define SMALL_NUMBER -1E10
 #define MAX_DISP_SP   12 //maximum number of spectra which may be displayed at once
@@ -106,6 +108,8 @@ struct {
   int fitStartCh, fitEndCh; //upper and lower channel bounds for fitting
   float fitPeakInitGuess[MAX_FIT_PK]; //initial guess of peak positions, in channels
   float fitParVal[6+(3*MAX_FIT_PK)]; //paramter values found by the fitter
+  int numFitPeaks; //number of peaks to fit
+  double sums[3+MAX_FIT_PK][3+MAX_FIT_PK], ysums[3+MAX_FIT_PK];
 } fitpar;
 
 #endif
