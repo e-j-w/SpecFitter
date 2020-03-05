@@ -63,30 +63,36 @@ GtkComboBoxText *multiplot_mode_combobox;
 GtkBuilder *builder;
 
 //non-GTK GUI globals
-int glob_draggingSp; //0 if no drag motion, 1 if dragging
-int glob_dragstartul, glob_dragstartll; //click and drag position storage parameters
-float glob_dragStartX; //start cursor position when dragging
-float glob_cursorPosX, glob_cursorPosY; //cursor position
-int glob_drawSpCursor; //0 = don't draw vertical cursor on spectrum, 1=draw, -1=drawing disabled
-int glob_drawingAreaMode; //0=normal drawing, 1=draw verticlal cursor only
+struct {
+  int draggingSp; //0 if no drag motion, 1 if dragging
+  int dragstartul, dragstartll; //click and drag position storage parameters
+  float dragStartX; //start cursor position when dragging
+  float cursorPosX, cursorPosY; //cursor position
+  int drawSpCursor; //0 = don't draw vertical cursor on spectrum, 1=draw, -1=drawing disabled
+  //int drawingAreaMode; //0=normal drawing, 1=draw verticlal cursor only
+} gui;
+
+//imported data globals
+struct {
+  double hist[NSPECT][S32K]; //spectrum histogram data
+  char histComment[NSPECT][256]; //spectrum description/comment
+  int openedSp; //0=not opened, 1=opened
+  int numSpOpened; //number of spectra in the opened file(s)
+} rawdata;
 
 //spectrum drawing globals
-double glob_hist[NSPECT][S32K]; //spectrum histogram data
-char glob_histComment[NSPECT][256]; //spectrum description/comment
-int glob_openedSp; //0=not opened, 1=opened
-int glob_numSpOpened; //number of spectra in the opened file(s)
-//int dispSp; //# of the spectrum to display
-int glob_lowerLimit, glob_upperLimit; //lower and upper limits to plot spectrum (in uncalibrated units ie. channels)
-int glob_xChanFocus; //x channel to focus on when zooming
-float glob_zoomLevel; //1.0 = zoomed out fully (on x axis)
-int glob_autoScale; //0=don't autoscale y axis, 1=autoscale y axis
-float glob_scaleLevelMax[MAX_DISP_SP], glob_scaleLevelMin[MAX_DISP_SP]; //the y scale values, ie. the maximum and minimum values to show on the y axis
-int glob_contractFactor; //the number of channels per bin (default=1)
-int glob_multiplotMode; //0=no multiplot, 1=summed spectra, 2=overlay spectra (common scaling), 3=overlay spectra (independent scaling), 4=stacked view
-int glob_numMultiplotSp; //number of spectra to show in multiplot mode
-int glob_multiPlots[NSPECT]; //indices of all the spectra to show in multiplot mode
-float glob_spColors[MAX_DISP_SP*3] = {0.8,0.0,0.0, 0.0,0.0,0.8, 0.0,0.8,0.0, 0.0,0.8,0.8, 0.7,0.7,0.0, 0.8,0.0,0.8,
-                           0.2,0.0,0.0, 0.0,0.0,0.2, 0.0,0.2,0.0, 0.0,0.2,0.2, 0.2,0.2,0.0, 0.2,0.0,0.8}; //colors for displayed spectra
+struct {
+  int lowerLimit, upperLimit; //lower and upper limits to plot spectrum (in uncalibrated units ie. channels)
+  int xChanFocus; //x channel to focus on when zooming
+  float zoomLevel; //1.0 = zoomed out fully (on x axis)
+  int autoScale; //0=don't autoscale y axis, 1=autoscale y axis
+  float scaleLevelMax[MAX_DISP_SP], scaleLevelMin[MAX_DISP_SP]; //the y scale values, ie. the maximum and minimum values to show on the y axis
+  int contractFactor; //the number of channels per bin (default=1)
+  int multiplotMode; //0=no multiplot, 1=summed spectra, 2=overlay spectra (common scaling), 3=overlay spectra (independent scaling), 4=stacked view
+  int numMultiplotSp; //number of spectra to show in multiplot mode
+  int multiPlots[NSPECT]; //indices of all the spectra to show in multiplot mode
+  float spColors[MAX_DISP_SP*3];
+} drawing;
 
 //calibration globals
 struct {

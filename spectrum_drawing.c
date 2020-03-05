@@ -5,7 +5,7 @@ int getFirstNonemptySpectrum(int numSpOpened){
   int i,j;
   for(i=0;i<numSpOpened;i++){
     for(j=0;j<S32K;j++){
-      if(glob_hist[i][j]!=0.0){
+      if(rawdata.hist[i][j]!=0.0){
         return i;
       }
     }
@@ -14,25 +14,25 @@ int getFirstNonemptySpectrum(int numSpOpened){
 }
 
 //get the value of the ith bin of the displayed spectrum
-//i is in channel units, offset from glob_lowerLimit
+//i is in channel units, offset from drawing.lowerLimit
 //for contracted spectra, the original channel units are retained, but the sum
 //of j bins is returned, where j is the contraction factor
 //spNum is the displayed spectrum number (for multiplot), 0 is the first displayed spectrum
 float getDispSpBinVal(int dispSpNum, int bin){
 
-  if((dispSpNum >= glob_numMultiplotSp)||(dispSpNum < 0)){
+  if((dispSpNum >= drawing.numMultiplotSp)||(dispSpNum < 0)){
     //invalid displayed spectrum number
     return 0;
   }
 
   int j,k;
   float val = 0.;
-    for(j=0;j<glob_contractFactor;j++){
-      switch(glob_multiplotMode){
+    for(j=0;j<drawing.contractFactor;j++){
+      switch(drawing.multiplotMode){
         case 1:
           //sum spectra
-          for(k=0;k<glob_numMultiplotSp;k++){
-            val += glob_hist[glob_multiPlots[k]][glob_lowerLimit+bin+j];
+          for(k=0;k<drawing.numMultiplotSp;k++){
+            val += rawdata.hist[drawing.multiPlots[k]][drawing.lowerLimit+bin+j];
           }
           break;
         case 4:
@@ -43,7 +43,7 @@ float getDispSpBinVal(int dispSpNum, int bin){
           //overlay (common scaling)
         case 0:
           //no multiplot
-          val += glob_hist[glob_multiPlots[dispSpNum]][glob_lowerLimit+bin+j];
+          val += rawdata.hist[drawing.multiPlots[dispSpNum]][drawing.lowerLimit+bin+j];
           break;
         default:
           break;
@@ -56,31 +56,31 @@ float getDispSpBinVal(int dispSpNum, int bin){
 //function setting the plotting limits for the spectrum based on the zoom level
 //the plotting limits are in UNCALIBRATED units ie. channels
 void getPlotLimits(){
-    if(glob_zoomLevel <= 1.0){
+    if(drawing.zoomLevel <= 1.0){
         //set zoomed out
-        glob_zoomLevel = 1.0;
-        glob_lowerLimit = 0;
-        glob_upperLimit = S32K - 1;
+        drawing.zoomLevel = 1.0;
+        drawing.lowerLimit = 0;
+        drawing.upperLimit = S32K - 1;
         return;
-    }else if(glob_zoomLevel > 1024.0){
-        glob_zoomLevel = 1024.0; //set maximum zoom level
+    }else if(drawing.zoomLevel > 1024.0){
+        drawing.zoomLevel = 1024.0; //set maximum zoom level
     }
 
-    int numChansToDisp = (int)(1.0*S32K/glob_zoomLevel);
-    glob_lowerLimit = glob_xChanFocus - numChansToDisp/2;
-    glob_lowerLimit = glob_lowerLimit - (glob_lowerLimit % glob_contractFactor); //round to nearest multiple of contraction factor
+    int numChansToDisp = (int)(1.0*S32K/drawing.zoomLevel);
+    drawing.lowerLimit = drawing.xChanFocus - numChansToDisp/2;
+    drawing.lowerLimit = drawing.lowerLimit - (drawing.lowerLimit % drawing.contractFactor); //round to nearest multiple of contraction factor
     //clamp to lower limit of 0 if needed
-    if(glob_lowerLimit < 0){
-        glob_lowerLimit = 0;
-        glob_upperLimit = numChansToDisp - 1;
+    if(drawing.lowerLimit < 0){
+        drawing.lowerLimit = 0;
+        drawing.upperLimit = numChansToDisp - 1;
         return;
     }
-    glob_upperLimit = glob_xChanFocus + numChansToDisp/2;
-    glob_upperLimit = glob_upperLimit - (glob_upperLimit % glob_contractFactor); //round to nearest multiple of contraction factor
+    drawing.upperLimit = drawing.xChanFocus + numChansToDisp/2;
+    drawing.upperLimit = drawing.upperLimit - (drawing.upperLimit % drawing.contractFactor); //round to nearest multiple of contraction factor
     //clamp to upper limit of S32K-1 if needed
-    if(glob_upperLimit > (S32K-1)){
-        glob_upperLimit=S32K-1;
-        glob_lowerLimit=S32K-1-numChansToDisp;
+    if(drawing.upperLimit > (S32K-1)){
+        drawing.upperLimit=S32K-1;
+        drawing.lowerLimit=S32K-1-numChansToDisp;
         return;
     }
 }
@@ -88,18 +88,18 @@ void getPlotLimits(){
 void on_toggle_autoscale(GtkToggleButton *togglebutton, gpointer user_data)
 {
   if(gtk_toggle_button_get_active(togglebutton))
-    glob_autoScale=1;
+    drawing.autoScale=1;
   else
-    glob_autoScale=0;
+    drawing.autoScale=0;
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
 }
 
 void on_toggle_cursor(GtkToggleButton *togglebutton, gpointer user_data)
 {
   if(gtk_toggle_button_get_active(togglebutton))
-    glob_drawSpCursor=0;
+    gui.drawSpCursor=0;
   else
-    glob_drawSpCursor=-1;
+    gui.drawSpCursor=-1;
   gtk_widget_queue_draw(GTK_WIDGET(cursor_drawing_area));
 }
 
@@ -107,7 +107,7 @@ void on_toggle_cursor(GtkToggleButton *togglebutton, gpointer user_data)
 //function handling mouse wheel scrolling to zoom the displayed spectrum
 void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e)
 {
-  if(!glob_openedSp){
+  if(!rawdata.openedSp){
 		return;
 	}
 
@@ -118,38 +118,38 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e)
 
   if(e->direction == 1){
     //printf("Scrolling down at %f %f!\n",e->x,e->y);
-    glob_zoomLevel *= 0.5; 
-  }else if(glob_zoomLevel < 1024.0){
+    drawing.zoomLevel *= 0.5; 
+  }else if(drawing.zoomLevel < 1024.0){
     //printf("Scrolling up at %f %f!\n",e->x,e->y);
-    glob_zoomLevel *= 2.0;
+    drawing.zoomLevel *= 2.0;
     GdkRectangle dasize;  // GtkDrawingArea size
     GdkWindow *wwindow = gtk_widget_get_window(widget);
     // Determine GtkDrawingArea dimensions
     gdk_window_get_geometry (wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
-    glob_xChanFocus = glob_lowerLimit + (((e->x)-80.0)/(dasize.width-80.0))*(glob_upperLimit - glob_lowerLimit);
+    drawing.xChanFocus = drawing.lowerLimit + (((e->x)-80.0)/(dasize.width-80.0))*(drawing.upperLimit - drawing.lowerLimit);
   }
-  gtk_range_set_value(GTK_RANGE(zoom_scale),log(glob_zoomLevel)/log(2.));//base 2 log of zoom
+  gtk_range_set_value(GTK_RANGE(zoom_scale),log(drawing.zoomLevel)/log(2.));//base 2 log of zoom
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
 }
 
 void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data){
 
-  if(!glob_openedSp){
+  if(!rawdata.openedSp){
 		return;
 	}
 
   //printf("Cursor pos: %f %f\n",event->x,event->y);
   if (event->state & GDK_BUTTON1_MASK){
     //button being pressed
-    if(glob_draggingSp == 0){
+    if(gui.draggingSp == 0){
       //start drag
-      glob_draggingSp = 1;
-      if(glob_drawSpCursor == 1)
-        glob_drawSpCursor = 0; //hide vertical cursor while dragging
-      glob_dragstartul=glob_upperLimit;
-      glob_dragstartll=glob_lowerLimit;
-      glob_dragStartX = event->x;
-      //printf("Drag started! dragstartll=%i, dragstartul=%i\n",dragstartll,dragstartul);
+      gui.draggingSp = 1;
+      if(gui.drawSpCursor == 1)
+        gui.drawSpCursor = 0; //hide vertical cursor while dragging
+      gui.dragstartul=drawing.upperLimit;
+      gui.dragstartll=drawing.lowerLimit;
+      gui.dragStartX = event->x;
+      //printf("Drag started! dragstartll=%i, dragstartul=%i\n",gui.dragstartll,gui.dragstartul);
     }else{
       //continue drag
       //printf("Drag updated!\n");
@@ -157,16 +157,16 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
       GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
       // Determine GtkDrawingArea dimensions
       gdk_window_get_geometry (gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
-      int limitWidth = glob_upperLimit-glob_lowerLimit;
-      glob_upperLimit = glob_dragstartul - ((2.*(event->x - glob_dragStartX)/(dasize.width))*limitWidth);
-      glob_lowerLimit = glob_dragstartll - ((2.*(event->x - glob_dragStartX)/(dasize.width))*limitWidth);
-      glob_xChanFocus = glob_lowerLimit + (glob_upperLimit - glob_lowerLimit)/2.;
-      //printf("startx = %f, x = %f, glob_lowerLimit = %i, glob_upperLimit = %i, width = %i, focus = %i\n",glob_dragStartX,event->x,glob_lowerLimit,glob_upperLimit,dasize.width,glob_xChanFocus);
+      int limitWidth = drawing.upperLimit-drawing.lowerLimit;
+      drawing.upperLimit = gui.dragstartul - ((2.*(event->x - gui.dragStartX)/(dasize.width))*limitWidth);
+      drawing.lowerLimit = gui.dragstartll - ((2.*(event->x - gui.dragStartX)/(dasize.width))*limitWidth);
+      drawing.xChanFocus = drawing.lowerLimit + (drawing.upperLimit - drawing.lowerLimit)/2.;
+      //printf("startx = %f, x = %f, drawing.lowerLimit = %i, drawing.upperLimit = %i, width = %i, focus = %i\n",gui.dragStartX,event->x,drawing.lowerLimit,drawing.upperLimit,dasize.width,drawing.xChanFocus);
       gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
     }
   }else{
     //no button press
-    glob_draggingSp = 0;
+    gui.draggingSp = 0;
   }
 
   GdkRectangle dasize;  // GtkDrawingArea size
@@ -175,49 +175,49 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
   gdk_window_get_geometry (gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
   if((event->x > 80.0)&&(event->y < (dasize.height - 40.0))){
     
-    int cursorChan = glob_lowerLimit + (((event->x)-80.0)/(dasize.width-80.0))*(glob_upperLimit - glob_lowerLimit);
-    cursorChan = cursorChan - fmod(cursorChan,glob_contractFactor);
+    int cursorChan = drawing.lowerLimit + (((event->x)-80.0)/(dasize.width-80.0))*(drawing.upperLimit - drawing.lowerLimit);
+    cursorChan = cursorChan - fmod(cursorChan,drawing.contractFactor);
 
     //print cursor position on status bar
     char posLabel[256];
     char *posLabelp = posLabel;
     int i;
-    switch(glob_multiplotMode){
+    switch(drawing.multiplotMode){
       case 4:
       case 3:
       case 2:
         //multiple visible plots
         if(calpar.calMode == 1){
-          int cursorChanEnd = cursorChan + glob_contractFactor;
+          int cursorChanEnd = cursorChan + drawing.contractFactor;
           float cal_lowerChanLimit = calpar.calpar0 + calpar.calpar1*cursorChan + calpar.calpar2*cursorChan*cursorChan;
           float cal_upperChanLimit = calpar.calpar0 + calpar.calpar1*cursorChanEnd + calpar.calpar2*cursorChanEnd*cursorChanEnd;
           posLabelp += snprintf(posLabelp,50,"%s: %0.1f - %0.1f, Values:", calpar.calUnit, cal_lowerChanLimit, cal_upperChanLimit);
         }else{
-          if(glob_contractFactor <= 1){
+          if(drawing.contractFactor <= 1){
             posLabelp += snprintf(posLabel,50,"Channel: %i, Values:",cursorChan);
           }else{
-            snprintf(posLabel,256,"Channels: %i - %i, Values:",cursorChan, cursorChan + glob_contractFactor - 1);
+            snprintf(posLabel,256,"Channels: %i - %i, Values:",cursorChan, cursorChan + drawing.contractFactor - 1);
           }
         }
-        for(i=0;i<(glob_numMultiplotSp-1);i++){
-          posLabelp += snprintf(posLabelp,17," %0.1f,", getDispSpBinVal(i,cursorChan-glob_lowerLimit));
+        for(i=0;i<(drawing.numMultiplotSp-1);i++){
+          posLabelp += snprintf(posLabelp,17," %0.1f,", getDispSpBinVal(i,cursorChan-drawing.lowerLimit));
         }
-        posLabelp += snprintf(posLabelp,17," %0.1f", getDispSpBinVal(glob_numMultiplotSp-1,cursorChan-glob_lowerLimit));
+        posLabelp += snprintf(posLabelp,17," %0.1f", getDispSpBinVal(drawing.numMultiplotSp-1,cursorChan-drawing.lowerLimit));
         break;
       case 1:
       case 0:
       default:
         //single plot
         if(calpar.calMode == 1){
-          int cursorChanEnd = cursorChan + glob_contractFactor;
+          int cursorChanEnd = cursorChan + drawing.contractFactor;
           float cal_lowerChanLimit = calpar.calpar0 + calpar.calpar1*cursorChan + calpar.calpar2*cursorChan*cursorChan;
           float cal_upperChanLimit = calpar.calpar0 + calpar.calpar1*cursorChanEnd + calpar.calpar2*cursorChanEnd*cursorChanEnd;
-          snprintf(posLabel,256,"%s: %0.1f - %0.1f, Value: %0.1f", calpar.calUnit, cal_lowerChanLimit, cal_upperChanLimit, getDispSpBinVal(0,cursorChan-glob_lowerLimit));
+          snprintf(posLabel,256,"%s: %0.1f - %0.1f, Value: %0.1f", calpar.calUnit, cal_lowerChanLimit, cal_upperChanLimit, getDispSpBinVal(0,cursorChan-drawing.lowerLimit));
         }else{
-          if(glob_contractFactor <= 1){
-            snprintf(posLabel,256,"Channel: %i, Value: %0.1f",cursorChan,getDispSpBinVal(0,cursorChan-glob_lowerLimit));
+          if(drawing.contractFactor <= 1){
+            snprintf(posLabel,256,"Channel: %i, Value: %0.1f",cursorChan,getDispSpBinVal(0,cursorChan-drawing.lowerLimit));
           }else{
-            snprintf(posLabel,256,"Channels: %i - %i, Value: %0.1f",cursorChan, cursorChan + glob_contractFactor - 1, getDispSpBinVal(0,cursorChan-glob_lowerLimit));
+            snprintf(posLabel,256,"Channels: %i - %i, Value: %0.1f",cursorChan, cursorChan + drawing.contractFactor - 1, getDispSpBinVal(0,cursorChan-drawing.lowerLimit));
           }
         }
         break;
@@ -225,19 +225,19 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
     gtk_label_set_text(bottom_info_text,posLabel);
 
     //draw cursor on plot (expensive, requires redraw of plot itself)
-    if((glob_draggingSp == 0)&&(glob_drawSpCursor != -1)){
+    if((gui.draggingSp == 0)&&(gui.drawSpCursor != -1)){
       //don't redraw if the cursor hasn't moved, that would be st00pid
-      if(fabs(glob_cursorPosX - event->x) >= 1.0){
-        glob_cursorPosX = event->x;
-        glob_drawSpCursor = 1; //draw vertical cursor
+      if(fabs(gui.cursorPosX - event->x) >= 1.0){
+        gui.cursorPosX = event->x;
+        gui.drawSpCursor = 1; //draw vertical cursor
         gtk_widget_queue_draw(GTK_WIDGET(cursor_drawing_area));
       }
     }
 
   }else{
     gtk_label_set_text(bottom_info_text,"");
-    if(glob_drawSpCursor == 1){
-      glob_drawSpCursor = 0; //hide vertical cursor
+    if(gui.drawSpCursor == 1){
+      gui.drawSpCursor = 0; //hide vertical cursor
       gtk_widget_queue_draw(GTK_WIDGET(cursor_drawing_area));
     }
   }
@@ -247,17 +247,17 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
 
 //get the bin position in the histogram plot
 float getXPos(int bin, float clip_x1, float clip_x2){
-	return clip_x1 + 80.0 + (bin*(clip_x2-clip_x1-80.0)/(glob_upperLimit-glob_lowerLimit));
+	return clip_x1 + 80.0 + (bin*(clip_x2-clip_x1-80.0)/(drawing.upperLimit-drawing.lowerLimit));
 }
 
 float getYPos(float val, int multiplotSpNum, float clip_y1, float clip_y2){
   float pos;
-  switch(glob_multiplotMode){
+  switch(drawing.multiplotMode){
     case 4:
       //stacked
-      pos = clip_y1 + 40.0 + (clip_y2-clip_y1-40.0)*((multiplotSpNum/(glob_numMultiplotSp*1.0)) + (1.0/(glob_numMultiplotSp*1.0))*((val - glob_scaleLevelMin[multiplotSpNum])/(glob_scaleLevelMax[multiplotSpNum] - glob_scaleLevelMin[multiplotSpNum])));
-      if(pos < clip_y1 + 40.0 + (clip_y2-clip_y1-40.0)*(multiplotSpNum/(glob_numMultiplotSp*1.0)))
-        pos = clip_y1 + 40.0 + (clip_y2-clip_y1-40.0)*(multiplotSpNum/(glob_numMultiplotSp*1.0));
+      pos = clip_y1 + 40.0 + (clip_y2-clip_y1-40.0)*((multiplotSpNum/(drawing.numMultiplotSp*1.0)) + (1.0/(drawing.numMultiplotSp*1.0))*((val - drawing.scaleLevelMin[multiplotSpNum])/(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])));
+      if(pos < clip_y1 + 40.0 + (clip_y2-clip_y1-40.0)*(multiplotSpNum/(drawing.numMultiplotSp*1.0)))
+        pos = clip_y1 + 40.0 + (clip_y2-clip_y1-40.0)*(multiplotSpNum/(drawing.numMultiplotSp*1.0));
       break;
     case 3:
     case 2:
@@ -265,7 +265,7 @@ float getYPos(float val, int multiplotSpNum, float clip_y1, float clip_y2){
     case 0:
     default:
       //single plot
-      pos = clip_y1 + 40.0 + (clip_y2-clip_y1-40.0)*((val - glob_scaleLevelMin[multiplotSpNum])/(glob_scaleLevelMax[multiplotSpNum] - glob_scaleLevelMin[multiplotSpNum]));
+      pos = clip_y1 + 40.0 + (clip_y2-clip_y1-40.0)*((val - drawing.scaleLevelMin[multiplotSpNum])/(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]));
       if(pos < clip_y1 + 40.0)
         pos = clip_y1 + 40.0;
       break;
@@ -275,12 +275,12 @@ float getYPos(float val, int multiplotSpNum, float clip_y1, float clip_y2){
 
 //axis tick drawing
 float getAxisXPos(int axisVal, float clip_x1, float clip_x2){
-  int cal_lowerLimit = glob_lowerLimit;
-  int cal_upperLimit = glob_upperLimit;
+  int cal_lowerLimit = drawing.lowerLimit;
+  int cal_upperLimit = drawing.upperLimit;
   if(calpar.calMode==1){
     //calibrate
-    cal_lowerLimit = calpar.calpar0 + calpar.calpar1*glob_lowerLimit + calpar.calpar2*glob_lowerLimit*glob_lowerLimit;
-    cal_upperLimit = calpar.calpar0 + calpar.calpar1*glob_upperLimit + calpar.calpar2*glob_upperLimit*glob_upperLimit;
+    cal_lowerLimit = calpar.calpar0 + calpar.calpar1*drawing.lowerLimit + calpar.calpar2*drawing.lowerLimit*drawing.lowerLimit;
+    cal_upperLimit = calpar.calpar0 + calpar.calpar1*drawing.upperLimit + calpar.calpar2*drawing.upperLimit*drawing.upperLimit;
   }
   if((axisVal < cal_lowerLimit)||(axisVal >= cal_upperLimit))
     return -1; //value is off the visible axis
@@ -305,17 +305,17 @@ void drawXAxisTick(int axisVal, cairo_t *cr, float clip_x1, float clip_x2, float
 float getAxisYPos(float axisVal, int multiplotSpNum, float clip_y2){
   float posVal;
 
-  switch(glob_multiplotMode){
+  switch(drawing.multiplotMode){
     case 4:
       //stacked
-      posVal = (1.0/glob_numMultiplotSp)*(40.0-clip_y2)*(axisVal - glob_scaleLevelMin[multiplotSpNum])/(glob_scaleLevelMax[multiplotSpNum] - glob_scaleLevelMin[multiplotSpNum]) + (40.0-clip_y2)*(multiplotSpNum/(glob_numMultiplotSp*1.0)) - 40.0;
+      posVal = (1.0/drawing.numMultiplotSp)*(40.0-clip_y2)*(axisVal - drawing.scaleLevelMin[multiplotSpNum])/(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]) + (40.0-clip_y2)*(multiplotSpNum/(drawing.numMultiplotSp*1.0)) - 40.0;
       break;
     case 3:
     case 2:
     case 1:
     case 0:
     default:
-      posVal = (40.0-clip_y2)*(axisVal - glob_scaleLevelMin[multiplotSpNum])/(glob_scaleLevelMax[multiplotSpNum] - glob_scaleLevelMin[multiplotSpNum]) - 40.0;
+      posVal = (40.0-clip_y2)*(axisVal - drawing.scaleLevelMin[multiplotSpNum])/(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]) - 40.0;
       break;
   }
 
@@ -323,11 +323,11 @@ float getAxisYPos(float axisVal, int multiplotSpNum, float clip_y2){
   return posVal;
 }
 void drawYAxisTick(float axisVal, int multiplotSpNum, cairo_t *cr, float clip_x1, float clip_x2, float clip_y1, float clip_y2, double baseFontSize){
-  if((axisVal < glob_scaleLevelMin[multiplotSpNum])||(axisVal >= glob_scaleLevelMax[multiplotSpNum])){
-    //printf("axisval:%f,scalemin:%f,scalemax:%f\n",axisVal,glob_scaleLevelMin[multiplotSpNum],glob_scaleLevelMax[multiplotSpNum]);
+  if((axisVal < drawing.scaleLevelMin[multiplotSpNum])||(axisVal >= drawing.scaleLevelMax[multiplotSpNum])){
+    //printf("axisval:%f,scalemin:%f,scalemax:%f\n",axisVal,drawing.scaleLevelMin[multiplotSpNum],drawing.scaleLevelMax[multiplotSpNum]);
     return; //invalid axis value,
   }
-  if((axisVal!=0.0)&&(fabs(axisVal - 0) < (glob_scaleLevelMax[multiplotSpNum] - glob_scaleLevelMin[multiplotSpNum])/20.0)){
+  if((axisVal!=0.0)&&(fabs(axisVal - 0) < (drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])/20.0)){
     //tick is too close to zero, don't draw
     return;
   }
@@ -357,23 +357,23 @@ void drawPlotLabel(cairo_t *cr, float clip_x1, float clip_x2, float clip_y2, dou
   int i;
   cairo_text_extents_t extents; //get dimensions needed to justify text labels
   cairo_set_font_size(cr, baseFontSize);
-  switch(glob_multiplotMode){
+  switch(drawing.multiplotMode){
     case 4:
       //stacked spectra
-      for(i=0;i<glob_numMultiplotSp;i++){
-        cairo_set_source_rgb (cr, glob_spColors[3*i], glob_spColors[3*i + 1], glob_spColors[3*i + 2]);
-        strcpy(plotLabel, glob_histComment[glob_multiPlots[i]]);
+      for(i=0;i<drawing.numMultiplotSp;i++){
+        cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
+        strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[i]]);
         cairo_text_extents(cr, plotLabel, &extents);
-        cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, (40.0-clip_y2)*((i/(glob_numMultiplotSp*1.0)) + 1.0/glob_numMultiplotSp) - 20.0);
+        cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, (40.0-clip_y2)*((i/(drawing.numMultiplotSp*1.0)) + 1.0/drawing.numMultiplotSp) - 20.0);
         cairo_show_text(cr, plotLabel);
       }
       break;
     case 3:
     case 2:
       //overlaid spectra
-      for(i=0;i<glob_numMultiplotSp;i++){
-        cairo_set_source_rgb (cr, glob_spColors[3*i], glob_spColors[3*i + 1], glob_spColors[3*i + 2]);
-        strcpy(plotLabel, glob_histComment[glob_multiPlots[i]]);
+      for(i=0;i<drawing.numMultiplotSp;i++){
+        cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
+        strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[i]]);
         cairo_text_extents(cr, plotLabel, &extents);
         cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, (40.0-clip_y2)*0.9 - 40.0 + 18.0*i);
         cairo_show_text(cr, plotLabel);
@@ -386,8 +386,8 @@ void drawPlotLabel(cairo_t *cr, float clip_x1, float clip_x2, float clip_y2, dou
       cairo_text_extents(cr, plotLabel, &extents);
       cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, (40.0-clip_y2)*0.9 - 40.0);
       cairo_show_text(cr, plotLabel);
-      for(i=0;i<glob_numMultiplotSp;i++){
-        strcpy(plotLabel, glob_histComment[glob_multiPlots[i]]);
+      for(i=0;i<drawing.numMultiplotSp;i++){
+        strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[i]]);
         cairo_text_extents(cr, plotLabel, &extents);
         cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, (40.0-clip_y2)*0.9 - 40.0 + 18.0*(i+1));
         cairo_show_text(cr, plotLabel);
@@ -396,7 +396,7 @@ void drawPlotLabel(cairo_t *cr, float clip_x1, float clip_x2, float clip_y2, dou
     case 0:
       //single plot mode
       cairo_set_source_rgb (cr, 0.3, 0.3, 0.3);
-      strcpy(plotLabel, glob_histComment[glob_multiPlots[0]]);
+      strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[0]]);
       cairo_text_extents(cr, plotLabel, &extents);
       cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, (40.0-clip_y2)*0.9 - 40.0);
       cairo_show_text(cr, plotLabel);
@@ -409,12 +409,12 @@ void drawPlotLabel(cairo_t *cr, float clip_x1, float clip_x2, float clip_y2, dou
 //get the x range of the plot in terms of x axis units, 
 //taking into account whether or not a calibration is in use
 int getPlotRangeXUnits(){
-  int cal_lowerLimit = glob_lowerLimit;
-  int cal_upperLimit = glob_upperLimit;
+  int cal_lowerLimit = drawing.lowerLimit;
+  int cal_upperLimit = drawing.upperLimit;
   if(calpar.calMode==1){
     //calibrate
-    cal_lowerLimit = calpar.calpar0 + calpar.calpar1*glob_lowerLimit + calpar.calpar2*glob_lowerLimit*glob_lowerLimit;
-    cal_upperLimit = calpar.calpar0 + calpar.calpar1*glob_upperLimit + calpar.calpar2*glob_upperLimit*glob_upperLimit;
+    cal_lowerLimit = calpar.calpar0 + calpar.calpar1*drawing.lowerLimit + calpar.calpar2*drawing.lowerLimit*drawing.lowerLimit;
+    cal_upperLimit = calpar.calpar0 + calpar.calpar1*drawing.upperLimit + calpar.calpar2*drawing.upperLimit*drawing.upperLimit;
   }
   return cal_upperLimit - cal_lowerLimit;
 }
@@ -423,11 +423,11 @@ int getPlotRangeXUnits(){
 void drawCursorArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 {
 
-	if(!glob_openedSp){
+	if(!rawdata.openedSp){
 		return;
 	}
 
-  if(glob_drawSpCursor != 1){
+  if(gui.drawSpCursor != 1){
     return;
   }
 
@@ -439,8 +439,8 @@ void drawCursorArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   gdk_window_get_geometry(wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
   cairo_set_line_width(cr, 1.0);
   cairo_set_source_rgb (cr, 0.3, 0.3, 0.3);
-  cairo_move_to(cr, glob_cursorPosX, 0.0);
-  cairo_line_to(cr, glob_cursorPosX, dasize.height-40.0);
+  cairo_move_to(cr, gui.cursorPosX, 0.0);
+  cairo_line_to(cr, gui.cursorPosX, dasize.height-40.0);
   cairo_stroke(cr);
 
 }
@@ -449,7 +449,7 @@ void drawCursorArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 {
 
-	if(!glob_openedSp){
+	if(!rawdata.openedSp){
 		return;
 	}
 
@@ -460,9 +460,9 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   // Determine GtkDrawingArea dimensions
   gdk_window_get_geometry(wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
 
-	if (glob_multiPlots[0] >= NSPECT)
+	if (drawing.multiPlots[0] >= NSPECT)
 	{
-		printf("Spectrum number too high (%i)!\n", glob_multiPlots[0]);
+		printf("Spectrum number too high (%i)!\n", drawing.multiPlots[0]);
 		return;
 	}
 
@@ -488,18 +488,18 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   //get the maximum/minimum y values of the displayed region
   float maxVal[MAX_DISP_SP];
   float minVal[MAX_DISP_SP];
-  for(i=0;i<glob_numMultiplotSp;i++){
+  for(i=0;i<drawing.numMultiplotSp;i++){
     minVal[i] = BIG_NUMBER;
     maxVal[i] = SMALL_NUMBER;
   }
-  for(i=0;i<(glob_upperLimit-glob_lowerLimit-1);i+=glob_contractFactor){
+  for(i=0;i<(drawing.upperLimit-drawing.lowerLimit-1);i+=drawing.contractFactor){
     float currentVal[MAX_DISP_SP];
-    switch(glob_multiplotMode){
+    switch(drawing.multiplotMode){
       case 4:
         //stacked
       case 3:
         //overlay (independent scaling)
-        for(j=0;j<glob_numMultiplotSp;j++){
+        for(j=0;j<drawing.numMultiplotSp;j++){
           currentVal[j] = getDispSpBinVal(j, i);
           if(currentVal[j] > maxVal[j]){
             maxVal[j] = currentVal[j];
@@ -511,7 +511,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
         break;
       case 2:
         //overlay (common scaling)
-        for(j=0;j<glob_numMultiplotSp;j++){
+        for(j=0;j<drawing.numMultiplotSp;j++){
           currentVal[0] = getDispSpBinVal(j, i);
           if(currentVal[0] > maxVal[0]){
             maxVal[0] = currentVal[0];
@@ -537,20 +537,20 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
     }
   }
   //setup autoscaling
-  if((glob_autoScale)||(glob_scaleLevelMax[0] <= glob_scaleLevelMin[0])){
-    switch(glob_multiplotMode){
+  if((drawing.autoScale)||(drawing.scaleLevelMax[0] <= drawing.scaleLevelMin[0])){
+    switch(drawing.multiplotMode){
       case 4:
       case 3:
-        for(i=0;i<glob_numMultiplotSp;i++){
-          glob_scaleLevelMax[i] = maxVal[i]*1.1;
-          glob_scaleLevelMin[i] = minVal[i];
+        for(i=0;i<drawing.numMultiplotSp;i++){
+          drawing.scaleLevelMax[i] = maxVal[i]*1.1;
+          drawing.scaleLevelMin[i] = minVal[i];
         }
         break;
       case 2:
       case 1:
       case 0:
-        glob_scaleLevelMax[0] = maxVal[0]*1.1;
-        glob_scaleLevelMin[0] = minVal[0];
+        drawing.scaleLevelMax[0] = maxVal[0]*1.1;
+        drawing.scaleLevelMin[0] = minVal[0];
         break;
       default:
         break;
@@ -562,22 +562,22 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   //to help drawing performance
   int maxDrawBins = (clip_x2 - clip_x1)*2;
   //printf("maximum bins to draw: %i\n",maxDrawBins);
-  int binSkipFactor = (glob_upperLimit-glob_lowerLimit)/(maxDrawBins);
-  if(binSkipFactor <= glob_contractFactor)
-    binSkipFactor = glob_contractFactor;
+  int binSkipFactor = (drawing.upperLimit-drawing.lowerLimit)/(maxDrawBins);
+  if(binSkipFactor <= drawing.contractFactor)
+    binSkipFactor = drawing.contractFactor;
   //printf("binskipfactor: %i\n",binSkipFactor);
   //for smooth scrolling of interpolated spectra, have the start bin always
   //be a multiple of the skip factor
-  int startBin = 0 - (glob_lowerLimit % binSkipFactor);
+  int startBin = 0 - (drawing.lowerLimit % binSkipFactor);
 
 	//draw the actual histogram
-  switch(glob_multiplotMode){
+  switch(drawing.multiplotMode){
     case 4:
       //stacked
     case 3:
       //overlay (independent scaling)
-      for(i=0;i<glob_numMultiplotSp;i++){
-        for(j=startBin;j<(glob_upperLimit-glob_lowerLimit-1);j+=binSkipFactor){
+      for(i=0;i<drawing.numMultiplotSp;i++){
+        for(j=startBin;j<(drawing.upperLimit-drawing.lowerLimit-1);j+=binSkipFactor){
           float currentVal = getDispSpBinVal(i, j);
           float nextVal = getDispSpBinVal(i, j+binSkipFactor);
           cairo_move_to (cr, getXPos(j,clip_x1,clip_x2), getYPos(currentVal,i,clip_y1,clip_y2));
@@ -585,14 +585,14 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
           cairo_line_to (cr, getXPos(j+binSkipFactor,clip_x1,clip_x2), getYPos(nextVal,i,clip_y1,clip_y2));
         }
         //choose color
-        cairo_set_source_rgb (cr, glob_spColors[3*i], glob_spColors[3*i + 1], glob_spColors[3*i + 2]);
+        cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
         cairo_stroke(cr);
       }
       break;
     case 2:
       //overlay (common scaling)
-      for(i=0;i<glob_numMultiplotSp;i++){
-        for(j=startBin;j<(glob_upperLimit-glob_lowerLimit-1);j+=binSkipFactor){
+      for(i=0;i<drawing.numMultiplotSp;i++){
+        for(j=startBin;j<(drawing.upperLimit-drawing.lowerLimit-1);j+=binSkipFactor){
           float currentVal = getDispSpBinVal(i, j);
           float nextVal = getDispSpBinVal(i, j+binSkipFactor);
           cairo_move_to (cr, getXPos(j,clip_x1,clip_x2), getYPos(currentVal,0,clip_y1,clip_y2));
@@ -600,22 +600,22 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
           cairo_line_to (cr, getXPos(j+binSkipFactor,clip_x1,clip_x2), getYPos(nextVal,0,clip_y1,clip_y2));
         }
         //choose color
-        cairo_set_source_rgb (cr, glob_spColors[3*i], glob_spColors[3*i + 1], glob_spColors[3*i + 2]);
+        cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
         cairo_stroke(cr);
       }
       break;
     case 1:
       //summed
     case 0:
-      for(i=startBin;i<(glob_upperLimit-glob_lowerLimit-1);i+=binSkipFactor){
+      for(i=startBin;i<(drawing.upperLimit-drawing.lowerLimit-1);i+=binSkipFactor){
         float currentVal = getDispSpBinVal(0, i);
         float nextVal = getDispSpBinVal(0, i+binSkipFactor);
-        //printf("Here! x=%f,y=%f,yorig=%f xclip=%f %f\n",getXPos(i,clip_x1,clip_x2), glob_hist[glob_multiPlots[0]][glob_lowerLimit+i],glob_hist[glob_multiPlots[0]][glob_lowerLimit+i],clip_x1,clip_x2);
+        //printf("Here! x=%f,y=%f,yorig=%f xclip=%f %f\n",getXPos(i,clip_x1,clip_x2), rawdata.hist[drawing.multiPlots[0]][drawing.lowerLimit+i],rawdata.hist[drawing.multiPlots[0]][drawing.lowerLimit+i],clip_x1,clip_x2);
         cairo_move_to (cr, getXPos(i,clip_x1,clip_x2), getYPos(currentVal,0,clip_y1,clip_y2));
         cairo_line_to (cr, getXPos(i+binSkipFactor,clip_x1,clip_x2), getYPos(currentVal,0,clip_y1,clip_y2));
         cairo_line_to (cr, getXPos(i+binSkipFactor,clip_x1,clip_x2), getYPos(nextVal,0,clip_y1,clip_y2));
       }
-      cairo_set_source_rgb (cr, glob_spColors[0], glob_spColors[1], glob_spColors[2]);
+      cairo_set_source_rgb (cr, drawing.spColors[0], drawing.spColors[1], drawing.spColors[2]);
       cairo_stroke(cr);
       break;
     default:
@@ -627,12 +627,12 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   cairo_set_source_rgb (cr, 0.3, 0.3, 0.3);
   cairo_move_to (cr, clip_x1+80.0, clip_y1+40.0);
   cairo_line_to (cr, clip_x1+80.0, clip_y2);
-  switch(glob_multiplotMode){
+  switch(drawing.multiplotMode){
     case 4:
       //stacked
-      for(i=0;i<glob_numMultiplotSp;i++){
-        cairo_move_to (cr, clip_x1+80.0, clip_y1+40.0 + (clip_y2-clip_y1-40.0)*i/(glob_numMultiplotSp*1.0));
-        cairo_line_to (cr, clip_x2, clip_y1+40.0 + (clip_y2-clip_y1-40.0)*i/(glob_numMultiplotSp*1.0));
+      for(i=0;i<drawing.numMultiplotSp;i++){
+        cairo_move_to (cr, clip_x1+80.0, clip_y1+40.0 + (clip_y2-clip_y1-40.0)*i/(drawing.numMultiplotSp*1.0));
+        cairo_line_to (cr, clip_x2, clip_y1+40.0 + (clip_y2-clip_y1-40.0)*i/(drawing.numMultiplotSp*1.0));
       }
       break;
     case 3:
@@ -701,19 +701,19 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   
   //draw y axis ticks
   int numTickPerSp;
-  switch(glob_multiplotMode){
+  switch(drawing.multiplotMode){
     case 4:
       //stacked
-      numTickPerSp = (clip_y2 - clip_y1)/(40.0*glob_numMultiplotSp) + 1;
-      for(i=0;i<glob_numMultiplotSp;i++){
-        cairo_set_source_rgb (cr, glob_spColors[3*i], glob_spColors[3*i + 1], glob_spColors[3*i + 2]);
+      numTickPerSp = (clip_y2 - clip_y1)/(40.0*drawing.numMultiplotSp) + 1;
+      for(i=0;i<drawing.numMultiplotSp;i++){
+        cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
         for(j=0;j<numTickPerSp;j++){
-          drawYAxisTick(glob_scaleLevelMin[i] + (glob_scaleLevelMax[i] - glob_scaleLevelMin[i])*j/(numTickPerSp*1.), i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
+          drawYAxisTick(drawing.scaleLevelMin[i] + (drawing.scaleLevelMax[i] - drawing.scaleLevelMin[i])*j/(numTickPerSp*1.), i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
         }
         drawYAxisTick(0.0, i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize); //always draw the zero label on the y axis
         cairo_stroke(cr);
         //draw the zero line if applicable
-        if((glob_scaleLevelMin[i] < 0.0) && (glob_scaleLevelMax[i] > 0.0)){
+        if((drawing.scaleLevelMin[i] < 0.0) && (drawing.scaleLevelMax[i] > 0.0)){
           cairo_set_line_width(cr, 1.0);
           cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
           cairo_move_to (cr, clip_x1 + 80.0, getAxisYPos(0.0,i,clip_y2));
@@ -724,10 +724,10 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       break;
     case 3:
       //overlay (independent scaling)
-      for(i=0;i<glob_numMultiplotSp;i++){
-        float labelOffset = 0.4*(i+1)/(glob_numMultiplotSp*1.);
-        cairo_set_source_rgb (cr, glob_spColors[3*i], glob_spColors[3*i + 1], glob_spColors[3*i + 2]);
-        drawYAxisTick(glob_scaleLevelMax[i]*(0.3 + labelOffset), i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize); //draw one axis tick near the middle of the axis, per spectrum
+      for(i=0;i<drawing.numMultiplotSp;i++){
+        float labelOffset = 0.4*(i+1)/(drawing.numMultiplotSp*1.);
+        cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
+        drawYAxisTick(drawing.scaleLevelMax[i]*(0.3 + labelOffset), i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize); //draw one axis tick near the middle of the axis, per spectrum
         drawYAxisTick(0.0, i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize); //always draw the zero label on the y axis
       }
       break;
@@ -738,12 +738,12 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       cairo_set_source_rgb (cr, 0.3, 0.3, 0.3);
       numTickPerSp = (clip_y2 - clip_y1)/40.0 + 1;
       for(i=0;i<numTickPerSp;i++){
-        drawYAxisTick(glob_scaleLevelMin[0] + (glob_scaleLevelMax[0] - glob_scaleLevelMin[0])*i/(numTickPerSp*1.), 0, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
+        drawYAxisTick(drawing.scaleLevelMin[0] + (drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])*i/(numTickPerSp*1.), 0, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
       }
       drawYAxisTick(0.0, 0, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize); //always draw the zero label on the y axis
       cairo_stroke(cr);
       //draw the zero line if applicable
-      if((glob_scaleLevelMin[0] < 0.0) && (glob_scaleLevelMax[0] > 0.0)){
+      if((drawing.scaleLevelMin[0] < 0.0) && (drawing.scaleLevelMax[0] > 0.0)){
         cairo_set_line_width(cr, 1.0);
         cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
         cairo_move_to (cr, clip_x1 + 80.0, getAxisYPos(0.0,0,clip_y2));

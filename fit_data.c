@@ -4,9 +4,9 @@ double getFitChisq(int numFitPk){
   double chisq = 0.;
   double f;
   float yval,xval;
-  for (i=fitpar.fitStartCh;i<=fitpar.fitEndCh;i+=glob_contractFactor){
-    xval = i + (glob_contractFactor/2.); //central value of bin
-    yval = getDispSpBinVal(0,i-glob_lowerLimit);
+  for (i=fitpar.fitStartCh;i<=fitpar.fitEndCh;i+=drawing.contractFactor){
+    xval = i + (drawing.contractFactor/2.); //central value of bin
+    yval = getDispSpBinVal(0,i-drawing.lowerLimit);
     //background term
     f = fitpar.fitParVal[0] + fitpar.fitParVal[1]*xval + fitpar.fitParVal[2]*xval*xval;
     //gaussian(s)
