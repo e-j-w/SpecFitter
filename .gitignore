@@ -5,3 +5,5 @@ jf3-resources.c
 *.fmca
 *.spe
 *.out
+*.o
+*/*.o
