@@ -38,18 +38,16 @@ So far the program has only been tested with Linux-based systems.  A Makefile is
 * GNU make
 * gcc
 * GTK 3 (`gtk3-devel` in CentOS)
-* GLib
-* Cairo (used for drawing spectra)
 
 ## Tips and tricks
 
-When running the program from the command line, it is possible to automatically open a file by specifying the filename as an argument (ie. `jf3 /path/to/file`).
+When running the program from the command line, it is possible to automatically open files by specifying the filename(s) as arguments (eg. `jf3 /path/to/file1 /path/to/file2`).
 
 
 ## Future plans
 
+* Peak fitting
 * Peak labels?
-* Peak fitting?
 
 ## Credits
 

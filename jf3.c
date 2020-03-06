@@ -6,9 +6,12 @@
 #include "fit_data.c"
 
 //function for opening a single file without UI (ie. from the command line)
-void openSingleFile(char *filename){
+//if append=1, append this file to already opened files
+void openSingleFile(char *filename, int append){
   int i;
   int openErr = 0;
+  if(append!=1)
+    rawdata.numSpOpened=0;
   int numSp = readSpectrumDataFile(filename,rawdata.hist,rawdata.numSpOpened);
   if(numSp > 0){ //see read_data.c
       rawdata.openedSp = 1;
@@ -17,7 +20,7 @@ void openSingleFile(char *filename){
         snprintf(rawdata.histComment[i],256,"Spectrum %i of %s",i-rawdata.numSpOpened,basename((char*)filename));
         //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
       }
-      rawdata.numSpOpened = numSp;
+      rawdata.numSpOpened += numSp;
       //select the first non-empty spectrum by default
       int sel = getFirstNonemptySpectrum(rawdata.numSpOpened);
       if(sel >=0){
@@ -66,8 +69,6 @@ void openSingleFile(char *filename){
     exit(-1);
   }
 
-  //set the title of the opened spectrum in the header bar
-  gtk_header_bar_set_subtitle(header_bar,filename);
 }
 
 void on_open_button_clicked(GtkButton *b)
@@ -336,6 +337,7 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data
 {
   drawing.multiPlots[0] = gtk_spin_button_get_value_as_int(spin_button);
   drawing.multiplotMode = 0;//unset multiplot, if it is being used
+  gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE); //no multiplot, therefore can fit
   //printf("Set selected spectrum to %i\n",dispSp);
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
 }
@@ -511,7 +513,19 @@ int main(int argc, char *argv[])
 
   //open a file if requested from the command line
   if(argc > 1){
-    openSingleFile(argv[1]);
+    int i;
+    openSingleFile(argv[1],0);
+    for(i=2;i<argc;i++){
+      openSingleFile(argv[i],1);
+    }
+    //set headerbar info for opened files
+    if(argc>2){
+      char headerBarSub[256];
+      snprintf(headerBarSub,256,"%i files loaded",argc-1);
+      gtk_header_bar_set_subtitle(header_bar,headerBarSub);
+    }else{
+      gtk_header_bar_set_subtitle(header_bar,argv[1]);
+    }
   }
 
   //startup UI
