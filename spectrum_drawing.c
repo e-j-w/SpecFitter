@@ -13,6 +13,22 @@ int getFirstNonemptySpectrum(int numSpOpened){
   return -1;
 }
 
+//converts cursor position units to channel units on the displayed spectrum
+//return value is float to allow sub-channel prescision, cast it to int if needed
+float getCursorChannel(float cursorx, float cursory){
+  GdkRectangle dasize;  // GtkDrawingArea size
+  GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
+  // Determine GtkDrawingArea dimensions
+  gdk_window_get_geometry (gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
+  if((cursorx > 80.0)&&(cursory < (dasize.height - 40.0))){
+    
+    float cursorChan = drawing.lowerLimit + (((cursorx)-80.0)/(dasize.width-80.0))*(drawing.upperLimit - drawing.lowerLimit);
+    return cursorChan;
+    //return cursorChan - fmod(cursorChan,drawing.contractFactor);
+  }
+  return -1; //
+}
+
 //get the value of the ith bin of the displayed spectrum
 //i is in channel units, offset from drawing.lowerLimit
 //for contracted spectra, the original channel units are retained, but the sum
@@ -132,15 +148,67 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e)
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
 }
 
+void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
+  
+  if ((event->type == GDK_BUTTON_PRESS) && (event->button == 3)){
+    //right mouse button being pressed
+    float cursorChan = getCursorChannel(event->x, event->y);
+    switch(gui.fittingSp){
+      case 2:
+        //setup peak positions
+        if(fitpar.numFitPeaks < MAX_FIT_PK){
+          if((cursorChan >= fitpar.fitStartCh)&&(cursorChan <= fitpar.fitEndCh)){
+            fitpar.fitPeakInitGuess[fitpar.numFitPeaks] = cursorChan;
+            printf("Fitting peak at channel %f\n",fitpar.fitPeakInitGuess[fitpar.numFitPeaks]);
+            gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),TRUE);
+            fitpar.numFitPeaks++;
+          }
+        }
+        if(fitpar.numFitPeaks >= MAX_FIT_PK){
+          printf("Maximum number of fit peaks specified.\n");
+          fitpar.numFitPeaks = MAX_FIT_PK;
+          gui.fittingSp = 3; //force fit to proceed
+        }
+        break;
+      case 1:
+        //setup fitting limit
+        if(fitpar.fitEndCh < 0){
+          if(fitpar.fitStartCh < 0){
+            fitpar.fitStartCh = (int)cursorChan;
+          }else{
+            if(cursorChan > fitpar.fitStartCh){
+              fitpar.fitEndCh = (int)cursorChan;
+            }else if (cursorChan < fitpar.fitStartCh){
+              fitpar.fitEndCh = fitpar.fitStartCh; //swap
+              fitpar.fitStartCh = (int)cursorChan;
+            }
+          }
+        }
+        //check if both limits have been set
+        if((fitpar.fitStartCh >= 0)&&(fitpar.fitEndCh >=0)){
+          printf("Fit limits: channel %i through %i\n",fitpar.fitStartCh,fitpar.fitEndCh);
+          gtk_label_set_text(overlay_info_label,"Right-click at approximate peak positions.");
+          gui.fittingSp = 2;
+        }
+        break;
+      case 0:
+      default:
+        break;
+    }
+  }
+}
+
 void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data){
 
   if(!rawdata.openedSp){
 		return;
 	}
 
+  int cursorChan = (int)getCursorChannel(event->x, event->y);
+
   //printf("Cursor pos: %f %f\n",event->x,event->y);
   if (event->state & GDK_BUTTON1_MASK){
-    //button being pressed
+    //left mouse button being pressed
     if(gui.draggingSp == 0){
       //start drag
       gui.draggingSp = 1;
@@ -169,14 +237,9 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
     gui.draggingSp = 0;
   }
 
-  GdkRectangle dasize;  // GtkDrawingArea size
-  GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
-  // Determine GtkDrawingArea dimensions
-  gdk_window_get_geometry (gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
-  if((event->x > 80.0)&&(event->y < (dasize.height - 40.0))){
-    
-    int cursorChan = drawing.lowerLimit + (((event->x)-80.0)/(dasize.width-80.0))*(drawing.upperLimit - drawing.lowerLimit);
-    cursorChan = cursorChan - fmod(cursorChan,drawing.contractFactor);
+  
+
+  if(cursorChan >= 0){
 
     //print cursor position on status bar
     char posLabel[256];

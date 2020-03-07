@@ -106,6 +106,7 @@ void on_open_button_clicked(GtkButton *b)
         if(sel >=0){
           drawing.multiPlots[0] = sel;
           drawing.multiplotMode = 0; //files just opened, disable multiplot
+          gui.fittingSp = 0; //files just opened, reset fit state
           gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
           gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),TRUE);
           gtk_widget_set_sensitive(GTK_WIDGET(display_button),TRUE);
@@ -344,16 +345,36 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data
 
 void on_fit_button_clicked(GtkButton *b)
 {
+  gui.fittingSp = 1;
+  //set default values
+  fitpar.fitStartCh = -1;
+  fitpar.fitEndCh = -1;
+  fitpar.numFitPeaks = 0;
+  //update widgets
   gtk_widget_set_sensitive(GTK_WIDGET(open_button),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
+  gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
   gtk_label_set_text(overlay_info_label,"Right-click to set fit region lower and upper bounds.");
   gtk_widget_show(GTK_WIDGET(overlay_info_bar));
   gtk_info_bar_set_revealed(overlay_info_bar, TRUE);
 }
 
+void on_fit_fit_button_clicked(GtkButton *b)
+{
+  gui.fittingSp = 3;
+  //update widgets
+  gtk_widget_set_sensitive(GTK_WIDGET(open_button),TRUE);
+  gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
+  gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
+  gtk_info_bar_set_revealed(overlay_info_bar, FALSE);
+  gtk_widget_hide(GTK_WIDGET(overlay_info_bar));
+}
+
 void on_fit_cancel_button_clicked(GtkButton *b)
 {
+  gui.fittingSp = 0;
+  //update widgets
   gtk_widget_set_sensitive(GTK_WIDGET(open_button),TRUE);
   gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
   gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
@@ -435,11 +456,13 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "draw", G_CALLBACK (drawSpectrumArea), NULL);
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "scroll-event", G_CALLBACK (on_spectrum_scroll), NULL);
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "motion-notify-event", G_CALLBACK (on_spectrum_cursor_motion), NULL);
+  g_signal_connect (G_OBJECT (spectrum_drawing_area), "button-press-event", G_CALLBACK (on_spectrum_click), NULL);
   g_signal_connect (G_OBJECT (cursor_drawing_area), "draw", G_CALLBACK (drawCursorArea), NULL);
   g_signal_connect (G_OBJECT (open_button), "clicked", G_CALLBACK (on_open_button_clicked), NULL);
   g_signal_connect (G_OBJECT (calibrate_button), "clicked", G_CALLBACK (on_calibrate_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_button), "clicked", G_CALLBACK (on_multiplot_button_clicked), NULL);
   g_signal_connect (G_OBJECT (fit_button), "clicked", G_CALLBACK (on_fit_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (fit_fit_button), "clicked", G_CALLBACK (on_fit_fit_button_clicked), NULL);
   g_signal_connect (G_OBJECT (fit_cancel_button), "clicked", G_CALLBACK (on_fit_cancel_button_clicked), NULL);
   g_signal_connect (G_OBJECT (display_button), "clicked", G_CALLBACK (on_display_button_clicked), NULL);
   g_signal_connect (G_OBJECT (calibrate_ok_button), "clicked", G_CALLBACK (on_calibrate_ok_button_clicked), NULL);
@@ -488,9 +511,13 @@ int main(int argc, char *argv[])
   drawing.spColors[27] = 0.0; drawing.spColors[28] = 0.2; drawing.spColors[29] = 0.2; //RGB values for color 10
   drawing.spColors[30] = 0.2; drawing.spColors[31] = 0.2; drawing.spColors[32] = 0.0; //RGB values for color 11
   drawing.spColors[33] = 0.2; drawing.spColors[34] = 0.0; drawing.spColors[35] = 0.8; //RGB values for color 12
-
+  gui.fittingSp = 0;
   gui.draggingSp = 0;
   gui.drawSpCursor = -1; //disabled by default
+  fitpar.fitStartCh = -1;
+  fitpar.fitEndCh = -1;
+  fitpar.numFitPeaks = 0;
+
   gtk_adjustment_set_lower(spectrum_selector_adjustment, 0);
   gtk_adjustment_set_upper(spectrum_selector_adjustment, 0);
   gtk_label_set_text(bottom_info_text,"No spectrum loaded.");

@@ -71,6 +71,7 @@ struct {
   float dragStartX; //start cursor position when dragging
   float cursorPosX, cursorPosY; //cursor position
   int drawSpCursor; //0 = don't draw vertical cursor on spectrum, 1=draw, -1=drawing disabled
+  int fittingSp; //0=not fitting, 1=selecting limits, 2=selecting peaks, 3=fitted (display fit)
   //int drawingAreaMode; //0=normal drawing, 1=draw verticlal cursor only
 } gui;
 
