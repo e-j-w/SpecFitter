@@ -1,7 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.2 -->
+<!-- Generated with glade 3.22.2 
+
+The MIT License (MIT)
+
+Copyright (c) Jonathan Williams and contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+Author: Jonathan Williams
+
+-->
 <interface>
   <requires lib="gtk+" version="3.20"/>
+  <!-- interface-license-type mit -->
+  <!-- interface-name jf3 Spectrum Viewer -->
+  <!-- interface-description A simple 1D spectrum viewer in GTK3. -->
+  <!-- interface-copyright Jonathan Williams and contributors -->
+  <!-- interface-authors Jonathan Williams -->
   <object class="GtkMenu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -836,16 +867,24 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="display_button">
-            <property name="label" translatable="yes">Display...</property>
+          <object class="GtkMenuButton" id="display_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Change display parameters for the loaded spectrum (zoom/pan/contraction factor).</property>
+            <property name="tooltip_text" translatable="yes">Change display parameters for the loaded spectra (zoom/pan/contraction factor).</property>
+            <property name="use_popover">False</property>
+            <property name="popover">display_popover</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_name">emblem-photos-symbolic</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="pack_type">end</property>
-            <property name="position">2</property>
+            <property name="position">3</property>
           </packing>
         </child>
       </object>
@@ -1008,7 +1047,7 @@
                   <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="stock">gtk-zoom-out</property>
+                    <property name="icon_name">zoom-out-symbolic</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1037,7 +1076,7 @@
                   <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="stock">gtk-zoom-in</property>
+                    <property name="icon_name">zoom-in-symbolic</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
