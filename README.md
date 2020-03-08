@@ -25,6 +25,10 @@ NOTE: This is still in the early stages - spectra appear to be drawing correctly
 * Zoom and pan using the mouse (mouse wheel, click and drag).
 * Rebin spectra, with results displayed in real time.
 
+### Peak fitting
+
+* Fit multiple Gaussian peak shapes on quadratic background (WIP).
+
 ### Cool user interface
 
 * Designed to be as simple and intuitive as possible given the supported featureset.
@@ -46,7 +50,7 @@ When running the program from the command line, it is possible to automatically 
 
 ## Future plans
 
-* Peak fitting
+* Display peak fit values (with uncertainties)
 * Peak labels?
 
 ## Credits

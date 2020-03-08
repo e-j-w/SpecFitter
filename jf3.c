@@ -193,6 +193,9 @@ void on_pan_scale_changed(GtkRange *range, gpointer user_data){
 }
 void on_contract_scale_changed(GtkRange *range, gpointer user_data){
   drawing.contractFactor = (int)gtk_range_get_value(range); //modify the contraction factor
+  if(gui.fittingSp == 3){
+    performGausFit(); //refit
+  }
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
 }
 
@@ -315,7 +318,17 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
     gtk_dialog_run (GTK_DIALOG (message_dialog));
     gtk_widget_destroy (message_dialog);
   }else{
+
+    //set drawing mode
     drawing.multiplotMode++; //value of 0 means no multiplot
+    
+    //handle fitting
+    if(drawing.multiplotMode > 1){
+      gui.fittingSp = 0; //clear any fits being displayed
+    }else if(gui.fittingSp == 3){
+      performGausFit(); //refit
+    }
+    
     printf("Number of spectra selected for plotting: %i.  Selected spectra: ", drawing.numMultiplotSp);
     int i;
     for(i=0;i<drawing.numMultiplotSp;i++){
@@ -338,6 +351,12 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data
 {
   drawing.multiPlots[0] = gtk_spin_button_get_value_as_int(spin_button);
   drawing.multiplotMode = 0;//unset multiplot, if it is being used
+  
+  //handle fitting
+  if(gui.fittingSp == 3){
+    performGausFit(); //refit
+  }
+
   gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE); //no multiplot, therefore can fit
   //printf("Set selected spectrum to %i\n",dispSp);
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
@@ -364,6 +383,7 @@ void on_fit_fit_button_clicked(GtkButton *b)
 {
   performGausFit(); //perform the fit
   gui.fittingSp = 3;
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
   //update widgets
   gtk_widget_set_sensitive(GTK_WIDGET(open_button),TRUE);
   gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);

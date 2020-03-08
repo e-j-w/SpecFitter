@@ -12,6 +12,18 @@ double evalGaussTerm(int peakNum, double xval){
   return evalG;
 }
 
+double evalFit(double xval){
+  int i;
+  double val = fitpar.fitParVal[0] + xval*fitpar.fitParVal[1] + xval*xval*fitpar.fitParVal[2];
+  for(i=0;i<fitpar.numFitPeaks;i++)
+    val += fitpar.fitParVal[6+(3*i)]*evalGaussTerm(i,xval);
+  return val;
+}
+
+double evalFitBG(double xval){
+  return fitpar.fitParVal[0] + xval*fitpar.fitParVal[1] + xval*xval*fitpar.fitParVal[2];
+}
+
 //function returns chisq evaluated for the current fit
 double getFitChisq(){
   int i,j;
@@ -19,7 +31,7 @@ double getFitChisq(){
   double f;
   double yval,xval;
   for (i=fitpar.fitStartCh;i<=fitpar.fitEndCh;i+=drawing.contractFactor){
-    xval = i + (drawing.contractFactor/2.); //central value of bin
+    xval = i;
     yval = getDispSpBinVal(0,i-drawing.lowerLimit);
     //background term
     f = fitpar.fitParVal[0] + fitpar.fitParVal[1]*xval + fitpar.fitParVal[2]*xval*xval;
@@ -147,7 +159,7 @@ void setupFitSums(lin_eq_type *linEq, int type){
     case 2:
       linEq->dim = 3 + fitpar.numFitPeaks;
       for (i=fitpar.fitStartCh;i<=fitpar.fitEndCh;i+=drawing.contractFactor){
-        xval = i + (drawing.contractFactor/2.); //central value of bin
+        xval = i;
         yval = getDispSpBinVal(0,i-drawing.lowerLimit);
         //printf("xval: %f, yval: %f\n",xval,yval);
         linEq->matrix[0][0] += 1./xval;
@@ -181,7 +193,7 @@ void setupFitSums(lin_eq_type *linEq, int type){
     case 1:
       linEq->dim = fitpar.numFitPeaks; //peak amplitude terms only
       for (i=fitpar.fitStartCh;i<=fitpar.fitEndCh;i+=drawing.contractFactor){
-        xval = i + (drawing.contractFactor/2.); //central value of bin
+        xval = i;
         yval = getDispSpBinVal(0,i-drawing.lowerLimit) - fitpar.fitParVal[0] - fitpar.fitParVal[1]*xval - fitpar.fitParVal[2]*xval*xval;
         //printf("xval: %f, yval: %f\n",xval,yval);
         for(j=0;j<fitpar.numFitPeaks;j++){
@@ -195,7 +207,7 @@ void setupFitSums(lin_eq_type *linEq, int type){
     case 0:
       linEq->dim = 3; //quadratic background terms only
       for (i=fitpar.fitStartCh;i<=fitpar.fitEndCh;i+=drawing.contractFactor){
-        xval = i + (drawing.contractFactor/2.); //central value of bin
+        xval = i;
         yval = getDispSpBinVal(0,i-drawing.lowerLimit);
         //printf("xval: %f, yval: %f\n",xval,yval);
         linEq->matrix[0][0] += 1./xval;

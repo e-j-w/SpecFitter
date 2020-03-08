@@ -169,6 +169,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
           fitpar.numFitPeaks = MAX_FIT_PK;
           performGausFit(); //force fit to proceed
           gui.fittingSp = 3; //force fit to proceed
+          gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
         }
         break;
       case 1:
@@ -312,6 +313,16 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
 //get the bin position in the histogram plot
 float getXPos(int bin, float clip_x1, float clip_x2){
 	return clip_x1 + 80.0 + (bin*(clip_x2-clip_x1-80.0)/(drawing.upperLimit-drawing.lowerLimit));
+}
+
+//get the screen position of a channel (or fractional channel)
+//returns -1 if offscreen
+float getXPosFromCh(float chVal, float clip_x1, float clip_x2){
+  if((chVal < drawing.lowerLimit)||(chVal > drawing.upperLimit)){
+    return -1;
+  }
+  float bin = chVal - drawing.lowerLimit;
+  return clip_x1 + 80.0 + (bin*(clip_x2-clip_x1-80.0)/(drawing.upperLimit-drawing.lowerLimit));
 }
 
 float getYPos(float val, int multiplotSpNum, float clip_y1, float clip_y2){
@@ -685,6 +696,34 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
     default:
       break;
   }
+
+  //draw fit
+  if(gui.fittingSp == 3){
+    if((drawing.lowerLimit < fitpar.fitEndCh)&&(drawing.upperLimit > fitpar.fitStartCh)){
+      cairo_set_line_width(cr, 3.0);
+      cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
+      float fitDrawX, nextFitDrawX, xpos, nextXpos;
+      for(fitDrawX=fitpar.fitStartCh; fitDrawX<=fitpar.fitEndCh; fitDrawX+= (clip_x2 - clip_x1 - 80.0)/1000.){
+        nextFitDrawX = fitDrawX + (clip_x2 - clip_x1 - 80.0)/1000.;
+        xpos = getXPosFromCh(fitDrawX,clip_x1,clip_x2);
+        nextXpos = getXPosFromCh(nextFitDrawX,clip_x1,clip_x2);
+        if((xpos > 0)&&(nextXpos > 0)){
+          cairo_move_to (cr, xpos, getYPos(evalFit(fitDrawX),0,clip_y1,clip_y2));
+          cairo_line_to (cr, nextXpos, getYPos(evalFit(nextFitDrawX),0,clip_y1,clip_y2));
+        }
+      }
+      for(fitDrawX=fitpar.fitStartCh; fitDrawX<=fitpar.fitEndCh; fitDrawX+= (clip_x2 - clip_x1 - 80.0)/1000.){
+        nextFitDrawX = fitDrawX + (clip_x2 - clip_x1 - 80.0)/1000.;
+        xpos = getXPosFromCh(fitDrawX,clip_x1,clip_x2);
+        nextXpos = getXPosFromCh(nextFitDrawX,clip_x1,clip_x2);
+        if((xpos > 0)&&(nextXpos > 0)){
+          cairo_move_to (cr, xpos, getYPos(evalFitBG(fitDrawX),0,clip_y1,clip_y2));
+          cairo_line_to (cr, nextXpos, getYPos(evalFitBG(nextFitDrawX),0,clip_y1,clip_y2));
+        }
+      }
+    }
+  }
+  cairo_stroke(cr);
 
   // draw axis lines
   cairo_set_line_width(cr, 1.0);
