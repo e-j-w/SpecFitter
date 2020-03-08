@@ -116,7 +116,7 @@ void on_toggle_cursor(GtkToggleButton *togglebutton, gpointer user_data)
     gui.drawSpCursor=0;
   else
     gui.drawSpCursor=-1;
-  gtk_widget_queue_draw(GTK_WIDGET(cursor_drawing_area));
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
 }
 
 
@@ -192,6 +192,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
           gtk_label_set_text(overlay_info_label,"Right-click at approximate peak positions.");
           gui.fittingSp = 2;
         }
+        gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
         break;
       case 0:
       default:
@@ -295,7 +296,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
       if(fabs(gui.cursorPosX - event->x) >= 1.0){
         gui.cursorPosX = event->x;
         gui.drawSpCursor = 1; //draw vertical cursor
-        gtk_widget_queue_draw(GTK_WIDGET(cursor_drawing_area));
+        gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
       }
     }
 
@@ -303,7 +304,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
     gtk_label_set_text(bottom_info_text,"");
     if(gui.drawSpCursor == 1){
       gui.drawSpCursor = 0; //hide vertical cursor
-      gtk_widget_queue_draw(GTK_WIDGET(cursor_drawing_area));
+      gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
     }
   }
 
@@ -494,31 +495,6 @@ int getPlotRangeXUnits(){
   return cal_upperLimit - cal_lowerLimit;
 }
 
-//draw a cursor over the spectrum
-void drawCursorArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
-{
-
-	if(!rawdata.openedSp){
-		return;
-	}
-
-  if(gui.drawSpCursor != 1){
-    return;
-  }
-
-  //printf("Drawing cursor!\n");
-
-  GdkRectangle dasize;  // GtkDrawingArea size
-  GdkWindow *wwindow = gtk_widget_get_window(widget);
-  // Determine GtkDrawingArea dimensions
-  gdk_window_get_geometry(wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
-  cairo_set_line_width(cr, 1.0);
-  cairo_set_source_rgb (cr, 0.3, 0.3, 0.3);
-  cairo_move_to(cr, gui.cursorPosX, 0.0);
-  cairo_line_to(cr, gui.cursorPosX, dasize.height-40.0);
-  cairo_stroke(cr);
-
-}
 
 //draw a spectrum
 void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
@@ -887,6 +863,40 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   cairo_show_text(cr, axisLabel);
   cairo_stroke(cr);
   cairo_restore(cr); //recall the unrotated context
+
+  //draw cursors at fit limits if needed
+  if(gui.fittingSp > 0){
+    if(fitpar.fitStartCh >= 0){
+      float cursorPos = getXPosFromCh(fitpar.fitStartCh, clip_x1, clip_x2);
+      if(cursorPos>=0){
+        cairo_set_line_width(cr, 2.0);
+        cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
+        cairo_move_to(cr, cursorPos, -40.0);
+        cairo_line_to(cr, cursorPos, -dasize.height);
+        cairo_stroke(cr);
+      }
+    }
+    if(fitpar.fitEndCh >= 0){
+      float cursorPos = getXPosFromCh(fitpar.fitEndCh, clip_x1, clip_x2);
+      if(cursorPos>=0){
+        cairo_set_line_width(cr, 2.0);
+        cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
+        cairo_move_to(cr, cursorPos, -40.0);
+        cairo_line_to(cr, cursorPos, -dasize.height);
+        cairo_stroke(cr);
+      }
+    }
+  }
+
+  //draw cursor at mouse position
+  if(gui.drawSpCursor == 1){
+    //printf("Drawing cursor!\n");
+    cairo_set_line_width(cr, 1.0);
+    cairo_set_source_rgb (cr, 0.3, 0.3, 0.3);
+    cairo_move_to(cr, gui.cursorPosX, -40.0);
+    cairo_line_to(cr, gui.cursorPosX, -dasize.height);
+    cairo_stroke(cr);
+  }
 
 
   return;

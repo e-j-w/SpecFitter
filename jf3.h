@@ -39,7 +39,7 @@ GtkLabel *bottom_info_text;
 GtkWidget *file_open_dialog;
 GtkFileFilter *file_filter;
 //spectrum drawing
-GtkWidget *spectrum_drawing_area, *cursor_drawing_area;
+GtkWidget *spectrum_drawing_area;
 GtkGesture *spectrum_drag_gesture;
 //spectrum overlay
 GtkInfoBar *overlay_info_bar;

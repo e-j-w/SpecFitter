@@ -905,14 +905,7 @@ Author: Jonathan Williams
             <property name="margin_top">6</property>
             <property name="margin_bottom">6</property>
             <child>
-              <object class="GtkDrawingArea" id="cursordrawingarea">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-              <packing>
-                <property name="pass_through">True</property>
-                <property name="index">-1</property>
-              </packing>
+              <placeholder/>
             </child>
             <child type="overlay">
               <object class="GtkDrawingArea" id="spectrumdrawingarea">

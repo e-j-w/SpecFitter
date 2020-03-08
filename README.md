@@ -52,6 +52,7 @@ When running the program from the command line, it is possible to automatically 
 
 * Display peak fit values (with uncertainties)
 * Peak labels?
+* Import of spectra exported from ROOT?
 
 ## Credits
 

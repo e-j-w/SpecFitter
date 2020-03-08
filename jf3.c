@@ -442,7 +442,6 @@ int main(int argc, char *argv[])
   autoscale_button = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "autoscalebutton"));
   cursor_draw_button = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "cursordrawbutton"));
   spectrum_drawing_area = GTK_WIDGET(gtk_builder_get_object(builder, "spectrumdrawingarea"));
-  cursor_drawing_area = GTK_WIDGET(gtk_builder_get_object(builder, "cursordrawingarea"));
   spectrum_drag_gesture = gtk_gesture_drag_new(spectrum_drawing_area); //without this, cannot click away from menus onto the drawing area, needs further investigation
   zoom_scale = GTK_SCALE(gtk_builder_get_object(builder, "zoom_scale"));
   about_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "about_button"));
@@ -478,7 +477,6 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "scroll-event", G_CALLBACK (on_spectrum_scroll), NULL);
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "motion-notify-event", G_CALLBACK (on_spectrum_cursor_motion), NULL);
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "button-press-event", G_CALLBACK (on_spectrum_click), NULL);
-  g_signal_connect (G_OBJECT (cursor_drawing_area), "draw", G_CALLBACK (drawCursorArea), NULL);
   g_signal_connect (G_OBJECT (open_button), "clicked", G_CALLBACK (on_open_button_clicked), NULL);
   g_signal_connect (G_OBJECT (calibrate_button), "clicked", G_CALLBACK (on_calibrate_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_button), "clicked", G_CALLBACK (on_multiplot_button_clicked), NULL);
