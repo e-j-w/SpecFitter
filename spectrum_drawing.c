@@ -169,8 +169,8 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
           fitpar.numFitPeaks = MAX_FIT_PK;
           performGausFit(); //force fit to proceed
           gui.fittingSp = 3; //force fit to proceed
-          gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
         }
+        gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
         break;
       case 1:
         //setup fitting limit
@@ -884,6 +884,31 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
         cairo_move_to(cr, cursorPos, -40.0);
         cairo_line_to(cr, cursorPos, -dasize.height);
         cairo_stroke(cr);
+      }
+    }
+
+    //draw peak position indicators
+    if(gui.fittingSp == 2){
+      //put markers at guessed positions
+      cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
+      cairo_set_line_width(cr, 2.0);
+      for(i=0;i<fitpar.numFitPeaks;i++){
+        if((fitpar.fitPeakInitGuess[i] > drawing.lowerLimit)&&(fitpar.fitPeakInitGuess[i] < drawing.upperLimit)){
+          cairo_arc(cr,getXPosFromCh(fitpar.fitPeakInitGuess[i],clip_x1,clip_x2),-30.0-getYPos(getDispSpBinVal(0,fitpar.fitPeakInitGuess[i]-drawing.lowerLimit),0,clip_y1,clip_y2),8.,0.,2*M_PI);
+        }
+        cairo_stroke_preserve(cr);
+        cairo_fill(cr);
+      }
+    }else if(gui.fittingSp == 3){
+      //put markers at fitted positions
+      cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
+      cairo_set_line_width(cr, 2.0);
+      for(i=0;i<fitpar.numFitPeaks;i++){
+        if((fitpar.fitParVal[7+(3*i)] > drawing.lowerLimit)&&(fitpar.fitParVal[7+(3*i)] < drawing.upperLimit)){
+          cairo_arc(cr,getXPosFromCh(fitpar.fitParVal[7+(3*i)],clip_x1,clip_x2),-30.0-getYPos(getDispSpBinVal(0,fitpar.fitParVal[7+(3*i)]-drawing.lowerLimit),0,clip_y1,clip_y2),8.,0.,2*M_PI);
+        }
+        cairo_stroke_preserve(cr);
+        cairo_fill(cr);
       }
     }
   }

@@ -895,6 +895,17 @@ Author: Jonathan Williams
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
+          <object class="GtkSeparator">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkOverlay">
             <property name="width_request">800</property>
             <property name="height_request">400</property>
@@ -916,8 +927,9 @@ Author: Jonathan Williams
             <child type="overlay">
               <object class="GtkInfoBar" id="overlay_info_bar">
                 <property name="visible">True</property>
+                <property name="app_paintable">True</property>
                 <property name="can_focus">False</property>
-                <property name="valign">start</property>
+                <property name="valign">end</property>
                 <property name="vexpand">False</property>
                 <child internal-child="action_area">
                   <object class="GtkButtonBox">
@@ -987,7 +999,7 @@ Author: Jonathan Williams
                 </child>
               </object>
               <packing>
-                <property name="index">1</property>
+                <property name="index">-1</property>
               </packing>
             </child>
           </object>
@@ -995,17 +1007,6 @@ Author: Jonathan Williams
             <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkSeparator">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
           </packing>
         </child>
         <child>
