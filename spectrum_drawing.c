@@ -167,6 +167,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
         if(fitpar.numFitPeaks >= MAX_FIT_PK){
           printf("Maximum number of fit peaks specified.\n");
           fitpar.numFitPeaks = MAX_FIT_PK;
+          performGausFit(); //force fit to proceed
           gui.fittingSp = 3; //force fit to proceed
         }
         break;

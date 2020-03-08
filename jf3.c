@@ -2,8 +2,8 @@
 
 #include "jf3-resources.c"
 #include "read_data.c"
-#include "spectrum_drawing.c"
 #include "fit_data.c"
+#include "spectrum_drawing.c"
 
 //function for opening a single file without UI (ie. from the command line)
 //if append=1, append this file to already opened files
@@ -362,6 +362,7 @@ void on_fit_button_clicked(GtkButton *b)
 
 void on_fit_fit_button_clicked(GtkButton *b)
 {
+  performGausFit(); //perform the fit
   gui.fittingSp = 3;
   //update widgets
   gtk_widget_set_sensitive(GTK_WIDGET(open_button),TRUE);

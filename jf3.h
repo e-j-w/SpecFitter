@@ -108,7 +108,8 @@ struct {
 struct {
   int fitStartCh, fitEndCh; //upper and lower channel bounds for fitting
   float fitPeakInitGuess[MAX_FIT_PK]; //initial guess of peak positions, in channels
-  float fitParVal[6+(3*MAX_FIT_PK)]; //paramter values found by the fitter
+  double widthFGH[3]; //F,G,H parameters used to evaluate widths
+  double fitParVal[6+(3*MAX_FIT_PK)]; //parameter values found by the fitter
   int numFitPeaks; //number of peaks to fit
 } fitpar;
 
