@@ -244,51 +244,91 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
 
   if(cursorChan >= 0){
 
-    //print cursor position on status bar
-    char posLabel[256];
-    char *posLabelp = posLabel;
+    int highlightedPeak = -1;
+    if(gui.fittingSp == 3){
+      //check if the cursor is over a peak
+      int i;
+      for(i=0;i<fitpar.numFitPeaks;i++){
+        if(cursorChan > (fitpar.fitParVal[7+(3*i)] - 2.*fitpar.fitParVal[8+(3*i)])){
+          if(cursorChan < (fitpar.fitParVal[7+(3*i)] + 2.*fitpar.fitParVal[8+(3*i)])){
+            if(highlightedPeak == -1){
+              //highlight the peak
+              highlightedPeak = i;
+            }else{
+              //highlight whichever peak is closer to the cursor
+              if(fabs(cursorChan - fitpar.fitParVal[7+(3*i)]) < fabs(cursorChan - fitpar.fitParVal[7+(3*highlightedPeak)])){
+                highlightedPeak = i;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    //print info on the status bar
+    char statusBarLabel[256];
+    char *statusBarLabelp = statusBarLabel;
     int i;
-    switch(drawing.multiplotMode){
-      case 4:
-      case 3:
-      case 2:
-        //multiple visible plots
-        if(calpar.calMode == 1){
-          int cursorChanEnd = cursorChan + drawing.contractFactor;
-          float cal_lowerChanLimit = calpar.calpar0 + calpar.calpar1*cursorChan + calpar.calpar2*cursorChan*cursorChan;
-          float cal_upperChanLimit = calpar.calpar0 + calpar.calpar1*cursorChanEnd + calpar.calpar2*cursorChanEnd*cursorChanEnd;
-          posLabelp += snprintf(posLabelp,50,"%s: %0.1f - %0.1f, Values:", calpar.calUnit, cal_lowerChanLimit, cal_upperChanLimit);
-        }else{
-          if(drawing.contractFactor <= 1){
-            posLabelp += snprintf(posLabel,50,"Channel: %i, Values:",cursorChan);
-          }else{
-            snprintf(posLabel,256,"Channels: %i - %i, Values:",cursorChan, cursorChan + drawing.contractFactor - 1);
-          }
+    switch(highlightedPeak){
+      case -1:
+        //print cursor position on status bar
+        switch(drawing.multiplotMode){
+          case 4:
+          case 3:
+          case 2:
+            //multiple visible plots
+            if(calpar.calMode == 1){
+              int cursorChanEnd = cursorChan + drawing.contractFactor;
+              float cal_lowerChanLimit = calpar.calpar0 + calpar.calpar1*cursorChan + calpar.calpar2*cursorChan*cursorChan;
+              float cal_upperChanLimit = calpar.calpar0 + calpar.calpar1*cursorChanEnd + calpar.calpar2*cursorChanEnd*cursorChanEnd;
+              statusBarLabelp += snprintf(statusBarLabelp,50,"%s: %0.1f - %0.1f, Values:", calpar.calUnit, cal_lowerChanLimit, cal_upperChanLimit);
+            }else{
+              if(drawing.contractFactor <= 1){
+                statusBarLabelp += snprintf(statusBarLabel,50,"Channel: %i, Values:",cursorChan);
+              }else{
+                snprintf(statusBarLabel,256,"Channels: %i - %i, Values:",cursorChan, cursorChan + drawing.contractFactor - 1);
+              }
+            }
+            for(i=0;i<(drawing.numMultiplotSp-1);i++){
+              statusBarLabelp += snprintf(statusBarLabelp,17," %0.1f,", getDispSpBinVal(i,cursorChan-drawing.lowerLimit));
+            }
+            statusBarLabelp += snprintf(statusBarLabelp,17," %0.1f", getDispSpBinVal(drawing.numMultiplotSp-1,cursorChan-drawing.lowerLimit));
+            break;
+          case 1:
+          case 0:
+          default:
+            //single plot
+            if(calpar.calMode == 1){
+              int cursorChanEnd = cursorChan + drawing.contractFactor;
+              float cal_lowerChanLimit = calpar.calpar0 + calpar.calpar1*cursorChan + calpar.calpar2*cursorChan*cursorChan;
+              float cal_upperChanLimit = calpar.calpar0 + calpar.calpar1*cursorChanEnd + calpar.calpar2*cursorChanEnd*cursorChanEnd;
+              snprintf(statusBarLabel,256,"%s: %0.1f - %0.1f, Value: %0.1f", calpar.calUnit, cal_lowerChanLimit, cal_upperChanLimit, getDispSpBinVal(0,cursorChan-drawing.lowerLimit));
+            }else{
+              if(drawing.contractFactor <= 1){
+                snprintf(statusBarLabel,256,"Channel: %i, Value: %0.1f",cursorChan,getDispSpBinVal(0,cursorChan-drawing.lowerLimit));
+              }else{
+                snprintf(statusBarLabel,256,"Channels: %i - %i, Value: %0.1f",cursorChan, cursorChan + drawing.contractFactor - 1, getDispSpBinVal(0,cursorChan-drawing.lowerLimit));
+              }
+            }
+            break;
         }
-        for(i=0;i<(drawing.numMultiplotSp-1);i++){
-          posLabelp += snprintf(posLabelp,17," %0.1f,", getDispSpBinVal(i,cursorChan-drawing.lowerLimit));
-        }
-        posLabelp += snprintf(posLabelp,17," %0.1f", getDispSpBinVal(drawing.numMultiplotSp-1,cursorChan-drawing.lowerLimit));
+        
         break;
-      case 1:
-      case 0:
       default:
-        //single plot
+        //print highlighted peak info
         if(calpar.calMode == 1){
-          int cursorChanEnd = cursorChan + drawing.contractFactor;
-          float cal_lowerChanLimit = calpar.calpar0 + calpar.calpar1*cursorChan + calpar.calpar2*cursorChan*cursorChan;
-          float cal_upperChanLimit = calpar.calpar0 + calpar.calpar1*cursorChanEnd + calpar.calpar2*cursorChanEnd*cursorChanEnd;
-          snprintf(posLabel,256,"%s: %0.1f - %0.1f, Value: %0.1f", calpar.calUnit, cal_lowerChanLimit, cal_upperChanLimit, getDispSpBinVal(0,cursorChan-drawing.lowerLimit));
+          float calAmp = calpar.calpar0 + calpar.calpar1*fitpar.fitParVal[6+(3*highlightedPeak)] + calpar.calpar2*fitpar.fitParVal[6+(3*highlightedPeak)]*fitpar.fitParVal[6+(3*highlightedPeak)];
+          float calCentr = calpar.calpar0 + calpar.calpar1*fitpar.fitParVal[7+(3*highlightedPeak)] + calpar.calpar2*fitpar.fitParVal[7+(3*highlightedPeak)]*fitpar.fitParVal[7+(3*highlightedPeak)];
+          float calWidth = calpar.calpar0 + calpar.calpar1*fitpar.fitParVal[8+(3*highlightedPeak)] + calpar.calpar2*fitpar.fitParVal[8+(3*highlightedPeak)]*fitpar.fitParVal[8+(3*highlightedPeak)];
+          snprintf(statusBarLabel,256,"Height: %0.3f, Centroid: %0.3f, FWHM: %0.3f",calAmp,calCentr,2.35482*calWidth);
         }else{
-          if(drawing.contractFactor <= 1){
-            snprintf(posLabel,256,"Channel: %i, Value: %0.1f",cursorChan,getDispSpBinVal(0,cursorChan-drawing.lowerLimit));
-          }else{
-            snprintf(posLabel,256,"Channels: %i - %i, Value: %0.1f",cursorChan, cursorChan + drawing.contractFactor - 1, getDispSpBinVal(0,cursorChan-drawing.lowerLimit));
-          }
+          snprintf(statusBarLabel,256,"Height: %0.3f, Centroid: %0.3f, FWHM: %0.3f",fitpar.fitParVal[6+(3*highlightedPeak)],fitpar.fitParVal[7+(3*highlightedPeak)],2.35482*fitpar.fitParVal[8+(3*highlightedPeak)]);
         }
         break;
     }
-    gtk_label_set_text(bottom_info_text,posLabel);
+    gtk_label_set_text(bottom_info_text,statusBarLabel);
+
+    
 
     //draw cursor on plot (expensive, requires redraw of plot itself)
     if((gui.draggingSp == 0)&&(gui.drawSpCursor != -1)){
