@@ -1,6 +1,7 @@
 //forward declarations
 float getDispSpBinVal(int dispSpNum, int bin);
 
+
 double getFWHM(double chan, double widthF, double widthG, double widthH){
   return sqrt(widthF*widthF + widthG*widthG*(chan/1000.) + widthH*widthH*(chan/1000.)*(chan/1000.));
 }
@@ -59,16 +60,15 @@ double getFitChisq(){
 }
 
 
-//Non-linearized fitting stage
+//Non-linearized fitting stages
 //Used to fit non-linear terms ie. peak positions and widths
 //chisq minimized wrt these parameters using an iterative approach
-int fitNonLinearizedStage(double initVaryAmount){
+int fitNonLinearizedWidths(double initVaryAmount){
 
   int i,j;
   int varying;
   double varyAmount;
   double finChisq;
-  double trialVal;
   int failCount;
 
   //get initial chisq
@@ -78,10 +78,23 @@ int fitNonLinearizedStage(double initVaryAmount){
   //vary width parameters (F,G,H)
   for(i=0;i<3;i++){
     varying = 1;
-    varyAmount = initVaryAmount;
     failCount = 0;
+
+    //pick a random direction to start
+    if((rand() % 2)==0)
+      varyAmount = initVaryAmount;
+    else
+      varyAmount = -1*initVaryAmount;
+    
     while(varying){
       fitpar.widthFGH[i] += varyAmount;
+      
+      //check for invalid width values and reverse course if neccesary
+      if((fitpar.widthFGH[i] < 0)||(fitpar.widthFGH[i] > 10)){
+        fitpar.widthFGH[i] -= (varyAmount+initVaryAmount);
+        varyAmount = -1.*initVaryAmount*varyAmount/fabs(varyAmount);
+      }
+
       //recalculate all peak widths
       for(j=0;j<fitpar.numFitPeaks;j++){
         fitpar.fitParVal[8+(3*j)] = getFWHM(fitpar.fitParVal[7+(3*j)],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482;
@@ -89,59 +102,76 @@ int fitNonLinearizedStage(double initVaryAmount){
       finChisq = getFitChisq();
       if((finChisq >= initChisq)||(finChisq < 0)){
         fitpar.widthFGH[i] -= varyAmount; //reset the parameter value
-        fitpar.fitParVal[8+(3*i)] = getFWHM(fitpar.fitParVal[7+(3*i)],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482; 
-        failCount++;
-      }
-      if(finChisq > 0){
-        varyAmount = -initVaryAmount*(finChisq - initChisq)/varyAmount; //move based on derivative
-      }else{
+        //recalculate all peak widths
+        for(j=0;j<fitpar.numFitPeaks;j++){
+          fitpar.fitParVal[8+(3*j)] = getFWHM(fitpar.fitParVal[7+(3*j)],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482;
+        }
         varyAmount = -1.*initVaryAmount*varyAmount/fabs(varyAmount);
-      }
-      if(finChisq < initChisq){
+        failCount++;
+      }else{
+        varyAmount = -initVaryAmount*(finChisq - initChisq)/varyAmount; //move based on derivative
         initChisq = finChisq; //new best chisq value
+        failCount = 0;
       }
       //set a threshold in channels
-      if((varyAmount < 0.0001*initVaryAmount)||(varyAmount > (fitpar.fitEndCh-fitpar.fitStartCh)*1.)||(failCount >= 20)){
+      if((varyAmount < 0.0001*initVaryAmount)||(failCount >= 20)){
         varying = 0; //stop optimizing this parameter
       }
     }
+
   }
+  return 1;
+}
+int fitNonLinearizedPositions(double initVaryAmount){
+
+  int i;
+  int varying;
+  double varyAmount;
+  double finChisq;
+  int failCount;
+
+  //get initial chisq
+  double initChisq = getFitChisq();
+  //printf("chisq: %f\n",initChisq);
 
   //vary position parameters
   for(i=0;i<fitpar.numFitPeaks;i++){
     varying = 1;
-    varyAmount = initVaryAmount;
     failCount = 0;
+
+    //pick a random direction to start
+    if((rand() % 2)==0)
+      varyAmount = initVaryAmount;
+    else
+      varyAmount = -1*initVaryAmount;
+    
     while(varying){
       
       fitpar.fitParVal[7+(3*i)] += varyAmount;
+
+      //check for invalid position values and reverse course if neccesary
+      if((fitpar.fitParVal[7+(3*i)] < 0)||(fitpar.fitParVal[7+(3*i)] >= S32K)){
+        fitpar.fitParVal[7+(3*i)] -= (varyAmount+initVaryAmount);
+        varyAmount = -1.*initVaryAmount*varyAmount/fabs(varyAmount);
+      }
+
       finChisq = getFitChisq();
       if((finChisq >= initChisq)||(finChisq < 0)){
         fitpar.fitParVal[7+(3*i)] -= varyAmount; //reset the parameter value
+        varyAmount = -1.*initVaryAmount*varyAmount/fabs(varyAmount); 
         failCount++;
-      }
-      if(finChisq > 0){
-        varyAmount = -1.*initVaryAmount*(finChisq - initChisq)/varyAmount; //move based on derivative
-        trialVal = fitpar.fitParVal[7+(3*i)] + varyAmount;
-        if(fabs(trialVal - fitpar.fitPeakInitGuess[i]) > 0.1*(fitpar.fitEndCh - fitpar.fitStartCh)){
-          varyAmount = -1.*initVaryAmount*varyAmount/fabs(varyAmount);
-        }
       }else{
-        varyAmount = -1.*initVaryAmount*varyAmount/fabs(varyAmount);
-      }
-      if(finChisq < initChisq){
+        varyAmount = -1.*initVaryAmount*(finChisq - initChisq)/varyAmount; //move based on derivative
         initChisq = finChisq; //new best chisq value
+        failCount = 0;
       }
       //printf("varyAmount: %f, varyDer: %f, chisq: %f\n",varyAmount,varyDer,initChisq);
       //set a threshold in channels
-      if((varyAmount < 0.0001*initVaryAmount)||(varyAmount > (fitpar.fitEndCh-fitpar.fitStartCh)*0.1)||(failCount >= 20)){
+      if((varyAmount < 0.0001*initVaryAmount)||(failCount >= 20)){
         varying = 0; //stop optimizing this parameter
       }
     }
   }
-
-  
-
   return 1;
 }
 
@@ -251,7 +281,9 @@ int performGausFit(){
 
   //iterations
   int iterNum = 0;
-  int maxIterNum = 500;
+  int maxIterNum = 50;
+  int maxFirstIterTries = 10;
+  int firstIterCounter = 0;
   double firstIterChisq, iterChisq, lastIterChisq;
   double varyFactor = 1.0;
   while (iterNum < maxIterNum){
@@ -285,8 +317,13 @@ int performGausFit(){
       //printf("amplitude %i: %f\n",i,fitpar.fitParVal[6+(3*i)]);
     }
 
-    if(!(fitNonLinearizedStage(varyFactor))){
-      printf("WARNING: failed fit - nonlinearized stage, iteration %i.\n",iterNum);
+    if(!(fitNonLinearizedWidths(varyFactor))){
+      printf("WARNING: failed fit - nonlinearized stage (widths), iteration %i.\n",iterNum);
+      break;
+    }
+
+    if(!(fitNonLinearizedPositions(varyFactor))){
+      printf("WARNING: failed fit - nonlinearized stage (positions), iteration %i.\n",iterNum);
       break;
     }
 
@@ -322,7 +359,16 @@ int performGausFit(){
 
     iterChisq = getFitChisq();
     if(iterNum == 0){
-      firstIterChisq = iterChisq;
+      if(iterChisq != BIG_NUMBER){
+        firstIterChisq = iterChisq;
+      }else{
+        iterNum--; //redo first iteration
+        firstIterCounter++;
+        if(firstIterCounter > maxFirstIterTries){
+          printf("WARNING: failed fit - first iteration\n");
+          break;
+        }
+      }
     }else if((iterChisq >= lastIterChisq)||(iterChisq < 0)){
       //reset the fit parameters, enforce that chisq must decrease
       memcpy(fitpar.fitParVal,prevFitParVal,sizeof(fitpar.fitParVal));
