@@ -296,27 +296,29 @@ int performGausFit(){
     //setup and perform linearized quadratic background fit
     setupFitSums(&linEq,0);
     if(!(solve_lin_eq(&linEq))){
-      printf("WARNING: failed fit - linearized stage (background only), iteration %i.\n",iterNum);
-      break;
+      printf("WARNING: failed fit - linearized stage (background only), iteration %i.  Reverting.\n",iterNum);
+      memcpy(fitpar.fitParVal,prevFitParVal,sizeof(fitpar.fitParVal));
+    }else{
+      //assign background parameters
+      for(i=0;i<3;i++){
+        fitpar.fitParVal[i] = linEq.solution[i];
+        //printf("par %i: %f\n",i,fitpar.fitParVal[i]);
+      }
     }
-    //assign background parameters
-    for(i=0;i<3;i++){
-      fitpar.fitParVal[i] = linEq.solution[i];
-      //printf("par %i: %f\n",i,fitpar.fitParVal[i]);
-    }
-
+    
     //setup and perform linearized peak amplitude fit
     setupFitSums(&linEq,1);
     if(!(solve_lin_eq(&linEq))){
-      printf("WARNING: failed fit - linearized stage (amplitudes only), iteration %i.\n",iterNum);
-      break;
+      printf("WARNING: failed fit - linearized stage (amplitudes only), iteration %i.  Reverting.\n",iterNum);
+      memcpy(fitpar.fitParVal,prevFitParVal,sizeof(fitpar.fitParVal));
+    }else{
+      //assign amplitude parameters
+      for(i=0;i<fitpar.numFitPeaks;i++){
+        fitpar.fitParVal[6+(3*i)] = linEq.solution[i];
+        //printf("amplitude %i: %f\n",i,fitpar.fitParVal[6+(3*i)]);
+      }
     }
-    //assign amplitude parameters
-    for(i=0;i<fitpar.numFitPeaks;i++){
-      fitpar.fitParVal[6+(3*i)] = linEq.solution[i];
-      //printf("amplitude %i: %f\n",i,fitpar.fitParVal[6+(3*i)]);
-    }
-
+    
     if(!(fitNonLinearizedWidths(varyFactor))){
       printf("WARNING: failed fit - nonlinearized stage (widths), iteration %i.\n",iterNum);
       break;
@@ -330,18 +332,20 @@ int performGausFit(){
     //setup and perform linearized fit of all linear parameters
     setupFitSums(&linEq,2);
     if(!(solve_lin_eq(&linEq))){
-      printf("WARNING: failed fit - linearized stage (all parameters), iteration %i.\n",iterNum);
-      break;
+      printf("WARNING: failed fit - linearized stage (all parameters), iteration %i.  Reverting.\n",iterNum);
+      memcpy(fitpar.fitParVal,prevFitParVal,sizeof(fitpar.fitParVal));
+    }else{
+      //assign all linear parameters
+      for(i=0;i<3;i++){
+        fitpar.fitParVal[i] = linEq.solution[i];
+        //printf("par %i: %f\n",i,fitpar.fitParVal[i]);
+      }
+      for(i=0;i<fitpar.numFitPeaks;i++){
+        fitpar.fitParVal[6+(3*i)] = linEq.solution[3+i];
+        //printf("amplitude %i: %f\n",i,fitpar.fitParVal[6+(3*i)]);
+      }
     }
-    //assign linear parameters
-    for(i=0;i<3;i++){
-      fitpar.fitParVal[i] = linEq.solution[i];
-      //printf("par %i: %f\n",i,fitpar.fitParVal[i]);
-    }
-    for(i=0;i<fitpar.numFitPeaks;i++){
-      fitpar.fitParVal[6+(3*i)] = linEq.solution[3+i];
-      //printf("amplitude %i: %f\n",i,fitpar.fitParVal[6+(3*i)]);
-    }
+    
 
     /*printf("Matrix\n");
     int j;

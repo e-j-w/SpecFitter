@@ -154,6 +154,11 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
     //right mouse button being pressed
     float cursorChan = getCursorChannel(event->x, event->y);
     switch(gui.fittingSp){
+      case 3:
+        //fit being displayed, clear it on right click
+        gui.fittingSp = 0;
+        gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+        break;
       case 2:
         //setup peak positions
         if(fitpar.numFitPeaks < MAX_FIT_PK){

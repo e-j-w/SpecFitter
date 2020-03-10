@@ -51,7 +51,8 @@ So far the program has only been tested with Linux-based systems.  A Makefile is
 
 ## Tips and tricks
 
-When running the program from the command line, it is possible to automatically open files by specifying the filename(s) as arguments (eg. `jf3 /path/to/file1 /path/to/file2`).
+* When running the program from the command line, it is possible to automatically open files by specifying the filename(s) as arguments (eg. `jf3 /path/to/file1 /path/to/file2`).
+* After fitting a spectrum, the onscreen fit can be cleared using the right mouse button.
 
 
 ## Future plans

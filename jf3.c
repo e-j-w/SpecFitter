@@ -192,11 +192,28 @@ void on_pan_scale_changed(GtkRange *range, gpointer user_data){
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
 }
 void on_contract_scale_changed(GtkRange *range, gpointer user_data){
+  int oldContractFactor = drawing.contractFactor;
   drawing.contractFactor = (int)gtk_range_get_value(range); //modify the contraction factor
   if(gui.fittingSp == 3){
-    performGausFit(); //refit
+    int i;
+    //rescale fit (optimization - don't refit until scale is released)
+    for(i=0;i<fitpar.numFitPeaks;i++){
+      fitpar.fitParVal[6+(3*i)] *= 1.0*drawing.contractFactor/oldContractFactor;
+    }
+    for(i=0;i<3;i++){
+      fitpar.fitParVal[i] *= 1.0*drawing.contractFactor/oldContractFactor;
+    }
+    gui.deferFit = 1;
   }
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
+}
+
+void on_contract_scale_button_release(GtkWidget *widget, GdkEvent *event, gpointer user_data){
+  if((gui.deferFit)&&(gui.fittingSp == 3)){
+    gui.deferFit = 0; //unset the flag
+    performGausFit(); //refit
+    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
+  }
 }
 
 void on_calibrate_button_clicked(GtkButton *b)
@@ -365,6 +382,7 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data
 void on_fit_button_clicked(GtkButton *b)
 {
   gui.fittingSp = 1;
+  memset(fitpar.fitParVal,0,sizeof(fitpar.fitParVal));
   //set default values
   fitpar.fitStartCh = -1;
   fitpar.fitEndCh = -1;
@@ -494,6 +512,8 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (cal_entry_quad), "preedit-changed", G_CALLBACK (on_cal_par_activate), NULL);
   g_signal_connect (G_OBJECT (zoom_scale), "value-changed", G_CALLBACK (on_zoom_scale_changed), NULL);
   g_signal_connect (G_OBJECT (contract_scale), "value-changed", G_CALLBACK (on_contract_scale_changed), NULL);
+  g_signal_connect (G_OBJECT (contract_scale), "button-release-event", G_CALLBACK (on_contract_scale_button_release), NULL);
+  gtk_widget_set_events(GTK_WIDGET(contract_scale), gtk_widget_get_events (GTK_WIDGET(contract_scale)) | GDK_BUTTON_RELEASE_MASK);
   g_signal_connect (G_OBJECT (about_button), "clicked", G_CALLBACK (on_about_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_ok_button), "clicked", G_CALLBACK (on_multiplot_ok_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_cr2), "toggled", G_CALLBACK (on_multiplot_cell_toggled), NULL);
@@ -531,6 +551,7 @@ int main(int argc, char *argv[])
   drawing.spColors[30] = 0.2; drawing.spColors[31] = 0.2; drawing.spColors[32] = 0.0; //RGB values for color 11
   drawing.spColors[33] = 0.2; drawing.spColors[34] = 0.0; drawing.spColors[35] = 0.8; //RGB values for color 12
   gui.fittingSp = 0;
+  gui.deferFit = 0;
   gui.draggingSp = 0;
   gui.drawSpCursor = -1; //disabled by default
   fitpar.fitStartCh = -1;
