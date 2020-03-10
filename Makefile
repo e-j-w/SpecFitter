@@ -6,7 +6,7 @@ CFLAGS = -I./lin_eq_solver -o2 -Wall -lm `pkg-config --cflags --libs gtk+-3.0` -
 
 all: lin_eq_solver jf3-resources.c jf3
 
-jf3: jf3.c jf3.h read_data.c fit_data.c spectrum_drawing.c jf3-resources.c lin_eq_solver/lin_eq_solver.o
+jf3: jf3.c jf3.h read_data.c fit_data.c spectrum_drawing.c utils.c jf3-resources.c lin_eq_solver/lin_eq_solver.o
 	gcc jf3.c $(CFLAGS) -o jf3 lin_eq_solver/lin_eq_solver.o
 
 jf3-resources.c: jf3.gresource.xml jf3.glade $(resources)

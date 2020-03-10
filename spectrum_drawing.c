@@ -213,6 +213,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
 	}
 
   int cursorChan = (int)getCursorChannel(event->x, event->y);
+  int cursorChanRounded = cursorChan - (cursorChan % drawing.contractFactor); //channel at the start of the bin (if rebinned)
 
   //printf("Cursor pos: %f %f\n",event->x,event->y);
   if (event->state & GDK_BUTTON1_MASK){
@@ -273,6 +274,9 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
     //print info on the status bar
     char statusBarLabel[256];
     char *statusBarLabelp = statusBarLabel;
+    char binValStr[50];
+    char *binValStrp = binValStr;
+    float binVal;
     int i;
     switch(highlightedPeak){
       case -1:
@@ -283,36 +287,38 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
           case 2:
             //multiple visible plots
             if(calpar.calMode == 1){
-              int cursorChanEnd = cursorChan + drawing.contractFactor;
-              float cal_lowerChanLimit = calpar.calpar0 + calpar.calpar1*cursorChan + calpar.calpar2*cursorChan*cursorChan;
+              int cursorChanEnd = cursorChanRounded + drawing.contractFactor;
+              float cal_lowerChanLimit = calpar.calpar0 + calpar.calpar1*cursorChanRounded + calpar.calpar2*cursorChanRounded*cursorChanRounded;
               float cal_upperChanLimit = calpar.calpar0 + calpar.calpar1*cursorChanEnd + calpar.calpar2*cursorChanEnd*cursorChanEnd;
               statusBarLabelp += snprintf(statusBarLabelp,50,"%s: %0.1f - %0.1f, Values:", calpar.calUnit, cal_lowerChanLimit, cal_upperChanLimit);
             }else{
               if(drawing.contractFactor <= 1){
-                statusBarLabelp += snprintf(statusBarLabel,50,"Channel: %i, Values:",cursorChan);
+                statusBarLabelp += snprintf(statusBarLabel,50,"Channel: %i, Values:",cursorChanRounded);
               }else{
-                snprintf(statusBarLabel,256,"Channels: %i - %i, Values:",cursorChan, cursorChan + drawing.contractFactor - 1);
+                snprintf(statusBarLabel,256,"Channels: %i - %i, Values:",cursorChanRounded, cursorChanRounded + drawing.contractFactor - 1);
               }
             }
             for(i=0;i<(drawing.numMultiplotSp-1);i++){
-              statusBarLabelp += snprintf(statusBarLabelp,17," %0.1f,", getDispSpBinVal(i,cursorChan-drawing.lowerLimit));
+              statusBarLabelp += snprintf(statusBarLabelp,17," %0.1f,", getDispSpBinVal(i,cursorChanRounded-drawing.lowerLimit));
             }
-            statusBarLabelp += snprintf(statusBarLabelp,17," %0.1f", getDispSpBinVal(drawing.numMultiplotSp-1,cursorChan-drawing.lowerLimit));
+            statusBarLabelp += snprintf(statusBarLabelp,17," %0.1f", getDispSpBinVal(drawing.numMultiplotSp-1,cursorChanRounded-drawing.lowerLimit));
             break;
           case 1:
           case 0:
           default:
             //single plot
+            binVal = getDispSpBinVal(0,cursorChanRounded-drawing.lowerLimit);
+            getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStrp,50);
             if(calpar.calMode == 1){
-              int cursorChanEnd = cursorChan + drawing.contractFactor;
-              float cal_lowerChanLimit = calpar.calpar0 + calpar.calpar1*cursorChan + calpar.calpar2*cursorChan*cursorChan;
+              int cursorChanEnd = cursorChanRounded + drawing.contractFactor;
+              float cal_lowerChanLimit = calpar.calpar0 + calpar.calpar1*cursorChanRounded + calpar.calpar2*cursorChanRounded*cursorChanRounded;
               float cal_upperChanLimit = calpar.calpar0 + calpar.calpar1*cursorChanEnd + calpar.calpar2*cursorChanEnd*cursorChanEnd;
-              snprintf(statusBarLabel,256,"%s: %0.1f - %0.1f, Value: %0.1f", calpar.calUnit, cal_lowerChanLimit, cal_upperChanLimit, getDispSpBinVal(0,cursorChan-drawing.lowerLimit));
+              snprintf(statusBarLabel,256,"%s: %0.1f - %0.1f, Value: %s", calpar.calUnit,cal_lowerChanLimit,cal_upperChanLimit,binValStr);
             }else{
               if(drawing.contractFactor <= 1){
-                snprintf(statusBarLabel,256,"Channel: %i, Value: %0.1f",cursorChan,getDispSpBinVal(0,cursorChan-drawing.lowerLimit));
+                snprintf(statusBarLabel,256,"Channel: %i, Value: %s",cursorChanRounded,binValStr);
               }else{
-                snprintf(statusBarLabel,256,"Channels: %i - %i, Value: %0.1f",cursorChan, cursorChan + drawing.contractFactor - 1, getDispSpBinVal(0,cursorChan-drawing.lowerLimit));
+                snprintf(statusBarLabel,256,"Channels: %i - %i, Value: %s",cursorChanRounded,cursorChanRounded + drawing.contractFactor - 1,binValStr);
               }
             }
             break;

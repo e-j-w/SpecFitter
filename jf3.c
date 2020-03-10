@@ -1,6 +1,7 @@
 #include "jf3.h"
 
 #include "jf3-resources.c"
+#include "utils.c"
 #include "read_data.c"
 #include "fit_data.c"
 #include "spectrum_drawing.c"
