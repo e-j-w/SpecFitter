@@ -275,7 +275,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
     char statusBarLabel[256];
     char *statusBarLabelp = statusBarLabel;
     char binValStr[50];
-    char *binValStrp = binValStr;
+    //char *binValStrp = binValStr;
     float binVal;
     int i;
     switch(highlightedPeak){
@@ -295,20 +295,24 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
               if(drawing.contractFactor <= 1){
                 statusBarLabelp += snprintf(statusBarLabel,50,"Channel: %i, Values:",cursorChanRounded);
               }else{
-                snprintf(statusBarLabel,256,"Channels: %i - %i, Values:",cursorChanRounded, cursorChanRounded + drawing.contractFactor - 1);
+                statusBarLabelp += snprintf(statusBarLabel,256,"Channels: %i - %i, Values:",cursorChanRounded, cursorChanRounded + drawing.contractFactor - 1);
               }
             }
             for(i=0;i<(drawing.numMultiplotSp-1);i++){
-              statusBarLabelp += snprintf(statusBarLabelp,17," %0.1f,", getDispSpBinVal(i,cursorChanRounded-drawing.lowerLimit));
+              binVal = getDispSpBinVal(i,cursorChanRounded-drawing.lowerLimit);
+              getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50);
+              statusBarLabelp += snprintf(statusBarLabelp,17," %s,", binValStr);
             }
-            statusBarLabelp += snprintf(statusBarLabelp,17," %0.1f", getDispSpBinVal(drawing.numMultiplotSp-1,cursorChanRounded-drawing.lowerLimit));
+            binVal = getDispSpBinVal(drawing.numMultiplotSp-1,cursorChanRounded-drawing.lowerLimit);
+            getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50);
+            statusBarLabelp += snprintf(statusBarLabelp,17," %s", binValStr);
             break;
           case 1:
           case 0:
           default:
             //single plot
             binVal = getDispSpBinVal(0,cursorChanRounded-drawing.lowerLimit);
-            getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStrp,50);
+            getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50);
             if(calpar.calMode == 1){
               int cursorChanEnd = cursorChanRounded + drawing.contractFactor;
               float cal_lowerChanLimit = calpar.calpar0 + calpar.calpar1*cursorChanRounded + calpar.calpar2*cursorChanRounded*cursorChanRounded;
@@ -465,11 +469,7 @@ void drawYAxisTick(float axisVal, int multiplotSpNum, cairo_t *cr, float clip_x1
     cairo_move_to (cr, clip_x1 + 85.0, axisPos);
     cairo_line_to (cr, clip_x1 + 75.0, axisPos);
     char tickLabel[20];
-    if((axisVal>=1000.0)||(axisVal<=-1000.0)){
-      sprintf(tickLabel,"%0.1e",axisVal); //set string for label
-    }else{
-      sprintf(tickLabel,"%0.1f",axisVal); //set string for label
-    }
+    getFormattedYAxisVal(axisVal, drawing.scaleLevelMin[multiplotSpNum], drawing.scaleLevelMax[multiplotSpNum], tickLabel, 20);
     
     cairo_text_extents_t extents; //get dimensions needed to center text labels
     cairo_text_extents(cr, tickLabel, &extents);
@@ -907,7 +907,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   sprintf(axisLabel,"Value"); //set string for label
   cairo_text_extents(cr, axisLabel, &extents);
   cairo_set_font_size(cr, plotFontSize*1.2);
-  cairo_move_to(cr, clip_x1+12.0, (clip_y1-clip_y2)*0.5);
+  cairo_move_to(cr, clip_x1+16.0, (clip_y1-clip_y2)*0.5);
   cairo_save(cr); //store the context before the rotation
   cairo_rotate(cr, 1.5*3.14159);
   cairo_translate(cr, (clip_x2-clip_x1)*0.015, -1.0*((clip_y1-clip_y2)*0.5)); //so that the origin is at the lower left

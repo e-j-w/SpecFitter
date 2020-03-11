@@ -18,11 +18,19 @@ void getFormattedValAndUncertainty(const double val, const double err, char *str
     while(fabs(errc) >= 19.5){
       errc /= 10;
       sigf++;
+      if(sigf > 100){
+        printf("WARNING: stuck on getFormattedValAndUncertainty loop 1.\n");
+        break; //safety
+      }
     }
   }else if((fabs(errc) < 1)&&(errc != 0)){
     while(fabs(errc) <= 1.95){
       errc *= 10;
       sigf--;
+      if(sigf > 100){
+        printf("WARNING: stuck on getFormattedValAndUncertainty loop 2.\n");
+        break; //safety
+      }
     }
   }else{
       sigf = 0;
@@ -50,4 +58,57 @@ void getFormattedValAndUncertainty(const double val, const double err, char *str
     snprintf(str,strLength,"%0.0f(%.0f)E%i",valc,errc,sigf);
   }
 
+}
+
+void getFormattedYAxisVal(const double val, const double axisMinVal, const double axisMaxVal, char *str, const int strLength){
+
+  if(val == 0){
+    //invalid axis value
+    snprintf(str,strLength,"\n");
+    return;
+  }
+
+  if((axisMaxVal - axisMinVal) >= 15){
+    //large axis range
+    if(fabs(val) < 100000){
+      //print value rounded to nearest integer
+      snprintf(str,strLength,"%0.0f",val);
+    }else{
+      //big number, use scientific notation
+      double valc = val;
+      int sigf = 0;
+      while(fabs(valc) >= 10.0){
+        valc /= 10;
+        sigf++;
+      }
+      if(sigf < 100){
+        snprintf(str,strLength,"%0.1fe%i",valc,sigf);
+      }else{
+        //REALLY big number...
+        snprintf(str,strLength,"%0.0fe%i",valc,sigf);
+      }
+    }    
+  }else if((axisMaxVal - axisMinVal) >= 1.5){
+    //small axis range, use one decimal place
+    snprintf(str,strLength,"%0.1f",val);
+  }else{
+    //axis range is very small, use scientific notation
+    if(fabs(val) >= 1){
+      double valc = val;
+      int sigf = 0;
+      while(fabs(valc) >= 10.0){
+        valc /= 10;
+        sigf++;
+      }
+      snprintf(str,strLength,"%0.1fe%i",valc,sigf);
+    }else{
+      double valc = val;
+      int sigf = 0;
+      while(fabs(valc) < 1.0){
+        valc *= 10;
+        sigf++;
+      }
+      snprintf(str,strLength,"%0.1fe-%i",valc,sigf);
+    }
+  }
 }
