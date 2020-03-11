@@ -27,7 +27,7 @@
 /* GUI globals */
 GtkWindow *window;
 GtkHeaderBar *header_bar;
-GtkWidget *open_button;
+GtkWidget *open_button, *append_button;
 GtkWidget *fit_button, *display_button;
 GtkPopover *display_popover;
 GtkWidget *calibrate_ok_button;
@@ -81,6 +81,7 @@ struct {
   char histComment[NSPECT][256]; //spectrum description/comment
   int openedSp; //0=not opened, 1=opened
   int numSpOpened; //number of spectra in the opened file(s)
+  int numFilesOpened; //number of files containing spectra opened
 } rawdata;
 
 //spectrum drawing globals

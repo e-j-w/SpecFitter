@@ -108,6 +108,7 @@ void on_open_button_clicked(GtkButton *b)
           drawing.multiPlots[0] = sel;
           drawing.multiplotMode = 0; //files just opened, disable multiplot
           gui.fittingSp = 0; //files just opened, reset fit state
+          gtk_widget_set_sensitive(GTK_WIDGET(append_button),TRUE);
           gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
           gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),TRUE);
           gtk_widget_set_sensitive(GTK_WIDGET(display_button),TRUE);
@@ -158,14 +159,16 @@ void on_open_button_clicked(GtkButton *b)
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),errMsg);
       gtk_dialog_run (GTK_DIALOG (message_dialog));
       gtk_widget_destroy (message_dialog);
-    }
-    //set the title of the opened spectrum in the header bar
-    if(g_slist_length(file_list) > 1){
-      char headerBarSub[256];
-      snprintf(headerBarSub,256,"%i files loaded",g_slist_length(file_list));
-      gtk_header_bar_set_subtitle(header_bar,headerBarSub);
     }else{
-      gtk_header_bar_set_subtitle(header_bar,filename);
+      rawdata.numFilesOpened = g_slist_length(file_list);
+      //set the title of the opened spectrum in the header bar
+      if(rawdata.numFilesOpened > 1){
+        char headerBarSub[256];
+        snprintf(headerBarSub,256,"%i files loaded",rawdata.numFilesOpened);
+        gtk_header_bar_set_subtitle(header_bar,headerBarSub);
+      }else{
+        gtk_header_bar_set_subtitle(header_bar,filename);
+      }
     }
     g_slist_free(file_list);
     g_free(filename);
@@ -176,6 +179,92 @@ void on_open_button_clicked(GtkButton *b)
   
   
 }
+
+
+void on_append_button_clicked(GtkButton *b)
+{
+  int i,j;
+  
+  file_open_dialog = gtk_file_chooser_dialog_new ("Open Spectrum File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, NULL);
+  gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(file_open_dialog), TRUE);
+  file_filter = gtk_file_filter_new();
+  gtk_file_filter_set_name(file_filter,"Spectrum Data (.mca, .fmca, .spe)");
+  gtk_file_filter_add_pattern(file_filter,"*.mca");
+  gtk_file_filter_add_pattern(file_filter,"*.fmca");
+  gtk_file_filter_add_pattern(file_filter,"*.spe");
+  gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(file_open_dialog),file_filter);
+
+  int openErr = 0; //to track if there are any errors when opening spectra
+  if (gtk_dialog_run(GTK_DIALOG(file_open_dialog)) == GTK_RESPONSE_ACCEPT)
+  {
+    char *filename;
+    GSList *file_list = gtk_file_chooser_get_filenames(GTK_FILE_CHOOSER(file_open_dialog));
+    for(i=0;i<g_slist_length(file_list);i++){
+      filename = g_slist_nth_data(file_list,i);
+      int numSp = readSpectrumDataFile(filename,rawdata.hist,rawdata.numSpOpened);
+      if(numSp > 0){ //see read_data.c
+        rawdata.openedSp = 1;
+        //set comments for spectra just opened
+        for (j = rawdata.numSpOpened; j < (rawdata.numSpOpened+numSp); j++){
+          snprintf(rawdata.histComment[j],256,"Spectrum %i of %s",j-rawdata.numSpOpened,basename((char*)filename));
+          //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
+        }
+        rawdata.numSpOpened += numSp;
+        gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened - 1);
+      }else if (numSp == -1){
+        //too many files opened
+        openErr = 3;
+        break;
+      }else{
+        //improper file format
+        openErr = 1;
+        break;
+      }
+    }
+
+    gtk_widget_destroy(file_open_dialog);
+
+    if(openErr>0){
+      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+      GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error opening spectrum data!");
+      char errMsg[256];
+      switch (openErr)
+      {
+        case 2:
+          snprintf(errMsg,256,"All spectrum data in file %s is empty.",filename);
+          break;
+        case 3:
+          snprintf(errMsg,256,"You are trying to open too many files at once.  Maximum number of individual spectra which may be imported is %i.",NSPECT);
+          break;
+        default:
+          snprintf(errMsg,256,"Data in file %s is incorrectly formatted.",filename);
+          break;
+      }
+      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),errMsg);
+      gtk_dialog_run (GTK_DIALOG (message_dialog));
+      gtk_widget_destroy (message_dialog);
+    }else{
+      rawdata.numFilesOpened += g_slist_length(file_list);
+      //set the title of the opened spectrum in the header bar
+      if(rawdata.numFilesOpened > 1){
+        char headerBarSub[256];
+        snprintf(headerBarSub,256,"%i files loaded",rawdata.numFilesOpened);
+        gtk_header_bar_set_subtitle(header_bar,headerBarSub);
+      }else{
+        gtk_header_bar_set_subtitle(header_bar,filename);
+      }
+    }
+    g_slist_free(file_list);
+    g_free(filename);
+  }else{
+    gtk_widget_destroy(file_open_dialog);
+  }
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+  
+  
+}
+
+
 
 void on_display_button_clicked(GtkButton *b)
 {
@@ -321,6 +410,14 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
   drawing.numMultiplotSp = selectedSpCount;
   drawing.multiplotMode = gtk_combo_box_get_active(GTK_COMBO_BOX(multiplot_mode_combobox));
   if((drawing.numMultiplotSp > MAX_DISP_SP)||(drawing.numMultiplotSp < 2)){
+
+    //reset default values, in case the multiplot window is closed
+    drawing.multiplotMode = 0;
+    drawing.multiPlots[0] = 0; 
+    drawing.numMultiplotSp = 1;
+    gtk_spin_button_set_value(spectrum_selector, 0);
+
+    //show an error dialog
     GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
     GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Invalid selection!");
     if(drawing.multiplotMode < 0)
@@ -329,10 +426,9 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Please select at least two spectra to plot together.");
     if(drawing.numMultiplotSp > MAX_DISP_SP){
       char errStr[256];
-      snprintf(errStr,256,"The maximum number of spectra that may be plotted at once is %i\n.",MAX_DISP_SP);
+      snprintf(errStr,256,"The maximum number of spectra that may be plotted at once is %i.",MAX_DISP_SP);
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),errStr);
     }
-    drawing.multiplotMode = 0; //reset the value
     gtk_dialog_run (GTK_DIALOG (message_dialog));
     gtk_widget_destroy (message_dialog);
   }else{
@@ -452,6 +548,7 @@ int main(int argc, char *argv[])
 
   //main window UI elements
   open_button = GTK_WIDGET(gtk_builder_get_object(builder, "open_button"));
+  append_button = GTK_WIDGET(gtk_builder_get_object(builder, "append_button"));
   calibrate_button = GTK_WIDGET(gtk_builder_get_object(builder, "calibrate_button"));
   fit_button = GTK_WIDGET(gtk_builder_get_object(builder, "fit_button"));
   display_button = GTK_WIDGET(gtk_builder_get_object(builder, "display_button"));
@@ -497,6 +594,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "motion-notify-event", G_CALLBACK (on_spectrum_cursor_motion), NULL);
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "button-press-event", G_CALLBACK (on_spectrum_click), NULL);
   g_signal_connect (G_OBJECT (open_button), "clicked", G_CALLBACK (on_open_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (append_button), "clicked", G_CALLBACK (on_append_button_clicked), NULL);
   g_signal_connect (G_OBJECT (calibrate_button), "clicked", G_CALLBACK (on_calibrate_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_button), "clicked", G_CALLBACK (on_multiplot_button_clicked), NULL);
   g_signal_connect (G_OBJECT (fit_button), "clicked", G_CALLBACK (on_fit_button_clicked), NULL);
@@ -527,6 +625,7 @@ int main(int argc, char *argv[])
 
   //set default values
   rawdata.openedSp = 0;
+  rawdata.numFilesOpened = 0;
   drawing.lowerLimit = 0;
   drawing.upperLimit = S32K - 1;
   drawing.scaleLevelMax[0] = 0.0;
@@ -564,6 +663,7 @@ int main(int argc, char *argv[])
   gtk_label_set_text(bottom_info_text,"No spectrum loaded.");
   
   //'gray out' widgets that can't be used yet
+  gtk_widget_set_sensitive(GTK_WIDGET(append_button),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(fit_button),FALSE);
@@ -589,11 +689,13 @@ int main(int argc, char *argv[])
     //set headerbar info for opened files
     if(argc>2){
       char headerBarSub[256];
-      snprintf(headerBarSub,256,"%i files loaded",argc-1);
+      rawdata.numFilesOpened = argc-1;
+      snprintf(headerBarSub,256,"%i files loaded",rawdata.numFilesOpened);
       gtk_header_bar_set_subtitle(header_bar,headerBarSub);
     }else{
       gtk_header_bar_set_subtitle(header_bar,argv[1]);
     }
+    gtk_widget_set_sensitive(GTK_WIDGET(append_button),TRUE);
   }
 
   //startup UI
