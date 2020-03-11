@@ -533,6 +533,69 @@ void drawPlotLabel(cairo_t *cr, float clip_x1, float clip_x2, float clip_y2, dou
   }
 }
 
+float getDistBetweenYAxisTicks(const float axisRange, const int numTicks){
+
+  float trialDist = 0;
+  int sigf = 0;
+  if(axisRange < 1){
+    //get number of sig figs
+    float axisRangec = axisRange;
+    while(axisRangec < 1){
+      axisRangec *= 10.;
+      sigf--;
+    }
+  }else{
+    //get number of sig figs
+    float axisRangec = 1;
+    while(axisRangec < axisRange){
+      axisRangec *= 10.;
+      sigf++;
+    }
+  }
+
+  trialDist =  pow(10,sigf-1);
+  int trialNumTicks = (int)floor(axisRange/trialDist);
+  //printf("axisRange: %f, sigf: %i, trialDist: %f, trialNumTicks: %i, numTicks: %i\n",axisRange,sigf,trialDist,trialNumTicks,numTicks);
+
+  if(trialNumTicks > numTicks){
+    trialDist *= 1.0*numTicks/trialNumTicks;
+  }else{
+    trialDist *= 1.0*trialNumTicks/numTicks;
+  }
+
+  //printf("axisRange: %f, sigf: %i, trialDist: %f, trialNumTicks: %i, numTicks: %i\n",axisRange,sigf,trialDist,trialNumTicks,numTicks);
+
+  return ceil(trialDist);
+
+}
+
+float getDistBetweenXAxisTicks(const float axisRange){
+  //use custom values
+  if(axisRange > 20000){
+    return 5000;
+  }else if(axisRange > 10000){
+    return 2000;
+  }else if(axisRange > 5000){
+    return 1000;
+  }else if(axisRange > 3000){
+    return 500;
+  }else if(axisRange > 2000){
+    return 300;
+  }else if(axisRange > 1000){
+    return 200;
+  }else if(axisRange > 500){
+    return 100;
+  }else if(axisRange > 200){
+    return 50;
+  }else if(axisRange > 100){
+    return 20;
+  }else if(axisRange > 50){
+    return 10;
+  }else{
+    return 5;
+  }
+}
+
 //get the x range of the plot in terms of x axis units, 
 //taking into account whether or not a calibration is in use
 int getPlotRangeXUnits(){
@@ -782,65 +845,30 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   cairo_scale(cr, 1.0, -1.0); //remove axis inversion, so that text is the right way up
 
   //draw x axis ticks
-  if(getPlotRangeXUnits() > 20000){
-    for(i=0;i<S32K;i+=5000){
-      drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
-    }
-  }else if(getPlotRangeXUnits() > 10000){
-    for(i=0;i<S32K;i+=2000){
-      drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
-    }
-  }else if(getPlotRangeXUnits() > 5000){
-    for(i=0;i<S32K;i+=1000){
-      drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
-    }
-  }else if(getPlotRangeXUnits() > 3000){
-    for(i=0;i<S32K;i+=500){
-      drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
-    }
-  }else if(getPlotRangeXUnits() > 2000){
-    for(i=0;i<S32K;i+=300){
-      drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
-    }
-  }else if(getPlotRangeXUnits() > 1000){
-    for(i=0;i<S32K;i+=200){
-      drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
-    }
-  }else if(getPlotRangeXUnits() > 500){
-    for(i=0;i<S32K;i+=100){
-      drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
-    }
-  }else if(getPlotRangeXUnits() > 200){
-    for(i=0;i<S32K;i+=50){
-      drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
-    }
-  }else if(getPlotRangeXUnits() > 100){
-    for(i=0;i<S32K;i+=20){
-      drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
-    }
-  }else if(getPlotRangeXUnits() > 50){
-    for(i=0;i<S32K;i+=10){
-      drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
-    }
-  }else{
-    for(i=0;i<S32K;i+=5){
-      drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
-    }
+  float tickDist = getDistBetweenXAxisTicks(getPlotRangeXUnits());
+  for(i=0;i<S32K;i+=tickDist){
+    drawXAxisTick(i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
   }
   cairo_stroke(cr);
   
   //draw y axis ticks
   int numTickPerSp;
+  float yTickDist, yTick;
   switch(drawing.multiplotMode){
     case 4:
       //stacked
       numTickPerSp = (clip_y2 - clip_y1)/(40.0*drawing.numMultiplotSp) + 1;
       for(i=0;i<drawing.numMultiplotSp;i++){
+        yTickDist = getDistBetweenYAxisTicks(drawing.scaleLevelMax[i] - drawing.scaleLevelMin[i],numTickPerSp);
         cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
-        for(j=0;j<numTickPerSp;j++){
-          drawYAxisTick(drawing.scaleLevelMin[i] + (drawing.scaleLevelMax[i] - drawing.scaleLevelMin[i])*j/(numTickPerSp*1.), i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
+        for(yTick=0.;yTick<drawing.scaleLevelMax[i];yTick+=yTickDist){
+          drawYAxisTick(yTick, i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
         }
-        drawYAxisTick(0.0, i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize); //always draw the zero label on the y axis
+        for(yTick=0.;yTick>drawing.scaleLevelMin[i];yTick-=yTickDist){
+          if(yTick != 0)
+            drawYAxisTick(yTick, i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
+        }
+        //drawYAxisTick(0.0, i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize); //always draw the zero label on the y axis
         cairo_stroke(cr);
         //draw the zero line if applicable
         if((drawing.scaleLevelMin[i] < 0.0) && (drawing.scaleLevelMax[i] > 0.0)){
@@ -867,10 +895,16 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       //modes with a single scale
       cairo_set_source_rgb (cr, 0.3, 0.3, 0.3);
       numTickPerSp = (clip_y2 - clip_y1)/40.0 + 1;
-      for(i=0;i<numTickPerSp;i++){
-        drawYAxisTick(drawing.scaleLevelMin[0] + (drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])*i/(numTickPerSp*1.), 0, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
+      yTickDist = getDistBetweenYAxisTicks(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0],numTickPerSp);
+      for(yTick=0.;yTick<drawing.scaleLevelMax[0];yTick+=yTickDist){
+        drawYAxisTick(yTick, 0, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
       }
-      drawYAxisTick(0.0, 0, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize); //always draw the zero label on the y axis
+      for(yTick=0.;yTick>drawing.scaleLevelMin[0];yTick-=yTickDist){
+        if(yTick != 0)
+          drawYAxisTick(yTick, 0, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
+      }
+      //printf("min: %f, max: %f, yTickDist: %f, numTickPerSp: %i\n",drawing.scaleLevelMin[0],drawing.scaleLevelMax[0],yTickDist,numTickPerSp);
+      //drawYAxisTick(0.0, 0, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize); //always draw the zero label on the y axis
       cairo_stroke(cr);
       //draw the zero line if applicable
       if((drawing.scaleLevelMin[0] < 0.0) && (drawing.scaleLevelMax[0] > 0.0)){

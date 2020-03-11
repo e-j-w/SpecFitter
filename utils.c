@@ -63,8 +63,7 @@ void getFormattedValAndUncertainty(const double val, const double err, char *str
 void getFormattedYAxisVal(const double val, const double axisMinVal, const double axisMaxVal, char *str, const int strLength){
 
   if(val == 0){
-    //invalid axis value
-    snprintf(str,strLength,"\n");
+    snprintf(str,strLength,"0");
     return;
   }
 
