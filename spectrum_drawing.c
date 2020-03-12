@@ -458,8 +458,12 @@ void drawYAxisTick(float axisVal, int multiplotSpNum, cairo_t *cr, float clip_x1
     //printf("axisval:%f,scalemin:%f,scalemax:%f\n",axisVal,drawing.scaleLevelMin[multiplotSpNum],drawing.scaleLevelMax[multiplotSpNum]);
     return; //invalid axis value,
   }
-  if((axisVal!=0.0)&&(fabs(axisVal - 0) < (drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])/20.0)){
+  if((axisVal!=0.0)&&(fabs(axisVal) < (drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])/20.0)){
     //tick is too close to zero, don't draw
+    return;
+  }
+  if((drawing.multiplotMode == 4)&&(fabs(drawing.scaleLevelMax[multiplotSpNum] - axisVal) < ((drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])/8.0)) ){
+    //tick is too close to the top of the spectrum in a stacked view, don't draw
     return;
   }
   float axisPos = getAxisYPos(axisVal,multiplotSpNum,clip_y2);
@@ -555,15 +559,20 @@ float getDistBetweenYAxisTicks(const float axisRange, const int numTicks){
 
   trialDist =  pow(10,sigf-1);
   int trialNumTicks = (int)floor(axisRange/trialDist);
-  //printf("axisRange: %f, sigf: %i, trialDist: %f, trialNumTicks: %i, numTicks: %i\n",axisRange,sigf,trialDist,trialNumTicks,numTicks);
+  //printf("1 - axisRange: %f, sigf: %i, trialDist: %f, trialNumTicks: %i, numTicks: %i\n",axisRange,sigf,trialDist,trialNumTicks,numTicks);
 
   if(trialNumTicks > numTicks){
-    trialDist *= 1.0*numTicks/trialNumTicks;
+    if((int)floor(axisRange/(trialDist*5.0)) < (numTicks/1.5))
+      trialDist *= 2.0;
+    else
+      trialDist *= 5.0;
   }else{
-    trialDist *= 1.0*trialNumTicks/numTicks;
+    if((int)floor(axisRange/(trialDist/5.0)) > numTicks*1.5)
+      trialDist /= 2.0;
+    else
+      trialDist /= 5.0;
   }
-
-  //printf("axisRange: %f, sigf: %i, trialDist: %f, trialNumTicks: %i, numTicks: %i\n",axisRange,sigf,trialDist,trialNumTicks,numTicks);
+  //printf("2 - axisRange: %f, sigf: %i, trialDist: %f, trialNumTicks: %i, numTicks: %i\n",axisRange,sigf,trialDist,trialNumTicks,numTicks);
 
   return ceil(trialDist);
 
@@ -857,7 +866,9 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   switch(drawing.multiplotMode){
     case 4:
       //stacked
-      numTickPerSp = (clip_y2 - clip_y1)/(40.0*drawing.numMultiplotSp) + 1;
+      numTickPerSp = (clip_y2 - clip_y1)/(40.0*drawing.numMultiplotSp);
+      if(numTickPerSp < 2)
+        numTickPerSp = 2;
       for(i=0;i<drawing.numMultiplotSp;i++){
         yTickDist = getDistBetweenYAxisTicks(drawing.scaleLevelMax[i] - drawing.scaleLevelMin[i],numTickPerSp);
         cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
