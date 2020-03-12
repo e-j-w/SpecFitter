@@ -144,6 +144,43 @@ int readSPE(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 	return 1;
 }
 
+int readTXT(const char *filename, double outHist[NSPECT][S32K], int outHistStartSp)
+{
+	int numElementsRead = 0;
+	char str[256];
+	double inpHist[S32K];
+	FILE *inp;
+
+	memset(outHist, 0, sizeof(*outHist));
+
+	if ((inp = fopen(filename, "r")) == NULL) //open the file
+	{
+		printf("ERROR: Cannot open the input file: %s\n", filename);
+		printf("Check that the file exists.\n");
+		exit(-1);
+	}
+
+	numElementsRead=0;
+	while(fscanf(inp,"%s\n",str)!=EOF){
+		if(numElementsRead<S32K){
+			inpHist[numElementsRead] = atof(str);
+		}
+		numElementsRead++;
+	}
+
+	//check for import errors
+	if(numElementsRead == 0){
+		printf("ERROR: Empty input file: %s\n", filename);
+		return 0;
+	}
+
+	//copy imported data
+	memcpy(outHist[outHistStartSp],inpHist,sizeof(inpHist));
+
+	fclose(inp);
+	return 1;
+}
+
 //reads a file containing spectrum data into an array
 //returns the number of spectra read (0 if reading fails)
 int readSpectrumDataFile(const char *filename, double outHist[NSPECT][S32K], int outHistStartSp)
@@ -157,6 +194,8 @@ int readSpectrumDataFile(const char *filename, double outHist[NSPECT][S32K], int
 		numSpec = readFMCA(filename, outHist, outHistStartSp);
 	else if (strcmp(dot + 1, "spe") == 0)
 		numSpec = readSPE(filename, outHist, outHistStartSp);
+	else if (strcmp(dot + 1, "txt") == 0)
+		numSpec = readTXT(filename, outHist, outHistStartSp);
 	else
 	{
 		//printf("Improper format of input file: %s\n", filename);

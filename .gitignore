@@ -1,6 +1,7 @@
 jf3
 jf3-resources.c
 *~
+*.txt
 *.mca
 *.fmca
 *.spe
