@@ -7,4 +7,5 @@ jf3-resources.c
 *.spe
 *.out
 *.o
+*.compiled
 */*.o

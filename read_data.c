@@ -169,15 +169,18 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 						if(numElementsRead==0){
 							numColumns = numLineEntries;
 						}else{
-							if(numLineEntries != numColumns){
-								printf("ERROR: inconsistent number of columns in line %i of file: %s\n",numElementsRead,filename);
+							if((numLineEntries != numColumns)&&(numLineEntries!=0)){
+								printf("ERROR: inconsistent number of columns (%i) in line %i of file: %s\n",numLineEntries,numElementsRead,filename);
 								return 0;
 							}
 						}
-						for(i=0;i<numLineEntries;i++){
-							outHist[outHistStartSp+i][numElementsRead]=num[i];
+						if(numLineEntries > 0){
+							for(i=0;i<numLineEntries;i++){
+								outHist[outHistStartSp+i][numElementsRead]=num[i];
+							}
+							numElementsRead++;
 						}
-						numElementsRead++;
+						
 					}
 				}else{
 					break;
