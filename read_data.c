@@ -147,7 +147,7 @@ int readSPE(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 
 int readTXT(const char *filename, double outHist[NSPECT][S32K], int outHistStartSp)
 {
-	int i;
+	int i,j;
 	int numElementsRead = 0;
 	char str[256];
 	FILE *inp;
@@ -191,6 +191,13 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 		printf("ERROR: Empty input file: %s\n", filename);
 		return 0;
 	}
+
+	for(i=0;i<numColumns;i++){
+		for(j=numElementsRead;j<S32K;j++){
+			outHist[outHistStartSp+i][j]=0.;
+		}
+	}
+	
 
 	fclose(inp);
 	return numColumns;
