@@ -37,8 +37,9 @@ int readMCA(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 				exit(-1);
 			}
 			else{
-				for (j = 0; j < S32K; j++)
+				for (j = 0; j < S32K; j++){
 					outHist[i][j] = (double)tmpHist[j];
+				}
 			}	
 		}
 	}
@@ -146,26 +147,43 @@ int readSPE(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 
 int readTXT(const char *filename, double outHist[NSPECT][S32K], int outHistStartSp)
 {
+	int i;
 	int numElementsRead = 0;
 	char str[256];
-	double inpHist[S32K];
 	FILE *inp;
+	double num[NSPECT];
+	int numColumns; // the detected number of columns in the first line
 
 	memset(outHist, 0, sizeof(*outHist));
 
-	if ((inp = fopen(filename, "r")) == NULL) //open the file
-	{
+	if ((inp = fopen(filename, "r")) == NULL){ //open the file
 		printf("ERROR: Cannot open the input file: %s\n", filename);
 		printf("Check that the file exists.\n");
 		exit(-1);
-	}
-
-	numElementsRead=0;
-	while(fscanf(inp,"%s\n",str)!=EOF){
-		if(numElementsRead<S32K){
-			inpHist[numElementsRead] = atof(str);
-		}
-		numElementsRead++;
+	}else{
+		while(!(feof(inp)))//go until the end of file is reached
+			{
+				if(numElementsRead<S32K){
+					if(fgets(str,256,inp)!=NULL){ //get an entire line
+						int numLineEntries = sscanf(str,"%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",&num[0],&num[1],&num[2],&num[3],&num[4],&num[5],&num[6],&num[7],&num[8],&num[9],&num[10],&num[11]);
+						if(numElementsRead==0){
+							numColumns = numLineEntries;
+						}else{
+							if(numLineEntries != numColumns){
+								printf("ERROR: inconsistent number of columns in line %i of file: %s\n",numElementsRead,filename);
+								return 0;
+							}
+						}
+						for(i=0;i<numLineEntries;i++){
+							outHist[outHistStartSp+i][numElementsRead]=num[i];
+						}
+						numElementsRead++;
+					}
+				}else{
+					break;
+				}
+				
+			}
 	}
 
 	//check for import errors
@@ -174,11 +192,8 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 		return 0;
 	}
 
-	//copy imported data
-	memcpy(outHist[outHistStartSp],inpHist,sizeof(inpHist));
-
 	fclose(inp);
-	return 1;
+	return numColumns;
 }
 
 //reads a file containing spectrum data into an array

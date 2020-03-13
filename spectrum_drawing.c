@@ -539,6 +539,10 @@ void drawPlotLabel(cairo_t *cr, float clip_x1, float clip_x2, float clip_y2, dou
 
 float getDistBetweenYAxisTicks(const float axisRange, const int numTicks){
 
+  if(axisRange == 0){
+    return 1;
+  }
+
   float trialDist = 0;
   int sigf = 0;
   if(axisRange < 1){
