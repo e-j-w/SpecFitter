@@ -230,5 +230,34 @@ int readSpectrumDataFile(const char *filename, double outHist[NSPECT][S32K], int
 
 	printf("Opened file: %s, number of spectra read in: %i\n", filename, numSpec);
 
+	//discard empty spectra
+	if(rawdata.dropEmptySpectra){
+		int i;
+		int checkedSpCount = 0;
+		int passedSpCount = 0;
+		int passed = 0;
+		while(checkedSpCount < numSpec){
+			passed = 0;
+			for(i=0;i<S32K;i++){
+				if(outHist[outHistStartSp+passedSpCount][i] != 0.){
+					//printf("Passed spectrum %i\n",checkedSpCount);
+					passed = 1;
+					passedSpCount++;
+					break;
+				}
+			}
+			if(passed == 0){
+				//spectrum was empty, overwrite it
+				for(i=passedSpCount;i<(numSpec-1);i++){
+					memcpy(outHist[outHistStartSp+i],outHist[outHistStartSp+i+1],sizeof(outHist[i+1]));
+				}
+			}
+			checkedSpCount++;
+		}
+		if((numSpec-passedSpCount)>0)
+			printf("Dropped %i empty spectra.\n",numSpec-passedSpCount);
+		return passedSpCount;
+	}
+
 	return numSpec;
 }

@@ -8,4 +8,6 @@ jf3-resources.c
 *.out
 *.o
 *.compiled
+*.conf
+*#
 */*.o

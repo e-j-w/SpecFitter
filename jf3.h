@@ -11,6 +11,8 @@
 #include <ctype.h>
 #include <math.h>
 #include <libgen.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "lin_eq_solver.h"
 
@@ -61,6 +63,11 @@ GtkTreeViewColumn *multiplot_column1, *multiplot_column2;
 GtkTreeSelection *multiplot_tree_selection;
 GtkCellRenderer *multiplot_cr1, *multiplot_cr2;
 GtkComboBoxText *multiplot_mode_combobox;
+//preferences dialog
+GtkModelButton *preferences_button;
+GtkWindow *preferences_window;
+GtkCheckButton *discard_empty_checkbutton;
+GtkButton *preferences_apply_button;
 //builder
 GtkBuilder *builder;
 
@@ -82,6 +89,7 @@ struct {
   int openedSp; //0=not opened, 1=opened
   int numSpOpened; //number of spectra in the opened file(s)
   int numFilesOpened; //number of files containing spectra opened
+  int dropEmptySpectra; //0=don't discard, 1=discard
 } rawdata;
 
 //spectrum drawing globals

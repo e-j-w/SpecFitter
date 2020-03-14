@@ -3,8 +3,23 @@
 #include "jf3-resources.c"
 #include "utils.c"
 #include "read_data.c"
+#include "read_config.c"
 #include "fit_data.c"
 #include "spectrum_drawing.c"
+
+void updateConfigFile(){
+  char dirPath[256];
+  strcpy(dirPath,"");
+	strcat(dirPath,getenv("HOME"));
+	strcat(dirPath,"/.config/jf3/jf3.conf");
+  FILE *configFile = fopen(dirPath, "w");
+  if(configFile != NULL){
+    writeConfigFile(configFile); //write the default configuration values
+    fclose(configFile);
+  }else{
+    printf("WARNING: Unable to write preferences to configuration file.\n");
+  }
+}
 
 //function for opening a single file without UI (ie. from the command line)
 //if append=1, append this file to already opened files
@@ -309,6 +324,16 @@ void on_contract_scale_button_release(GtkWidget *widget, GdkEvent *event, gpoint
 
 void on_calibrate_button_clicked(GtkButton *b)
 {
+  if(calpar.calMode == 1){
+    char str[256];
+    sprintf(str,"%.3f",calpar.calpar0);
+    gtk_entry_set_text(cal_entry_const,str);
+    sprintf(str,"%.3f",calpar.calpar1);
+    gtk_entry_set_text(cal_entry_lin,str);
+    sprintf(str,"%.3f",calpar.calpar2);
+    gtk_entry_set_text(cal_entry_quad,str);
+    gtk_entry_set_text(cal_entry_unit,calpar.calUnit);
+  }
   gtk_window_present(calibrate_window); //show the window
 }
 
@@ -343,6 +368,7 @@ void on_calibrate_ok_button_clicked(GtkButton *b)
     //not all calibration parameters are zero, calibration is valid
     calpar.calMode=1;
     //printf("Calibration parameters: %f %f %f, drawing.calMode: %i, calpar.calUnit: %s\n",calpar.calpar0,calpar.calpar1,calpar.calpar2,drawing.calMode,drawing.calUnit);
+    updateConfigFile();
     gtk_widget_hide(GTK_WIDGET(calibrate_window)); //close the calibration window
     gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
   }else{
@@ -519,6 +545,26 @@ void on_fit_cancel_button_clicked(GtkButton *b)
   gtk_widget_hide(GTK_WIDGET(overlay_info_bar));
 }
 
+void on_toggle_discard_empty(GtkToggleButton *togglebutton, gpointer user_data)
+{
+  if(gtk_toggle_button_get_active(togglebutton))
+    rawdata.dropEmptySpectra=1;
+  else
+    rawdata.dropEmptySpectra=0;
+}
+
+void on_preferences_button_clicked(GtkButton *b)
+{
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(discard_empty_checkbutton),rawdata.dropEmptySpectra);
+  gtk_window_present(preferences_window); //show the window
+}
+
+void on_preferences_apply_button_clicked(GtkButton *b)
+{
+  updateConfigFile();
+  gtk_widget_hide(GTK_WIDGET(preferences_window)); //close the multiplot window
+}
+
 void on_about_button_clicked(GtkButton *b)
 {
   gtk_window_present(GTK_WINDOW(about_dialog)); //show the window
@@ -538,6 +584,8 @@ int main(int argc, char *argv[])
   gtk_window_set_transient_for(calibrate_window, window); //center calibrate window on main window
   multiplot_window = GTK_WINDOW(gtk_builder_get_object(builder, "multiplot_window"));
   gtk_window_set_transient_for(multiplot_window, window); //center multiplot window on main window
+  preferences_window = GTK_WINDOW(gtk_builder_get_object(builder, "preferences_window"));
+  gtk_window_set_transient_for(preferences_window, window); //center preferences window on main window
   about_dialog = GTK_ABOUT_DIALOG(gtk_builder_get_object(builder, "about_dialog"));
   gtk_window_set_transient_for(GTK_WINDOW(about_dialog), window); //center about dialog on main window
   
@@ -584,6 +632,11 @@ int main(int argc, char *argv[])
   multiplot_cr2 = GTK_CELL_RENDERER(gtk_builder_get_object(builder, "multiplot_cr2"));
   multiplot_mode_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "multiplot_mode_combobox"));
 
+  //preferences window UI elements
+  preferences_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "preferences_button"));
+  discard_empty_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "discard_empty_checkbutton"));
+  preferences_apply_button = GTK_BUTTON(gtk_builder_get_object(builder, "preferences_apply_button"));
+
   //display menu UI elements
   multiplot_button = GTK_WIDGET(gtk_builder_get_object(builder, "multiplot_button"));
   contract_scale = GTK_SCALE(gtk_builder_get_object(builder, "contract_scale"));
@@ -606,6 +659,9 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (spectrum_selector), "value-changed", G_CALLBACK (on_spectrum_selector_changed), NULL);
   g_signal_connect (G_OBJECT (autoscale_button), "toggled", G_CALLBACK (on_toggle_autoscale), NULL);
   g_signal_connect (G_OBJECT (cursor_draw_button), "toggled", G_CALLBACK (on_toggle_cursor), NULL);
+  g_signal_connect (G_OBJECT (discard_empty_checkbutton), "toggled", G_CALLBACK (on_toggle_discard_empty), NULL);
+  g_signal_connect (G_OBJECT (preferences_apply_button), "clicked", G_CALLBACK (on_preferences_apply_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (preferences_button), "clicked", G_CALLBACK (on_preferences_button_clicked), NULL);
   gtk_widget_set_events(spectrum_drawing_area, gtk_widget_get_events (spectrum_drawing_area) | GDK_SCROLL_MASK | GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK); //allow mouse scrolling over the drawing area
   g_signal_connect (G_OBJECT (cal_entry_const), "preedit-changed", G_CALLBACK (on_cal_par_activate), NULL);
   g_signal_connect (G_OBJECT (cal_entry_lin), "preedit-changed", G_CALLBACK (on_cal_par_activate), NULL);
@@ -619,6 +675,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (multiplot_cr2), "toggled", G_CALLBACK (on_multiplot_cell_toggled), NULL);
   g_signal_connect (G_OBJECT (calibrate_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (multiplot_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect (G_OBJECT (preferences_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (about_dialog), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
 
   //set attributes
@@ -636,6 +693,7 @@ int main(int argc, char *argv[])
   drawing.contractFactor = 1;
   drawing.autoScale = 1;
   calpar.calMode = 0;
+  rawdata.dropEmptySpectra = 1;
   rawdata.numSpOpened = 0;
   drawing.multiplotMode = 0;
   drawing.numMultiplotSp = 1;
@@ -697,6 +755,33 @@ int main(int argc, char *argv[])
       gtk_header_bar_set_subtitle(header_bar,argv[1]);
     }
     gtk_widget_set_sensitive(GTK_WIDGET(append_button),TRUE);
+  }
+
+  //setup config file
+  char dirPath[256];
+  strcpy(dirPath,"");
+	strcat(dirPath,getenv("HOME"));
+	strcat(dirPath,"/.config/jf3");
+  struct stat st = {0};
+  if (stat(dirPath, &st) == -1) {
+    //config directory doesn't exist, make it
+    mkdir(dirPath, 0700);
+    printf("Setup configuration file directory: %s\n",dirPath);
+  }
+  FILE *configFile;
+  strcat(dirPath,"/jf3.conf");
+  if ((configFile = fopen(dirPath, "r")) == NULL){ //open the config file
+		printf("Creating configuration file at: %s\n", dirPath);
+    configFile = fopen(dirPath, "w");
+    if(configFile != NULL){
+      writeConfigFile(configFile); //write the default configuration values
+      fclose(configFile);
+    }else{
+      printf("WARNING: Unable to create configuration file, falling back to default values.\n");
+    }
+	}else{
+    readConfigFile(configFile);
+    fclose(configFile);
   }
 
   //startup UI

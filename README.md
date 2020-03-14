@@ -42,7 +42,7 @@ Conversion codes for some of these data formats are available in the [FileConvTo
 
 * Designed to be as simple and intuitive as possible given the supported featureset.
 
-## How to install
+## How to build
 
 So far the program has only been tested with Linux-based systems.  A Makefile is provided, use `make` to compile.  This should work fine on most recent Linux distros - the build process has been tested on CentOS 7 and Arch Linux (as of March 2020) under the GNOME desktop environment.
 
@@ -52,8 +52,10 @@ So far the program has only been tested with Linux-based systems.  A Makefile is
 * gcc
 * GTK 3 (`gtk3-devel` in CentOS)
 
-## Tips and tricks
 
+## Usage notes
+
+* Preferences are stored in a plaintext configuration file at `$HOME/.config/jf3/jf3.conf`.
 * When running the program from the command line, it is possible to automatically open files by specifying the filename(s) as arguments (eg. `jf3 /path/to/file1 /path/to/file2`).
 * After fitting a spectrum, the onscreen fit can be cleared using the right mouse button.
 
