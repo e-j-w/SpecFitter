@@ -1,7 +1,7 @@
 
 //get a formatted string with a value and its uncertainty, 
 //properly rounded using the '20 rule' for reporting uncertainties
-void getFormattedValAndUncertainty(const double val, const double err, char *str, const int strLength){
+void getFormattedValAndUncertainty(const double val, const double err, char *str, const int strLength, const int showErr){
 
   if(err < 0){
     //invalid error
@@ -46,16 +46,29 @@ void getFormattedValAndUncertainty(const double val, const double err, char *str
   //printf("sigf: %i, errc = %f\n",sigf,errc);
 
   if(val == 0){
-    snprintf(str,strLength,"0(0)");
+    if(showErr)
+      snprintf(str,strLength,"0(0)");
+    else
+      snprintf(str,strLength,"0");
   }else if(fabs(val) > 0.001){
     //use normal notation
-    if(sigf < 0)
-      snprintf(str,strLength,"%0.*f(%.0f)",-1*sigf,valc*pow(10,sigf),errc);
-    else
-      snprintf(str,strLength,"%0.0f(%.0f)",valc*pow(10,sigf),errc*pow(10,sigf));
+    if(sigf < 0){
+      if(showErr)
+        snprintf(str,strLength,"%0.*f(%.0f)",-1*sigf,valc*pow(10,sigf),errc);
+      else
+        snprintf(str,strLength,"%0.*f",-1*sigf,valc*pow(10,sigf));
+    }else{
+      if(showErr)
+        snprintf(str,strLength,"%0.0f(%.0f)",valc*pow(10,sigf),errc*pow(10,sigf));
+      else
+        snprintf(str,strLength,"%0.0f",valc*pow(10,sigf));
+    }
   }else{
     //use scientific notation
-    snprintf(str,strLength,"%0.0f(%.0f)E%i",valc,errc,sigf);
+    if(showErr)
+      snprintf(str,strLength,"%0.0f(%.0f)E%i",valc,errc,sigf);
+    else
+      snprintf(str,strLength,"%0.0fE%i",valc,sigf);
   }
 
 }

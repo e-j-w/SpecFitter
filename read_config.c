@@ -40,6 +40,14 @@ int readConfigFile(FILE *file)
 				}
 			}
 
+			if(strcmp(par,"show_bin_errors") == 0){
+				if(strcmp(val,"yes") == 0){
+					gui.showBinErrors = 1;
+				}else{
+					gui.showBinErrors = 0;
+				}
+			}
+
 			if(strcmp(par,"calibrate") == 0){
 				if(strcmp(val,"yes") == 0){
 					calpar.calMode = 1;
@@ -88,6 +96,11 @@ int writeConfigFile(FILE *file)
 		fprintf(file,"discard_empty_spectra=yes\n");
 	}else{
 		fprintf(file,"discard_empty_spectra=no\n");
+	}
+	if(gui.showBinErrors == 1){
+		fprintf(file,"show_bin_errors=yes\n");
+	}else{
+		fprintf(file,"show_bin_errors=no\n");
 	}
 
 	return 1;

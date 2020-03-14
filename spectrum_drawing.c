@@ -300,11 +300,11 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
             }
             for(i=0;i<(drawing.numMultiplotSp-1);i++){
               binVal = getDispSpBinVal(i,cursorChanRounded-drawing.lowerLimit);
-              getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50);
+              getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,gui.showBinErrors);
               statusBarLabelp += snprintf(statusBarLabelp,17," %s,", binValStr);
             }
             binVal = getDispSpBinVal(drawing.numMultiplotSp-1,cursorChanRounded-drawing.lowerLimit);
-            getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50);
+            getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,gui.showBinErrors);
             statusBarLabelp += snprintf(statusBarLabelp,17," %s", binValStr);
             break;
           case 1:
@@ -312,7 +312,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
           default:
             //single plot
             binVal = getDispSpBinVal(0,cursorChanRounded-drawing.lowerLimit);
-            getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50);
+            getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,gui.showBinErrors);
             if(calpar.calMode == 1){
               int cursorChanEnd = cursorChanRounded + drawing.contractFactor;
               float cal_lowerChanLimit = calpar.calpar0 + calpar.calpar1*cursorChanRounded + calpar.calpar2*cursorChanRounded*cursorChanRounded;
