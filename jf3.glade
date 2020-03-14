@@ -760,6 +760,7 @@ Author: Jonathan Williams
     <property name="modal">True</property>
     <property name="window_position">center-always</property>
     <property name="type_hint">dialog</property>
+    <property name="deletable">False</property>
     <property name="gravity">center</property>
     <property name="attached_to">window</property>
     <child type="titlebar">
@@ -831,7 +832,35 @@ Author: Jonathan Williams
               </packing>
             </child>
             <child>
-              <placeholder/>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">start</property>
+                <property name="label" translatable="yes">Look &amp; Feel</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="dark_theme_checkbutton">
+                <property name="label" translatable="yes">Prefer dark theme</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">If checked, will use the dark GTK theme variant if available.</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">4</property>
+              </packing>
             </child>
           </object>
           <packing>
@@ -1206,6 +1235,10 @@ Author: Jonathan Williams
                 <property name="halign">start</property>
                 <property name="label" translatable="yes">No spectrum loaded.</property>
                 <property name="ellipsize">end</property>
+                <property name="track_visited_links">False</property>
+                <attributes>
+                  <attribute name="style" value="normal"/>
+                </attributes>
               </object>
               <packing>
                 <property name="expand">False</property>

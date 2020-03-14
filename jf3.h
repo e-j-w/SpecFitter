@@ -66,7 +66,7 @@ GtkComboBoxText *multiplot_mode_combobox;
 //preferences dialog
 GtkModelButton *preferences_button;
 GtkWindow *preferences_window;
-GtkCheckButton *discard_empty_checkbutton, *bin_errors_checkbutton;
+GtkCheckButton *discard_empty_checkbutton, *bin_errors_checkbutton, *dark_theme_checkbutton;
 GtkButton *preferences_apply_button;
 //builder
 GtkBuilder *builder;
@@ -81,6 +81,7 @@ struct {
   int fittingSp; //0=not fitting, 1=selecting limits, 2=selecting peaks, 3=fitted (display fit)
   int deferFit; //0=no action, 1=fit is being deferred until a later time
   int showBinErrors; //0=don't show, 1=show
+  int preferDarkTheme; //0=prefer light, 1=prefer dark
 } gui;
 
 //imported data globals

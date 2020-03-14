@@ -559,11 +559,22 @@ void on_toggle_bin_errors(GtkToggleButton *togglebutton, gpointer user_data)
   else
     gui.showBinErrors=0;
 }
+void on_toggle_dark_theme(GtkToggleButton *togglebutton, gpointer user_data)
+{
+  if(gtk_toggle_button_get_active(togglebutton))
+    gui.preferDarkTheme=1;
+  else
+    gui.preferDarkTheme=0;
+  
+  //set whether dark theme is preferred
+  g_object_set(gtk_settings_get_default(),"gtk-application-prefer-dark-theme", gui.preferDarkTheme, NULL);
+}
 
 void on_preferences_button_clicked(GtkButton *b)
 {
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(discard_empty_checkbutton),rawdata.dropEmptySpectra);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bin_errors_checkbutton),gui.showBinErrors);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dark_theme_checkbutton),gui.preferDarkTheme);
   gtk_window_present(preferences_window); //show the window
 }
 
@@ -644,6 +655,7 @@ int main(int argc, char *argv[])
   preferences_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "preferences_button"));
   discard_empty_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "discard_empty_checkbutton"));
   bin_errors_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "bin_errors_checkbutton"));
+  dark_theme_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "dark_theme_checkbutton"));
   preferences_apply_button = GTK_BUTTON(gtk_builder_get_object(builder, "preferences_apply_button"));
 
   //display menu UI elements
@@ -670,6 +682,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (cursor_draw_button), "toggled", G_CALLBACK (on_toggle_cursor), NULL);
   g_signal_connect (G_OBJECT (discard_empty_checkbutton), "toggled", G_CALLBACK (on_toggle_discard_empty), NULL);
   g_signal_connect (G_OBJECT (bin_errors_checkbutton), "toggled", G_CALLBACK (on_toggle_bin_errors), NULL);
+  g_signal_connect (G_OBJECT (dark_theme_checkbutton), "toggled", G_CALLBACK (on_toggle_dark_theme), NULL);
   g_signal_connect (G_OBJECT (preferences_apply_button), "clicked", G_CALLBACK (on_preferences_apply_button_clicked), NULL);
   g_signal_connect (G_OBJECT (preferences_button), "clicked", G_CALLBACK (on_preferences_button_clicked), NULL);
   gtk_widget_set_events(spectrum_drawing_area, gtk_widget_get_events (spectrum_drawing_area) | GDK_SCROLL_MASK | GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK); //allow mouse scrolling over the drawing area
@@ -707,23 +720,24 @@ int main(int argc, char *argv[])
   rawdata.numSpOpened = 0;
   drawing.multiplotMode = 0;
   drawing.numMultiplotSp = 1;
-  drawing.spColors[0] = 0.8; drawing.spColors[1] = 0.0; drawing.spColors[2] = 0.0;    //RGB values for color 1
-  drawing.spColors[3] = 0.0; drawing.spColors[4] = 0.0; drawing.spColors[5] = 0.8;    //RGB values for color 2
-  drawing.spColors[6] = 0.0; drawing.spColors[7] = 0.8; drawing.spColors[8] = 0.0;    //RGB values for color 3
-  drawing.spColors[9] = 0.0; drawing.spColors[10] = 0.8; drawing.spColors[11] = 0.8;  //RGB values for color 4
-  drawing.spColors[12] = 0.7; drawing.spColors[13] = 0.7; drawing.spColors[14] = 0.0; //RGB values for color 5
-  drawing.spColors[15] = 0.8; drawing.spColors[16] = 0.0; drawing.spColors[17] = 0.8; //RGB values for color 6
-  drawing.spColors[18] = 0.2; drawing.spColors[19] = 0.0; drawing.spColors[20] = 0.0; //RGB values for color 7
-  drawing.spColors[21] = 0.0; drawing.spColors[22] = 0.0; drawing.spColors[23] = 0.2; //RGB values for color 8
-  drawing.spColors[24] = 0.0; drawing.spColors[25] = 0.2; drawing.spColors[26] = 0.0; //RGB values for color 9
-  drawing.spColors[27] = 0.0; drawing.spColors[28] = 0.2; drawing.spColors[29] = 0.2; //RGB values for color 10
-  drawing.spColors[30] = 0.2; drawing.spColors[31] = 0.2; drawing.spColors[32] = 0.0; //RGB values for color 11
-  drawing.spColors[33] = 0.2; drawing.spColors[34] = 0.0; drawing.spColors[35] = 0.8; //RGB values for color 12
+  drawing.spColors[0] = 220/255.; drawing.spColors[1] = 50/255.; drawing.spColors[2] = 47/255.;      //RGB values for color 1 (solarized red)
+  drawing.spColors[3] = 38/255.; drawing.spColors[4] = 139/255.; drawing.spColors[5] = 210/255.;     //RGB values for color 2 (solarized blue)
+  drawing.spColors[6] = 0.0; drawing.spColors[7] = 0.8; drawing.spColors[8] = 0.0;                   //RGB values for color 3
+  drawing.spColors[9] = 0.8; drawing.spColors[10] = 0.0; drawing.spColors[11] = 0.8;                 //RGB values for color 4
+  drawing.spColors[12] = 0.7; drawing.spColors[13] = 0.4; drawing.spColors[14] = 0.0;                //RGB values for color 5
+  drawing.spColors[15] = 42/255.; drawing.spColors[16] = 161/255.; drawing.spColors[17] = 152/255.;  //RGB values for color 6 (solarized cyan)
+  drawing.spColors[18] = 203/255.; drawing.spColors[19] = 75/255.; drawing.spColors[20] = 22/255.;   //RGB values for color 7 (solarized orange)
+  drawing.spColors[21] = 133/255.; drawing.spColors[22] = 153/255.; drawing.spColors[23] = 0.0;      //RGB values for color 8 (solarized green)
+  drawing.spColors[24] = 211/255.; drawing.spColors[25] = 54/255.; drawing.spColors[26] = 130/255.;  //RGB values for color 9 (solarized magenta)
+  drawing.spColors[27] = 181/255.; drawing.spColors[28] = 137/255.; drawing.spColors[29] = 0.0;      //RGB values for color 10 (solarized yellow)
+  drawing.spColors[30] = 0.5; drawing.spColors[31] = 0.5; drawing.spColors[32] = 0.5;                //RGB values for color 11
+  drawing.spColors[33] = 0.7; drawing.spColors[34] = 0.0; drawing.spColors[35] = 0.3;                //RGB values for color 12
   gui.fittingSp = 0;
   gui.deferFit = 0;
   gui.draggingSp = 0;
   gui.drawSpCursor = -1; //disabled by default
   gui.showBinErrors = 1;
+  gui.preferDarkTheme = 0;
   fitpar.fitStartCh = -1;
   fitpar.fitEndCh = -1;
   fitpar.numFitPeaks = 0;
@@ -794,6 +808,9 @@ int main(int argc, char *argv[])
     readConfigFile(configFile);
     fclose(configFile);
   }
+
+  //set whether dark theme is preferred
+  g_object_set(gtk_settings_get_default(),"gtk-application-prefer-dark-theme", gui.preferDarkTheme, NULL);
 
   //startup UI
   gtk_widget_show(GTK_WIDGET(window)); //show the window

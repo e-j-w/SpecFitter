@@ -1,3 +1,13 @@
+//set the default text color, depending on the
+void setTextColor(cairo_t *cr){
+  if(gui.preferDarkTheme){
+    cairo_set_source_rgb (cr, 0.7, 0.7, 0.7);
+  }else{
+    cairo_set_source_rgb (cr, 0.3, 0.3, 0.3);
+  }
+  
+}
+
 int getFirstNonemptySpectrum(int numSpOpened){
   if(numSpOpened>=NSPECT){
     return -1;
@@ -512,7 +522,7 @@ void drawPlotLabel(cairo_t *cr, float clip_x1, float clip_x2, float clip_y2, dou
       break;
     case 1:
       //summed spectra
-      cairo_set_source_rgb (cr, 0.3, 0.3, 0.3);
+      setTextColor(cr);
       strcpy(plotLabel, "Sum of:");
       cairo_text_extents(cr, plotLabel, &extents);
       cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, (40.0-clip_y2)*0.9 - 40.0);
@@ -526,7 +536,7 @@ void drawPlotLabel(cairo_t *cr, float clip_x1, float clip_x2, float clip_y2, dou
       break;
     case 0:
       //single plot mode
-      cairo_set_source_rgb (cr, 0.3, 0.3, 0.3);
+      setTextColor(cr);
       strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[0]]);
       cairo_text_extents(cr, plotLabel, &extents);
       cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, (40.0-clip_y2)*0.9 - 40.0);
@@ -830,7 +840,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 
   // draw axis lines
   cairo_set_line_width(cr, 1.0);
-  cairo_set_source_rgb (cr, 0.3, 0.3, 0.3);
+  setTextColor(cr);
   cairo_move_to (cr, clip_x1+80.0, clip_y1+40.0);
   cairo_line_to (cr, clip_x1+80.0, clip_y2);
   switch(drawing.multiplotMode){
@@ -908,7 +918,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
     case 1:
     case 0:
       //modes with a single scale
-      cairo_set_source_rgb (cr, 0.3, 0.3, 0.3);
+      setTextColor(cr);
       numTickPerSp = (clip_y2 - clip_y1)/40.0 + 1;
       yTickDist = getDistBetweenYAxisTicks(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0],numTickPerSp);
       for(yTick=0.;yTick<drawing.scaleLevelMax[0];yTick+=yTickDist){
@@ -939,7 +949,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   
 
   //draw axis labels
-  cairo_set_source_rgb (cr, 0.3, 0.3, 0.3);
+  setTextColor(cr);
   char axisLabel[16];
   cairo_text_extents_t extents; //for getting dimensions needed to center text labels
   //x axis
@@ -1017,7 +1027,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   if(gui.drawSpCursor == 1){
     //printf("Drawing cursor!\n");
     cairo_set_line_width(cr, 1.0);
-    cairo_set_source_rgb (cr, 0.3, 0.3, 0.3);
+    setTextColor(cr);
     cairo_move_to(cr, gui.cursorPosX, -40.0);
     cairo_line_to(cr, gui.cursorPosX, -dasize.height);
     cairo_stroke(cr);

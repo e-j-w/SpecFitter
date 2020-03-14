@@ -39,7 +39,6 @@ int readConfigFile(FILE *file)
 					rawdata.dropEmptySpectra = 0;
 				}
 			}
-
 			if(strcmp(par,"show_bin_errors") == 0){
 				if(strcmp(val,"yes") == 0){
 					gui.showBinErrors = 1;
@@ -47,7 +46,13 @@ int readConfigFile(FILE *file)
 					gui.showBinErrors = 0;
 				}
 			}
-
+			if(strcmp(par,"prefer_dark_theme") == 0){
+				if(strcmp(val,"yes") == 0){
+					gui.preferDarkTheme = 1;
+				}else{
+					gui.preferDarkTheme = 0;
+				}
+			}
 			if(strcmp(par,"calibrate") == 0){
 				if(strcmp(val,"yes") == 0){
 					calpar.calMode = 1;
@@ -55,7 +60,6 @@ int readConfigFile(FILE *file)
 					calpar.calMode = 0;
 				}
 			}
-
 			if(strcmp(par,"cal_parameter0") == 0){
 				calpar.calpar0 = atof(val);
 			}
@@ -101,6 +105,11 @@ int writeConfigFile(FILE *file)
 		fprintf(file,"show_bin_errors=yes\n");
 	}else{
 		fprintf(file,"show_bin_errors=no\n");
+	}
+	if(gui.preferDarkTheme == 1){
+		fprintf(file,"prefer_dark_theme=yes\n");
+	}else{
+		fprintf(file,"prefer_dark_theme=no\n");
 	}
 
 	return 1;

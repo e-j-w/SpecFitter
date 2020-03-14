@@ -47,26 +47,26 @@ void getFormattedValAndUncertainty(const double val, const double err, char *str
 
   if(val == 0){
     if(showErr)
-      snprintf(str,strLength,"0(0)");
+      snprintf(str,strLength,"0( 0)");
     else
       snprintf(str,strLength,"0");
   }else if(fabs(val) > 0.001){
     //use normal notation
     if(sigf < 0){
       if(showErr)
-        snprintf(str,strLength,"%0.*f(%.0f)",-1*sigf,valc*pow(10,sigf),errc);
+        snprintf(str,strLength,"%0.*f(%2.0f)",-1*sigf,valc*pow(10,sigf),errc);
       else
         snprintf(str,strLength,"%0.*f",-1*sigf,valc*pow(10,sigf));
     }else{
       if(showErr)
-        snprintf(str,strLength,"%0.0f(%.0f)",valc*pow(10,sigf),errc*pow(10,sigf));
+        snprintf(str,strLength,"%0.0f(%2.0f)",valc*pow(10,sigf),errc*pow(10,sigf));
       else
         snprintf(str,strLength,"%0.0f",valc*pow(10,sigf));
     }
   }else{
     //use scientific notation
     if(showErr)
-      snprintf(str,strLength,"%0.0f(%.0f)E%i",valc,errc,sigf);
+      snprintf(str,strLength,"%0.0f(%2.0f)E%i",valc,errc,sigf);
     else
       snprintf(str,strLength,"%0.0fE%i",valc,sigf);
   }
