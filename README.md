@@ -62,7 +62,6 @@ So far the program has only been tested with Linux-based systems.  A Makefile is
 
 ## Future plans
 
-* Display peak fit uncertainties
 * Peak labels?
 * Import of spectra exported from ROOT?
 

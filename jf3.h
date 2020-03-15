@@ -121,7 +121,9 @@ struct {
   float fitPeakInitGuess[MAX_FIT_PK]; //initial guess of peak positions, in channels
   double widthFGH[3]; //F,G,H parameters used to evaluate widths
   double fitParVal[6+(3*MAX_FIT_PK)]; //parameter values found by the fitter
+  double fitParErr[6+(3*MAX_FIT_PK)]; //errors in parameter values
   int numFitPeaks; //number of peaks to fit
+  int errFound; //whether or not paramter errors have been found
 } fitpar;
 
 #endif
