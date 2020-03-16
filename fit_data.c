@@ -70,7 +70,7 @@ int getParameterErrors(lin_eq_type *linEq){
   for(i=0;i<fitpar.numFitPeaks;i++){
     double npts = 0;
     for (j=fitpar.fitStartCh;j<=fitpar.fitEndCh;j+=drawing.contractFactor){
-      npts += getDispSpBinVal(0,j-drawing.lowerLimit) - evalFitBG(j);
+      npts += evalGaussTerm(i, j);
     }
     //error on mean value
     fitpar.fitParErr[7+(3*i)] = fitpar.fitParVal[8+(3*i)]/sqrt(fabs(npts)); //absolute value to handle negative amplitude case

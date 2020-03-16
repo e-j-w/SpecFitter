@@ -342,20 +342,18 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
       default:
         //print highlighted peak info
         if(calpar.calMode == 1){
-          float calAmp = calpar.calpar0 + calpar.calpar1*fitpar.fitParVal[6+(3*highlightedPeak)] + calpar.calpar2*fitpar.fitParVal[6+(3*highlightedPeak)]*fitpar.fitParVal[6+(3*highlightedPeak)];
           float calCentr = calpar.calpar0 + calpar.calpar1*fitpar.fitParVal[7+(3*highlightedPeak)] + calpar.calpar2*fitpar.fitParVal[7+(3*highlightedPeak)]*fitpar.fitParVal[7+(3*highlightedPeak)];
           float calWidth = calpar.calpar0 + calpar.calpar1*fitpar.fitParVal[8+(3*highlightedPeak)] + calpar.calpar2*fitpar.fitParVal[8+(3*highlightedPeak)]*fitpar.fitParVal[8+(3*highlightedPeak)];
           if(fitpar.errFound){
-            float calAmpErr = calpar.calpar0 + calpar.calpar1*fitpar.fitParErr[6+(3*highlightedPeak)] + calpar.calpar2*fitpar.fitParErr[6+(3*highlightedPeak)]*fitpar.fitParErr[6+(3*highlightedPeak)];
             float calCentrErr = calpar.calpar0 + calpar.calpar1*fitpar.fitParErr[7+(3*highlightedPeak)] + calpar.calpar2*fitpar.fitParErr[7+(3*highlightedPeak)]*fitpar.fitParErr[7+(3*highlightedPeak)];
             float calWidthErr = calpar.calpar0 + calpar.calpar1*fitpar.fitParErr[8+(3*highlightedPeak)] + calpar.calpar2*fitpar.fitParErr[8+(3*highlightedPeak)]*fitpar.fitParErr[8+(3*highlightedPeak)];
             char fitParStr[3][50];
-            getFormattedValAndUncertainty(calAmp,calAmpErr,fitParStr[0],50,1);
+            getFormattedValAndUncertainty(fitpar.fitParVal[6+(3*highlightedPeak)],fitpar.fitParErr[6+(3*highlightedPeak)],fitParStr[0],50,1);
             getFormattedValAndUncertainty(calCentr,calCentrErr,fitParStr[1],50,1);
             getFormattedValAndUncertainty(2.35482*calWidth,2.35482*calWidthErr,fitParStr[2],50,1);
             snprintf(statusBarLabel,256,"Height: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
           }else{
-            snprintf(statusBarLabel,256,"Height: %0.3f, Centroid: %0.3f, FWHM: %0.3f",calAmp,calCentr,2.35482*calWidth);
+            snprintf(statusBarLabel,256,"Height: %0.3f, Centroid: %0.3f, FWHM: %0.3f",fitpar.fitParVal[6+(3*highlightedPeak)],calCentr,2.35482*calWidth);
           }
         }else{
           if(fitpar.errFound){
@@ -965,7 +963,6 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 
   drawPlotLabel(cr,clip_x1,clip_x2,clip_y2, plotFontSize); //draw plot label(s)
   cairo_stroke(cr);
-  
 
   //draw axis labels
   setTextColor(cr);
