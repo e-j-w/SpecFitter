@@ -80,6 +80,7 @@ struct {
   int drawSpCursor; //0 = don't draw vertical cursor on spectrum, 1=draw, -1=drawing disabled
   int fittingSp; //0=not fitting, 1=selecting limits, 2=selecting peaks, 3=fitted (display fit)
   int deferFit; //0=no action, 1=fit is being deferred until a later time
+  int deferSpSelChange;
   int showBinErrors; //0=don't show, 1=show
   int preferDarkTheme; //0=prefer light, 1=prefer dark
 } gui;

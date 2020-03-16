@@ -409,6 +409,25 @@ void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
     val=FALSE;
   }
   gtk_list_store_set(multiplot_liststore,&iter,1,val,-1); //set the boolean value (change checkbox value)
+  
+  int selectedSpCount = 0;
+  int spInd = 0;
+  gboolean readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
+  while (readingTreeModel)
+  {
+    gtk_tree_model_get(model,&iter,1,&val,2,&spInd,-1); //get whether the spectrum is selected and the spectrum index
+    if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
+      if(val==TRUE){
+        selectedSpCount++;
+      }
+    }
+    readingTreeModel = gtk_tree_model_iter_next (model, &iter);
+  }
+  if(selectedSpCount > 1){
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),TRUE);
+  }else{
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),FALSE);
+  }
   //printf("toggled %i\n",val);
   //gtk_widget_queue_draw(GTK_WIDGET(multiplot_window));
 }
@@ -416,13 +435,34 @@ void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
 void on_multiplot_button_clicked(GtkButton *b)
 {
   GtkTreeIter iter;
+  gboolean val = FALSE;
+  GtkTreeModel *model = gtk_tree_view_get_model(multiplot_tree_view);
   int i;
   gtk_list_store_clear(multiplot_liststore);
   for(i=0;i<rawdata.numSpOpened;i++){
     gtk_list_store_append(multiplot_liststore,&iter);
     gtk_list_store_set(multiplot_liststore, &iter, 0, rawdata.histComment[i], -1);
-    gtk_list_store_set(multiplot_liststore, &iter, 1, FALSE, -1);
+    gtk_list_store_set(multiplot_liststore, &iter, 1, isSpSelected(i), -1);
     gtk_list_store_set(multiplot_liststore, &iter, 2, i, -1);
+  }
+
+  int selectedSpCount = 0;
+  int spInd = 0;
+  gboolean readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
+  while (readingTreeModel)
+  {
+    gtk_tree_model_get(model,&iter,1,&val,2,&spInd,-1); //get whether the spectrum is selected and the spectrum index
+    if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
+      if(val==TRUE){
+        selectedSpCount++;
+      }
+    }
+    readingTreeModel = gtk_tree_model_iter_next (model, &iter);
+  }
+  if(selectedSpCount > 1){
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),TRUE);
+  }else{
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),FALSE);
   }
   
   gtk_window_present(multiplot_window); //show the window
@@ -450,21 +490,20 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
   }
   drawing.numMultiplotSp = selectedSpCount;
   drawing.multiplotMode = gtk_combo_box_get_active(GTK_COMBO_BOX(multiplot_mode_combobox));
-  if((drawing.numMultiplotSp > MAX_DISP_SP)||(drawing.numMultiplotSp < 2)){
+
+  if((drawing.numMultiplotSp > MAX_DISP_SP)||((drawing.multiplotMode < 0))){
 
     //reset default values, in case the multiplot window is closed
     drawing.multiplotMode = 0;
     drawing.multiPlots[0] = 0; 
     drawing.numMultiplotSp = 1;
-    gtk_spin_button_set_value(spectrum_selector, 1);
+    gtk_spin_button_set_value(spectrum_selector, drawing.multiPlots[0]+1);
 
     //show an error dialog
     GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
     GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Invalid selection!");
     if(drawing.multiplotMode < 0)
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Please select a plotting mode.");
-    if(drawing.numMultiplotSp < 2)
-      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Please select at least two spectra to plot together.");
     if(drawing.numMultiplotSp > MAX_DISP_SP){
       char errStr[256];
       snprintf(errStr,256,"The maximum number of spectra that may be plotted at once is %i.",MAX_DISP_SP);
@@ -475,7 +514,11 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
   }else{
 
     //set drawing mode
-    drawing.multiplotMode++; //value of 0 means no multiplot
+    if(drawing.numMultiplotSp == 1){
+      drawing.multiplotMode = 0;
+    }else{
+      drawing.multiplotMode++; //value of 0 means no multiplot
+    }
     
     //handle fitting
     if(drawing.multiplotMode > 1){
@@ -483,6 +526,9 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
     }else if(gui.fittingSp == 3){
       performGausFit(); //refit
     }
+
+    gui.deferSpSelChange = 1;
+    gtk_spin_button_set_value(spectrum_selector, drawing.multiPlots[0]+1);
     
     printf("Number of spectra selected for plotting: %i.  Selected spectra: ", drawing.numMultiplotSp);
     int i;
@@ -504,17 +550,23 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
 
 void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data)
 {
-  drawing.multiPlots[0] = gtk_spin_button_get_value_as_int(spin_button) - 1;
-  drawing.multiplotMode = 0;//unset multiplot, if it is being used
-  
-  //handle fitting
-  if(gui.fittingSp == 3){
-    performGausFit(); //refit
-  }
+  if(!gui.deferSpSelChange){
+    drawing.multiPlots[0] = gtk_spin_button_get_value_as_int(spin_button) - 1;
+    drawing.multiplotMode = 0;//unset multiplot, if it is being used
+    drawing.numMultiplotSp = 1;//unset multiplot
+    
+    //handle fitting
+    if(gui.fittingSp == 3){
+      performGausFit(); //refit
+    }
 
-  gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE); //no multiplot, therefore can fit
-  //printf("Set selected spectrum to %i\n",dispSp);
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+    gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE); //no multiplot, therefore can fit
+    //printf("Set selected spectrum to %i\n",dispSp);
+    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+  }else{
+    gui.deferSpSelChange = 0;
+  }
+  
 }
 
 void on_fit_button_clicked(GtkButton *b)
@@ -759,6 +811,7 @@ int main(int argc, char *argv[])
   drawing.spColors[33] = 0.7; drawing.spColors[34] = 0.0; drawing.spColors[35] = 0.3;                //RGB values for color 12
   gui.fittingSp = 0;
   gui.deferFit = 0;
+  gui.deferSpSelChange = 0;
   gui.draggingSp = 0;
   gui.drawSpCursor = -1; //disabled by default
   gui.showBinErrors = 1;

@@ -23,6 +23,17 @@ int getFirstNonemptySpectrum(int numSpOpened){
   return -1;
 }
 
+//used to check whether a spectrum has been selected in multiplot mode
+int isSpSelected(int spNum){
+  int i;
+  for(i=0;i<drawing.numMultiplotSp;i++){
+    if(drawing.multiPlots[i] == spNum){
+      return 1;
+    }
+  }
+  return 0;
+}
+
 //converts cursor position units to channel units on the displayed spectrum
 //return value is float to allow sub-channel prescision, cast it to int if needed
 float getCursorChannel(float cursorx, float cursory){
