@@ -21,6 +21,20 @@ void updateConfigFile(){
   }
 }
 
+void updatePrefsFromConfigFile(){
+  char dirPath[256];
+  strcpy(dirPath,"");
+	strcat(dirPath,getenv("HOME"));
+	strcat(dirPath,"/.config/jf3/jf3.conf");
+  FILE *configFile = fopen(dirPath, "r");
+  if(configFile != NULL){
+    readConfigFile(configFile); //read the configuration values
+    fclose(configFile);
+  }else{
+    printf("WARNING: Unable to read preferences to configuration file.\n");
+  }
+}
+
 //function for opening a single file without UI (ie. from the command line)
 //if append=1, append this file to already opened files
 void openSingleFile(char *filename, int append){
@@ -33,7 +47,7 @@ void openSingleFile(char *filename, int append){
       rawdata.openedSp = 1;
       //set comments for spectra just opened
       for (i = rawdata.numSpOpened; i < (rawdata.numSpOpened+numSp); i++){
-        snprintf(rawdata.histComment[i],256,"Spectrum %i of %s",i-rawdata.numSpOpened,basename((char*)filename));
+        snprintf(rawdata.histComment[i],256,"Spectrum %i of %s",i-rawdata.numSpOpened+1,basename((char*)filename));
         //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
       }
       rawdata.numSpOpened += numSp;
@@ -52,9 +66,9 @@ void openSingleFile(char *filename, int append){
           gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
         }
         //set the range of selectable spectra values
-        gtk_adjustment_set_lower(spectrum_selector_adjustment, 0);
-        gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened - 1);
-        gtk_spin_button_set_value(spectrum_selector, sel);
+        gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);
+        gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened);
+        gtk_spin_button_set_value(spectrum_selector, sel+1);
       }else{
         //no spectra with any data in the selected file
         openErr = 2;
@@ -114,7 +128,7 @@ void on_open_button_clicked(GtkButton *b)
         rawdata.openedSp = 1;
         //set comments for spectra just opened
         for (j = rawdata.numSpOpened; j < (rawdata.numSpOpened+numSp); j++){
-          snprintf(rawdata.histComment[j],256,"Spectrum %i of %s",j-rawdata.numSpOpened,basename((char*)filename));
+          snprintf(rawdata.histComment[j],256,"Spectrum %i of %s",j-rawdata.numSpOpened+1,basename((char*)filename));
           //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
         }
         rawdata.numSpOpened += numSp;
@@ -135,9 +149,9 @@ void on_open_button_clicked(GtkButton *b)
             gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
           }
           //set the range of selectable spectra values
-          gtk_adjustment_set_lower(spectrum_selector_adjustment, 0);
-          gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened - 1);
-          gtk_spin_button_set_value(spectrum_selector, sel);
+          gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);
+          gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened);
+          gtk_spin_button_set_value(spectrum_selector, sel+1);
         }else{
           //no spectra with any data in the selected file
           openErr = 2;
@@ -222,11 +236,11 @@ void on_append_button_clicked(GtkButton *b)
         rawdata.openedSp = 1;
         //set comments for spectra just opened
         for (j = rawdata.numSpOpened; j < (rawdata.numSpOpened+numSp); j++){
-          snprintf(rawdata.histComment[j],256,"Spectrum %i of %s",j-rawdata.numSpOpened,basename((char*)filename));
+          snprintf(rawdata.histComment[j],256,"Spectrum %i of %s",j-rawdata.numSpOpened+1,basename((char*)filename));
           //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
         }
         rawdata.numSpOpened += numSp;
-        gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened - 1);
+        gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened);
       }else if (numSp == -1){
         //too many files opened
         openErr = 3;
@@ -442,7 +456,7 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
     drawing.multiplotMode = 0;
     drawing.multiPlots[0] = 0; 
     drawing.numMultiplotSp = 1;
-    gtk_spin_button_set_value(spectrum_selector, 0);
+    gtk_spin_button_set_value(spectrum_selector, 1);
 
     //show an error dialog
     GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
@@ -490,7 +504,7 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
 
 void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data)
 {
-  drawing.multiPlots[0] = gtk_spin_button_get_value_as_int(spin_button);
+  drawing.multiPlots[0] = gtk_spin_button_get_value_as_int(spin_button) - 1;
   drawing.multiplotMode = 0;//unset multiplot, if it is being used
   
   //handle fitting
@@ -584,6 +598,15 @@ void on_preferences_apply_button_clicked(GtkButton *b)
   gtk_widget_hide(GTK_WIDGET(preferences_window)); //close the multiplot window
 }
 
+void on_preferences_cancel_button_clicked(GtkButton *b)
+{
+  updatePrefsFromConfigFile(); //rather than updating the config file, read from it to revert settings
+  //set whether dark theme is preferred
+  g_object_set(gtk_settings_get_default(),"gtk-application-prefer-dark-theme", gui.preferDarkTheme, NULL);
+  //hide the dialog
+  gtk_widget_hide(GTK_WIDGET(preferences_window)); //close the multiplot window
+}
+
 void on_about_button_clicked(GtkButton *b)
 {
   gtk_window_present(GTK_WINDOW(about_dialog)); //show the window
@@ -657,6 +680,7 @@ int main(int argc, char *argv[])
   bin_errors_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "bin_errors_checkbutton"));
   dark_theme_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "dark_theme_checkbutton"));
   preferences_apply_button = GTK_BUTTON(gtk_builder_get_object(builder, "preferences_apply_button"));
+  preferences_cancel_button = GTK_BUTTON(gtk_builder_get_object(builder, "preferences_cancel_button"));
 
   //display menu UI elements
   multiplot_button = GTK_WIDGET(gtk_builder_get_object(builder, "multiplot_button"));
@@ -685,6 +709,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (dark_theme_checkbutton), "toggled", G_CALLBACK (on_toggle_dark_theme), NULL);
   g_signal_connect (G_OBJECT (preferences_apply_button), "clicked", G_CALLBACK (on_preferences_apply_button_clicked), NULL);
   g_signal_connect (G_OBJECT (preferences_button), "clicked", G_CALLBACK (on_preferences_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (preferences_cancel_button), "clicked", G_CALLBACK (on_preferences_cancel_button_clicked), NULL);
   gtk_widget_set_events(spectrum_drawing_area, gtk_widget_get_events (spectrum_drawing_area) | GDK_SCROLL_MASK | GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK); //allow mouse scrolling over the drawing area
   g_signal_connect (G_OBJECT (cal_entry_const), "preedit-changed", G_CALLBACK (on_cal_par_activate), NULL);
   g_signal_connect (G_OBJECT (cal_entry_lin), "preedit-changed", G_CALLBACK (on_cal_par_activate), NULL);
@@ -742,8 +767,8 @@ int main(int argc, char *argv[])
   fitpar.fitEndCh = -1;
   fitpar.numFitPeaks = 0;
 
-  gtk_adjustment_set_lower(spectrum_selector_adjustment, 0);
-  gtk_adjustment_set_upper(spectrum_selector_adjustment, 0);
+  gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);
+  gtk_adjustment_set_upper(spectrum_selector_adjustment, 1);
   gtk_label_set_text(bottom_info_text,"No spectrum loaded.");
   
   //'gray out' widgets that can't be used yet

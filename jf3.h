@@ -67,7 +67,7 @@ GtkComboBoxText *multiplot_mode_combobox;
 GtkModelButton *preferences_button;
 GtkWindow *preferences_window;
 GtkCheckButton *discard_empty_checkbutton, *bin_errors_checkbutton, *dark_theme_checkbutton;
-GtkButton *preferences_apply_button;
+GtkButton *preferences_apply_button, *preferences_cancel_button;
 //builder
 GtkBuilder *builder;
 
