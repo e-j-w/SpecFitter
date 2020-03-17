@@ -525,15 +525,20 @@ void drawPlotLabel(cairo_t *cr, float clip_x1, float clip_x2, float clip_y2, dou
   char plotLabel[256];
   int i;
   cairo_text_extents_t extents; //get dimensions needed to justify text labels
+  float labelYOffset;
   cairo_set_font_size(cr, baseFontSize);
   switch(drawing.multiplotMode){
     case 4:
       //stacked spectra
+      labelYOffset = clip_y2/(3.*drawing.numMultiplotSp);
+      if(labelYOffset > 40.0){
+        labelYOffset = 40.0;
+      }
       for(i=0;i<drawing.numMultiplotSp;i++){
         cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
         strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[i]]);
         cairo_text_extents(cr, plotLabel, &extents);
-        cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, (40.0-clip_y2)*((i/(drawing.numMultiplotSp*1.0)) + 1.0/drawing.numMultiplotSp) - 20.0);
+        cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, (clip_y2-40.0)*((drawing.numMultiplotSp-i-1)/(drawing.numMultiplotSp*1.0)) + labelYOffset);
         cairo_show_text(cr, plotLabel);
       }
       break;
@@ -544,7 +549,7 @@ void drawPlotLabel(cairo_t *cr, float clip_x1, float clip_x2, float clip_y2, dou
         cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
         strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[i]]);
         cairo_text_extents(cr, plotLabel, &extents);
-        cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, (40.0-clip_y2)*0.9 - 40.0 + 18.0*i);
+        cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, 40.0 + 18.0*i);
         cairo_show_text(cr, plotLabel);
       }
       break;
@@ -553,12 +558,12 @@ void drawPlotLabel(cairo_t *cr, float clip_x1, float clip_x2, float clip_y2, dou
       setTextColor(cr);
       strcpy(plotLabel, "Sum of:");
       cairo_text_extents(cr, plotLabel, &extents);
-      cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, (40.0-clip_y2)*0.9 - 40.0);
+      cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, 40.0);
       cairo_show_text(cr, plotLabel);
       for(i=0;i<drawing.numMultiplotSp;i++){
         strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[i]]);
         cairo_text_extents(cr, plotLabel, &extents);
-        cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, (40.0-clip_y2)*0.9 - 40.0 + 18.0*(i+1));
+        cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, 40.0 + 18.0*(i+1));
         cairo_show_text(cr, plotLabel);
       }
       break;
@@ -567,7 +572,7 @@ void drawPlotLabel(cairo_t *cr, float clip_x1, float clip_x2, float clip_y2, dou
       setTextColor(cr);
       strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[0]]);
       cairo_text_extents(cr, plotLabel, &extents);
-      cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, (40.0-clip_y2)*0.9 - 40.0);
+      cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, 40.0);
       cairo_show_text(cr, plotLabel);
       break;
     default:
@@ -642,8 +647,10 @@ float getDistBetweenXAxisTicks(const float axisRange){
     return 20;
   }else if(axisRange > 50){
     return 10;
-  }else{
+  }else if(axisRange > 20){
     return 5;
+  }else{
+    return 2;
   }
 }
 
@@ -688,16 +695,21 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   //cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
   //cairo_paint(cr);
 
-  // transform the coordinate system
-  cairo_translate(cr, 0.0, dasize.height); //so that the origin is at the lower left
-  cairo_scale(cr, 1.0, -1.0); //so that positive y values go up
-
   // Determine the data points to calculate (ie. those in the clipping zone
   gdouble clip_x1 = 0.0, clip_y1 = 0.0, clip_x2 = 0.0, clip_y2 = 0.0;
   cairo_clip_extents(cr, &clip_x1, &clip_y1, &clip_x2, &clip_y2);
   cairo_set_line_width(cr, 2.0);
 
   double plotFontSize = 13.5;
+
+  //draw label for the plot
+  setTextColor(cr);
+  drawPlotLabel(cr,clip_x1,clip_x2,clip_y2, plotFontSize); //draw plot label(s)
+  cairo_stroke(cr);
+
+  // transform the coordinate system
+  cairo_translate(cr, 0.0, dasize.height); //so that the origin is at the lower left
+  cairo_scale(cr, 1.0, -1.0); //so that positive y values go up
 
   getPlotLimits(); //setup the x range to plot over
 
@@ -971,9 +983,6 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
     default:
       break;
   }
-
-  drawPlotLabel(cr,clip_x1,clip_x2,clip_y2, plotFontSize); //draw plot label(s)
-  cairo_stroke(cr);
 
   //draw axis labels
   setTextColor(cr);

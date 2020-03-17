@@ -218,7 +218,7 @@ void on_append_button_clicked(GtkButton *b)
   file_open_dialog = gtk_file_chooser_dialog_new ("Add More Spectrum File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, NULL);
   gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(file_open_dialog), TRUE);
   file_filter = gtk_file_filter_new();
-  gtk_file_filter_set_name(file_filter,"Spectrum Data (.mca, .fmca, .spe)");
+  gtk_file_filter_set_name(file_filter,"Spectrum Data (.txt, .mca, .fmca, .spe)");
   gtk_file_filter_add_pattern(file_filter,"*.mca");
   gtk_file_filter_add_pattern(file_filter,"*.fmca");
   gtk_file_filter_add_pattern(file_filter,"*.spe");
@@ -571,12 +571,6 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
 
   if((drawing.numMultiplotSp > MAX_DISP_SP)||((drawing.multiplotMode < 0))){
 
-    //reset default values, in case the multiplot window is closed
-    drawing.multiplotMode = 0;
-    drawing.multiPlots[0] = 0; 
-    drawing.numMultiplotSp = 1;
-    gtk_spin_button_set_value(spectrum_selector, drawing.multiPlots[0]+1);
-
     //show an error dialog
     GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
     GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Invalid selection!");
@@ -584,9 +578,16 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Please select a plotting mode.");
     if(drawing.numMultiplotSp > MAX_DISP_SP){
       char errStr[256];
-      snprintf(errStr,256,"The maximum number of spectra that may be plotted at once is %i.",MAX_DISP_SP);
+      snprintf(errStr,256,"The maximum number of spectra\nthat may be plotted at once is %i.",MAX_DISP_SP);
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),errStr);
     }
+
+    //reset default values, in case the multiplot window is closed
+    drawing.multiplotMode = 0;
+    drawing.multiPlots[0] = 0; 
+    drawing.numMultiplotSp = 1;
+    gtk_spin_button_set_value(spectrum_selector, drawing.multiPlots[0]+1);
+
     gtk_dialog_run (GTK_DIALOG (message_dialog));
     gtk_widget_destroy (message_dialog);
   }else{
