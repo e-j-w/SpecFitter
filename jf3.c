@@ -398,17 +398,41 @@ void on_calibrate_ok_button_clicked(GtkButton *b)
 }
 
 void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
+  int i;
   GtkTreeIter iter;
+  gboolean toggleVal = FALSE;
   gboolean val = FALSE;
   GtkTreeModel *model = gtk_tree_view_get_model(multiplot_tree_view);
+
+  //get the value of the cell which was toggled
   gtk_tree_model_get_iter_from_string(model, &iter, path_string);
   gtk_tree_model_get(model,&iter,1,&val,-1); //get the boolean value
   if(val==FALSE){
-    val=TRUE;
+    toggleVal=TRUE;
   }else{
-    val=FALSE;
+    toggleVal=FALSE;
   }
-  gtk_list_store_set(multiplot_liststore,&iter,1,val,-1); //set the boolean value (change checkbox value)
+
+  //GList *list;
+  GList * rowList = gtk_tree_selection_get_selected_rows(gtk_tree_view_get_selection(multiplot_tree_view),&model);
+  //printf("List length: %i, toggleVal: %i\n",g_list_length(rowList),toggleVal);
+  if(g_list_length(rowList) > 0){
+    for(i = 0; i < g_list_length(rowList); i++){
+      gtk_tree_model_get_iter(model,&iter,g_list_nth_data(rowList, i));
+      gtk_tree_model_get(model,&iter,1,&val,-1); //get the boolean value
+      if(toggleVal==TRUE){
+        val=TRUE;
+      }else{
+        val=FALSE;
+      }
+      gtk_list_store_set(multiplot_liststore,&iter,1,val,-1); //set the boolean value (change checkbox value)
+      
+    }
+    g_list_free_full(rowList,(GDestroyNotify)gtk_tree_path_free);
+  }else{
+    //single cell toggle
+    gtk_list_store_set(multiplot_liststore,&iter,1,toggleVal,-1); //set the boolean value (change checkbox value)
+  }
   
   int selectedSpCount = 0;
   int spInd = 0;
@@ -427,6 +451,11 @@ void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
     gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),TRUE);
   }else{
     gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),FALSE);
+  }
+  if(selectedSpCount < 1){
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_ok_button),FALSE);
+  }else{
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_ok_button),TRUE);
   }
   //printf("toggled %i\n",val);
   //gtk_widget_queue_draw(GTK_WIDGET(multiplot_window));

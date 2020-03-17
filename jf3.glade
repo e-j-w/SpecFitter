@@ -631,7 +631,9 @@ Author: Jonathan Williams
                         <property name="model">multiplot_liststore</property>
                         <property name="search_column">0</property>
                         <child internal-child="selection">
-                          <object class="GtkTreeSelection"/>
+                          <object class="GtkTreeSelection">
+                            <property name="mode">multiple</property>
+                          </object>
                         </child>
                         <child>
                           <object class="GtkTreeViewColumn" id="multiplot_column1">
