@@ -397,6 +397,57 @@ void on_calibrate_ok_button_clicked(GtkButton *b)
   
 }
 
+void on_multiplot_row_activated(GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *column, gpointer user_data){
+  
+  //don't toggle a row if a multiple toggle was jsut performed
+  if(gui.deferToggleRow){
+    gui.deferToggleRow = 0;
+    return;
+  }
+  
+  GtkTreeIter iter;
+  gboolean toggleVal = FALSE;
+  gboolean val = FALSE;
+  GtkTreeModel *model = gtk_tree_view_get_model(tree_view);
+
+  //get the value of the cell which was toggled
+  gtk_tree_model_get_iter(model,&iter,path);
+  gtk_tree_model_get(model,&iter,1,&val,-1); //get the boolean value
+  if(val==FALSE){
+    toggleVal=TRUE;
+  }else{
+    toggleVal=FALSE;
+  }
+  //single cell toggle
+  gtk_list_store_set(multiplot_liststore,&iter,1,toggleVal,-1); //set the boolean value (change checkbox value)
+  
+  int selectedSpCount = 0;
+  int spInd = 0;
+  gboolean readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
+  while (readingTreeModel)
+  {
+    gtk_tree_model_get(model,&iter,1,&val,2,&spInd,-1); //get whether the spectrum is selected and the spectrum index
+    if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
+      if(val==TRUE){
+        selectedSpCount++;
+      }
+    }
+    readingTreeModel = gtk_tree_model_iter_next (model, &iter);
+  }
+  if(selectedSpCount > 1){
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),TRUE);
+  }else{
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),FALSE);
+  }
+  if(selectedSpCount < 1){
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_ok_button),FALSE);
+  }else{
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_ok_button),TRUE);
+  }
+  //printf("toggled %i\n",val);
+  //gtk_widget_queue_draw(GTK_WIDGET(multiplot_window));
+}
+
 void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
   int i;
   GtkTreeIter iter;
@@ -416,7 +467,7 @@ void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
   //GList *list;
   GList * rowList = gtk_tree_selection_get_selected_rows(gtk_tree_view_get_selection(multiplot_tree_view),&model);
   //printf("List length: %i, toggleVal: %i\n",g_list_length(rowList),toggleVal);
-  if(g_list_length(rowList) > 0){
+  if(g_list_length(rowList) > 1){
     for(i = 0; i < g_list_length(rowList); i++){
       gtk_tree_model_get_iter(model,&iter,g_list_nth_data(rowList, i));
       gtk_tree_model_get(model,&iter,1,&val,-1); //get the boolean value
@@ -428,10 +479,8 @@ void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
       gtk_list_store_set(multiplot_liststore,&iter,1,val,-1); //set the boolean value (change checkbox value)
       
     }
+    gui.deferToggleRow = 1;
     g_list_free_full(rowList,(GDestroyNotify)gtk_tree_path_free);
-  }else{
-    //single cell toggle
-    gtk_list_store_set(multiplot_liststore,&iter,1,toggleVal,-1); //set the boolean value (change checkbox value)
   }
   
   int selectedSpCount = 0;
@@ -802,6 +851,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (about_button), "clicked", G_CALLBACK (on_about_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_ok_button), "clicked", G_CALLBACK (on_multiplot_ok_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_cr2), "toggled", G_CALLBACK (on_multiplot_cell_toggled), NULL);
+  g_signal_connect (G_OBJECT (multiplot_tree_view), "row-activated", G_CALLBACK (on_multiplot_row_activated), NULL);
   g_signal_connect (G_OBJECT (calibrate_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (multiplot_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (preferences_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
@@ -841,6 +891,7 @@ int main(int argc, char *argv[])
   gui.fittingSp = 0;
   gui.deferFit = 0;
   gui.deferSpSelChange = 0;
+  gui.deferToggleRow = 0;
   gui.draggingSp = 0;
   gui.drawSpCursor = -1; //disabled by default
   gui.showBinErrors = 1;

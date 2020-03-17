@@ -576,7 +576,6 @@ Author: Jonathan Williams
   <object class="GtkWindow" id="multiplot_window">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Advanced Plotting</property>
-    <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="window_position">center-always</property>
     <property name="type_hint">dialog</property>
@@ -603,7 +602,7 @@ Author: Jonathan Williams
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
-                <property name="label" translatable="yes">Select spectra to plot simultaneously:</property>
+                <property name="label" translatable="yes">Select spectra to plot:</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -630,6 +629,7 @@ Author: Jonathan Williams
                         <property name="can_focus">True</property>
                         <property name="model">multiplot_liststore</property>
                         <property name="search_column">0</property>
+                        <property name="activate_on_single_click">True</property>
                         <child internal-child="selection">
                           <object class="GtkTreeSelection">
                             <property name="mode">multiple</property>
@@ -665,7 +665,7 @@ Author: Jonathan Williams
                 </child>
               </object>
               <packing>
-                <property name="expand">False</property>
+                <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="position">2</property>
               </packing>
@@ -710,12 +710,13 @@ Author: Jonathan Williams
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
+                <property name="pack_type">end</property>
                 <property name="position">3</property>
               </packing>
             </child>
           </object>
           <packing>
-            <property name="expand">False</property>
+            <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="padding">6</property>
             <property name="position">0</property>
@@ -751,6 +752,7 @@ Author: Jonathan Williams
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
+            <property name="pack_type">end</property>
             <property name="position">2</property>
           </packing>
         </child>
