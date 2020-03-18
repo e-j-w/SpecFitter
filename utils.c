@@ -9,12 +9,14 @@ void getFormattedValAndUncertainty(const double val, const double err, char *str
     return;
   }
 
+  //printf("val: %f, err: %f\n",val,err);
+
   double errc = err;
   double valc = val;
 
   //get the position of the first sig fig in the error
   int sigf = 0;
-  if(fabs(errc) > 1){
+  if(fabs(errc) > 1.95){
     while(fabs(errc) >= 19.5){
       errc /= 10;
       sigf++;
@@ -23,7 +25,7 @@ void getFormattedValAndUncertainty(const double val, const double err, char *str
         break; //safety
       }
     }
-  }else if((fabs(errc) < 1)&&(errc != 0)){
+  }else if((fabs(errc) < 1.95)&&(errc != 0)){
     while(fabs(errc) <= 1.95){
       errc *= 10;
       sigf--;
@@ -41,7 +43,7 @@ void getFormattedValAndUncertainty(const double val, const double err, char *str
   valc = round(valc);
 
   //get the first digits of the error
-  errc = floor(errc);
+  errc = round(errc);
 
   //printf("sigf: %i, errc = %f\n",sigf,errc);
 

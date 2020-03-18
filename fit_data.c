@@ -75,7 +75,7 @@ int getParameterErrors(lin_eq_type *linEq){
     //error on mean value
     fitpar.fitParErr[7+(3*i)] = fitpar.fitParVal[8+(3*i)]/sqrt(fabs(npts)); //absolute value to handle negative amplitude case
     //error on width
-    fitpar.fitParErr[8+(3*i)] = sqrt(fitpar.fitParVal[8+(3*i)]*fitpar.fitParVal[8+(3*i)]*sqrt(2./fabs(npts)));
+    fitpar.fitParErr[8+(3*i)] = fabs( sqrt(fitpar.fitParVal[8+(3*i)]*fitpar.fitParVal[8+(3*i)]*(1 + sqrt(2./fabs(npts)))) - fitpar.fitParVal[8+(3*i)] );
   }
 
   //For linear parameters (this probably has some mistakes, check):
@@ -137,7 +137,7 @@ int fitNonLinearizedWidths(double initVaryAmount){
         for(j=0;j<fitpar.numFitPeaks;j++){
           fitpar.fitParVal[8+(3*j)] = getFWHM(fitpar.fitParVal[7+(3*j)],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482;
         }
-        varyAmount = -1.*initVaryAmount*varyAmount/fabs(varyAmount);
+        varyAmount = -1.*initVaryAmount*pow(2,failCount)*varyAmount/fabs(varyAmount);
         failCount++;
       }else{
         varyAmount = -initVaryAmount*(finChisq - initChisq)/varyAmount; //move based on derivative
@@ -145,7 +145,8 @@ int fitNonLinearizedWidths(double initVaryAmount){
         failCount = 0;
       }
       //set a threshold in channels
-      if((varyAmount < 0.0001*initVaryAmount)||(failCount >= 20)){
+      if((varyAmount < 0.0001)||(failCount >= 5)){
+        //printf("failcount: %i\n",failCount);
         varying = 0; //stop optimizing this parameter
       }
     }
@@ -189,7 +190,7 @@ int fitNonLinearizedPositions(double initVaryAmount){
       finChisq = getFitChisq();
       if((finChisq >= initChisq)||(finChisq < 0)){
         fitpar.fitParVal[7+(3*i)] -= varyAmount; //reset the parameter value
-        varyAmount = -1.*initVaryAmount*varyAmount/fabs(varyAmount); 
+        varyAmount = -1.*initVaryAmount*pow(2,failCount)*varyAmount/fabs(varyAmount); 
         failCount++;
       }else{
         varyAmount = -1.*initVaryAmount*(finChisq - initChisq)/varyAmount; //move based on derivative
@@ -198,7 +199,7 @@ int fitNonLinearizedPositions(double initVaryAmount){
       }
       //printf("varyAmount: %f, varyDer: %f, chisq: %f\n",varyAmount,varyDer,initChisq);
       //set a threshold in channels
-      if((varyAmount < 0.0001*initVaryAmount)||(failCount >= 20)){
+      if((varyAmount < 0.0001)||(failCount >= 5)){
         varying = 0; //stop optimizing this parameter
       }
     }
@@ -354,14 +355,14 @@ int performGausFit(){
         //printf("amplitude %i: %f\n",i,fitpar.fitParVal[6+(3*i)]);
       }
     }
-    
-    if(!(fitNonLinearizedWidths(varyFactor))){
-      printf("WARNING: failed fit - nonlinearized stage (widths), iteration %i.\n",iterNum);
-      break;
-    }
 
     if(!(fitNonLinearizedPositions(varyFactor))){
       printf("WARNING: failed fit - nonlinearized stage (positions), iteration %i.\n",iterNum);
+      break;
+    }
+
+    if(!(fitNonLinearizedWidths(varyFactor))){
+      printf("WARNING: failed fit - nonlinearized stage (widths), iteration %i.\n",iterNum);
       break;
     }
 
@@ -426,18 +427,14 @@ int performGausFit(){
       varyFactor = 1.0;
     }
 
-    printf("Fit iteration %i - chisq: %f, A: %f, B: %f, C: %f",iterNum+1,iterChisq,fitpar.fitParVal[0],fitpar.fitParVal[1],fitpar.fitParVal[2]);
+    printf("Fit iteration %i - chisq: %f\nA: %f +/- %f, B: %f +/- %f, C: %f +/- %f\n",iterNum+1,iterChisq,fitpar.fitParVal[0],fitpar.fitParErr[0],fitpar.fitParVal[1],fitpar.fitParErr[1],fitpar.fitParVal[2],fitpar.fitParErr[2]);
     for(i=0;i<fitpar.numFitPeaks;i++){
-      printf(", A%i: %f, P%i: %f, W%i: %f",i+1,fitpar.fitParVal[6+(3*i)],i+1,fitpar.fitParVal[7+(3*i)],i+1,fitpar.fitParVal[8+(3*i)]);
-    }
-    printf("\nerrA: %f, errB: %f, errC: %f",fitpar.fitParErr[0],fitpar.fitParErr[1],fitpar.fitParErr[2]);
-    for(i=0;i<fitpar.numFitPeaks;i++){
-      printf(", errA%i: %f, errP%i: %f, errW%i: %f",i+1,fitpar.fitParErr[6+(3*i)],i+1,fitpar.fitParErr[7+(3*i)],i+1,fitpar.fitParErr[8+(3*i)]);
+      printf("A%i: %f +/- %f, P%i: %f +/- %f, W%i: %f +/- %f\n",i+1,fitpar.fitParVal[6+(3*i)],fitpar.fitParErr[6+(3*i)],i+1,fitpar.fitParVal[7+(3*i)],fitpar.fitParErr[7+(3*i)],i+1,fitpar.fitParVal[8+(3*i)],fitpar.fitParErr[8+(3*i)]);
     }
     printf("\n");
 
     if(iterChisq != BIG_NUMBER){
-      if(varyFactor >= 128.){
+      if(varyFactor >= 32.){
         if(fabs(lastIterChisq - iterChisq) < fabs(0.0001*firstIterChisq)){
           //end the fit
           printf("Fit converged at iteration %i.\n",iterNum+1);
