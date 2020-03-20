@@ -1,3 +1,5 @@
+/* J. Williams, 2020 */
+
 //function reads an .mca file into a double array and returns the number of spectra read in
 int readMCA(const char *filename, double outHist[NSPECT][S32K], int outHistStartSp)
 {

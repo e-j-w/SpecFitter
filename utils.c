@@ -1,3 +1,4 @@
+/* J. Williams, 2020 */
 
 //get a formatted string with a value and its uncertainty, 
 //properly rounded using the '20 rule' for reporting uncertainties

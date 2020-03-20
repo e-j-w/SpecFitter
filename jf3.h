@@ -1,3 +1,5 @@
+/* J. Williams, 2020 */
+
 #ifndef SV_H
 #define SV_H
 
@@ -66,7 +68,7 @@ GtkComboBoxText *multiplot_mode_combobox;
 //preferences dialog
 GtkModelButton *preferences_button;
 GtkWindow *preferences_window;
-GtkCheckButton *discard_empty_checkbutton, *bin_errors_checkbutton, *dark_theme_checkbutton;
+GtkCheckButton *discard_empty_checkbutton, *bin_errors_checkbutton, *dark_theme_checkbutton, *spectrum_label_checkbutton;
 GtkButton *preferences_apply_button, *preferences_cancel_button;
 //builder
 GtkBuilder *builder;
@@ -78,6 +80,7 @@ struct {
   float dragStartX; //start cursor position when dragging
   float cursorPosX, cursorPosY; //cursor position
   int drawSpCursor; //0 = don't draw vertical cursor on spectrum, 1=draw, -1=drawing disabled
+  int drawSpLabels; //0 = don't draw labels, 1 = draw labels
   int fittingSp; //0=not fitting, 1=selecting limits, 2=selecting peaks, 3=fitted (display fit)
   int deferFit; //0=no action, 1=fit is being deferred until a later time
   int deferSpSelChange;

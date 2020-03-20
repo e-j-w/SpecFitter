@@ -1,3 +1,5 @@
+/* J. Williams, 2020 */
+
 //set the default text color, depending on the
 void setTextColor(cairo_t *cr){
   if(gui.preferDarkTheme){
@@ -702,10 +704,12 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 
   double plotFontSize = 13.5;
 
-  //draw label for the plot
-  setTextColor(cr);
-  drawPlotLabel(cr,clip_x1,clip_x2,clip_y2, plotFontSize); //draw plot label(s)
-  cairo_stroke(cr);
+  //draw label(s) for the plot
+  if(gui.drawSpLabels){
+    setTextColor(cr);
+    drawPlotLabel(cr,clip_x1,clip_x2,clip_y2, plotFontSize); //draw plot label(s)
+    cairo_stroke(cr);
+  }
 
   // transform the coordinate system
   cairo_translate(cr, 0.0, dasize.height); //so that the origin is at the lower left
@@ -856,15 +860,19 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       cairo_set_line_width(cr, 3.0);
       cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
       float fitDrawX, nextFitDrawX, xpos, nextXpos;
-      for(fitDrawX=fitpar.fitStartCh; fitDrawX<=fitpar.fitEndCh; fitDrawX+= (clip_x2 - clip_x1 - 80.0)/1000.){
-        nextFitDrawX = fitDrawX + (clip_x2 - clip_x1 - 80.0)/1000.;
-        xpos = getXPosFromCh(fitDrawX,clip_x1,clip_x2);
-        nextXpos = getXPosFromCh(nextFitDrawX,clip_x1,clip_x2);
-        if((xpos > 0)&&(nextXpos > 0)){
-          cairo_move_to (cr, xpos, getYPos(evalFit(fitDrawX),0,clip_y1,clip_y2));
-          cairo_line_to (cr, nextXpos, getYPos(evalFit(nextFitDrawX),0,clip_y1,clip_y2));
+      //draw each peak
+      for(i=0;i<fitpar.numFitPeaks;i++){
+        for(fitDrawX=fitpar.fitStartCh; fitDrawX<=fitpar.fitEndCh; fitDrawX+= (clip_x2 - clip_x1 - 80.0)/1000.){
+          nextFitDrawX = fitDrawX + (clip_x2 - clip_x1 - 80.0)/1000.;
+          xpos = getXPosFromCh(fitDrawX,clip_x1,clip_x2);
+          nextXpos = getXPosFromCh(nextFitDrawX,clip_x1,clip_x2);
+          if((xpos > 0)&&(nextXpos > 0)){
+            cairo_move_to (cr, xpos, getYPos(evalFitOnePeak(fitDrawX,i),0,clip_y1,clip_y2));
+            cairo_line_to (cr, nextXpos, getYPos(evalFitOnePeak(nextFitDrawX,i),0,clip_y1,clip_y2));
+          }
         }
       }
+      //draw background
       for(fitDrawX=fitpar.fitStartCh; fitDrawX<=fitpar.fitEndCh; fitDrawX+= (clip_x2 - clip_x1 - 80.0)/1000.){
         nextFitDrawX = fitDrawX + (clip_x2 - clip_x1 - 80.0)/1000.;
         xpos = getXPosFromCh(fitDrawX,clip_x1,clip_x2);

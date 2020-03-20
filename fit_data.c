@@ -1,3 +1,5 @@
+/* J. Williams, 2020 */
+
 //forward declarations
 float getDispSpBinVal(int dispSpNum, int bin);
 
@@ -13,17 +15,26 @@ double evalGaussTerm(int peakNum, double xval){
   return evalG;
 }
 
+double evalFitBG(double xval){
+  return fitpar.fitParVal[0] + xval*fitpar.fitParVal[1] + xval*xval*fitpar.fitParVal[2];
+}
+
 double evalFit(double xval){
   int i;
-  double val = fitpar.fitParVal[0] + xval*fitpar.fitParVal[1] + xval*xval*fitpar.fitParVal[2];
+  double val = evalFitBG(xval);
   for(i=0;i<fitpar.numFitPeaks;i++)
     val += fitpar.fitParVal[6+(3*i)]*evalGaussTerm(i,xval);
   return val;
 }
 
-double evalFitBG(double xval){
-  return fitpar.fitParVal[0] + xval*fitpar.fitParVal[1] + xval*xval*fitpar.fitParVal[2];
+double evalFitOnePeak(double xval, int peak){
+  if(peak>=fitpar.numFitPeaks)
+    return 0.0;
+  double val = evalFitBG(xval);
+  val += fitpar.fitParVal[6+(3*peak)]*evalGaussTerm(peak,xval);
+  return val;
 }
+
 
 //function returns chisq evaluated for the current fit
 double getFitChisq(){

@@ -1,3 +1,5 @@
+/* J. Williams, 2020 */
+
 #include "jf3.h"
 
 #include "jf3-resources.c"
@@ -715,17 +717,27 @@ void on_toggle_dark_theme(GtkToggleButton *togglebutton, gpointer user_data)
   g_object_set(gtk_settings_get_default(),"gtk-application-prefer-dark-theme", gui.preferDarkTheme, NULL);
 }
 
+void on_toggle_spectrum_label(GtkToggleButton *togglebutton, gpointer user_data)
+{
+  if(gtk_toggle_button_get_active(togglebutton))
+    gui.drawSpLabels=1;
+  else
+    gui.drawSpLabels=0;
+}
+
 void on_preferences_button_clicked(GtkButton *b)
 {
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(discard_empty_checkbutton),rawdata.dropEmptySpectra);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bin_errors_checkbutton),gui.showBinErrors);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dark_theme_checkbutton),gui.preferDarkTheme);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_label_checkbutton),gui.drawSpLabels);
   gtk_window_present(preferences_window); //show the window
 }
 
 void on_preferences_apply_button_clicked(GtkButton *b)
 {
   updateConfigFile();
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
   gtk_widget_hide(GTK_WIDGET(preferences_window)); //close the multiplot window
 }
 
@@ -810,6 +822,7 @@ int main(int argc, char *argv[])
   discard_empty_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "discard_empty_checkbutton"));
   bin_errors_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "bin_errors_checkbutton"));
   dark_theme_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "dark_theme_checkbutton"));
+  spectrum_label_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "spectrum_label_checkbutton"));
   preferences_apply_button = GTK_BUTTON(gtk_builder_get_object(builder, "preferences_apply_button"));
   preferences_cancel_button = GTK_BUTTON(gtk_builder_get_object(builder, "preferences_cancel_button"));
 
@@ -838,6 +851,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (discard_empty_checkbutton), "toggled", G_CALLBACK (on_toggle_discard_empty), NULL);
   g_signal_connect (G_OBJECT (bin_errors_checkbutton), "toggled", G_CALLBACK (on_toggle_bin_errors), NULL);
   g_signal_connect (G_OBJECT (dark_theme_checkbutton), "toggled", G_CALLBACK (on_toggle_dark_theme), NULL);
+  g_signal_connect (G_OBJECT (spectrum_label_checkbutton), "toggled", G_CALLBACK (on_toggle_spectrum_label), NULL);
   g_signal_connect (G_OBJECT (preferences_apply_button), "clicked", G_CALLBACK (on_preferences_apply_button_clicked), NULL);
   g_signal_connect (G_OBJECT (preferences_button), "clicked", G_CALLBACK (on_preferences_button_clicked), NULL);
   g_signal_connect (G_OBJECT (preferences_cancel_button), "clicked", G_CALLBACK (on_preferences_cancel_button_clicked), NULL);
@@ -895,6 +909,7 @@ int main(int argc, char *argv[])
   gui.deferToggleRow = 0;
   gui.draggingSp = 0;
   gui.drawSpCursor = -1; //disabled by default
+  gui.drawSpLabels = 1; //enabled by default
   gui.showBinErrors = 1;
   gui.preferDarkTheme = 0;
   fitpar.fitStartCh = -1;

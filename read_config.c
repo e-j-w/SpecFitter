@@ -1,3 +1,5 @@
+/* J. Williams, 2020 */
+
 //read data from a config file
 int readConfigFile(FILE *file)
 {
@@ -51,6 +53,13 @@ int readConfigFile(FILE *file)
 					gui.preferDarkTheme = 1;
 				}else{
 					gui.preferDarkTheme = 0;
+				}
+			}
+			if(strcmp(par,"draw_sp_labels") == 0){
+				if(strcmp(val,"yes") == 0){
+					gui.drawSpLabels = 1;
+				}else{
+					gui.drawSpLabels = 0;
 				}
 			}
 			if(strcmp(par,"calibrate") == 0){
@@ -110,6 +119,11 @@ int writeConfigFile(FILE *file)
 		fprintf(file,"prefer_dark_theme=yes\n");
 	}else{
 		fprintf(file,"prefer_dark_theme=no\n");
+	}
+	if(gui.drawSpLabels == 1){
+		fprintf(file,"draw_sp_labels=yes\n");
+	}else{
+		fprintf(file,"draw_sp_labels=no\n");
 	}
 
 	return 1;

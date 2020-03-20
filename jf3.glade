@@ -77,7 +77,7 @@ Author: Jonathan Williams
     <property name="type_hint">dialog</property>
     <property name="attached_to">window</property>
     <property name="program_name">jf3 Spectrum Viewer</property>
-    <property name="comments" translatable="yes">A 1D spectrum viewer application.</property>
+    <property name="comments" translatable="yes">A 1D spectrum viewer and fitter application.</property>
     <property name="website">https://github.com/e-j-w/jf3</property>
     <property name="authors">Jonathan Williams</property>
     <property name="logo_icon_name">utilities-system-monitor</property>
@@ -855,7 +855,7 @@ Author: Jonathan Williams
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="position">4</property>
+                <property name="position">3</property>
               </packing>
             </child>
             <child>
@@ -865,6 +865,21 @@ Author: Jonathan Williams
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
                 <property name="tooltip_text" translatable="yes">If checked, will use the dark GTK theme variant if available.</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="spectrum_label_checkbutton">
+                <property name="label" translatable="yes">Draw labels for spectra</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">If checked, will draw text labels identifying the displayed spectra.</property>
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
@@ -1053,7 +1068,7 @@ Author: Jonathan Williams
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Open a file containing spectra (.mca, .fmca, .spe format).</property>
+                <property name="tooltip_text" translatable="yes">Open a file containing spectra (.txt, .mca, .fmca, .spe format).</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -1109,7 +1124,7 @@ Author: Jonathan Williams
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Change display parameters for the loaded spectra (zoom/pan/contraction factor).</property>
+            <property name="tooltip_text" translatable="yes">Show display options for the loaded spectra.</property>
             <property name="use_popover">False</property>
             <property name="popover">display_popover</property>
             <child>
