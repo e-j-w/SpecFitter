@@ -124,6 +124,39 @@ void getPlotLimits(){
     }
 }
 
+//zoom to the non-zero region of the spectrum
+void autoZoom(){
+  if(drawing.multiplotMode == 0){
+    int i;
+    for(i=0;i<S32K;i++){
+      if(rawdata.hist[drawing.multiPlots[0]][i] != 0.){
+        drawing.lowerLimit = i;
+        break;
+      }
+    }
+    for(i=S32K-1;i>=0;i--){
+      if(rawdata.hist[drawing.multiPlots[0]][i] != 0.){
+        drawing.upperLimit = i;
+        break;
+      }
+    }
+    drawing.xChanFocus = (drawing.upperLimit + drawing.lowerLimit)/2.0;
+    int numChansToDisp = drawing.upperLimit - drawing.lowerLimit;
+    if(numChansToDisp > 0){
+      drawing.zoomLevel = 1.0*S32K/numChansToDisp;
+    }
+
+    //obey zoom limits
+    if(drawing.zoomLevel < 1.0){
+      drawing.zoomLevel = 1.0;
+    }else if(drawing.zoomLevel > 1024.0){
+      drawing.zoomLevel = 1024.0; //set maximum zoom level
+    }
+      
+  }
+  //printf("lowerLimit: %i, upperLimit: %i, xChanFocus: %i, zoomLevel: %f\n",drawing.lowerLimit,drawing.upperLimit,drawing.xChanFocus, drawing.zoomLevel);
+}
+
 void on_toggle_autoscale(GtkToggleButton *togglebutton, gpointer user_data)
 {
   if(gtk_toggle_button_get_active(togglebutton))

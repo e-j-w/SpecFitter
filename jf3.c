@@ -101,6 +101,12 @@ void openSingleFile(char *filename, int append){
     exit(-1);
   }
 
+  //autozoom if needed
+  if(gui.autoZoom){
+    autoZoom();
+    gtk_range_set_value(GTK_RANGE(zoom_scale),log2(drawing.zoomLevel));
+  }
+
 }
 
 void on_open_button_clicked(GtkButton *b)
@@ -207,8 +213,14 @@ void on_open_button_clicked(GtkButton *b)
   }else{
     gtk_widget_destroy(file_open_dialog);
   }
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
   
+  //autozoom if needed
+  if(gui.autoZoom){
+    autoZoom();
+    gtk_range_set_value(GTK_RANGE(zoom_scale),log2(drawing.zoomLevel));
+  }
+  
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
   
 }
 
@@ -293,9 +305,7 @@ void on_append_button_clicked(GtkButton *b)
   }
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
   
-  
 }
-
 
 
 void on_display_button_clicked(GtkButton *b)
@@ -307,10 +317,6 @@ void on_display_button_clicked(GtkButton *b)
 
 void on_zoom_scale_changed(GtkRange *range, gpointer user_data){
   drawing.zoomLevel = pow(2,gtk_range_get_value(range)); //modify the zoom level
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
-}
-void on_pan_scale_changed(GtkRange *range, gpointer user_data){
-  drawing.xChanFocus = (S32K/100.0)*gtk_range_get_value(range); //modify the pan level
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
 }
 void on_contract_scale_changed(GtkRange *range, gpointer user_data){
@@ -716,6 +722,13 @@ void on_toggle_dark_theme(GtkToggleButton *togglebutton, gpointer user_data)
   //set whether dark theme is preferred
   g_object_set(gtk_settings_get_default(),"gtk-application-prefer-dark-theme", gui.preferDarkTheme, NULL);
 }
+void on_toggle_autozoom(GtkToggleButton *togglebutton, gpointer user_data)
+{
+  if(gtk_toggle_button_get_active(togglebutton))
+    gui.autoZoom=1;
+  else
+    gui.autoZoom=0;
+}
 
 void on_toggle_spectrum_label(GtkToggleButton *togglebutton, gpointer user_data)
 {
@@ -730,6 +743,7 @@ void on_preferences_button_clicked(GtkButton *b)
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(discard_empty_checkbutton),rawdata.dropEmptySpectra);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bin_errors_checkbutton),gui.showBinErrors);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dark_theme_checkbutton),gui.preferDarkTheme);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autozoom_checkbutton),gui.autoZoom);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_label_checkbutton),gui.drawSpLabels);
   gtk_window_present(preferences_window); //show the window
 }
@@ -821,6 +835,7 @@ int main(int argc, char *argv[])
   preferences_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "preferences_button"));
   discard_empty_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "discard_empty_checkbutton"));
   bin_errors_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "bin_errors_checkbutton"));
+  autozoom_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "autozoom_checkbutton"));
   dark_theme_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "dark_theme_checkbutton"));
   spectrum_label_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "spectrum_label_checkbutton"));
   preferences_apply_button = GTK_BUTTON(gtk_builder_get_object(builder, "preferences_apply_button"));
@@ -852,6 +867,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (bin_errors_checkbutton), "toggled", G_CALLBACK (on_toggle_bin_errors), NULL);
   g_signal_connect (G_OBJECT (dark_theme_checkbutton), "toggled", G_CALLBACK (on_toggle_dark_theme), NULL);
   g_signal_connect (G_OBJECT (spectrum_label_checkbutton), "toggled", G_CALLBACK (on_toggle_spectrum_label), NULL);
+  g_signal_connect (G_OBJECT (autozoom_checkbutton), "toggled", G_CALLBACK (on_toggle_autozoom), NULL);
   g_signal_connect (G_OBJECT (preferences_apply_button), "clicked", G_CALLBACK (on_preferences_apply_button_clicked), NULL);
   g_signal_connect (G_OBJECT (preferences_button), "clicked", G_CALLBACK (on_preferences_button_clicked), NULL);
   g_signal_connect (G_OBJECT (preferences_cancel_button), "clicked", G_CALLBACK (on_preferences_cancel_button_clicked), NULL);
@@ -911,6 +927,7 @@ int main(int argc, char *argv[])
   gui.drawSpCursor = -1; //disabled by default
   gui.drawSpLabels = 1; //enabled by default
   gui.showBinErrors = 1;
+  gui.autoZoom = 1;
   gui.preferDarkTheme = 0;
   fitpar.fitStartCh = -1;
   fitpar.fitEndCh = -1;

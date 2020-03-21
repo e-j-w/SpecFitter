@@ -62,6 +62,13 @@ int readConfigFile(FILE *file)
 					gui.drawSpLabels = 0;
 				}
 			}
+			if(strcmp(par,"autozoom") == 0){
+				if(strcmp(val,"yes") == 0){
+					gui.autoZoom = 1;
+				}else{
+					gui.autoZoom = 0;
+				}
+			}
 			if(strcmp(par,"calibrate") == 0){
 				if(strcmp(val,"yes") == 0){
 					calpar.calMode = 1;
@@ -124,6 +131,11 @@ int writeConfigFile(FILE *file)
 		fprintf(file,"draw_sp_labels=yes\n");
 	}else{
 		fprintf(file,"draw_sp_labels=no\n");
+	}
+	if(gui.autoZoom == 1){
+		fprintf(file,"autozoom=yes\n");
+	}else{
+		fprintf(file,"autozoom=no\n");
 	}
 
 	return 1;
