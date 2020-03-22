@@ -9,5 +9,6 @@ jf3-resources.c
 *.o
 *.compiled
 *.conf
+*.sh
 *#
 */*.o

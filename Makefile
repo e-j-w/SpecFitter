@@ -16,5 +16,31 @@ jf3-resources.c: data/jf3.gresource.xml data/jf3.glade $(resources)
 lin_eq_solver: src/lin_eq_solver/lin_eq_solver.c src/lin_eq_solver/lin_eq_solver.h
 	gcc $(CFLAGS) -c -o src/lin_eq_solver/lin_eq_solver.o src/lin_eq_solver/lin_eq_solver.c
 
+install:
+	@echo "Will install to /usr/bin."
+	@echo "Run 'make uninstall' to undo installation."
+	@if [[ $EUID -ne 0 ]]; then \
+		echo "This must be run with administrator privileges (eg. with 'sudo')."; \
+	else \
+		read -p "Press any key to continue..." ; \
+		cp jf3 /usr/bin ; \
+		cp data/jf3.desktop /usr/share/applications ; \
+		update-desktop-database ; \
+		echo "Done!" ; \
+	fi
+	
+	
+uninstall:
+	@echo "Will undo changes made from running 'make install'."
+	@if [[ $EUID -ne 0 ]]; then \
+		echo "This must be run with administrator privileges (eg. with 'sudo')."; \
+	else \
+		read -p "Press any key to continue..." ; \
+		rm /usr/bin/jf3 ; \
+		rm /usr/share/applications/jf3.desktop ; \
+		update-desktop-database ; \
+		echo "Done!" ; \
+	fi
+
 clean:
 	rm -rf *~ *.o */*/*.o jf3-resources.c *# jf3

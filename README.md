@@ -44,7 +44,19 @@ Conversion codes for some of these data formats are available in the [FileConvTo
 
 ## How to build
 
-So far the program has only been tested with Linux-based systems.  A Makefile is provided, use `make` to compile.  This should work fine on most recent Linux distros - the build process has been tested on CentOS 7 and Arch Linux (as of March 2020) under the GNOME desktop environment.
+So far the program has only been tested with Linux-based systems.  A Makefile is provided, build the program using:
+
+```make``` 
+
+The program can be installed for all users with:
+
+```sudo make install```
+
+This will place the `jf3` binary in `/usr/bin` and a desktop entry file in `/usr/share/applications` (for desktop environment integration).  These changes can be undone with:
+
+```sudo make uninstall```
+
+This build process has been tested on CentOS 7 and Arch Linux (as of March 2020) under the GNOME desktop environment.
 
 ### Build dependencies
 
@@ -55,7 +67,7 @@ So far the program has only been tested with Linux-based systems.  A Makefile is
 
 ## Usage notes
 
-* Preferences are stored in a plaintext configuration file at `$HOME/.config/jf3/jf3.conf`.
+* Preferences are stored in a plaintext configuration file on a per-user basis at `$HOME/.config/jf3/jf3.conf`.
 * When running the program from the command line, it is possible to automatically open files by specifying the filename(s) as arguments (eg. `jf3 /path/to/file1 /path/to/file2`).
 * After fitting a spectrum, the onscreen fit can be cleared using the right mouse button.
 
