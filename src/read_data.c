@@ -154,7 +154,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 	char str[256];
 	FILE *inp;
 	double num[NSPECT];
-	int numColumns; // the detected number of columns in the first line
+	int numColumns = 0; // the detected number of columns in the first line
 
 	memset(outHist, 0, sizeof(*outHist));
 

@@ -361,7 +361,8 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
             }
             binVal = getDispSpBinVal(drawing.numMultiplotSp-1,cursorChanRounded-drawing.lowerLimit);
             getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,gui.showBinErrors);
-            statusBarLabelp += snprintf(statusBarLabelp,17," %s", binValStr);
+            binValStr[15] = '\0'; //truncate string (staying safe with sprintf, working around compiler warning when using snprintf instead)
+            statusBarLabelp += sprintf(statusBarLabelp," %s", binValStr);
             break;
           case 1:
           case 0:
@@ -915,9 +916,24 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
           cairo_line_to (cr, nextXpos, getYPos(evalFitBG(nextFitDrawX),0,clip_y1,clip_y2));
         }
       }
+      cairo_stroke(cr);
+      //draw sum of peaks
+      if(fitpar.numFitPeaks > 1){
+        cairo_set_line_width(cr, 2.0);
+        for(fitDrawX=fitpar.fitStartCh; fitDrawX<=fitpar.fitEndCh; fitDrawX+= (clip_x2 - clip_x1 - 80.0)/1000.){
+          nextFitDrawX = fitDrawX + (clip_x2 - clip_x1 - 80.0)/1000.;
+          xpos = getXPosFromCh(fitDrawX,clip_x1,clip_x2);
+          nextXpos = getXPosFromCh(nextFitDrawX,clip_x1,clip_x2);
+          if((xpos > 0)&&(nextXpos > 0)){
+            cairo_move_to (cr, xpos, getYPos(evalFit(fitDrawX),0,clip_y1,clip_y2));
+            cairo_line_to (cr, nextXpos, getYPos(evalFit(nextFitDrawX),0,clip_y1,clip_y2));
+          }
+        }
+        cairo_stroke(cr);
+      }
     }
   }
-  cairo_stroke(cr);
+  
 
   // draw axis lines
   cairo_set_line_width(cr, 1.0);
@@ -1081,7 +1097,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       cairo_set_line_width(cr, 2.0);
       for(i=0;i<fitpar.numFitPeaks;i++){
         if((fitpar.fitPeakInitGuess[i] > drawing.lowerLimit)&&(fitpar.fitPeakInitGuess[i] < drawing.upperLimit)){
-          cairo_arc(cr,getXPosFromCh(fitpar.fitPeakInitGuess[i],clip_x1,clip_x2),-30.0-getYPos(getDispSpBinVal(0,fitpar.fitPeakInitGuess[i]-drawing.lowerLimit),0,clip_y1,clip_y2),8.,0.,2*M_PI);
+          cairo_arc(cr,getXPosFromCh(fitpar.fitPeakInitGuess[i],clip_x1,clip_x2),-30.0-getYPos(getDispSpBinVal(0,fitpar.fitPeakInitGuess[i]-drawing.lowerLimit),0,clip_y1,clip_y2),8.,0.,2*G_PI);
         }
         cairo_stroke_preserve(cr);
         cairo_fill(cr);
@@ -1092,7 +1108,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       cairo_set_line_width(cr, 2.0);
       for(i=0;i<fitpar.numFitPeaks;i++){
         if((fitpar.fitParVal[7+(3*i)] > drawing.lowerLimit)&&(fitpar.fitParVal[7+(3*i)] < drawing.upperLimit)){
-          cairo_arc(cr,getXPosFromCh(fitpar.fitParVal[7+(3*i)],clip_x1,clip_x2),-30.0-getYPos(getDispSpBinVal(0,fitpar.fitParVal[7+(3*i)]-drawing.lowerLimit),0,clip_y1,clip_y2),8.,0.,2*M_PI);
+          cairo_arc(cr,getXPosFromCh(fitpar.fitParVal[7+(3*i)],clip_x1,clip_x2),-30.0-getYPos(getDispSpBinVal(0,fitpar.fitParVal[7+(3*i)]-drawing.lowerLimit),0,clip_y1,clip_y2),8.,0.,2*G_PI);
         }
         cairo_stroke_preserve(cr);
         cairo_fill(cr);

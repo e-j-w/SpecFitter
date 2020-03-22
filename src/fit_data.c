@@ -329,7 +329,9 @@ int performGausFit(){
   int maxIterNum = 50;
   int maxFirstIterTries = 10;
   int firstIterCounter = 0;
-  double firstIterChisq, iterChisq, lastIterChisq;
+  double firstIterChisq = BIG_NUMBER;
+  double lastIterChisq = BIG_NUMBER;
+  double iterChisq;
   double varyFactor = 1.0;
   while (iterNum < maxIterNum){
 

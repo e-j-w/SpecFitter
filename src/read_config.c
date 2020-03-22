@@ -14,18 +14,18 @@ int readConfigFile(FILE *file)
 			//parse the line
 			tok = strtok(fullLine,"=");
 			if(tok != NULL){
-				strncpy(par,tok,sizeof(par));
+				strncpy(par,tok,sizeof(par)-1);
 
 				//handle values which might include the '=' sign
 				if(strcmp(par,"cal_unit") == 0){
 					tok = strtok(NULL,"");
 					if(tok != NULL){
-						strncpy(val,tok,sizeof(val));
+						strncpy(val,tok,sizeof(val)-1);
 					}
 				}else{
 					tok = strtok(NULL,"=");
 					if(tok != NULL){
-						strncpy(val,tok,sizeof(val));
+						strncpy(val,tok,sizeof(val)-1);
 					}
 				}
 				
@@ -86,7 +86,8 @@ int readConfigFile(FILE *file)
 				calpar.calpar2 = atof(val);
 			}
 			if(strcmp(par,"cal_unit") == 0){
-				strncpy(calpar.calUnit,val,16);
+				val[15] = '\0'; //truncate string
+				strcpy(calpar.calUnit,val);
 			}
 			
 
@@ -139,4 +140,33 @@ int writeConfigFile(FILE *file)
 	}
 
 	return 1;
+}
+
+
+void updateConfigFile(){
+  char dirPath[256];
+  strcpy(dirPath,"");
+	strcat(dirPath,getenv("HOME"));
+	strcat(dirPath,"/.config/jf3/jf3.conf");
+  FILE *configFile = fopen(dirPath, "w");
+  if(configFile != NULL){
+    writeConfigFile(configFile); //write the default configuration values
+    fclose(configFile);
+  }else{
+    printf("WARNING: Unable to write preferences to configuration file.\n");
+  }
+}
+
+void updatePrefsFromConfigFile(){
+  char dirPath[256];
+  strcpy(dirPath,"");
+	strcat(dirPath,getenv("HOME"));
+	strcat(dirPath,"/.config/jf3/jf3.conf");
+  FILE *configFile = fopen(dirPath, "r");
+  if(configFile != NULL){
+    readConfigFile(configFile); //read the configuration values
+    fclose(configFile);
+  }else{
+    printf("WARNING: Unable to read preferences to configuration file.\n");
+  }
 }
