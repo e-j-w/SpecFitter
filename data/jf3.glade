@@ -125,7 +125,10 @@ Author: Jonathan Williams
         <property name="can_focus">False</property>
         <property name="margin_left">10</property>
         <property name="margin_right">10</property>
+        <property name="margin_top">10</property>
+        <property name="margin_bottom">10</property>
         <property name="orientation">vertical</property>
+        <property name="spacing">10</property>
         <child>
           <object class="GtkBox" id="tab1_box">
             <property name="visible">True</property>
@@ -136,7 +139,6 @@ Author: Jonathan Williams
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_top">10</property>
                 <property name="spacing">10</property>
                 <child>
                   <object class="GtkLabel">
@@ -205,7 +207,6 @@ Author: Jonathan Williams
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_bottom">10</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">10</property>
                 <child>
@@ -281,7 +282,7 @@ Author: Jonathan Williams
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">* (channel #)  +</property>
+                        <property name="label" translatable="yes">× (channel)  +</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -311,7 +312,7 @@ Author: Jonathan Williams
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">* (channel #)^2</property>
+                        <property name="label" translatable="yes">× (channel)²</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -356,8 +357,6 @@ Author: Jonathan Williams
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="halign">end</property>
-            <property name="margin_top">10</property>
-            <property name="margin_bottom">10</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkButton" id="options_ok_button">
@@ -405,12 +404,38 @@ Author: Jonathan Williams
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="tooltip_text" translatable="yes">Select the spectrum to display.</property>
             <property name="spacing">6</property>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Spectrum #:</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">Display</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Spectrum:</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -422,7 +447,6 @@ Author: Jonathan Williams
               <object class="GtkSpinButton" id="spectrumselector">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="tooltip_text" translatable="yes">Select the spectrum to display.</property>
                 <property name="max_length">3</property>
                 <property name="text" translatable="yes">0</property>
                 <property name="input_purpose">digits</property>
@@ -434,7 +458,7 @@ Author: Jonathan Williams
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">1</property>
+                <property name="position">2</property>
               </packing>
             </child>
             <child>
@@ -445,7 +469,7 @@ Author: Jonathan Williams
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="position">3</property>
               </packing>
             </child>
             <child>
@@ -455,12 +479,12 @@ Author: Jonathan Williams
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Plot multiple spectra from the opened file(s) at once.</property>
+                <property name="tooltip_text" translatable="yes">Advanced plotting options - plot multiple spectra from the opened file(s) at once.</property>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">3</property>
+                <property name="position">4</property>
               </packing>
             </child>
           </object>
@@ -546,7 +570,7 @@ Author: Jonathan Williams
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Channels per bin</property>
+                <property name="label" translatable="yes">Channels / bin</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -599,7 +623,10 @@ Author: Jonathan Williams
         <property name="can_focus">False</property>
         <property name="margin_left">10</property>
         <property name="margin_right">10</property>
+        <property name="margin_top">10</property>
+        <property name="margin_bottom">10</property>
         <property name="orientation">vertical</property>
+        <property name="spacing">10</property>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
@@ -612,6 +639,9 @@ Author: Jonathan Williams
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
                 <property name="label" translatable="yes">Select spectra to plot:</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -689,11 +719,40 @@ Author: Jonathan Williams
                 <property name="can_focus">False</property>
                 <property name="spacing">10</property>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Select plotting mode:
-(for multiple spectra)</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Select plotting mode:</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">(for multiple spectra)</property>
+                        <attributes>
+                          <attribute name="style" value="italic"/>
+                        </attributes>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -716,7 +775,7 @@ Author: Jonathan Williams
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>
@@ -736,12 +795,21 @@ Author: Jonathan Williams
           </packing>
         </child>
         <child>
+          <object class="GtkSeparator">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="halign">end</property>
-            <property name="margin_top">10</property>
-            <property name="margin_bottom">10</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkButton" id="multiplot_ok_button">
@@ -899,7 +967,7 @@ Author: Jonathan Williams
             </child>
             <child>
               <object class="GtkCheckButton" id="spectrum_label_checkbutton">
-                <property name="label" translatable="yes">Draw labels for spectra</property>
+                <property name="label" translatable="yes">Draw descriptive labels for spectra</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
