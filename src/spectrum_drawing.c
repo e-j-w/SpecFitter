@@ -820,7 +820,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 		return;
 	}
 
-  int i,j;
+  int i,j,k;
 	
   // Draw the background colour
   //cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
@@ -921,12 +921,12 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 
   //interpolate (ie. limit the number of bins drawn) in the next step, 
   //to help drawing performance
-  int maxDrawBins = (clip_x2 - clip_x1)*2;
+  int maxDrawBins = (clip_x2 - clip_x1)*1.1;
   //printf("maximum bins to draw: %i\n",maxDrawBins);
   int binSkipFactor = (drawing.upperLimit-drawing.lowerLimit)/(maxDrawBins);
   if(binSkipFactor <= drawing.contractFactor)
     binSkipFactor = drawing.contractFactor;
-  //printf("binskipfactor: %i\n",binSkipFactor);
+  //printf("binskipfactor: %i, contractFactor: %i\n",binSkipFactor,drawing.contractFactor);
   //for smooth scrolling of interpolated spectra, have the start bin always
   //be a multiple of the skip factor
   int startBin = 0 - (drawing.lowerLimit % binSkipFactor);
@@ -939,8 +939,25 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       //overlay (independent scaling)
       for(i=0;i<drawing.numMultiplotSp;i++){
         for(j=startBin;j<(drawing.upperLimit-drawing.lowerLimit-1);j+=binSkipFactor){
-          float currentVal = getDispSpBinVal(i, j);
-          float nextVal = getDispSpBinVal(i, j+binSkipFactor);
+
+          float currentVal, nextVal;
+
+          //draw high values even if they were going to be interpolated over
+          if(binSkipFactor > drawing.contractFactor){
+            for(k=0;k<binSkipFactor;k++){
+              if(getDispSpBinVal(i, j+k) > drawing.scaleLevelMax[i]*0.8){
+                currentVal = getDispSpBinVal(i, j);
+                nextVal = getDispSpBinVal(i, j+k);
+                cairo_move_to (cr, getXPos(j,clip_x1,clip_x2), getYPos(currentVal,i,clip_y1,clip_y2));
+                cairo_line_to (cr, getXPos(j+k,clip_x1,clip_x2), getYPos(currentVal,i,clip_y1,clip_y2));
+                cairo_line_to (cr, getXPos(j+k,clip_x1,clip_x2), getYPos(nextVal,i,clip_y1,clip_y2));
+                break;
+              }
+            }
+          }
+
+          currentVal = getDispSpBinVal(i, j);
+          nextVal = getDispSpBinVal(i, j+binSkipFactor);
           cairo_move_to (cr, getXPos(j,clip_x1,clip_x2), getYPos(currentVal,i,clip_y1,clip_y2));
           cairo_line_to (cr, getXPos(j+binSkipFactor,clip_x1,clip_x2), getYPos(currentVal,i,clip_y1,clip_y2));
           cairo_line_to (cr, getXPos(j+binSkipFactor,clip_x1,clip_x2), getYPos(nextVal,i,clip_y1,clip_y2));
@@ -954,8 +971,25 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       //overlay (common scaling)
       for(i=0;i<drawing.numMultiplotSp;i++){
         for(j=startBin;j<(drawing.upperLimit-drawing.lowerLimit-1);j+=binSkipFactor){
-          float currentVal = getDispSpBinVal(i, j);
-          float nextVal = getDispSpBinVal(i, j+binSkipFactor);
+
+          float currentVal, nextVal;
+
+          //draw high values even if they were going to be interpolated over
+          if(binSkipFactor > drawing.contractFactor){
+            for(k=0;k<binSkipFactor;k++){
+              if(getDispSpBinVal(i, j+k) > drawing.scaleLevelMax[0]*0.8){
+                currentVal = getDispSpBinVal(i, j);
+                nextVal = getDispSpBinVal(i, j+k);
+                cairo_move_to (cr, getXPos(j,clip_x1,clip_x2), getYPos(currentVal,0,clip_y1,clip_y2));
+                cairo_line_to (cr, getXPos(j+k,clip_x1,clip_x2), getYPos(currentVal,0,clip_y1,clip_y2));
+                cairo_line_to (cr, getXPos(j+k,clip_x1,clip_x2), getYPos(nextVal,0,clip_y1,clip_y2));
+                break;
+              }
+            }
+          }
+
+          currentVal = getDispSpBinVal(i, j);
+          nextVal = getDispSpBinVal(i, j+binSkipFactor);
           cairo_move_to (cr, getXPos(j,clip_x1,clip_x2), getYPos(currentVal,0,clip_y1,clip_y2));
           cairo_line_to (cr, getXPos(j+binSkipFactor,clip_x1,clip_x2), getYPos(currentVal,0,clip_y1,clip_y2));
           cairo_line_to (cr, getXPos(j+binSkipFactor,clip_x1,clip_x2), getYPos(nextVal,0,clip_y1,clip_y2));
@@ -969,8 +1003,25 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       //summed
     case 0:
       for(i=startBin;i<(drawing.upperLimit-drawing.lowerLimit-1);i+=binSkipFactor){
-        float currentVal = getDispSpBinVal(0, i);
-        float nextVal = getDispSpBinVal(0, i+binSkipFactor);
+
+        float currentVal, nextVal;
+
+        //draw high values even if they were going to be interpolated over
+        if(binSkipFactor > drawing.contractFactor){
+          for(k=0;k<binSkipFactor;k++){
+            if(getDispSpBinVal(0, i+k) > drawing.scaleLevelMax[0]*0.8){
+              currentVal = getDispSpBinVal(0, i);
+              nextVal = getDispSpBinVal(0, i+k);
+              cairo_move_to (cr, getXPos(i,clip_x1,clip_x2), getYPos(currentVal,0,clip_y1,clip_y2));
+              cairo_line_to (cr, getXPos(i+k,clip_x1,clip_x2), getYPos(currentVal,0,clip_y1,clip_y2));
+              cairo_line_to (cr, getXPos(i+k,clip_x1,clip_x2), getYPos(nextVal,0,clip_y1,clip_y2));
+              break;
+            }
+          }
+        }
+
+        currentVal = getDispSpBinVal(0, i);
+        nextVal = getDispSpBinVal(0, i+binSkipFactor);
         //printf("Here! x=%f,y=%f,yorig=%f xclip=%f %f\n",getXPos(i,clip_x1,clip_x2), rawdata.hist[drawing.multiPlots[0]][drawing.lowerLimit+i],rawdata.hist[drawing.multiPlots[0]][drawing.lowerLimit+i],clip_x1,clip_x2);
         cairo_move_to (cr, getXPos(i,clip_x1,clip_x2), getYPos(currentVal,0,clip_y1,clip_y2));
         cairo_line_to (cr, getXPos(i+binSkipFactor,clip_x1,clip_x2), getYPos(currentVal,0,clip_y1,clip_y2));
