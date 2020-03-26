@@ -511,15 +511,44 @@ Author: Jonathan Williams
             <property name="can_focus">False</property>
             <property name="spacing">10</property>
             <child>
-              <object class="GtkCheckButton" id="autoscalebutton">
-                <property name="label" translatable="yes"> Vertical Autoscale</property>
+              <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="tooltip_text" translatable="yes">If checked, the displayed spectrum will be automatically scaled on the vertical axis to fit visible features.</property>
-                <property name="halign">start</property>
-                <property name="active">True</property>
-                <property name="draw_indicator">True</property>
+                <property name="can_focus">False</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">10</property>
+                <child>
+                  <object class="GtkCheckButton" id="autoscalebutton">
+                    <property name="label" translatable="yes"> Vertical Autoscale</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">If checked, the displayed spectrum will be automatically scaled on the vertical axis to fit visible features.</property>
+                    <property name="halign">start</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="logscalebutton">
+                    <property name="label" translatable="yes"> Logarithmic Scale</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">If checked, will display the y-axis in logarithmic scale (omitting negative values).</property>
+                    <property name="halign">start</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -528,8 +557,19 @@ Author: Jonathan Williams
               </packing>
             </child>
             <child>
+              <object class="GtkSeparator">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkCheckButton" id="cursordrawbutton">
-                <property name="label" translatable="yes">Show Cursor</property>
+                <property name="label" translatable="yes"> Show Cursor</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
@@ -539,7 +579,7 @@ Author: Jonathan Williams
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">1</property>
+                <property name="position">2</property>
               </packing>
             </child>
           </object>
@@ -888,7 +928,7 @@ Author: Jonathan Williams
             </child>
             <child>
               <object class="GtkCheckButton" id="discard_empty_checkbutton">
-                <property name="label" translatable="yes">Discard empty spectra on import</property>
+                <property name="label" translatable="yes"> Discard empty spectra on import</property>
                 <property name="name">drop_empty_checkbox</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -905,11 +945,12 @@ Author: Jonathan Williams
             </child>
             <child>
               <object class="GtkCheckButton" id="autozoom_checkbutton">
-                <property name="label" translatable="yes">Automatically zoom when opening spectra</property>
+                <property name="label" translatable="yes"> Automatically zoom when opening spectra</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
                 <property name="tooltip_text" translatable="yes">If checked, will automatically zoom into the region containing data the first time spectrum data is opened.</property>
+                <property name="halign">start</property>
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
@@ -920,7 +961,7 @@ Author: Jonathan Williams
             </child>
             <child>
               <object class="GtkCheckButton" id="bin_errors_checkbutton">
-                <property name="label" translatable="yes">Show bin value uncertainties</property>
+                <property name="label" translatable="yes"> Show bin value uncertainties</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
@@ -952,11 +993,12 @@ Author: Jonathan Williams
             </child>
             <child>
               <object class="GtkCheckButton" id="dark_theme_checkbutton">
-                <property name="label" translatable="yes">Prefer dark theme</property>
+                <property name="label" translatable="yes"> Prefer dark theme</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
                 <property name="tooltip_text" translatable="yes">If checked, will use the dark GTK theme variant if available.</property>
+                <property name="halign">start</property>
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
@@ -967,11 +1009,12 @@ Author: Jonathan Williams
             </child>
             <child>
               <object class="GtkCheckButton" id="spectrum_label_checkbutton">
-                <property name="label" translatable="yes">Draw descriptive labels for spectra</property>
+                <property name="label" translatable="yes"> Draw descriptive labels for spectra</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
                 <property name="tooltip_text" translatable="yes">If checked, will draw text labels identifying the displayed spectra.</property>
+                <property name="halign">start</property>
                 <property name="draw_indicator">True</property>
               </object>
               <packing>

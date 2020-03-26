@@ -32,6 +32,7 @@ Conversion codes for some of these data formats are available in the [FileConvTo
     * Overlay spectra, with either common or independent scaling on the y-axis.
     * Show spectra in a "stacked" view (tiled vertically with a common x-axis).
 * Zoom and pan using the mouse (mouse wheel, click and drag).
+* Display in linear or logarithmic scale on the y-axis.
 * Rebin spectra, with results displayed in real time.
 
 ### Peak fitting

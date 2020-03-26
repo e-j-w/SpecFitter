@@ -35,13 +35,14 @@ GtkWidget *open_button, *append_button;
 GtkWidget *fit_button, *display_button;
 GtkPopover *display_popover;
 GtkWidget *calibrate_ok_button;
-GtkSpinButton *spectrum_selector;
-GtkCheckButton *autoscale_button, *cursor_draw_button;
-GtkScale *contract_scale, *zoom_scale; //*pan_scale;
-GtkAdjustment *spectrum_selector_adjustment, *contract_adjustment;
 GtkLabel *bottom_info_text;
 GtkWidget *file_open_dialog;
 GtkFileFilter *file_filter;
+//display menu
+GtkSpinButton *spectrum_selector;
+GtkCheckButton *autoscale_button, *logscale_button, *cursor_draw_button;
+GtkScale *contract_scale, *zoom_scale; //*pan_scale;
+GtkAdjustment *spectrum_selector_adjustment, *contract_adjustment;
 //spectrum drawing
 GtkWidget *spectrum_drawing_area;
 GtkGesture *spectrum_drag_gesture;
@@ -106,6 +107,7 @@ struct {
   int xChanFocus; //x channel to focus on when zooming
   float zoomLevel; //1.0 = zoomed out fully (on x axis)
   int autoScale; //0=don't autoscale y axis, 1=autoscale y axis
+  int logScale; //0=draw in linear scale, 1=draw in log scale (y-axis)
   float scaleLevelMax[MAX_DISP_SP], scaleLevelMin[MAX_DISP_SP]; //the y scale values, ie. the maximum and minimum values to show on the y axis
   int contractFactor; //the number of channels per bin (default=1)
   int multiplotMode; //0=no multiplot, 1=summed spectra, 2=overlay spectra (common scaling), 3=overlay spectra (independent scaling), 4=stacked view

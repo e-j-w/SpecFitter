@@ -127,3 +127,36 @@ void getFormattedYAxisVal(const double val, const double axisMinVal, const doubl
     }
   }
 }
+
+//oomVal = order-of-magnitude value, multiplicative factor describing an order of magnitude, typically 10, can use this to calculate sig figs in different bases
+int getNSigf(const double val, const double oomVal){
+  int sigf = 0;
+  double valc = val;
+
+  //printf("val: %f\n",val);
+
+  if(oomVal <= 1.){
+    printf("Invalid order-of-magnitude value (%f), what are you doing?!\n",oomVal);
+    return 0;
+  }
+
+  if(val == 0){
+    return 0;
+  }
+
+  if(val > 1){
+    while(!(valc < oomVal)){
+      valc /= oomVal;
+      sigf++;
+    }
+  }else if(val < 1){
+    while(val < 1.){
+      valc *= oomVal;
+      sigf--;
+    }
+  }else{
+    return 0;
+  }
+
+  return sigf;
+}

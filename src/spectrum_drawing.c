@@ -166,6 +166,15 @@ void on_toggle_autoscale(GtkToggleButton *togglebutton, gpointer user_data)
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
 }
 
+void on_toggle_logscale(GtkToggleButton *togglebutton, gpointer user_data)
+{
+  if(gtk_toggle_button_get_active(togglebutton))
+    drawing.logScale=1;
+  else
+    drawing.logScale=0;
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+}
+
 void on_toggle_cursor(GtkToggleButton *togglebutton, gpointer user_data)
 {
   if(gtk_toggle_button_get_active(togglebutton))
@@ -441,8 +450,14 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
 }
 
 //get the bin position in the histogram plot
-float getXPos(int bin, float clip_x1, float clip_x2){
-	return clip_x1 + 80.0 + (bin*(clip_x2-clip_x1-80.0)/(drawing.upperLimit-drawing.lowerLimit));
+float getXPos(const int bin, const float clip_x1, const float clip_x2){
+  int binc=bin;
+  if(bin < 0)
+    binc=0;
+  else if(bin > (drawing.upperLimit - drawing.lowerLimit))
+    binc=drawing.upperLimit - drawing.lowerLimit;
+  //printf("bin: %i\n",bin);
+  return clip_x1 + 80.0 + (binc*(clip_x2-clip_x1-80.0)/(drawing.upperLimit-drawing.lowerLimit));
 }
 
 //get the screen position of a channel (or fractional channel)
@@ -455,14 +470,29 @@ float getXPosFromCh(float chVal, float clip_x1, float clip_x2){
   return clip_x1 + 80.0 + (bin*(clip_x2-clip_x1-80.0)/(drawing.upperLimit-drawing.lowerLimit));
 }
 
-float getYPos(float val, int multiplotSpNum, float clip_y1, float clip_y2){
-  float pos;
+//get the y-coordinate for drawing a specific bin value
+float getYPos(const float val, const int multiplotSpNum, const float clip_y1, const float clip_y2){
+  float pos, minVal;
   switch(drawing.multiplotMode){
     case 4:
       //stacked
-      pos = clip_y1 + 40.0 + (clip_y2-clip_y1-40.0)*((multiplotSpNum/(drawing.numMultiplotSp*1.0)) + (1.0/(drawing.numMultiplotSp*1.0))*((val - drawing.scaleLevelMin[multiplotSpNum])/(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])));
-      if(pos < clip_y1 + 40.0 + (clip_y2-clip_y1-40.0)*(multiplotSpNum/(drawing.numMultiplotSp*1.0)))
-        pos = clip_y1 + 40.0 + (clip_y2-clip_y1-40.0)*(multiplotSpNum/(drawing.numMultiplotSp*1.0));
+      minVal = pos = clip_y1 + 40.0 + (clip_y2-clip_y1-40.0)*(multiplotSpNum/(drawing.numMultiplotSp*1.0));
+      if(drawing.logScale){
+        if((val > 0)&&(drawing.scaleLevelMax[multiplotSpNum] > 0)){
+          if(drawing.scaleLevelMin[multiplotSpNum] > 0){
+            pos = clip_y1 + 40.0 + (clip_y2-clip_y1-40.0)*((multiplotSpNum/(drawing.numMultiplotSp*1.0)) + (1.0/(drawing.numMultiplotSp*1.0))*(log10(val - drawing.scaleLevelMin[multiplotSpNum])/log10(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])));
+          }else{
+            pos = clip_y1 + 40.0 + (clip_y2-clip_y1-40.0)*((multiplotSpNum/(drawing.numMultiplotSp*1.0)) + (1.0/(drawing.numMultiplotSp*1.0))*(log10(val)/log10(drawing.scaleLevelMax[multiplotSpNum])));
+          }
+        }else{
+          pos = minVal;
+        }
+      }else{
+        pos = clip_y1 + 40.0 + (clip_y2-clip_y1-40.0)*((multiplotSpNum/(drawing.numMultiplotSp*1.0)) + (1.0/(drawing.numMultiplotSp*1.0))*((val - drawing.scaleLevelMin[multiplotSpNum])/(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])));
+      }
+      //clip value to bottom edge of plot
+      if((pos < minVal)||(pos!=pos))
+        pos = minVal;
       break;
     case 3:
     case 2:
@@ -470,11 +500,26 @@ float getYPos(float val, int multiplotSpNum, float clip_y1, float clip_y2){
     case 0:
     default:
       //single plot
-      pos = clip_y1 + 40.0 + (clip_y2-clip_y1-40.0)*((val - drawing.scaleLevelMin[multiplotSpNum])/(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]));
-      if(pos < clip_y1 + 40.0)
-        pos = clip_y1 + 40.0;
+      minVal = clip_y1 + 40.0;
+      if(drawing.logScale){
+        if((val > 0)&&(drawing.scaleLevelMax[multiplotSpNum] > 0)){
+          if(drawing.scaleLevelMin[multiplotSpNum] > 0){
+            pos = clip_y1 + 40.0 + (clip_y2-clip_y1-40.0)*(log10(val - drawing.scaleLevelMin[multiplotSpNum])/log10(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]));
+          }else{
+            pos = clip_y1 + 40.0 + (clip_y2-clip_y1-40.0)*(log10(val)/log10(drawing.scaleLevelMax[multiplotSpNum]));
+          } 
+        }else{
+          pos = clip_y1 + 40.0;
+        }
+      }else{
+        pos = clip_y1 + 40.0 + (clip_y2-clip_y1-40.0)*((val - drawing.scaleLevelMin[multiplotSpNum])/(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]));
+      }
+      //clip value to bottom edge of plot
+      if((pos < minVal)||(pos!=pos))
+        pos = minVal;
       break;
   }
+  //printf("pos: %f\n",pos);
 	return pos;
 }
 
@@ -509,18 +554,41 @@ void drawXAxisTick(int axisVal, cairo_t *cr, float clip_x1, float clip_x2, float
 }
 float getAxisYPos(float axisVal, int multiplotSpNum, float clip_y2){
   float posVal;
-
   switch(drawing.multiplotMode){
     case 4:
       //stacked
-      posVal = (1.0/drawing.numMultiplotSp)*(40.0-clip_y2)*(axisVal - drawing.scaleLevelMin[multiplotSpNum])/(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]) + (40.0-clip_y2)*(multiplotSpNum/(drawing.numMultiplotSp*1.0)) - 40.0;
+      if(drawing.logScale){
+        if((axisVal > 0)&&(drawing.scaleLevelMax[multiplotSpNum] > 0)){
+          if(drawing.scaleLevelMin[multiplotSpNum] > 0){
+            posVal = (1.0/drawing.numMultiplotSp)*(40.0-clip_y2)*log10(axisVal - drawing.scaleLevelMin[multiplotSpNum])/log10(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]) + (40.0-clip_y2)*(multiplotSpNum/(drawing.numMultiplotSp*1.0)) - 40.0;
+          }else{
+            posVal = (1.0/drawing.numMultiplotSp)*(40.0-clip_y2)*log10(axisVal)/log10(drawing.scaleLevelMax[multiplotSpNum]) + (40.0-clip_y2)*(multiplotSpNum/(drawing.numMultiplotSp*1.0)) - 40.0;
+          }
+        }else{
+          posVal = (40.0-clip_y2)*(multiplotSpNum/(drawing.numMultiplotSp*1.0)) - 40.0;
+        }
+      }else{
+        posVal = (1.0/drawing.numMultiplotSp)*(40.0-clip_y2)*(axisVal - drawing.scaleLevelMin[multiplotSpNum])/(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]) + (40.0-clip_y2)*(multiplotSpNum/(drawing.numMultiplotSp*1.0)) - 40.0;
+      }
       break;
     case 3:
     case 2:
     case 1:
     case 0:
     default:
-      posVal = (40.0-clip_y2)*(axisVal - drawing.scaleLevelMin[multiplotSpNum])/(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]) - 40.0;
+      if(drawing.logScale){
+        if((axisVal > 0)&&(drawing.scaleLevelMax[multiplotSpNum] > 0)){
+          if(drawing.scaleLevelMin[multiplotSpNum] > 0){
+            posVal = (40.0-clip_y2)*log10(axisVal - drawing.scaleLevelMin[multiplotSpNum])/log10(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]) - 40.0;
+          }else{
+            posVal = (40.0-clip_y2)*log10(axisVal)/log10(drawing.scaleLevelMax[multiplotSpNum]) - 40.0;
+          }    
+        }else{
+          posVal = -40.0;
+        }
+      }else{
+        posVal = (40.0-clip_y2)*(axisVal - drawing.scaleLevelMin[multiplotSpNum])/(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]) - 40.0;
+      }
       break;
   }
 
@@ -532,14 +600,41 @@ void drawYAxisTick(float axisVal, int multiplotSpNum, cairo_t *cr, float clip_x1
     //printf("axisval:%f,scalemin:%f,scalemax:%f\n",axisVal,drawing.scaleLevelMin[multiplotSpNum],drawing.scaleLevelMax[multiplotSpNum]);
     return; //invalid axis value,
   }
-  if((axisVal!=0.0)&&(fabs(axisVal) < (drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])/20.0)){
-    //tick is too close to zero, don't draw
-    return;
+  if(drawing.logScale == 0){
+    if((axisVal!=0.0)&&(fabs(axisVal) < (drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])/20.0)){
+      //tick is too close to zero, don't draw
+      return;
+    }
+    if((drawing.multiplotMode == 4)&&(fabs(drawing.scaleLevelMax[multiplotSpNum] - axisVal) < ((drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])/8.0)) ){
+      //tick is too close to the top of the spectrum in a stacked view, don't draw
+      return;
+    }
+  }else{
+    if(axisVal <= 0.){
+      return; //invalid axis value in log scale
+    }
+    if(drawing.scaleLevelMin[multiplotSpNum] > 0.){
+      if((log10(axisVal) < log10(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])/20.0)){
+        //tick is too close to zero, don't draw
+        return;
+      }
+      if((drawing.multiplotMode == 4)&&(log10(drawing.scaleLevelMax[multiplotSpNum] - axisVal) < (log10(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])/8.0)) ){
+        //tick is too close to the top of the spectrum in a stacked view, don't draw
+        return;
+      }
+    }else{
+      if((log10(axisVal) < log10(drawing.scaleLevelMax[multiplotSpNum])/20.0)){
+        //tick is too close to zero, don't draw
+        return;
+      }
+      if((drawing.multiplotMode == 4)&&(log10(drawing.scaleLevelMax[multiplotSpNum] - axisVal) < (log10(drawing.scaleLevelMax[multiplotSpNum])/8.0)) ){
+        //tick is too close to the top of the spectrum in a stacked view, don't draw
+        return;
+      }
+    }
+    
   }
-  if((drawing.multiplotMode == 4)&&(fabs(drawing.scaleLevelMax[multiplotSpNum] - axisVal) < ((drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])/8.0)) ){
-    //tick is too close to the top of the spectrum in a stacked view, don't draw
-    return;
-  }
+  
   float axisPos = getAxisYPos(axisVal,multiplotSpNum,clip_y2);
   //printf ("clip: %f %f\n",clip_y1,clip_y2);
   if((axisPos <= 0) && (axisPos > (clip_y2-clip_y1)*-0.98)) {
@@ -980,27 +1075,54 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       numTickPerSp = (clip_y2 - clip_y1)/(40.0*drawing.numMultiplotSp);
       if(numTickPerSp < 2)
         numTickPerSp = 2;
-      for(i=0;i<drawing.numMultiplotSp;i++){
-        yTickDist = getDistBetweenYAxisTicks(drawing.scaleLevelMax[i] - drawing.scaleLevelMin[i],numTickPerSp);
-        cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
-        for(yTick=0.;yTick<drawing.scaleLevelMax[i];yTick+=yTickDist){
-          drawYAxisTick(yTick, i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
+      if(drawing.logScale){
+        for(i=0;i<drawing.numMultiplotSp;i++){
+          float rangeVal = drawing.scaleLevelMax[i] - drawing.scaleLevelMin[i];
+          if(rangeVal > drawing.scaleLevelMax[i])
+            rangeVal = drawing.scaleLevelMax[i];
+          int numTickUsed = 0;
+          if(rangeVal >= 1000.){
+            //logarithmic scale ticks in base-10
+            float tickVal = pow(10.0,getNSigf(drawing.scaleLevelMax[i],10.0));
+            while(numTickUsed < numTickPerSp){
+              drawYAxisTick(tickVal, i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
+              tickVal /= 10.;
+              numTickUsed++;
+            }
+          }else{
+            //logarithmic scale ticks in base-2
+            float tickVal = pow(2.0,getNSigf(drawing.scaleLevelMax[i],2.0));
+            while(numTickUsed < numTickPerSp){
+              drawYAxisTick(tickVal, i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
+              tickVal /= 2.;
+              numTickUsed++;
+            }
+          }
         }
-        for(yTick=0.;yTick>drawing.scaleLevelMin[i];yTick-=yTickDist){
-          if(yTick != 0)
+      }else{
+        for(i=0;i<drawing.numMultiplotSp;i++){
+          yTickDist = getDistBetweenYAxisTicks(drawing.scaleLevelMax[i] - drawing.scaleLevelMin[i],numTickPerSp);
+          cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
+          for(yTick=0.;yTick<drawing.scaleLevelMax[i];yTick+=yTickDist){
             drawYAxisTick(yTick, i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
-        }
-        //drawYAxisTick(0.0, i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize); //always draw the zero label on the y axis
-        cairo_stroke(cr);
-        //draw the zero line if applicable
-        if((drawing.scaleLevelMin[i] < 0.0) && (drawing.scaleLevelMax[i] > 0.0)){
-          cairo_set_line_width(cr, 1.0);
-          cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
-          cairo_move_to (cr, clip_x1 + 80.0, getAxisYPos(0.0,i,clip_y2));
-          cairo_line_to (cr, clip_x2, getAxisYPos(0.0,i,clip_y2));
+          }
+          for(yTick=0.;yTick>drawing.scaleLevelMin[i];yTick-=yTickDist){
+            if(yTick != 0)
+              drawYAxisTick(yTick, i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
+          }
+          //drawYAxisTick(0.0, i, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize); //always draw the zero label on the y axis
           cairo_stroke(cr);
+          //draw the zero line if applicable
+          if((drawing.scaleLevelMin[i] < 0.0) && (drawing.scaleLevelMax[i] > 0.0)){
+            cairo_set_line_width(cr, 1.0);
+            cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
+            cairo_move_to (cr, clip_x1 + 80.0, getAxisYPos(0.0,i,clip_y2));
+            cairo_line_to (cr, clip_x2, getAxisYPos(0.0,i,clip_y2));
+            cairo_stroke(cr);
+          }
         }
       }
+      
       break;
     case 3:
       //overlay (independent scaling)
@@ -1017,24 +1139,52 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       //modes with a single scale
       setTextColor(cr);
       numTickPerSp = (clip_y2 - clip_y1)/40.0 + 1;
-      yTickDist = getDistBetweenYAxisTicks(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0],numTickPerSp);
-      for(yTick=0.;yTick<drawing.scaleLevelMax[0];yTick+=yTickDist){
-        drawYAxisTick(yTick, 0, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
-      }
-      for(yTick=0.;yTick>drawing.scaleLevelMin[0];yTick-=yTickDist){
-        if(yTick != 0)
+      if(drawing.logScale){
+        //numTickPerSp *= 2;
+        int nsigf10 = 0;
+        if(drawing.scaleLevelMin[0] <= 0)
+          nsigf10 = getNSigf(drawing.scaleLevelMax[0],10.0);
+        else
+          nsigf10 = getNSigf(drawing.scaleLevelMax[0],10.0) - getNSigf(drawing.scaleLevelMin[0],10.0);
+        int numTickUsed = 0;
+        //printf("nsigf10: %i\n",nsigf10);
+        if(nsigf10 >= 3){
+          //logarithmic scale ticks in base-10
+          float tickVal = pow(10.0,getNSigf(drawing.scaleLevelMax[0],10.0));
+          while(numTickUsed < numTickPerSp){
+            drawYAxisTick(tickVal, 0, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
+            tickVal /= 10.;
+            numTickUsed++;
+          }
+        }else{
+          //logarithmic scale ticks in base-2
+          float tickVal = pow(2.0,getNSigf(drawing.scaleLevelMax[0],2.0));
+          while(numTickUsed < numTickPerSp){
+            drawYAxisTick(tickVal, 0, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
+            tickVal /= 2.;
+            numTickUsed++;
+          }
+        }
+      }else{
+        yTickDist = getDistBetweenYAxisTicks(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0],numTickPerSp);
+        for(yTick=0.;yTick<drawing.scaleLevelMax[0];yTick+=yTickDist){
           drawYAxisTick(yTick, 0, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
-      }
-      //printf("min: %f, max: %f, yTickDist: %f, numTickPerSp: %i\n",drawing.scaleLevelMin[0],drawing.scaleLevelMax[0],yTickDist,numTickPerSp);
-      //drawYAxisTick(0.0, 0, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize); //always draw the zero label on the y axis
-      cairo_stroke(cr);
-      //draw the zero line if applicable
-      if((drawing.scaleLevelMin[0] < 0.0) && (drawing.scaleLevelMax[0] > 0.0)){
-        cairo_set_line_width(cr, 1.0);
-        cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
-        cairo_move_to (cr, clip_x1 + 80.0, getAxisYPos(0.0,0,clip_y2));
-        cairo_line_to (cr, clip_x2, getAxisYPos(0.0,0,clip_y2));
+        }
+        for(yTick=0.;yTick>drawing.scaleLevelMin[0];yTick-=yTickDist){
+          if(yTick != 0)
+            drawYAxisTick(yTick, 0, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize);
+        }
+        //printf("min: %f, max: %f, yTickDist: %f, numTickPerSp: %i\n",drawing.scaleLevelMin[0],drawing.scaleLevelMax[0],yTickDist,numTickPerSp);
+        //drawYAxisTick(0.0, 0, cr, clip_x1, clip_x2, clip_y1, clip_y2, plotFontSize); //always draw the zero label on the y axis
         cairo_stroke(cr);
+        //draw the zero line if applicable
+        if((drawing.scaleLevelMin[0] < 0.0) && (drawing.scaleLevelMax[0] > 0.0)){
+          cairo_set_line_width(cr, 1.0);
+          cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
+          cairo_move_to (cr, clip_x1 + 80.0, getAxisYPos(0.0,0,clip_y2));
+          cairo_line_to (cr, clip_x2, getAxisYPos(0.0,0,clip_y2));
+          cairo_stroke(cr);
+        }
       }
       break;
     default:
