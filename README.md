@@ -1,16 +1,12 @@
 # **jf3**
 
-**A Spectrum Viewer in GTK3**
+**A simple spectrum viewer in GTK3**
 
 ## Description
 
-A (1D) spectrum viewer app using GTK3, with functionality inspired by the `gf3` program for gamma-ray spectroscopy in the [RadWare](https://radware.phy.ornl.gov/) software package.
+A (1D) spectrum viewer app, with functionality inspired by the `gf3` program for gamma-ray spectroscopy in the [RadWare](https://radware.phy.ornl.gov/) software package.
 
 **NOTE**: This is still in the early stages - spectra are drawing correctly, rudimentary fitting support is in but it is not science ready yet.
-
-## Screenshot
-
-![jf3 user interface screenshot](https://raw.githubusercontent.com/e-j-w/e-j-w.github.io/master/media/jf3.png "jf3 user interface")
 
 ## Features
 
@@ -71,6 +67,10 @@ This build process has been tested on CentOS 7 and Arch Linux (as of March 2020)
 * Preferences are stored in a plaintext configuration file on a per-user basis at `$HOME/.config/jf3/jf3.conf`.
 * When running the program from the command line, it is possible to automatically open files by specifying the filename(s) as arguments (eg. `jf3 /path/to/file1 /path/to/file2`).
 * After fitting a spectrum, the onscreen fit can be cleared using the right mouse button.
+
+## Screenshot
+
+![jf3 user interface screenshot](https://raw.githubusercontent.com/e-j-w/e-j-w.github.io/master/media/jf3.png "jf3 user interface")
 
 
 ## Future plans

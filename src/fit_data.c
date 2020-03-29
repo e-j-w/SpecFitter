@@ -10,9 +10,31 @@ double getFWHM(double chan, double widthF, double widthG, double widthH){
 
 //get the value of the fitted gaussian term for a given x value
 double evalGaussTerm(int peakNum, double xval){
-  double evalG = exp(-0.5* pow((xval-fitpar.fitParVal[7+(3*peakNum)]),2.0)/(2.0*fitpar.fitParVal[8+(3*peakNum)]*fitpar.fitParVal[8+(3*peakNum)]));
+  double evalG = exp(-0.5* pow((xval-fitpar.fitParVal[7+(3*peakNum)]),2.0)/(pow(fitpar.fitParVal[8+(3*peakNum)],2.0)));
   //printf("peakNum: %i, xval: %f, pos: %f, width: %f, eval: %f\n",peakNum,xval,fitpar.fitParVal[7+(3*peakNum)],fitpar.fitParVal[8+(3*peakNum)],evalG);
   return evalG;
+}
+
+//evaluate the derivative of a gaussian peak term, needed for non-linear fits 
+//derPar: 0=amplitude, 1=centroid, 2=width
+double evalGaussTermDerivative(int peakNum, double xval, int derPar){
+  double evalGDer = evalGaussTerm(peakNum,xval);
+  switch (derPar){
+  case 2:
+    evalGDer *= fitpar.fitParVal[6+(3*peakNum)];
+    evalGDer *= (xval-fitpar.fitParVal[7+(3*peakNum)])*(xval-fitpar.fitParVal[7+(3*peakNum)])/(fitpar.fitParVal[8+(3*peakNum)]*fitpar.fitParVal[8+(3*peakNum)]*fitpar.fitParVal[8+(3*peakNum)]);
+    break;
+  case 1:
+    evalGDer *= fitpar.fitParVal[6+(3*peakNum)];
+    evalGDer *= (xval-fitpar.fitParVal[7+(3*peakNum)])/(fitpar.fitParVal[8+(3*peakNum)]*fitpar.fitParVal[8+(3*peakNum)]);
+    break;
+  case 0:
+    break;
+  default:
+    printf("WARNING: invalid derivative parameter (%i).\n",derPar);
+    break;
+  }
+  return evalGDer;
 }
 
 double evalFitBG(double xval){
@@ -35,6 +57,17 @@ double evalFitOnePeak(double xval, int peak){
   return val;
 }
 
+double evalPeakArea(int peakNum){
+  return fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[8+(3*peakNum)]*sqrt(2.0*G_PI)/(1.0*drawing.contractFactor);
+}
+
+double evalPeakAreaErr(int peakNum){
+  double err = (fitpar.fitParErr[6+(3*peakNum)]/fitpar.fitParVal[6+(3*peakNum)])*(fitpar.fitParErr[6+(3*peakNum)]/fitpar.fitParVal[6+(3*peakNum)]);
+  err += (fitpar.fitParErr[8+(3*peakNum)]/fitpar.fitParVal[8+(3*peakNum)])*(fitpar.fitParErr[8+(3*peakNum)]/fitpar.fitParVal[8+(3*peakNum)]);
+  err = sqrt(err);
+  err = err*evalPeakArea(peakNum);
+  return err;
+}
 
 //function returns chisq evaluated for the current fit
 double getFitChisq(){
@@ -72,155 +105,46 @@ double getFitChisq(){
 
 int getParameterErrors(lin_eq_type *linEq){
 
-  if(linEq->dim != 3 + fitpar.numFitPeaks){
-    printf("WARNING: trying to get parameter errors without all linear parameters in use!\n");
+  if(linEq->dim != 3 + (3*fitpar.numFitPeaks)){
+    printf("WARNING: trying to get parameter errors without all parameters in use!\n");
   }
-
-  int i,j;
-  
-  for(i=0;i<fitpar.numFitPeaks;i++){
-    double npts = 0;
-    for (j=fitpar.fitStartCh;j<=fitpar.fitEndCh;j+=drawing.contractFactor){
-      npts += evalGaussTerm(i, j);
-    }
-    //error on mean value
-    fitpar.fitParErr[7+(3*i)] = fitpar.fitParVal[8+(3*i)]/sqrt(fabs(npts)); //absolute value to handle negative amplitude case
-    //error on width
-    fitpar.fitParErr[8+(3*i)] = fabs( sqrt(fitpar.fitParVal[8+(3*i)]*fitpar.fitParVal[8+(3*i)]*(1 + sqrt(2./fabs(npts)))) - fitpar.fitParVal[8+(3*i)] );
-  }
-
-  //For linear parameters (this probably has some mistakes, check):
-  //Calculate covariances and uncertainties, see J. Wolberg 
-  //'Data Analysis Using the Method of Least Squares' sec 2.5
-  int ndf = (int)((fitpar.fitEndCh - fitpar.fitStartCh)/(1.0*drawing.contractFactor)) - linEq->dim;
-  for(i=0;i<3;i++)
-    fitpar.fitParErr[i]=sqrt((double)(linEq->inv_matrix[i][i]*(getFitChisq()/ndf)));
-  for(i=0;i<fitpar.numFitPeaks;i++)
-    fitpar.fitParErr[6+(3*i)]=sqrt((double)(linEq->inv_matrix[3+i][3+i]*(getFitChisq()/ndf)));
-    
-  return 1;
-}
-
-
-//Non-linearized fitting stages
-//Used to fit non-linear terms ie. peak positions and widths
-//chisq minimized wrt these parameters using an iterative approach
-int fitNonLinearizedWidths(double initVaryAmount){
-
-  int i,j;
-  int varying;
-  double varyAmount;
-  double finChisq;
-  int failCount;
-
-  //get initial chisq
-  double initChisq = getFitChisq();
-  //printf("chisq: %f\n",initChisq);
-
-  //vary width parameters (F,G,H)
-  for(i=0;i<3;i++){
-    varying = 1;
-    failCount = 0;
-
-    //pick a random direction to start
-    if((rand() % 2)==0)
-      varyAmount = initVaryAmount;
-    else
-      varyAmount = -1*initVaryAmount;
-    
-    while(varying){
-      fitpar.widthFGH[i] += varyAmount;
-      
-      //check for invalid width values and reverse course if neccesary
-      if((fitpar.widthFGH[i] < 0)||(fitpar.widthFGH[i] > 10)){
-        fitpar.widthFGH[i] -= (varyAmount+initVaryAmount);
-        varyAmount = -1.*initVaryAmount*varyAmount/fabs(varyAmount);
-      }
-
-      //recalculate all peak widths
-      for(j=0;j<fitpar.numFitPeaks;j++){
-        fitpar.fitParVal[8+(3*j)] = getFWHM(fitpar.fitParVal[7+(3*j)],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482;
-      }
-      finChisq = getFitChisq();
-      if((finChisq >= initChisq)||(finChisq < 0)){
-        fitpar.widthFGH[i] -= varyAmount; //reset the parameter value
-        //recalculate all peak widths
-        for(j=0;j<fitpar.numFitPeaks;j++){
-          fitpar.fitParVal[8+(3*j)] = getFWHM(fitpar.fitParVal[7+(3*j)],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482;
-        }
-        varyAmount = -1.*initVaryAmount*pow(2,failCount)*varyAmount/fabs(varyAmount);
-        failCount++;
-      }else{
-        varyAmount = -initVaryAmount*(finChisq - initChisq)/varyAmount; //move based on derivative
-        initChisq = finChisq; //new best chisq value
-        failCount = 0;
-      }
-      //set a threshold in channels
-      if((varyAmount < 0.0001)||(failCount >= 5)){
-        //printf("failcount: %i\n",failCount);
-        varying = 0; //stop optimizing this parameter
-      }
-    }
-
-  }
-  return 1;
-}
-int fitNonLinearizedPositions(double initVaryAmount){
 
   int i;
-  int varying;
-  double varyAmount;
-  double finChisq;
-  int failCount;
 
-  //get initial chisq
-  double initChisq = getFitChisq();
-  //printf("chisq: %f\n",initChisq);
+  //For linear parameters:
+  //Calculate covariances and uncertainties, see J. Wolberg 
+  //'Data Analysis Using the Method of Least Squares' sec 2.5
+  int ndf = (int)((fitpar.fitEndCh - fitpar.fitStartCh)/(1.0*drawing.contractFactor)) - (3+(3*fitpar.numFitPeaks));
+  for(i=0;i<3;i++)
+    fitpar.fitParErr[i]=sqrt((double)(linEq->inv_matrix[i][i]*(getFitChisq()/ndf)));
+  for(i=0;i<(3*fitpar.numFitPeaks);i++)
+    fitpar.fitParErr[6+i]=sqrt((double)(linEq->inv_matrix[3+i][3+i]*(getFitChisq()/ndf)));
 
-  //vary position parameters
+  //add Guassian parameter errors in quadrature against Cramer–Rao lower bounds
+  //ie. I'm assuming the errors on the fit parameters and the errors from
+  //Poisson statistics are independent
   for(i=0;i<fitpar.numFitPeaks;i++){
-    varying = 1;
-    failCount = 0;
-
-    //pick a random direction to start
-    if((rand() % 2)==0)
-      varyAmount = initVaryAmount;
-    else
-      varyAmount = -1*initVaryAmount;
     
-    while(varying){
-      
-      fitpar.fitParVal[7+(3*i)] += varyAmount;
+    //Cramer–Rao lower bound variances
+    //(see https://en.wikipedia.org/wiki/Gaussian_function#Gaussian_profile_estimation for an explanation)
+    double aCRLB = fabs(3.0*fitpar.fitParVal[6+(3*i)]/(2.0*sqrt(2.0*G_PI)*fitpar.fitParVal[8+(3*i)]));
+    double pCRLB = fabs(fitpar.fitParVal[8+(3*i)]/(sqrt(2.0*G_PI)*fitpar.fitParVal[6+(3*i)]));
+    double wCRLB = fabs(fitpar.fitParVal[8+(3*i)]/(2.0*sqrt(2.0*G_PI)*fitpar.fitParVal[6+(3*i)]));
 
-      //check for invalid position values and reverse course if neccesary
-      if((fitpar.fitParVal[7+(3*i)] < 0)||(fitpar.fitParVal[7+(3*i)] >= S32K)){
-        fitpar.fitParVal[7+(3*i)] -= (varyAmount+initVaryAmount);
-        varyAmount = -1.*initVaryAmount*varyAmount/fabs(varyAmount);
-      }
+    fitpar.fitParErr[6+(3*i)] = sqrt(fitpar.fitParErr[6+(3*i)]*fitpar.fitParErr[6+(3*i)] + aCRLB);
+    fitpar.fitParErr[7+(3*i)] = sqrt(fitpar.fitParErr[7+(3*i)]*fitpar.fitParErr[7+(3*i)] + pCRLB);
+    fitpar.fitParErr[8+(3*i)] = sqrt(fitpar.fitParErr[8+(3*i)]*fitpar.fitParErr[8+(3*i)] + wCRLB);
 
-      finChisq = getFitChisq();
-      if((finChisq >= initChisq)||(finChisq < 0)){
-        fitpar.fitParVal[7+(3*i)] -= varyAmount; //reset the parameter value
-        varyAmount = -1.*initVaryAmount*pow(2,failCount)*varyAmount/fabs(varyAmount); 
-        failCount++;
-      }else{
-        varyAmount = -1.*initVaryAmount*(finChisq - initChisq)/varyAmount; //move based on derivative
-        initChisq = finChisq; //new best chisq value
-        failCount = 0;
-      }
-      //printf("varyAmount: %f, varyDer: %f, chisq: %f\n",varyAmount,varyDer,initChisq);
-      //set a threshold in channels
-      if((varyAmount < 0.0001)||(failCount >= 5)){
-        varying = 0; //stop optimizing this parameter
-      }
-    }
   }
+
   return 1;
 }
 
-//type=0: background fit only
-//type=1: amplitude fit only
-//type=2: combined fit
+
+//setup sums for the non-linearized fit
+//using the Gauss-Newton method
+//see eq. 2.4.14, 2.4.15, pg. 47 J. Wolberg 
+//'Data Analysis Using the Method of Least Squares'
 void setupFitSums(lin_eq_type *linEq, int type){
 
   int i,j,k;
@@ -228,238 +152,174 @@ void setupFitSums(lin_eq_type *linEq, int type){
   memset(linEq->vector,0,sizeof(linEq->vector));
   double xval,yval;
 
-  switch(type){
-    case 2:
-      linEq->dim = 3 + fitpar.numFitPeaks;
-      for (i=fitpar.fitStartCh;i<=fitpar.fitEndCh;i+=drawing.contractFactor){
-        xval = i;
-        yval = getDispSpBinVal(0,i-drawing.lowerLimit);
-        //printf("xval: %f, yval: %f\n",xval,yval);
-        linEq->matrix[0][0] += 1./xval;
-        linEq->matrix[0][1] += 1.;
-        linEq->matrix[0][2] += xval;
-        linEq->matrix[1][2] += xval*xval;
-        linEq->matrix[2][2] += xval*xval*xval;
-        linEq->vector[0] += yval/xval;
-        linEq->vector[1] += yval;
-        linEq->vector[2] += yval*xval;
-        for(j=0;j<fitpar.numFitPeaks;j++){
-          linEq->matrix[0][j+3] += evalGaussTerm(j,xval)/xval;
-          linEq->matrix[1][j+3] += evalGaussTerm(j,xval);
-          linEq->matrix[2][j+3] += xval*evalGaussTerm(j,xval);
-          linEq->vector[j+3] += yval*evalGaussTerm(j,xval)/xval;
-          for(k=0;k<fitpar.numFitPeaks;k++){
-            linEq->matrix[k+3][j+3] += evalGaussTerm(j,xval)*evalGaussTerm(k,xval)/xval;
-          }
-        }
+  linEq->dim = 3 + (3*fitpar.numFitPeaks);
+  for (i=fitpar.fitStartCh;i<=fitpar.fitEndCh;i+=drawing.contractFactor){
+    xval = i;
+    yval = getDispSpBinVal(0,i-drawing.lowerLimit) - evalFit(xval);
+    
+    linEq->matrix[0][0] += 1.;
+    linEq->matrix[0][1] += xval;
+    linEq->matrix[0][2] += xval*xval;
+    linEq->matrix[1][2] += xval*xval*xval;
+    linEq->matrix[2][2] += xval*xval*xval*xval;
+    linEq->vector[0] += yval;
+    linEq->vector[1] += yval*xval;
+    linEq->vector[2] += yval*xval*xval;
+    for(j=3;j<linEq->dim;j++){
+      linEq->matrix[0][j] += evalGaussTermDerivative((int)(j-3)/3,xval,j % 3);
+      linEq->matrix[1][j] += xval*evalGaussTermDerivative((int)(j-3)/3,xval,j % 3);
+      linEq->matrix[2][j] += xval*xval*evalGaussTermDerivative((int)(j-3)/3,xval,j % 3);
+      linEq->vector[j] += yval*evalGaussTermDerivative((int)(j-3)/3,xval,j % 3);
+      //printf("j: %i, j-3/3: %i, jmod3: %i\n",j,(int)(j-3)/3,j % 3);
+      for(k=3;k<linEq->dim;k++){
+        linEq->matrix[j][k] += evalGaussTermDerivative((int)(j-3)/3,xval,j % 3)*evalGaussTermDerivative((int)(k-3)/3,xval,k % 3);
+        //printf("yval: %f, j: %i, k: %i, evalgaussder j: %f, evalgaussder k: %f\n",yval,j,k,evalGaussTermDerivative((int)(j-3)/3,xval,j % 3),evalGaussTermDerivative((int)(k-3)/3,xval,k % 3));
       }
-      linEq->matrix[1][0] = linEq->matrix[0][1];
-      linEq->matrix[2][0] = linEq->matrix[0][2];
-      linEq->matrix[1][1] = linEq->matrix[0][2];
-      linEq->matrix[2][1] = linEq->matrix[1][2];
-      for(i=0;i<fitpar.numFitPeaks;i++){
-        linEq->matrix[i+3][0] = linEq->matrix[0][i+3];
-        linEq->matrix[i+3][1] = linEq->matrix[1][i+3];
-        linEq->matrix[i+3][2] = linEq->matrix[2][i+3];
-      }
-      break;
-    case 1:
-      linEq->dim = fitpar.numFitPeaks; //peak amplitude terms only
-      for (i=fitpar.fitStartCh;i<=fitpar.fitEndCh;i+=drawing.contractFactor){
-        xval = i;
-        yval = getDispSpBinVal(0,i-drawing.lowerLimit) - fitpar.fitParVal[0] - fitpar.fitParVal[1]*xval - fitpar.fitParVal[2]*xval*xval;
-        //printf("xval: %f, yval: %f\n",xval,yval);
-        for(j=0;j<fitpar.numFitPeaks;j++){
-          linEq->vector[j] += yval*evalGaussTerm(j,xval)/xval;
-          for(k=0;k<fitpar.numFitPeaks;k++){
-            linEq->matrix[k][j] += evalGaussTerm(j,xval)*evalGaussTerm(k,xval)/xval;
-          }
-        }
-      }
-      break;
-    case 0:
-      linEq->dim = 3; //quadratic background terms only
-      for (i=fitpar.fitStartCh;i<=fitpar.fitEndCh;i+=drawing.contractFactor){
-        xval = i;
-        yval = getDispSpBinVal(0,i-drawing.lowerLimit);
-        //printf("xval: %f, yval: %f\n",xval,yval);
-        linEq->matrix[0][0] += 1./xval;
-        linEq->matrix[0][1] += 1.;
-        linEq->matrix[0][2] += xval;
-        linEq->matrix[1][2] += xval*xval;
-        linEq->matrix[2][2] += xval*xval*xval;
-        linEq->vector[0] += yval/xval;
-        linEq->vector[1] += yval;
-        linEq->vector[2] += yval*xval;
-      }
-      linEq->matrix[1][0] = linEq->matrix[0][1];
-      linEq->matrix[2][0] = linEq->matrix[0][2];
-      linEq->matrix[1][1] = linEq->matrix[0][2];
-      linEq->matrix[2][1] = linEq->matrix[1][2];
-      break;
+    }
+    
+  }
+  linEq->matrix[1][0] = linEq->matrix[0][1];
+  linEq->matrix[2][0] = linEq->matrix[0][2];
+  linEq->matrix[1][1] = linEq->matrix[0][2];
+  linEq->matrix[2][1] = linEq->matrix[1][2];
+  for(i=3;i<linEq->dim;i++){
+    linEq->matrix[i][0] = linEq->matrix[0][i];
+    linEq->matrix[i][1] = linEq->matrix[1][i];
+    linEq->matrix[i][2] = linEq->matrix[2][i];
   }
 
-  
-  
 }
+
+
+//non-linearized fitting
+//return value: number of iterations performed (if fit not converged), -1 (if fit converged)
+int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFrac, lin_eq_type *linEq){
+
+  int i;
+  int iterCurrent = 0;
+  int conv = 0;
+
+  /*printf("Matrix\n");
+  int j;
+  for(i=0;i<linEq->dim;i++){
+    for(j=0;j<linEq->dim;j++){
+      printf("%Lf ",linEq->matrix[i][j]);
+    }
+    printf("\n");
+  }
+  printf("Vector\n");
+  for(i=0;i<linEq->dim;i++){
+    printf("%Lf ",linEq->vector[i]);
+  }
+  printf("\n");*/
+
+  while(iterCurrent < numIter){
+    setupFitSums(linEq,3);
+    if(!(solve_lin_eq(linEq))){
+      //the return value being less than the requested number of iterations indicates a failure
+      return iterCurrent; 
+    }else{
+      iterCurrent++;
+      conv=1;
+      //assign parameter values
+      for(i=0;i<3;i++){
+        if((fitpar.fitParVal[i]!=0.)&&(fabs(linEq->solution[i]/fitpar.fitParVal[i]) > convergenceFrac)){
+          conv=0;
+        }
+        fitpar.fitParVal[i] += linEq->solution[i];
+        //printf("par %i: %f\n",i,fitpar.fitParVal[i]);
+      }
+      for(i=0;i<(3*fitpar.numFitPeaks);i++){
+        if((fitpar.fitParVal[6+i]!=0.)&&(fabs(linEq->solution[3+i]/fitpar.fitParVal[6+i]) > convergenceFrac)){
+          conv=0;
+        }
+        fitpar.fitParVal[6+i] += linEq->solution[3+i];
+        //printf("par %i: %f\n",6+i,fitpar.fitParVal[6+i]);
+      }
+
+      //check convergence condition
+      if(conv == 1){
+        return -1;
+      }
+
+    }
+  }
+
+  return iterCurrent;
+}
+
 
 int performGausFit(){
 
   int i;
   fitpar.errFound = 0;
 
-  double prevFitParVal[6+(3*MAX_FIT_PK)]; //storage for previous iteration fit parameters
-  double prevFitParErr[6+(3*MAX_FIT_PK)];
-
   //width parameters
   fitpar.widthFGH[0] = 3.;
   fitpar.widthFGH[1] = 2.;
   fitpar.widthFGH[2] = 0.;
 
+  //assing initial guesses for background
+  double bgval = 0.;
+  for (i=fitpar.fitStartCh;i<=fitpar.fitEndCh;i+=drawing.contractFactor){
+    bgval += getDispSpBinVal(0,i-drawing.lowerLimit);
+  }
+  fitpar.fitParVal[0] = bgval/((fitpar.fitEndCh-fitpar.fitStartCh)/(1.0*drawing.contractFactor));
+  fitpar.fitParVal[1] = 0.;
+  fitpar.fitParVal[2] = 0.;
+
   //assign initial guesses for non-linear params
   for(i=0;i<fitpar.numFitPeaks;i++){
+    fitpar.fitParVal[6+(3*i)] = fitpar.fitParVal[0];
     fitpar.fitParVal[7+(3*i)] = fitpar.fitPeakInitGuess[i];
     fitpar.fitParVal[8+(3*i)] = getFWHM(fitpar.fitPeakInitGuess[i],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482;
   }
 
   lin_eq_type linEq;
 
-  //iterations
-  int iterNum = 0;
-  int maxIterNum = 50;
-  int maxFirstIterTries = 10;
-  int firstIterCounter = 0;
-  double firstIterChisq = BIG_NUMBER;
-  double lastIterChisq = BIG_NUMBER;
-  double iterChisq = BIG_NUMBER;
-  double varyFactor = 1.0;
-  while (iterNum < maxIterNum){
-
-    if(iterNum > 0)
-      lastIterChisq = iterChisq;
-
-    memcpy(prevFitParVal,fitpar.fitParVal,sizeof(fitpar.fitParVal));
-    memcpy(prevFitParErr,fitpar.fitParErr,sizeof(fitpar.fitParErr));
-    
-    //setup and perform linearized quadratic background fit
-    setupFitSums(&linEq,0);
-    if(!(solve_lin_eq(&linEq))){
-      printf("WARNING: failed fit - linearized stage (background only), iteration %i.  Reverting.\n",iterNum);
-      memcpy(fitpar.fitParVal,prevFitParVal,sizeof(fitpar.fitParVal));
-      memcpy(fitpar.fitParErr,prevFitParErr,sizeof(fitpar.fitParErr));
+  //do non-linearized fit
+  int numNLIterTry = 50;
+  int numNLIter = nonLinearizedGausFit(numNLIterTry, 0.0001, &linEq);
+  if(numNLIter == -1){
+    printf("Non-linear fit converged.\n");
+    fitpar.errFound = getParameterErrors(&linEq);
+  }else if (numNLIter >= numNLIterTry){
+    printf("Fit did not converge after %i iterations.  Trying some more...\n",numNLIter);
+    numNLIter = nonLinearizedGausFit(numNLIterTry*10, 0.0001, &linEq);
+    if(numNLIter == -1){
+      printf("Non-linear fit converged.\n");
+    }else if(numNLIter >= numNLIterTry*10){
+      printf("Fit did not converge after %i iterations.  Giving up...\n",11*numNLIterTry);
     }else{
-      //assign background parameters
-      for(i=0;i<3;i++){
-        fitpar.fitParVal[i] = linEq.solution[i];
-        //printf("par %i: %f\n",i,fitpar.fitParVal[i]);
-      }
+      printf("WARNING: failed fit, iteration %i.\n",numNLIterTry*10 + numNLIter);
+    return 0;
     }
-    
-    //setup and perform linearized peak amplitude fit
-    setupFitSums(&linEq,1);
-    if(!(solve_lin_eq(&linEq))){
-      printf("WARNING: failed fit - linearized stage (amplitudes only), iteration %i.  Reverting.\n",iterNum);
-      memcpy(fitpar.fitParVal,prevFitParVal,sizeof(fitpar.fitParVal));
-      memcpy(fitpar.fitParErr,prevFitParErr,sizeof(fitpar.fitParErr));
-    }else{
-      //assign amplitude parameters
-      for(i=0;i<fitpar.numFitPeaks;i++){
-        fitpar.fitParVal[6+(3*i)] = linEq.solution[i];
-        //printf("amplitude %i: %f\n",i,fitpar.fitParVal[6+(3*i)]);
-      }
-    }
+    fitpar.errFound = getParameterErrors(&linEq);
+  }else{
+    printf("WARNING: failed fit, iteration %i.\n",numNLIter);
+    return 0;
+  }
 
-    if(!(fitNonLinearizedPositions(varyFactor))){
-      printf("WARNING: failed fit - nonlinearized stage (positions), iteration %i.\n",iterNum);
-      break;
-    }
-
-    if(!(fitNonLinearizedWidths(varyFactor))){
-      printf("WARNING: failed fit - nonlinearized stage (widths), iteration %i.\n",iterNum);
-      break;
-    }
-
-    //setup and perform linearized fit of all linear parameters
-    setupFitSums(&linEq,2);
-    if(!(solve_lin_eq(&linEq))){
-      printf("WARNING: failed fit - linearized stage (all parameters), iteration %i.  Reverting.\n",iterNum);
-      memcpy(fitpar.fitParVal,prevFitParVal,sizeof(fitpar.fitParVal));
-      memcpy(fitpar.fitParErr,prevFitParErr,sizeof(fitpar.fitParErr));
-    }else{
-      //assign all linear parameters
-      for(i=0;i<3;i++){
-        fitpar.fitParVal[i] = linEq.solution[i];
-        //printf("par %i: %f\n",i,fitpar.fitParVal[i]);
-      }
-      for(i=0;i<fitpar.numFitPeaks;i++){
-        fitpar.fitParVal[6+(3*i)] = linEq.solution[3+i];
-        //printf("amplitude %i: %f\n",i,fitpar.fitParVal[6+(3*i)]);
-      }
-
-      //get errors for all fit parameters
-      fitpar.errFound = getParameterErrors(&linEq);
-      //getParameterErrors(&linEq);
-    }
-    
-
-    /*printf("Matrix\n");
-    int j;
-    for(i=0;i<linEq.dim;i++){
-      for(j=0;j<linEq.dim;j++){
-        printf("%Lf ",linEq.matrix[i][j]);
-      }
-      printf("\n");
-    }
-    printf("Vector\n");
-    for(i=0;i<linEq.dim;i++){
-      printf("%Lf ",linEq.vector[i]);
-    }
-    printf("\n");*/
-
-    iterChisq = getFitChisq();
-    if(iterNum == 0){
-      if(iterChisq != BIG_NUMBER){
-        firstIterChisq = iterChisq;
-      }else{
-        iterNum--; //redo first iteration
-        firstIterCounter++;
-        if(firstIterCounter > maxFirstIterTries){
-          printf("WARNING: failed fit - first iteration\n");
-          break;
-        }
-      }
-    }else if((iterChisq >= lastIterChisq)||(iterChisq < 0)){
-      //reset the fit parameters, enforce that chisq must decrease
-      memcpy(fitpar.fitParVal,prevFitParVal,sizeof(fitpar.fitParVal));
-      memcpy(fitpar.fitParErr,prevFitParErr,sizeof(fitpar.fitParErr));
-      iterChisq = lastIterChisq;
-      //increase the range over which non-linear parameters are varied
-      if(iterNum > 0)
-        varyFactor *= 2.;
-    }else{
-      varyFactor = 1.0;
-    }
-
-    printf("Fit iteration %i - chisq: %f\nA: %f +/- %f, B: %f +/- %f, C: %f +/- %f\n",iterNum+1,iterChisq,fitpar.fitParVal[0],fitpar.fitParErr[0],fitpar.fitParVal[1],fitpar.fitParErr[1],fitpar.fitParVal[2],fitpar.fitParErr[2]);
-    for(i=0;i<fitpar.numFitPeaks;i++){
-      printf("A%i: %f +/- %f, P%i: %f +/- %f, W%i: %f +/- %f\n",i+1,fitpar.fitParVal[6+(3*i)],fitpar.fitParErr[6+(3*i)],i+1,fitpar.fitParVal[7+(3*i)],fitpar.fitParErr[7+(3*i)],i+1,fitpar.fitParVal[8+(3*i)],fitpar.fitParErr[8+(3*i)]);
+  /*printf("Matrix\n");
+  int j;
+  for(i=0;i<linEq.dim;i++){
+    for(j=0;j<linEq.dim;j++){
+      printf("%Lf ",linEq.matrix[i][j]);
     }
     printf("\n");
-
-    if(iterChisq != BIG_NUMBER){
-      if(varyFactor >= 32.){
-        if(fabs(lastIterChisq - iterChisq) < fabs(0.0001*firstIterChisq)){
-          //end the fit
-          printf("Fit converged at iteration %i.\n",iterNum+1);
-          break;
-        }
-      }
-      
-    }
-    
-
-    iterNum++;
   }
+  printf("Vector\n");
+  for(i=0;i<linEq.dim;i++){
+    printf("%Lf ",linEq.vector[i]);
+  }
+  printf("\n");*/
+  //getc(stdin);
+    
+  printf("\nFit result - chisq: %f\nA: %f +/- %f, B: %f +/- %f, C: %f +/- %f\n",getFitChisq(),fitpar.fitParVal[0],fitpar.fitParErr[0],fitpar.fitParVal[1],fitpar.fitParErr[1],fitpar.fitParVal[2],fitpar.fitParErr[2]);
+  for(i=0;i<fitpar.numFitPeaks;i++){
+    printf("A%i: %f +/- %f, P%i: %f +/- %f, W%i: %f +/- %f\n",i+1,fitpar.fitParVal[6+(3*i)],fitpar.fitParErr[6+(3*i)],i+1,fitpar.fitParVal[7+(3*i)],fitpar.fitParErr[7+(3*i)],i+1,fitpar.fitParVal[8+(3*i)],fitpar.fitParErr[8+(3*i)]);
+  }
+  printf("\n");
   
   return 1;
 }

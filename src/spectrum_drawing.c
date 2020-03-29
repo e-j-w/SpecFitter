@@ -404,22 +404,22 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
             float calCentrErr = calpar.calpar0 + calpar.calpar1*fitpar.fitParErr[7+(3*highlightedPeak)] + calpar.calpar2*fitpar.fitParErr[7+(3*highlightedPeak)]*fitpar.fitParErr[7+(3*highlightedPeak)];
             float calWidthErr = calpar.calpar0 + calpar.calpar1*fitpar.fitParErr[8+(3*highlightedPeak)] + calpar.calpar2*fitpar.fitParErr[8+(3*highlightedPeak)]*fitpar.fitParErr[8+(3*highlightedPeak)];
             char fitParStr[3][50];
-            getFormattedValAndUncertainty(fitpar.fitParVal[6+(3*highlightedPeak)],fitpar.fitParErr[6+(3*highlightedPeak)],fitParStr[0],50,1);
+            getFormattedValAndUncertainty(evalPeakArea(highlightedPeak),evalPeakAreaErr(highlightedPeak),fitParStr[0],50,1);
             getFormattedValAndUncertainty(calCentr,calCentrErr,fitParStr[1],50,1);
             getFormattedValAndUncertainty(2.35482*calWidth,2.35482*calWidthErr,fitParStr[2],50,1);
-            snprintf(statusBarLabel,256,"Height: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
+            snprintf(statusBarLabel,256,"Area: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
           }else{
-            snprintf(statusBarLabel,256,"Height: %0.3f, Centroid: %0.3f, FWHM: %0.3f",fitpar.fitParVal[6+(3*highlightedPeak)],calCentr,2.35482*calWidth);
+            snprintf(statusBarLabel,256,"Area: %0.3f, Centroid: %0.3f, FWHM: %0.3f",evalPeakArea(highlightedPeak),calCentr,2.35482*calWidth);
           }
         }else{
           if(fitpar.errFound){
             char fitParStr[3][50];
-            getFormattedValAndUncertainty(fitpar.fitParVal[6+(3*highlightedPeak)],fitpar.fitParErr[6+(3*highlightedPeak)],fitParStr[0],50,1);
+            getFormattedValAndUncertainty(evalPeakArea(highlightedPeak),evalPeakAreaErr(highlightedPeak),fitParStr[0],50,1);
             getFormattedValAndUncertainty(fitpar.fitParVal[7+(3*highlightedPeak)],fitpar.fitParErr[7+(3*highlightedPeak)],fitParStr[1],50,1);
             getFormattedValAndUncertainty(2.35482*fitpar.fitParVal[8+(3*highlightedPeak)],2.35482*fitpar.fitParErr[8+(3*highlightedPeak)],fitParStr[2],50,1);
-            snprintf(statusBarLabel,256,"Height: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
+            snprintf(statusBarLabel,256,"Area: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
           }else{
-            snprintf(statusBarLabel,256,"Height: %0.3f, Centroid: %0.3f, FWHM: %0.3f",fitpar.fitParVal[6+(3*highlightedPeak)],fitpar.fitParVal[7+(3*highlightedPeak)],2.35482*fitpar.fitParVal[8+(3*highlightedPeak)]);
+            snprintf(statusBarLabel,256,"Area: %0.3f, Centroid: %0.3f, FWHM: %0.3f",evalPeakArea(highlightedPeak),fitpar.fitParVal[7+(3*highlightedPeak)],2.35482*fitpar.fitParVal[8+(3*highlightedPeak)]);
           }
         }
         break;
@@ -921,7 +921,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 
   //interpolate (ie. limit the number of bins drawn) in the next step, 
   //to help drawing performance
-  int maxDrawBins = (clip_x2 - clip_x1)*1.1;
+  int maxDrawBins = (clip_x2 - clip_x1)*1.5;
   //printf("maximum bins to draw: %i\n",maxDrawBins);
   int binSkipFactor = (drawing.upperLimit-drawing.lowerLimit)/(maxDrawBins);
   if(binSkipFactor <= drawing.contractFactor)
