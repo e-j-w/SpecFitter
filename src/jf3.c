@@ -42,7 +42,6 @@ int main(int argc, char *argv[])
   calibrate_button = GTK_WIDGET(gtk_builder_get_object(builder, "calibrate_button"));
   fit_button = GTK_WIDGET(gtk_builder_get_object(builder, "fit_button"));
   display_button = GTK_WIDGET(gtk_builder_get_object(builder, "display_button"));
-  calibrate_ok_button = GTK_WIDGET(gtk_builder_get_object(builder, "options_ok_button"));
   spectrum_drawing_area = GTK_WIDGET(gtk_builder_get_object(builder, "spectrumdrawingarea"));
   spectrum_drag_gesture = gtk_gesture_drag_new(spectrum_drawing_area); //without this, cannot click away from menus onto the drawing area, needs further investigation
   zoom_scale = GTK_SCALE(gtk_builder_get_object(builder, "zoom_scale"));
@@ -54,6 +53,8 @@ int main(int argc, char *argv[])
   fit_fit_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_fit_button"));
 
   //calibration window UI elements
+  calibrate_ok_button = GTK_WIDGET(gtk_builder_get_object(builder, "options_ok_button"));
+  remove_calibration_button = GTK_WIDGET(gtk_builder_get_object(builder, "remove_calibration_button"));
   cal_entry_unit = GTK_ENTRY(gtk_builder_get_object(builder, "calibration_unit_entry"));
   cal_entry_const = GTK_ENTRY(gtk_builder_get_object(builder, "cal_entry_const"));
   cal_entry_lin = GTK_ENTRY(gtk_builder_get_object(builder, "cal_entry_lin"));
@@ -103,6 +104,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (fit_cancel_button), "clicked", G_CALLBACK (on_fit_cancel_button_clicked), NULL);
   g_signal_connect (G_OBJECT (display_button), "clicked", G_CALLBACK (on_display_button_clicked), NULL);
   g_signal_connect (G_OBJECT (calibrate_ok_button), "clicked", G_CALLBACK (on_calibrate_ok_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (remove_calibration_button), "clicked", G_CALLBACK (on_remove_calibration_button_clicked), NULL);
   g_signal_connect (G_OBJECT (spectrum_selector), "value-changed", G_CALLBACK (on_spectrum_selector_changed), NULL);
   g_signal_connect (G_OBJECT (autoscale_button), "toggled", G_CALLBACK (on_toggle_autoscale), NULL);
   g_signal_connect (G_OBJECT (logscale_button), "toggled", G_CALLBACK (on_toggle_logscale), NULL);

@@ -34,7 +34,7 @@ GtkHeaderBar *header_bar;
 GtkWidget *open_button, *append_button;
 GtkWidget *fit_button, *display_button;
 GtkPopover *display_popover;
-GtkWidget *calibrate_ok_button;
+GtkWidget *calibrate_button;
 GtkLabel *bottom_info_text;
 GtkWidget *file_open_dialog;
 GtkFileFilter *file_filter;
@@ -51,7 +51,7 @@ GtkInfoBar *overlay_info_bar;
 GtkLabel *overlay_info_label;
 GtkButton *fit_cancel_button, *fit_fit_button;
 //Calibration dialog
-GtkWidget *calibrate_button;
+GtkWidget *calibrate_ok_button, *remove_calibration_button;
 GtkWindow *calibrate_window;
 GtkEntry *cal_entry_unit, *cal_entry_const, *cal_entry_lin, *cal_entry_quad;
 //'About' dialog

@@ -368,6 +368,16 @@ void on_calibrate_ok_button_clicked(GtkButton *b)
   
 }
 
+void on_remove_calibration_button_clicked(GtkButton *b)
+{
+  calpar.calMode=0;
+  //printf("Calibration parameters: %f %f %f, drawing.calMode: %i, calpar.calUnit: %s\n",calpar.calpar0,calpar.calpar1,calpar.calpar2,drawing.calMode,drawing.calUnit);
+  updateConfigFile();
+  gtk_widget_hide(GTK_WIDGET(calibrate_window)); //close the calibration window
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+  
+}
+
 void on_multiplot_row_activated(GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *column, gpointer user_data){
   
   //don't toggle a row if a multiple toggle was jsut performed
