@@ -274,9 +274,12 @@ int performGausFit(){
   int i;
   fitpar.errFound = 0;
 
+  int contrFac = drawing.contractFactor;
+  drawing.contractFactor = 1;
+
   //width parameters
-  fitpar.widthFGH[0] = 3.;
-  fitpar.widthFGH[1] = 2.;
+  fitpar.widthFGH[0] = 0.3;
+  fitpar.widthFGH[1] = 0.2;
   fitpar.widthFGH[2] = 0.;
 
   //assign initial guesses for background
@@ -337,6 +340,18 @@ int performGausFit(){
   }
   printf("\n");*/
   //getc(stdin);
+
+  //scale according to contraction factor
+  for(i=0;i<3;i++){
+    fitpar.fitParVal[i] *= contrFac;
+    fitpar.fitParErr[i] *= contrFac;
+  }
+  for(i=0;i<fitpar.numFitPeaks;i++){
+    fitpar.fitParVal[6+(3*i)] *= contrFac;
+    fitpar.fitParErr[6+(3*i)] *= contrFac;
+  }
+
+  drawing.contractFactor = contrFac;
     
   printf("\nFit result - chisq/ndf: %f\nA: %f +/- %f, B: %f +/- %f, C: %f +/- %f\n",getFitChisq()/(1.0*ndf),fitpar.fitParVal[0],fitpar.fitParErr[0],fitpar.fitParVal[1],fitpar.fitParErr[1],fitpar.fitParVal[2],fitpar.fitParErr[2]);
   for(i=0;i<fitpar.numFitPeaks;i++){

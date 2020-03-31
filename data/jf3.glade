@@ -66,6 +66,11 @@ Author: Jonathan Williams
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
+  <object class="GtkImage" id="undo_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">edit-undo-symbolic</property>
+  </object>
   <object class="GtkAdjustment" id="zoom_adjustment">
     <property name="upper">10</property>
     <property name="step_increment">1</property>
@@ -360,13 +365,15 @@ Author: Jonathan Williams
             <property name="spacing">10</property>
             <child>
               <object class="GtkButton" id="remove_calibration_button">
-                <property name="label" translatable="yes">Remove Calibration</property>
+                <property name="label" translatable="yes">Undo Calibration</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Remove an existing calibration, and revert to displaying data uncalibrated.</property>
                 <property name="halign">end</property>
                 <property name="hexpand">False</property>
+                <property name="image">undo_image</property>
+                <property name="always_show_image">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>

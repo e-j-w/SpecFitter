@@ -18,8 +18,8 @@
 
 #include "lin_eq_solver.h"
 
-#define BIG_NUMBER    1E10
-#define SMALL_NUMBER -1E10
+#define BIG_NUMBER    1E30
+#define SMALL_NUMBER -1E30
 #define MAX_DISP_SP   12 //maximum number of spectra which may be displayed at once
 #define MAX_FIT_PK    10 //maximum number of peaks which may be fit at once
 
