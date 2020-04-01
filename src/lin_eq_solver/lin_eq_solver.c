@@ -1,6 +1,6 @@
 #include "lin_eq_solver.h"
 
-int solve_lin_eq(lin_eq_type * lin_eq)
+int solve_lin_eq(lin_eq_type * lin_eq, int weighted)
 {
 
   int i,j;//iterators
@@ -14,9 +14,15 @@ int solve_lin_eq(lin_eq_type * lin_eq)
   
   //use inverse matrix to find solutions
   memset(lin_eq->solution,0,sizeof(lin_eq->solution));
-  for(i=0;i<n;i++)
-    for(j=0;j<n;j++)
-      lin_eq->solution[i]+=lin_eq->inv_matrix[i][j]*lin_eq->vector[j];
+  if(weighted){
+    for(i=0;i<n;i++)
+      for(j=0;j<n;j++)
+        lin_eq->solution[i]+=lin_eq->inv_matrix[i][j]*lin_eq->vector[j]*lin_eq->mat_weights[i][j];
+  }else{
+    for(i=0;i<n;i++)
+      for(j=0;j<n;j++)
+        lin_eq->solution[i]+=lin_eq->inv_matrix[i][j]*lin_eq->vector[j];
+  }
   
   return 1;
 }
