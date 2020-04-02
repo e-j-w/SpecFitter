@@ -462,11 +462,14 @@ float getXPos(const int bin, const float clip_x1, const float clip_x2){
 
 //get the screen position of a channel (or fractional channel)
 //returns -1 if offscreen
-float getXPosFromCh(float chVal, float clip_x1, float clip_x2){
+//if halfBinOffset=1, will offset by half a bin (for drawing fits)
+float getXPosFromCh(float chVal, float clip_x1, float clip_x2, int halfBinOffset){
   if((chVal < drawing.lowerLimit)||(chVal > drawing.upperLimit)){
     return -1;
   }
   float bin = chVal - drawing.lowerLimit;
+  if(halfBinOffset)
+    bin += (drawing.contractFactor/2.);
   return clip_x1 + 80.0 + (bin*(clip_x2-clip_x1-80.0)/(drawing.upperLimit-drawing.lowerLimit));
 }
 
@@ -1044,8 +1047,8 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       for(i=0;i<fitpar.numFitPeaks;i++){
         for(fitDrawX=fitpar.fitStartCh; fitDrawX<=fitpar.fitEndCh; fitDrawX+= (clip_x2 - clip_x1 - 80.0)/1000.){
           nextFitDrawX = fitDrawX + (clip_x2 - clip_x1 - 80.0)/1000.;
-          xpos = getXPosFromCh(fitDrawX,clip_x1,clip_x2);
-          nextXpos = getXPosFromCh(nextFitDrawX,clip_x1,clip_x2);
+          xpos = getXPosFromCh(fitDrawX,clip_x1,clip_x2,1);
+          nextXpos = getXPosFromCh(nextFitDrawX,clip_x1,clip_x2,1);
           if((xpos > 0)&&(nextXpos > 0)){
             cairo_move_to (cr, xpos, getYPos(evalFitOnePeak(fitDrawX,i),0,clip_y1,clip_y2));
             cairo_line_to (cr, nextXpos, getYPos(evalFitOnePeak(nextFitDrawX,i),0,clip_y1,clip_y2));
@@ -1055,8 +1058,8 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       //draw background
       for(fitDrawX=fitpar.fitStartCh; fitDrawX<=fitpar.fitEndCh; fitDrawX+= (clip_x2 - clip_x1 - 80.0)/1000.){
         nextFitDrawX = fitDrawX + (clip_x2 - clip_x1 - 80.0)/1000.;
-        xpos = getXPosFromCh(fitDrawX,clip_x1,clip_x2);
-        nextXpos = getXPosFromCh(nextFitDrawX,clip_x1,clip_x2);
+        xpos = getXPosFromCh(fitDrawX,clip_x1,clip_x2,1);
+        nextXpos = getXPosFromCh(nextFitDrawX,clip_x1,clip_x2,1);
         if((xpos > 0)&&(nextXpos > 0)){
           cairo_move_to (cr, xpos, getYPos(evalFitBG(fitDrawX),0,clip_y1,clip_y2));
           cairo_line_to (cr, nextXpos, getYPos(evalFitBG(nextFitDrawX),0,clip_y1,clip_y2));
@@ -1068,8 +1071,8 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
         cairo_set_line_width(cr, 2.0);
         for(fitDrawX=fitpar.fitStartCh; fitDrawX<=fitpar.fitEndCh; fitDrawX+= (clip_x2 - clip_x1 - 80.0)/1000.){
           nextFitDrawX = fitDrawX + (clip_x2 - clip_x1 - 80.0)/1000.;
-          xpos = getXPosFromCh(fitDrawX,clip_x1,clip_x2);
-          nextXpos = getXPosFromCh(nextFitDrawX,clip_x1,clip_x2);
+          xpos = getXPosFromCh(fitDrawX,clip_x1,clip_x2,1);
+          nextXpos = getXPosFromCh(nextFitDrawX,clip_x1,clip_x2,1);
           if((xpos > 0)&&(nextXpos > 0)){
             cairo_move_to (cr, xpos, getYPos(evalFit(fitDrawX),0,clip_y1,clip_y2));
             cairo_line_to (cr, nextXpos, getYPos(evalFit(nextFitDrawX),0,clip_y1,clip_y2));
@@ -1271,7 +1274,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   //draw cursors at fit limits if needed
   if(gui.fittingSp > 0){
     if(fitpar.fitStartCh >= 0){
-      float cursorPos = getXPosFromCh(fitpar.fitStartCh, clip_x1, clip_x2);
+      float cursorPos = getXPosFromCh(fitpar.fitStartCh, clip_x1, clip_x2,0);
       if(cursorPos>=0){
         cairo_set_line_width(cr, 2.0);
         cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
@@ -1281,7 +1284,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       }
     }
     if(fitpar.fitEndCh >= 0){
-      float cursorPos = getXPosFromCh(fitpar.fitEndCh, clip_x1, clip_x2);
+      float cursorPos = getXPosFromCh(fitpar.fitEndCh, clip_x1, clip_x2,0);
       if(cursorPos>=0){
         cairo_set_line_width(cr, 2.0);
         cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
@@ -1298,7 +1301,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       cairo_set_line_width(cr, 2.0);
       for(i=0;i<fitpar.numFitPeaks;i++){
         if((fitpar.fitPeakInitGuess[i] > drawing.lowerLimit)&&(fitpar.fitPeakInitGuess[i] < drawing.upperLimit)){
-          cairo_arc(cr,getXPosFromCh(fitpar.fitPeakInitGuess[i],clip_x1,clip_x2),-30.0-getYPos(getDispSpBinVal(0,fitpar.fitPeakInitGuess[i]-drawing.lowerLimit),0,clip_y1,clip_y2),8.,0.,2*G_PI);
+          cairo_arc(cr,getXPosFromCh(fitpar.fitPeakInitGuess[i],clip_x1,clip_x2,1),-30.0-getYPos(getDispSpBinVal(0,fitpar.fitPeakInitGuess[i]-drawing.lowerLimit),0,clip_y1,clip_y2),8.,0.,2*G_PI);
         }
         cairo_stroke_preserve(cr);
         cairo_fill(cr);
@@ -1309,7 +1312,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       cairo_set_line_width(cr, 2.0);
       for(i=0;i<fitpar.numFitPeaks;i++){
         if((fitpar.fitParVal[7+(3*i)] > drawing.lowerLimit)&&(fitpar.fitParVal[7+(3*i)] < drawing.upperLimit)){
-          cairo_arc(cr,getXPosFromCh(fitpar.fitParVal[7+(3*i)],clip_x1,clip_x2),-30.0-getYPos(getDispSpBinVal(0,fitpar.fitParVal[7+(3*i)]-drawing.lowerLimit),0,clip_y1,clip_y2),8.,0.,2*G_PI);
+          cairo_arc(cr,getXPosFromCh(fitpar.fitParVal[7+(3*i)],clip_x1,clip_x2,1),-30.0-getYPos(getDispSpBinVal(0,fitpar.fitParVal[7+(3*i)]-drawing.lowerLimit),0,clip_y1,clip_y2),8.,0.,2*G_PI);
         }
         cairo_stroke_preserve(cr);
         cairo_fill(cr);

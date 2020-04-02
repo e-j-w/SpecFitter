@@ -112,13 +112,11 @@ int getParameterErrors(lin_eq_type *linEq){
 
   int i;
 
-  //Calculate covariances and uncertainties, see J. Wolberg 
-  //'Data Analysis Using the Method of Least Squares' sec 2.5
-  int ndf = (int)((fitpar.fitEndCh - fitpar.fitStartCh)/(1.0*drawing.contractFactor)) - (3+(3*fitpar.numFitPeaks));
+  //Calculate uncertainties from linear equation solution
   for(i=0;i<3;i++)
-    fitpar.fitParErr[i]=sqrt((double)(linEq->inv_matrix[i][i]*(getFitChisq()/ndf)));
+    fitpar.fitParErr[i]=sqrt((double)(linEq->inv_matrix[i][i]*linEq->mat_weights[i][i]));
   for(i=0;i<(3*fitpar.numFitPeaks);i++)
-    fitpar.fitParErr[6+i]=sqrt((double)(linEq->inv_matrix[3+i][3+i]*(getFitChisq()/ndf)));
+    fitpar.fitParErr[6+i]=sqrt((double)(linEq->inv_matrix[3+i][3+i]*linEq->mat_weights[3+i][3+i]));
 
   //add Guassian parameter errors in quadrature against Cramer–Rao lower bounds
   //ie. I'm assuming the errors on the fit parameters and the errors from
@@ -439,8 +437,6 @@ int performGausFit(){
       fitpar.errFound = getParameterErrors(&linEq);
     }
   }
-  
-  
 
   /*printf("Matrix\n");
   int j;

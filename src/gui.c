@@ -318,6 +318,9 @@ void on_calibrate_button_clicked(GtkButton *b)
     sprintf(str,"%.3f",calpar.calpar2);
     gtk_entry_set_text(cal_entry_quad,str);
     gtk_entry_set_text(cal_entry_unit,calpar.calUnit);
+    gtk_widget_set_sensitive(GTK_WIDGET(remove_calibration_button),TRUE);
+  }else{
+    gtk_widget_set_sensitive(GTK_WIDGET(remove_calibration_button),FALSE);
   }
   gtk_window_present(calibrate_window); //show the window
 }

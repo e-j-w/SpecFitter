@@ -82,6 +82,7 @@ Author: Jonathan Williams
     <property name="type_hint">dialog</property>
     <property name="attached_to">window</property>
     <property name="program_name">jf3 Spectrum Viewer</property>
+    <property name="copyright" translatable="yes">© 2020 Jonathan Williams</property>
     <property name="comments" translatable="yes">A 1D spectrum viewer and fitter application.</property>
     <property name="website">https://github.com/e-j-w/jf3</property>
     <property name="authors">Jonathan Williams</property>
