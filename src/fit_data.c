@@ -160,12 +160,13 @@ int setupFitSums(lin_eq_type *linEq, double flambda){
   linEq->dim = 3 + (3*fitpar.numFitPeaks);
 
   for (i=fitpar.fitStartCh;i<=fitpar.fitEndCh;i+=drawing.contractFactor){
-    xval = i;
+    xval = (double)(i);
     yval = getDispSpBinVal(0,i-drawing.lowerLimit);
 
     if(yval != 0){
       ydiff = yval - evalFit(xval);
-      yval = fabs(yval);
+      if(yval < 1.)
+        yval = 1.;
     
       linEq->matrix[0][0] += 1./yval;
       linEq->matrix[0][1] += xval/yval;
@@ -176,13 +177,13 @@ int setupFitSums(lin_eq_type *linEq, double flambda){
       linEq->vector[1] += ydiff*xval/yval;
       linEq->vector[2] += ydiff*xval*xval/yval;
       for(j=3;j<linEq->dim;j++){
-        linEq->matrix[0][j] += evalGaussTermDerivative((int)(j-3)/3,xval,j % 3)/yval;
-        linEq->matrix[1][j] += xval*evalGaussTermDerivative((int)(j-3)/3,xval,j % 3)/yval;
-        linEq->matrix[2][j] += xval*xval*evalGaussTermDerivative((int)(j-3)/3,xval,j % 3)/yval;
-        linEq->vector[j] += ydiff*evalGaussTermDerivative((int)(j-3)/3,xval,j % 3)/yval;
+        linEq->matrix[0][j] += evalGaussTermDerivative((int)((j-3)/3),xval,j % 3)/yval;
+        linEq->matrix[1][j] += xval*evalGaussTermDerivative((int)((j-3)/3),xval,j % 3)/yval;
+        linEq->matrix[2][j] += xval*xval*evalGaussTermDerivative((int)((j-3)/3),xval,j % 3)/yval;
+        linEq->vector[j] += ydiff*evalGaussTermDerivative((int)((j-3)/3),xval,j % 3)/yval;
         //printf("j: %i, j-3/3: %i, jmod3: %i\n",j,(int)(j-3)/3,j % 3);
         for(k=3;k<linEq->dim;k++){
-          linEq->matrix[j][k] += evalGaussTermDerivative((int)(j-3)/3,xval,j % 3)*evalGaussTermDerivative((int)(k-3)/3,xval,k % 3)/yval;
+          linEq->matrix[j][k] += evalGaussTermDerivative((int)((j-3)/3),xval,j % 3)*evalGaussTermDerivative((int)((k-3)/3),xval,k % 3)/yval;
           //printf("yval: %f, j: %i, k: %i, evalgaussder j: %f, evalgaussder k: %f\n",yval,j,k,evalGaussTermDerivative((int)(j-3)/3,xval,j % 3),evalGaussTermDerivative((int)(k-3)/3,xval,k % 3));
         }
       }
@@ -253,6 +254,37 @@ int setupFitSums(lin_eq_type *linEq, double flambda){
 
 }
 
+//function which specifies constraining conditions for peak fit parameters
+int areParsValid(){
+  int i;
+  int fitRange = fitpar.fitEndCh - fitpar.fitStartCh;
+  for(i=0;i<fitpar.numFitPeaks;i+=3){
+    
+    if(fitpar.fitParVal[7+(3*i)] < fitpar.fitStartCh){
+      return 0;
+    }
+    if(fitpar.fitParVal[7+(3*i)] > fitpar.fitEndCh){
+      return 0;
+    }
+    if(fabs(fitpar.fitParVal[7+(3*i)] - fitpar.fitPeakInitGuess[i]) > (fitRange)/4.){
+      return 0;
+    }
+    if(fabs(fitpar.fitParVal[8+(3*i)]) > (fitRange)/2.){
+      return 0;
+    }
+    if(getDispSpBinVal(0,fitpar.fitPeakInitGuess[i]-drawing.lowerLimit) > 0){
+      if(fitpar.fitParVal[6+(3*i)] < 0.){
+        return 0;
+      }
+    }else{
+      if(fitpar.fitParVal[6+(3*i)] > 0.){
+        return 0;
+      }
+    }
+  }
+  return 1;
+}
+
 
 //non-linearized fitting
 //return value: number of iterations performed (if fit not converged), -1 (if fit converged)
@@ -262,7 +294,6 @@ int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFra
   int iterCurrent = 0;
   int conv = 0; //converged?
   int lmCount = 0; //counter if at a chisq local minimum
-  int stallCount = 0; //counter if stalled with no change happening
 
   double iterStartChisq, iterEndChisq;
   double flamda = .001;
@@ -274,12 +305,12 @@ int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFra
     iterStartChisq = getFitChisq();
     memcpy(prevFitParVal,fitpar.fitParVal,sizeof(fitpar.fitParVal));
 
-    printf("\nFit iteration %i - A: %f, B: %f, C: %f\n",iterCurrent, fitpar.fitParVal[0],fitpar.fitParVal[1],fitpar.fitParVal[2]);
+    /*printf("\nFit iteration %i - A: %f, B: %f, C: %f\n",iterCurrent, fitpar.fitParVal[0],fitpar.fitParVal[1],fitpar.fitParVal[2]);
     for(i=0;i<fitpar.numFitPeaks;i++){
       printf("A%i: %f, P%i: %f, W%i: %f\n",i+1,fitpar.fitParVal[6+(3*i)],i+1,fitpar.fitParVal[7+(3*i)],i+1,fitpar.fitParVal[8+(3*i)]);
     }
     printf("chisq: %f\n",iterStartChisq);
-    printf("\n");
+    printf("\n");*/
 
     if(!(setupFitSums(linEq,flamda))){
       //the return value being less than the requested number of iterations indicates a failure
@@ -292,11 +323,11 @@ int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFra
       iterCurrent++;
       conv=1;
 
-      printf("Solution\n");
+      /*printf("Solution\n");
       for(i=0;i<linEq->dim;i++){
         printf("%10.4Lf ",linEq->solution[i]);
       }
-      printf("\n");
+      printf("\n");*/
 
       //assign parameter values
       for(i=0;i<3;i++){
@@ -315,28 +346,35 @@ int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFra
         fitpar.fitParVal[6+i] += linEq->solution[3+i];
         //printf("par %i: %f\n",6+i,fitpar.fitParVal[6+i]);
       }
+      
 
       //check chisq, if it increased change value of flambda and try again
       iterEndChisq = getFitChisq();
-
-      printf("Start chisq: %f, end chisq: %f\n",iterStartChisq,iterEndChisq);
+      //printf("Start chisq: %f, end chisq: %f\n",iterStartChisq,iterEndChisq);
 
       if((iterEndChisq!=iterEndChisq)||((iterEndChisq > iterStartChisq)&&(iterEndChisq > 0.))){
         if(flamda < 2.0){
-          flamda *= 10.0;
+          flamda *= 2.0;
+          //revert fit parameters
+          memcpy(fitpar.fitParVal,prevFitParVal,sizeof(fitpar.fitParVal));
+        }else{
+          flamda /= 10.;
         }
-        //revert fit parameters
-        memcpy(fitpar.fitParVal,prevFitParVal,sizeof(fitpar.fitParVal));
-        stallCount++;
       }else if(((iterStartChisq-iterEndChisq)/iterStartChisq) < convergenceFrac) {
         lmCount++;
+        flamda /= 10.;
       }else{
         lmCount = 0;
-        stallCount = 0;
+        flamda /= 10.;
+      }
+
+      if(areParsValid() == 0){
+        //revert fit parameters
+        memcpy(fitpar.fitParVal,prevFitParVal,sizeof(fitpar.fitParVal));
       }
 
       //check convergence condition
-      if((conv == 1)||(stallCount > 20)||(lmCount > 4)){
+      if(conv == 1){
         return -1;
       }
       //getc(stdin);
@@ -365,17 +403,13 @@ int performGausFit(){
   fitpar.widthFGH[2] = 0.;
 
   //assign initial guesses for background
-  double bgval = 0.;
-  for (i=fitpar.fitStartCh;i<=fitpar.fitEndCh;i+=drawing.contractFactor){
-    bgval += getDispSpBinVal(0,i-drawing.lowerLimit);
-  }
-  fitpar.fitParVal[0] = 1.0*bgval/((fitpar.fitEndCh-fitpar.fitStartCh)/(1.0*drawing.contractFactor));
-  fitpar.fitParVal[1] = 0.001;
-  fitpar.fitParVal[2] = 0.001;
+  fitpar.fitParVal[0] = (getDispSpBinVal(0,fitpar.fitStartCh-drawing.lowerLimit) + getDispSpBinVal(0,fitpar.fitEndCh-drawing.lowerLimit))/2.0;
+  fitpar.fitParVal[1] = (getDispSpBinVal(0,fitpar.fitEndCh-drawing.lowerLimit) - getDispSpBinVal(0,fitpar.fitStartCh-drawing.lowerLimit))/(fitpar.fitEndCh - fitpar.fitStartCh);
+  fitpar.fitParVal[2] = 0.0;
 
   //assign initial guesses for non-linear params
   for(i=0;i<fitpar.numFitPeaks;i++){
-    fitpar.fitParVal[6+(3*i)] = fitpar.fitParVal[0];
+    fitpar.fitParVal[6+(3*i)] = getDispSpBinVal(0,fitpar.fitPeakInitGuess[i]-drawing.lowerLimit) - fitpar.fitParVal[0] - fitpar.fitParVal[1]*fitpar.fitPeakInitGuess[i];
     fitpar.fitParVal[7+(3*i)] = fitpar.fitPeakInitGuess[i];
     fitpar.fitParVal[8+(3*i)] = getFWHM(fitpar.fitPeakInitGuess[i],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482;
   }
@@ -393,11 +427,20 @@ int performGausFit(){
     fitpar.errFound = getParameterErrors(&linEq);
   }else if (numNLIter >= numNLIterTry){
     printf("Fit did not converge after %i iterations.  Giving up...\n",numNLIter);
-    fitpar.errFound = getParameterErrors(&linEq);
   }else{
     printf("WARNING: failed fit, iteration %i.\n",numNLIter);
     return 0;
   }
+
+  //get fit parameter uncertainties
+  fitpar.errFound = 0;
+  if(setupFitSums(&linEq,0.)){
+    if(solve_lin_eq(&linEq,1)){
+      fitpar.errFound = getParameterErrors(&linEq);
+    }
+  }
+  
+  
 
   /*printf("Matrix\n");
   int j;
@@ -413,6 +456,13 @@ int performGausFit(){
   }
   printf("\n");*/
   //getc(stdin);
+
+  //make sure widths are positive
+  for(i=0;i<fitpar.numFitPeaks;i+=3){
+    if(fitpar.fitParVal[8+(3*i)] < 0.){
+      fitpar.fitParVal[8+(3*i)] = fabs(fitpar.fitParVal[8+(3*i)]);
+    }
+  }
     
   printf("\nFit result - chisq/ndf: %f\nA: %f +/- %f, B: %f +/- %f, C: %f +/- %f\n",getFitChisq()/(1.0*ndf),fitpar.fitParVal[0],fitpar.fitParErr[0],fitpar.fitParVal[1],fitpar.fitParErr[1],fitpar.fitParVal[2],fitpar.fitParErr[2]);
   for(i=0;i<fitpar.numFitPeaks;i++){
