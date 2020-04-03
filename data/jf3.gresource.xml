@@ -2,5 +2,6 @@
 <gresources>
   <gresource prefix="/resources">
     <file preprocess="xml-stripblanks">jf3.glade</file>
+    <file preprocess="xml-stripblanks">shortcuts_window.ui</file>
   </gresource>
 </gresources>

@@ -168,10 +168,23 @@ void on_toggle_autoscale(GtkToggleButton *togglebutton, gpointer user_data)
 
 void on_toggle_logscale(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  if(gtk_toggle_button_get_active(togglebutton))
-    drawing.logScale=1;
-  else
-    drawing.logScale=0;
+  if(rawdata.openedSp){
+    if(gtk_toggle_button_get_active(togglebutton))
+      drawing.logScale=1;
+    else
+      drawing.logScale=0;
+    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+  }
+}
+//used for keyboard shortcut
+void toggle_logscale(){
+  if(rawdata.openedSp){
+    if(drawing.logScale){
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(logscale_button),FALSE);
+    }else{
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(logscale_button),TRUE);
+    }
+  }
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
 }
 

@@ -10,7 +10,7 @@ A (1D) spectrum viewer app, with functionality inspired by the `gf3` program for
 
 ## Features
 
-### Support for various file formats
+### File format support
 
 * **.txt** - A plaintext file of tab-separated values, where each row repesents a bin/channel and each column represents a spectrum (single column needed for 1 spectrum, 2 columns for 2, etc.).
 * **.mca** - An .mca file is simply a 2D array of integers, with the first index denoting a spectrum number (array length up to 100) and the second index denoting a bin number (array length fixed to 32768 ie. 2<sup>15</sup>).
@@ -21,7 +21,7 @@ Some sample files that the program can open are available [here](https://mega.nz
 
 Conversion codes for some of these data formats are available in the [FileConvTools](https://github.com/e-j-w/FileConvTools) repository.
 
-### Various spectrum display options
+### Spectrum display options
 
 * Import spectra from multiple files and plot multiple spectra simultaneously:
     * Sum spectra together.
@@ -34,10 +34,6 @@ Conversion codes for some of these data formats are available in the [FileConvTo
 ### Peak fitting
 
 * Fit multiple Gaussian peak shapes on quadratic background (WIP).
-
-### Cool user interface
-
-* Designed to be as simple and intuitive as possible given the supported featureset.
 
 ## How to build
 

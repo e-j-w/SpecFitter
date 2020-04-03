@@ -46,6 +46,7 @@ Author: Jonathan Williams
     <property name="page_size">1</property>
   </object>
   <object class="GtkEntryCompletion" id="entrycompletion1"/>
+  <object class="GtkAccelGroup" id="main_window_accelgroup"/>
   <object class="GtkListStore" id="multiplot_liststore">
     <columns>
       <!-- column-name Name -->
@@ -1182,6 +1183,19 @@ Author: Jonathan Williams
           </packing>
         </child>
         <child>
+          <object class="GtkModelButton" id="shortcuts_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="text" translatable="yes">Keyboard Shortcuts</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">4</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkModelButton" id="about_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -1192,7 +1206,7 @@ Author: Jonathan Williams
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">4</property>
+            <property name="position">5</property>
           </packing>
         </child>
       </object>

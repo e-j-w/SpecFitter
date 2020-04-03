@@ -38,6 +38,7 @@ GtkWidget *calibrate_button;
 GtkLabel *bottom_info_text;
 GtkWidget *file_open_dialog;
 GtkFileFilter *file_filter;
+GtkAccelGroup *main_window_accelgroup;
 //display menu
 GtkSpinButton *spectrum_selector;
 GtkCheckButton *autoscale_button, *logscale_button, *cursor_draw_button;
@@ -71,6 +72,9 @@ GtkModelButton *preferences_button;
 GtkWindow *preferences_window;
 GtkCheckButton *discard_empty_checkbutton, *bin_errors_checkbutton, *dark_theme_checkbutton, *spectrum_label_checkbutton, *autozoom_checkbutton;
 GtkButton *preferences_apply_button, *preferences_cancel_button;
+//shortcuts window
+GtkModelButton *shortcuts_button;
+GtkShortcutsWindow *shortcuts_window;
 //builder
 GtkBuilder *builder;
 

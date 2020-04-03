@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
   gtk_init(&argc, &argv); //initialize Gtk
 
   builder = gtk_builder_new_from_resource("/resources/jf3.glade"); //get UI layout from glade XML file
+  gtk_builder_add_from_resource (builder, "/resources/shortcuts_window.ui", NULL);
 
   //windows
   window = GTK_WINDOW(gtk_builder_get_object(builder, "window"));
@@ -27,8 +28,12 @@ int main(int argc, char *argv[])
   gtk_window_set_transient_for(multiplot_window, window); //center multiplot window on main window
   preferences_window = GTK_WINDOW(gtk_builder_get_object(builder, "preferences_window"));
   gtk_window_set_transient_for(preferences_window, window); //center preferences window on main window
+  shortcuts_window = GTK_SHORTCUTS_WINDOW(gtk_builder_get_object(builder, "shortcuts_window"));
+  gtk_window_set_transient_for(GTK_WINDOW(shortcuts_window), window); //center shortcuts window on main window
   about_dialog = GTK_ABOUT_DIALOG(gtk_builder_get_object(builder, "about_dialog"));
   gtk_window_set_transient_for(GTK_WINDOW(about_dialog), window); //center about dialog on main window
+  main_window_accelgroup = GTK_ACCEL_GROUP(gtk_builder_get_object(builder, "main_window_accelgroup"));
+  gtk_window_add_accel_group (window, main_window_accelgroup);
   
   //header bar
   header_bar = GTK_HEADER_BAR(gtk_builder_get_object(builder, "header_bar"));
@@ -45,6 +50,7 @@ int main(int argc, char *argv[])
   spectrum_drawing_area = GTK_WIDGET(gtk_builder_get_object(builder, "spectrumdrawingarea"));
   spectrum_drag_gesture = gtk_gesture_drag_new(spectrum_drawing_area); //without this, cannot click away from menus onto the drawing area, needs further investigation
   zoom_scale = GTK_SCALE(gtk_builder_get_object(builder, "zoom_scale"));
+  shortcuts_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "shortcuts_button"));
   about_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "about_button"));
   bottom_info_text = GTK_LABEL(gtk_builder_get_object(builder, "bottom_info_text"));
   overlay_info_bar = GTK_INFO_BAR(gtk_builder_get_object(builder, "overlay_info_bar"));
@@ -90,6 +96,8 @@ int main(int argc, char *argv[])
   contract_scale = GTK_SCALE(gtk_builder_get_object(builder, "contract_scale"));
 
 
+
+
   //connect signals
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "draw", G_CALLBACK (drawSpectrumArea), NULL);
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "scroll-event", G_CALLBACK (on_spectrum_scroll), NULL);
@@ -125,6 +133,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (contract_scale), "value-changed", G_CALLBACK (on_contract_scale_changed), NULL);
   g_signal_connect (G_OBJECT (contract_scale), "button-release-event", G_CALLBACK (on_contract_scale_button_release), NULL);
   gtk_widget_set_events(GTK_WIDGET(contract_scale), gtk_widget_get_events (GTK_WIDGET(contract_scale)) | GDK_BUTTON_RELEASE_MASK);
+  g_signal_connect (G_OBJECT (shortcuts_button), "clicked", G_CALLBACK (on_shortcuts_button_clicked), NULL);
   g_signal_connect (G_OBJECT (about_button), "clicked", G_CALLBACK (on_about_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_ok_button), "clicked", G_CALLBACK (on_multiplot_ok_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_cr2), "toggled", G_CALLBACK (on_multiplot_cell_toggled), NULL);
@@ -132,10 +141,14 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (calibrate_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (multiplot_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (preferences_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect (G_OBJECT (shortcuts_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (about_dialog), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
 
-  //set attributes
-  gtk_tree_view_column_add_attribute(multiplot_column2,multiplot_cr2, "active",1);
+  //setup keyboard shortcuts
+  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_f, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_fit_button_clicked), NULL, 0));
+  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_c, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_calibrate_button_clicked), NULL, 0));
+  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_l, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(toggle_logscale), NULL, 0));
+  //gtk_widget_add_accelerator (fit_button, "clicked", main_window_accelgroup, GDK_KEY_f, (GdkModifierType)0, GTK_ACCEL_VISIBLE);
 
   //set default values
   rawdata.openedSp = 0;

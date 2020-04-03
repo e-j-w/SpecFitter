@@ -274,6 +274,11 @@ void on_append_button_clicked(GtkButton *b)
 void on_display_button_clicked(GtkButton *b)
 {
   //gtk_range_set_value(GTK_RANGE(pan_scale),(drawing.xChanFocus*100.0/S32K));
+  if(drawing.logScale){
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(logscale_button),TRUE);
+  }else{
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(logscale_button),FALSE);
+  }
   gtk_range_set_value(GTK_RANGE(contract_scale),drawing.contractFactor);
   gtk_popover_popup(display_popover); //show the popover menu
 }
@@ -634,20 +639,34 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data
 
 void on_fit_button_clicked(GtkButton *b)
 {
-  gui.fittingSp = 1;
-  memset(fitpar.fitParVal,0,sizeof(fitpar.fitParVal));
-  //set default values
-  fitpar.fitStartCh = -1;
-  fitpar.fitEndCh = -1;
-  fitpar.numFitPeaks = 0;
-  //update widgets
-  gtk_widget_set_sensitive(GTK_WIDGET(open_button),FALSE);
-  gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),FALSE);
-  gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
-  gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
-  gtk_label_set_text(overlay_info_label,"Right-click to set fit region lower and upper bounds.");
-  gtk_widget_show(GTK_WIDGET(overlay_info_bar));
-  gtk_info_bar_set_revealed(overlay_info_bar, TRUE);
+  //do some checks, since this can be activated from a keyboard shortcut
+  //spectrum must be open to fit
+  if(rawdata.openedSp){
+    //cannot be already fitting
+    if((gui.fittingSp == 0)||(gui.fittingSp == 3)){
+      //must be displaying only a single spectrum
+      if(drawing.multiplotMode < 2){
+
+        //safe to fit
+      
+        gui.fittingSp = 1;
+        memset(fitpar.fitParVal,0,sizeof(fitpar.fitParVal));
+        //set default values
+        fitpar.fitStartCh = -1;
+        fitpar.fitEndCh = -1;
+        fitpar.numFitPeaks = 0;
+        //update widgets
+        gtk_widget_set_sensitive(GTK_WIDGET(open_button),FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
+        gtk_label_set_text(overlay_info_label,"Right-click to set fit region lower and upper bounds.");
+        gtk_widget_show(GTK_WIDGET(overlay_info_bar));
+        gtk_info_bar_set_revealed(overlay_info_bar, TRUE);
+      }
+    }
+  }
+  
 }
 
 void on_fit_fit_button_clicked(GtkButton *b)
@@ -738,6 +757,11 @@ void on_preferences_cancel_button_clicked(GtkButton *b)
   g_object_set(gtk_settings_get_default(),"gtk-application-prefer-dark-theme", gui.preferDarkTheme, NULL);
   //hide the dialog
   gtk_widget_hide(GTK_WIDGET(preferences_window)); //close the multiplot window
+}
+
+void on_shortcuts_button_clicked(GtkButton *b)
+{
+  gtk_widget_show_all(GTK_WIDGET(shortcuts_window)); //show the window
 }
 
 void on_about_button_clicked(GtkButton *b)
