@@ -6,11 +6,11 @@
 
 A (1D) spectrum viewer app, with functionality inspired by the `gf3` program for gamma-ray spectroscopy in the [RadWare](https://radware.phy.ornl.gov/) software package.
 
-**NOTE**: This is still in the early stages - spectra are drawing correctly, rudimentary fitting support is in but it is not science ready yet.
+**DISCLAIMER**: This is still a work in progress - results are not guaranteed.
 
 ## Features
 
-### File format support
+### Supported file formats
 
 * **.txt** - A plaintext file of tab-separated values, where each row repesents a bin/channel and each column represents a spectrum (single column needed for 1 spectrum, 2 columns for 2, etc.).
 * **.mca** - An .mca file is simply a 2D array of integers, with the first index denoting a spectrum number (array length up to 100) and the second index denoting a bin number (array length fixed to 32768 ie. 2<sup>15</sup>).
