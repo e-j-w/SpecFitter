@@ -660,9 +660,8 @@ void on_fit_button_clicked(GtkButton *b)
         gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),FALSE);
         gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
         gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
-        gtk_label_set_text(overlay_info_label,"Right-click to set fit region lower and upper bounds.");
-        gtk_widget_show(GTK_WIDGET(overlay_info_bar));
-        gtk_info_bar_set_revealed(overlay_info_bar, TRUE);
+        gtk_label_set_text(revealer_info_label,"Right-click to set fit region lower and upper bounds.");
+        gtk_revealer_set_reveal_child(revealer_info_panel, TRUE);
       }
     }
   }
@@ -678,8 +677,7 @@ void on_fit_fit_button_clicked(GtkButton *b)
   gtk_widget_set_sensitive(GTK_WIDGET(open_button),TRUE);
   gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
   gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
-  gtk_info_bar_set_revealed(overlay_info_bar, FALSE);
-  gtk_widget_hide(GTK_WIDGET(overlay_info_bar));
+  gtk_revealer_set_reveal_child(revealer_info_panel, FALSE);
 }
 
 void on_fit_cancel_button_clicked(GtkButton *b)
@@ -689,8 +687,7 @@ void on_fit_cancel_button_clicked(GtkButton *b)
   gtk_widget_set_sensitive(GTK_WIDGET(open_button),TRUE);
   gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
   gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
-  gtk_info_bar_set_revealed(overlay_info_bar, FALSE);
-  gtk_widget_hide(GTK_WIDGET(overlay_info_bar));
+  gtk_revealer_set_reveal_child(revealer_info_panel, FALSE);
 }
 
 void on_toggle_discard_empty(GtkToggleButton *togglebutton, gpointer user_data)

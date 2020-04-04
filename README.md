@@ -49,7 +49,7 @@ This will place the `jf3` binary in `/usr/bin` and a desktop entry file in `/usr
 
 ```sudo make uninstall```
 
-This build process has been tested on CentOS 7 and Arch Linux (as of March 2020) under the GNOME desktop environment.
+This build process has been tested on CentOS 7 and Arch Linux (as of April 2020) under the GNOME desktop environment.
 
 ### Build dependencies
 

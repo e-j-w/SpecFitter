@@ -53,8 +53,8 @@ int main(int argc, char *argv[])
   shortcuts_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "shortcuts_button"));
   about_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "about_button"));
   bottom_info_text = GTK_LABEL(gtk_builder_get_object(builder, "bottom_info_text"));
-  overlay_info_bar = GTK_INFO_BAR(gtk_builder_get_object(builder, "overlay_info_bar"));
-  overlay_info_label = GTK_LABEL(gtk_builder_get_object(builder, "overlay_info_label"));
+  revealer_info_panel = GTK_REVEALER(gtk_builder_get_object(builder, "revealer_info_panel"));
+  revealer_info_label = GTK_LABEL(gtk_builder_get_object(builder, "revealer_info_label"));
   fit_cancel_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_cancel_button"));
   fit_fit_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_fit_button"));
 
@@ -148,6 +148,7 @@ int main(int argc, char *argv[])
   gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_f, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_fit_button_clicked), NULL, 0));
   gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_c, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_calibrate_button_clicked), NULL, 0));
   gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_l, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(toggle_logscale), NULL, 0));
+  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_o, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_open_button_clicked), NULL, 0));
 
   //set attributes
   gtk_tree_view_column_add_attribute(multiplot_column2,multiplot_cr2, "active",1);
@@ -210,8 +211,7 @@ int main(int argc, char *argv[])
   gtk_widget_set_sensitive(GTK_WIDGET(zoom_scale),FALSE);
 
   //hide widgets that can't be seen yet
-  gtk_info_bar_set_revealed(overlay_info_bar,FALSE);
-  gtk_widget_hide(GTK_WIDGET(overlay_info_bar));
+  gtk_revealer_set_reveal_child(revealer_info_panel, FALSE);
 
   //setup UI element appearance at startup
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autoscale_button), drawing.autoScale);

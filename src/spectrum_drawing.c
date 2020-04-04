@@ -272,7 +272,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
         //check if both limits have been set
         if((fitpar.fitStartCh >= 0)&&(fitpar.fitEndCh >=0)){
           printf("Fit limits: channel %i through %i\n",fitpar.fitStartCh,fitpar.fitEndCh);
-          gtk_label_set_text(overlay_info_label,"Right-click at approximate peak positions.");
+          gtk_label_set_text(revealer_info_label,"Right-click at approximate peak positions.");
           gui.fittingSp = 2;
         }
         gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));

@@ -48,8 +48,8 @@ GtkAdjustment *spectrum_selector_adjustment, *contract_adjustment;
 GtkWidget *spectrum_drawing_area;
 GtkGesture *spectrum_drag_gesture;
 //spectrum overlay
-GtkInfoBar *overlay_info_bar;
-GtkLabel *overlay_info_label;
+GtkRevealer *revealer_info_panel;
+GtkLabel *revealer_info_label;
 GtkButton *fit_cancel_button, *fit_fit_button;
 //Calibration dialog
 GtkWidget *calibrate_ok_button, *remove_calibration_button;
