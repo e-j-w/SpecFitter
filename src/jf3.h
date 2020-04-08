@@ -70,7 +70,7 @@ GtkComboBoxText *multiplot_mode_combobox;
 //preferences dialog
 GtkModelButton *preferences_button;
 GtkWindow *preferences_window;
-GtkCheckButton *discard_empty_checkbutton, *bin_errors_checkbutton, *dark_theme_checkbutton, *spectrum_label_checkbutton, *autozoom_checkbutton;
+GtkCheckButton *discard_empty_checkbutton, *bin_errors_checkbutton, *round_errors_checkbutton, *dark_theme_checkbutton, *spectrum_label_checkbutton, *autozoom_checkbutton;
 GtkButton *preferences_apply_button, *preferences_cancel_button;
 //shortcuts window
 GtkModelButton *shortcuts_button;
@@ -91,6 +91,7 @@ struct {
   int deferSpSelChange;
   int deferToggleRow;
   int showBinErrors; //0=don't show, 1=show
+  int roundErrors; //0=don't round, 1=round
   int autoZoom; //0=don't autozoom, 1=autozoom
   int preferDarkTheme; //0=prefer light, 1=prefer dark
 } gui;

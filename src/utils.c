@@ -1,8 +1,8 @@
 /* J. Williams, 2020 */
 
-//get a formatted string with a value and its uncertainty, 
-//properly rounded using the '20 rule' for reporting uncertainties
-void getFormattedValAndUncertainty(const double val, const double err, char *str, const int strLength, const int showErr){
+//get a formatted string with a value and its uncertainty 
+//if roundErr=1, error will beproperly rounded using the '20 rule' for reporting uncertainties
+void getFormattedValAndUncertainty(const double val, const double err, char *str, const int strLength, const int showErr, const int roundErr){
 
   if(err < 0){
     //invalid error
@@ -41,10 +41,12 @@ void getFormattedValAndUncertainty(const double val, const double err, char *str
 
   //round the value based on the sig fig
   valc /= pow(10,sigf);
-  valc = round(valc);
+  if(roundErr)
+    valc = round(valc);
 
   //get the first digits of the error
-  errc = round(errc);
+  if(roundErr)
+    errc = round(errc);
 
   //printf("sigf: %i, errc = %f\n",sigf,errc);
 

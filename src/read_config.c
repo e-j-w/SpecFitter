@@ -48,6 +48,13 @@ int readConfigFile(FILE *file)
 					gui.showBinErrors = 0;
 				}
 			}
+			if(strcmp(par,"round_errors") == 0){
+				if(strcmp(val,"yes") == 0){
+					gui.roundErrors = 1;
+				}else{
+					gui.roundErrors = 0;
+				}
+			}
 			if(strcmp(par,"prefer_dark_theme") == 0){
 				if(strcmp(val,"yes") == 0){
 					gui.preferDarkTheme = 1;
@@ -122,6 +129,11 @@ int writeConfigFile(FILE *file)
 		fprintf(file,"show_bin_errors=yes\n");
 	}else{
 		fprintf(file,"show_bin_errors=no\n");
+	}
+	if(gui.roundErrors == 1){
+		fprintf(file,"round_errors=yes\n");
+	}else{
+		fprintf(file,"round_errors=no\n");
 	}
 	if(gui.preferDarkTheme == 1){
 		fprintf(file,"prefer_dark_theme=yes\n");

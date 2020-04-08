@@ -378,11 +378,11 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
             }
             for(i=0;i<(drawing.numMultiplotSp-1);i++){
               binVal = getDispSpBinVal(i,cursorChanRounded-drawing.lowerLimit);
-              getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,gui.showBinErrors);
+              getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,gui.showBinErrors,gui.roundErrors);
               statusBarLabelp += snprintf(statusBarLabelp,17," %s,", binValStr);
             }
             binVal = getDispSpBinVal(drawing.numMultiplotSp-1,cursorChanRounded-drawing.lowerLimit);
-            getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,gui.showBinErrors);
+            getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,gui.showBinErrors,gui.roundErrors);
             binValStr[15] = '\0'; //truncate string (staying safe with sprintf, working around compiler warning when using snprintf instead)
             statusBarLabelp += sprintf(statusBarLabelp," %s", binValStr);
             break;
@@ -391,7 +391,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
           default:
             //single plot
             binVal = getDispSpBinVal(0,cursorChanRounded-drawing.lowerLimit);
-            getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,gui.showBinErrors);
+            getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,gui.showBinErrors,gui.roundErrors);
             if(calpar.calMode == 1){
               int cursorChanEnd = cursorChanRounded + drawing.contractFactor;
               float cal_lowerChanLimit = calpar.calpar0 + calpar.calpar1*cursorChanRounded + calpar.calpar2*cursorChanRounded*cursorChanRounded;
@@ -417,9 +417,9 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
             float calCentrErr = calpar.calpar0 + calpar.calpar1*fitpar.fitParErr[7+(3*highlightedPeak)] + calpar.calpar2*fitpar.fitParErr[7+(3*highlightedPeak)]*fitpar.fitParErr[7+(3*highlightedPeak)];
             float calWidthErr = calpar.calpar0 + calpar.calpar1*fitpar.fitParErr[8+(3*highlightedPeak)] + calpar.calpar2*fitpar.fitParErr[8+(3*highlightedPeak)]*fitpar.fitParErr[8+(3*highlightedPeak)];
             char fitParStr[3][50];
-            getFormattedValAndUncertainty(evalPeakArea(highlightedPeak),evalPeakAreaErr(highlightedPeak),fitParStr[0],50,1);
-            getFormattedValAndUncertainty(calCentr,calCentrErr,fitParStr[1],50,1);
-            getFormattedValAndUncertainty(2.35482*calWidth,2.35482*calWidthErr,fitParStr[2],50,1);
+            getFormattedValAndUncertainty(evalPeakArea(highlightedPeak),evalPeakAreaErr(highlightedPeak),fitParStr[0],50,1,gui.roundErrors);
+            getFormattedValAndUncertainty(calCentr,calCentrErr,fitParStr[1],50,1,gui.roundErrors);
+            getFormattedValAndUncertainty(2.35482*calWidth,2.35482*calWidthErr,fitParStr[2],50,1,gui.roundErrors);
             snprintf(statusBarLabel,256,"Area: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
           }else{
             snprintf(statusBarLabel,256,"Area: %0.3f, Centroid: %0.3f, FWHM: %0.3f",evalPeakArea(highlightedPeak),calCentr,2.35482*calWidth);
@@ -427,9 +427,9 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
         }else{
           if(fitpar.errFound){
             char fitParStr[3][50];
-            getFormattedValAndUncertainty(evalPeakArea(highlightedPeak),evalPeakAreaErr(highlightedPeak),fitParStr[0],50,1);
-            getFormattedValAndUncertainty(fitpar.fitParVal[7+(3*highlightedPeak)],fitpar.fitParErr[7+(3*highlightedPeak)],fitParStr[1],50,1);
-            getFormattedValAndUncertainty(2.35482*fitpar.fitParVal[8+(3*highlightedPeak)],2.35482*fitpar.fitParErr[8+(3*highlightedPeak)],fitParStr[2],50,1);
+            getFormattedValAndUncertainty(evalPeakArea(highlightedPeak),evalPeakAreaErr(highlightedPeak),fitParStr[0],50,1,gui.roundErrors);
+            getFormattedValAndUncertainty(fitpar.fitParVal[7+(3*highlightedPeak)],fitpar.fitParErr[7+(3*highlightedPeak)],fitParStr[1],50,1,gui.roundErrors);
+            getFormattedValAndUncertainty(2.35482*fitpar.fitParVal[8+(3*highlightedPeak)],2.35482*fitpar.fitParErr[8+(3*highlightedPeak)],fitParStr[2],50,1,gui.roundErrors);
             snprintf(statusBarLabel,256,"Area: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
           }else{
             snprintf(statusBarLabel,256,"Area: %0.3f, Centroid: %0.3f, FWHM: %0.3f",evalPeakArea(highlightedPeak),fitpar.fitParVal[7+(3*highlightedPeak)],2.35482*fitpar.fitParVal[8+(3*highlightedPeak)]);

@@ -704,6 +704,13 @@ void on_toggle_bin_errors(GtkToggleButton *togglebutton, gpointer user_data)
   else
     gui.showBinErrors=0;
 }
+void on_toggle_round_errors(GtkToggleButton *togglebutton, gpointer user_data)
+{
+  if(gtk_toggle_button_get_active(togglebutton))
+    gui.roundErrors=1;
+  else
+    gui.roundErrors=0;
+}
 void on_toggle_dark_theme(GtkToggleButton *togglebutton, gpointer user_data)
 {
   if(gtk_toggle_button_get_active(togglebutton))
@@ -734,6 +741,7 @@ void on_preferences_button_clicked(GtkButton *b)
 {
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(discard_empty_checkbutton),rawdata.dropEmptySpectra);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bin_errors_checkbutton),gui.showBinErrors);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(round_errors_checkbutton),gui.roundErrors);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dark_theme_checkbutton),gui.preferDarkTheme);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autozoom_checkbutton),gui.autoZoom);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_label_checkbutton),gui.drawSpLabels);

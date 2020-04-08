@@ -80,6 +80,7 @@ int main(int argc, char *argv[])
   preferences_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "preferences_button"));
   discard_empty_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "discard_empty_checkbutton"));
   bin_errors_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "bin_errors_checkbutton"));
+  round_errors_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "round_errors_checkbutton"));
   autozoom_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "autozoom_checkbutton"));
   dark_theme_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "dark_theme_checkbutton"));
   spectrum_label_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "spectrum_label_checkbutton"));
@@ -119,6 +120,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (cursor_draw_button), "toggled", G_CALLBACK (on_toggle_cursor), NULL);
   g_signal_connect (G_OBJECT (discard_empty_checkbutton), "toggled", G_CALLBACK (on_toggle_discard_empty), NULL);
   g_signal_connect (G_OBJECT (bin_errors_checkbutton), "toggled", G_CALLBACK (on_toggle_bin_errors), NULL);
+  g_signal_connect (G_OBJECT (round_errors_checkbutton), "toggled", G_CALLBACK (on_toggle_round_errors), NULL);
   g_signal_connect (G_OBJECT (dark_theme_checkbutton), "toggled", G_CALLBACK (on_toggle_dark_theme), NULL);
   g_signal_connect (G_OBJECT (spectrum_label_checkbutton), "toggled", G_CALLBACK (on_toggle_spectrum_label), NULL);
   g_signal_connect (G_OBJECT (autozoom_checkbutton), "toggled", G_CALLBACK (on_toggle_autozoom), NULL);
@@ -190,6 +192,7 @@ int main(int argc, char *argv[])
   gui.drawSpCursor = -1; //disabled by default
   gui.drawSpLabels = 1; //enabled by default
   gui.showBinErrors = 1;
+  gui.roundErrors = 0;
   gui.autoZoom = 1;
   gui.preferDarkTheme = 0;
   fitpar.fitStartCh = -1;
