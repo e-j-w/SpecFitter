@@ -384,6 +384,29 @@ int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFra
 }
 
 
+//do some math (assuming a Gaussian peak shape) to get a better initial estimate of the peak width
+double widthGuess(const double centroidCh, const double widthInit){
+
+  double centroidYVal = getDispSpBinVal(0,centroidCh-drawing.lowerLimit);
+  centroidYVal -= fitpar.fitParVal[0] + fitpar.fitParVal[1]*centroidCh;
+  double HWInit = 2.35482*widthInit/2.; //initial half-width
+  double FWHighEdgeVal = getDispSpBinVal(0,centroidCh+HWInit-drawing.lowerLimit);
+  FWHighEdgeVal -= fitpar.fitParVal[0] + fitpar.fitParVal[1]*(centroidCh+HWInit);
+  double FWLowEdgeVal = getDispSpBinVal(0,centroidCh-HWInit-drawing.lowerLimit);
+  FWLowEdgeVal -= fitpar.fitParVal[0] + fitpar.fitParVal[1]*(centroidCh-HWInit);
+  
+  if(centroidYVal != 0.){
+    //get average ratio of half-values from centroid y-value
+    double avgRatio = (fabs(centroidYVal/FWHighEdgeVal) + fabs(centroidYVal/FWLowEdgeVal))/2.;
+    if(avgRatio > 1.){
+      return HWInit*2./(2.*sqrt(2.*log(avgRatio)));
+    }  
+  }
+  
+  return widthInit; //give up
+
+}
+
 int performGausFit(){
 
   int ndf = (int)((fitpar.fitEndCh - fitpar.fitStartCh)/(1.0*drawing.contractFactor)) - (3+(3*fitpar.numFitPeaks));
@@ -409,7 +432,7 @@ int performGausFit(){
   for(i=0;i<fitpar.numFitPeaks;i++){
     fitpar.fitParVal[6+(3*i)] = getDispSpBinVal(0,fitpar.fitPeakInitGuess[i]-drawing.lowerLimit) - fitpar.fitParVal[0] - fitpar.fitParVal[1]*fitpar.fitPeakInitGuess[i];
     fitpar.fitParVal[7+(3*i)] = fitpar.fitPeakInitGuess[i];
-    fitpar.fitParVal[8+(3*i)] = getFWHM(fitpar.fitPeakInitGuess[i],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482;
+    fitpar.fitParVal[8+(3*i)] = widthGuess(fitpar.fitPeakInitGuess[i],getFWHM(fitpar.fitPeakInitGuess[i],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482);
   }
 
   //printf("Initial guesses: %f %f %f %f %f %f\n",fitpar.fitParVal[0],fitpar.fitParVal[1],fitpar.fitParVal[2],fitpar.fitParVal[6],fitpar.fitParVal[7],fitpar.fitParVal[8]);
