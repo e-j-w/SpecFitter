@@ -15,7 +15,6 @@
 #include <libgen.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <pthread.h>
 
 #include "lin_eq_solver.h"
 
@@ -141,9 +140,6 @@ struct {
   int numFitPeaks; //number of peaks to fit
   char errFound; //whether or not paramter errors have been found
 } fitpar;
-
-/* Forward declarations */
-void update_gui_fit_state(); //see gui.c
 
 #endif
 

@@ -3,6 +3,62 @@
 //forward declarations
 float getDispSpBinVal(int dispSpNum, int bin);
 
+//update the gui state while/after fitting
+gboolean update_gui_fit_state(){
+  switch(gui.fittingSp){
+    case 5:
+      gtk_widget_set_sensitive(GTK_WIDGET(open_button),TRUE);
+      if(rawdata.openedSp)
+        gtk_widget_set_sensitive(GTK_WIDGET(append_button),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(contract_scale),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),TRUE);
+      gtk_widget_hide(GTK_WIDGET(fit_spinner));
+      gtk_revealer_set_reveal_child(revealer_info_panel, FALSE);
+      gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw to show the fit
+      break;
+    case 4:
+      gtk_label_set_text(revealer_info_label,"Refining fit...");
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
+      break;
+    case 3:
+      gtk_label_set_text(revealer_info_label,"Fitting...");
+      gtk_widget_show(GTK_WIDGET(fit_spinner));
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(contract_scale),FALSE);
+      gtk_revealer_set_reveal_child(revealer_info_panel, TRUE);
+      break;
+    case 2:
+      gtk_label_set_text(revealer_info_label,"Right-click at approximate peak positions.");
+      break;
+    case 1:
+      gtk_widget_set_sensitive(GTK_WIDGET(open_button),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(append_button),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_button),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
+      gtk_label_set_text(revealer_info_label,"Right-click to set fit region lower and upper bounds.");
+      gtk_revealer_set_reveal_child(revealer_info_panel, TRUE);
+      break;
+    case 0:
+    default:
+      gtk_widget_set_sensitive(GTK_WIDGET(open_button),TRUE);
+      if(rawdata.openedSp)
+        gtk_widget_set_sensitive(GTK_WIDGET(append_button),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),TRUE);
+      gtk_widget_hide(GTK_WIDGET(fit_spinner));
+      gtk_revealer_set_reveal_child(revealer_info_panel, FALSE);
+      gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw to hide any fit
+      break;
+  }
+  return FALSE; //stop running
+}
 
 double getFWHM(double chan, double widthF, double widthG, double widthH){
   return sqrt(widthF*widthF + widthG*widthG*(chan/1000.) + widthH*widthH*(chan/1000.)*(chan/1000.));
@@ -384,8 +440,8 @@ int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFra
 }
 
 
-//fitting routine to run on its own thread
-void* performGausFit(void *threadid){
+//fitting routine
+void performGausFit(){
   int i;
   lin_eq_type linEq;
 
@@ -398,13 +454,13 @@ void* performGausFit(void *threadid){
   }else if (numNLIter >= numNLIterTry){
     printf("Fit did not converge after %i iterations.  Continuing...\n",numNLIter);
     gui.fittingSp = 4;
-    update_gui_fit_state();
+    g_idle_add(update_gui_fit_state,NULL);
     nonLinearizedGausFit(numNLIterTry*10, 0.0001, &linEq);
   }else{
     printf("WARNING: failed fit, iteration %i.\n",numNLIter);
     gui.fittingSp = 0;
-    update_gui_fit_state();
-    pthread_exit(NULL);
+    g_idle_add(update_gui_fit_state,NULL);
+    return;
   }
 
   //get fit parameter uncertainties
@@ -443,8 +499,12 @@ void* performGausFit(void *threadid){
   }
   printf("\n");
   gui.fittingSp = 5;
-  update_gui_fit_state();
-  pthread_exit(NULL);
+  g_idle_add(update_gui_fit_state,NULL);
+}
+gpointer performGausFitThreaded(){
+  performGausFit();
+  g_thread_exit(NULL);
+  return NULL;
 }
 
 
@@ -480,7 +540,7 @@ int startGausFit(){
   }
 
   gui.fittingSp = 3;
-  update_gui_fit_state();
+  g_idle_add(update_gui_fit_state,NULL);
 
   int i;
   fitpar.errFound = 0;
@@ -503,11 +563,9 @@ int startGausFit(){
   }
 
   //printf("Initial guesses: %f %f %f %f %f %f\n",fitpar.fitParVal[0],fitpar.fitParVal[1],fitpar.fitParVal[2],fitpar.fitParVal[6],fitpar.fitParVal[7],fitpar.fitParVal[8]);
-  pthread_t fitThread;
-  int err = pthread_create(&fitThread, NULL, performGausFit, NULL);
-  if(err){
-    printf("WARNING: Couldn't initialize thread for fit.\n");
-    return 0;
+  if (g_thread_try_new("fitthread", performGausFitThreaded, NULL, NULL) == NULL){
+    printf("WARNING: Couldn't initialize thread for fit, will try on the main thread.\n");
+    performGausFit(); //try non-threaded fit
   }
   
   return 1;
