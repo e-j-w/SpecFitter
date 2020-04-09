@@ -1387,6 +1387,18 @@ Author: Jonathan Williams
                 <property name="margin_bottom">6</property>
                 <property name="spacing">10</property>
                 <child>
+                  <object class="GtkSpinner" id="fit_spinner">
+                    <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="active">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkLabel" id="revealer_info_label">
                     <property name="width_request">400</property>
                     <property name="visible">True</property>
@@ -1397,7 +1409,7 @@ Author: Jonathan Williams
                   <packing>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
-                    <property name="position">0</property>
+                    <property name="position">1</property>
                   </packing>
                 </child>
                 <child>

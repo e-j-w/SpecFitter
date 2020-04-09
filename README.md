@@ -6,7 +6,7 @@
 
 A (1D) spectrum viewer app, with functionality inspired by the `gf3` program for gamma-ray spectroscopy in the [RadWare](https://radware.phy.ornl.gov/) software package.
 
-**DISCLAIMER**: This is still a work in progress - results are not guaranteed.
+**DISCLAIMER**: This is a work in progress and under active development - results are not guaranteed.
 
 ## Features
 
@@ -33,7 +33,7 @@ Conversion codes for some of these data formats are available in the [FileConvTo
 
 ### Peak fitting
 
-* Fit multiple Gaussian peak shapes on quadratic background (WIP).
+* Fit multiple Gaussian peak shapes on quadratic background (iterative least-squares fitter).
 
 ## How to build
 

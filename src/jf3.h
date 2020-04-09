@@ -15,6 +15,7 @@
 #include <libgen.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <pthread.h>
 
 #include "lin_eq_solver.h"
 
@@ -47,10 +48,11 @@ GtkAdjustment *spectrum_selector_adjustment, *contract_adjustment;
 //spectrum drawing
 GtkWidget *spectrum_drawing_area;
 GtkGesture *spectrum_drag_gesture;
-//spectrum overlay
+//fit overlay/revealer
 GtkRevealer *revealer_info_panel;
 GtkLabel *revealer_info_label;
 GtkButton *fit_cancel_button, *fit_fit_button;
+GtkSpinner *fit_spinner;
 //Calibration dialog
 GtkWidget *calibrate_ok_button, *remove_calibration_button;
 GtkWindow *calibrate_window;
@@ -80,30 +82,30 @@ GtkBuilder *builder;
 
 //non-GTK GUI globals
 struct {
-  int draggingSp; //0 if no drag motion, 1 if dragging
+  char draggingSp; //0 if no drag motion, 1 if dragging
   int dragstartul, dragstartll; //click and drag position storage parameters
   float dragStartX; //start cursor position when dragging
   float cursorPosX, cursorPosY; //cursor position
-  int drawSpCursor; //0 = don't draw vertical cursor on spectrum, 1=draw, -1=drawing disabled
-  int drawSpLabels; //0 = don't draw labels, 1 = draw labels
-  int fittingSp; //0=not fitting, 1=selecting limits, 2=selecting peaks, 3=fitted (display fit)
-  int deferFit; //0=no action, 1=fit is being deferred until a later time
+  char drawSpCursor; //0 = don't draw vertical cursor on spectrum, 1=draw, -1=drawing disabled
+  char drawSpLabels; //0 = don't draw labels, 1 = draw labels
+  char fittingSp; //0=not fitting, 1=selecting limits, 2=selecting peaks, 3=fitting, 4=refining fit, 5=fitted (display fit)
+  char deferFit; //0=no action, 1=fit is being deferred until a later time
   int deferSpSelChange;
   int deferToggleRow;
-  int showBinErrors; //0=don't show, 1=show
-  int roundErrors; //0=don't round, 1=round
-  int autoZoom; //0=don't autozoom, 1=autozoom
-  int preferDarkTheme; //0=prefer light, 1=prefer dark
+  char showBinErrors; //0=don't show, 1=show
+  char roundErrors; //0=don't round, 1=round
+  char autoZoom; //0=don't autozoom, 1=autozoom
+  char preferDarkTheme; //0=prefer light, 1=prefer dark
 } gui;
 
 //imported data globals
 struct {
   double hist[NSPECT][S32K]; //spectrum histogram data
   char histComment[NSPECT][256]; //spectrum description/comment
-  int openedSp; //0=not opened, 1=opened
+  char openedSp; //0=not opened, 1=opened
   int numSpOpened; //number of spectra in the opened file(s)
   int numFilesOpened; //number of files containing spectra opened
-  int dropEmptySpectra; //0=don't discard, 1=discard
+  char dropEmptySpectra; //0=don't discard, 1=discard
 } rawdata;
 
 //spectrum drawing globals
@@ -115,7 +117,7 @@ struct {
   int logScale; //0=draw in linear scale, 1=draw in log scale (y-axis)
   float scaleLevelMax[MAX_DISP_SP], scaleLevelMin[MAX_DISP_SP]; //the y scale values, ie. the maximum and minimum values to show on the y axis
   int contractFactor; //the number of channels per bin (default=1)
-  int multiplotMode; //0=no multiplot, 1=summed spectra, 2=overlay spectra (common scaling), 3=overlay spectra (independent scaling), 4=stacked view
+  char multiplotMode; //0=no multiplot, 1=summed spectra, 2=overlay spectra (common scaling), 3=overlay spectra (independent scaling), 4=stacked view
   int numMultiplotSp; //number of spectra to show in multiplot mode
   int multiPlots[NSPECT]; //indices of all the spectra to show in multiplot mode
   float spColors[MAX_DISP_SP*3];
@@ -123,7 +125,7 @@ struct {
 
 //calibration globals
 struct {
-  int calMode; //0=no calibration, 1=calibration enabled
+  char calMode; //0=no calibration, 1=calibration enabled
   float calpar0,calpar1,calpar2; //0th, 1st, and 2nd order calibration parameters
   char calUnit[16]; //name of the unit used for calibration
 } calpar;
@@ -131,13 +133,17 @@ struct {
 //fitting globals
 struct {
   int fitStartCh, fitEndCh; //upper and lower channel bounds for fitting
+  int ndf; //DOF for fit
   float fitPeakInitGuess[MAX_FIT_PK]; //initial guess of peak positions, in channels
   double widthFGH[3]; //F,G,H parameters used to evaluate widths
   double fitParVal[6+(3*MAX_FIT_PK)]; //parameter values found by the fitter
   double fitParErr[6+(3*MAX_FIT_PK)]; //errors in parameter values
   int numFitPeaks; //number of peaks to fit
-  int errFound; //whether or not paramter errors have been found
+  char errFound; //whether or not paramter errors have been found
 } fitpar;
+
+/* Forward declarations */
+void update_gui_fit_state(); //see gui.c
 
 #endif
 

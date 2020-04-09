@@ -232,7 +232,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
     //right mouse button being pressed
     float cursorChan = getCursorChannel(event->x, event->y);
     switch(gui.fittingSp){
-      case 3:
+      case 5:
         //fit being displayed, clear it on right click
         gui.fittingSp = 0;
         gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
@@ -250,8 +250,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
         if(fitpar.numFitPeaks >= MAX_FIT_PK){
           printf("Maximum number of fit peaks specified.\n");
           fitpar.numFitPeaks = MAX_FIT_PK;
-          performGausFit(); //force fit to proceed
-          gui.fittingSp = 3; //force fit to proceed
+          startGausFit(); //force fit to proceed
         }
         gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
         break;
@@ -272,8 +271,8 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
         //check if both limits have been set
         if((fitpar.fitStartCh >= 0)&&(fitpar.fitEndCh >=0)){
           printf("Fit limits: channel %i through %i\n",fitpar.fitStartCh,fitpar.fitEndCh);
-          gtk_label_set_text(revealer_info_label,"Right-click at approximate peak positions.");
           gui.fittingSp = 2;
+          update_gui_fit_state();
         }
         gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
         break;
@@ -329,7 +328,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
   if(cursorChan >= 0){
 
     int highlightedPeak = -1;
-    if(gui.fittingSp == 3){
+    if(gui.fittingSp == 5){
       //check if the cursor is over a peak
       int i;
       for(i=0;i<fitpar.numFitPeaks;i++){
@@ -1051,7 +1050,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   }
 
   //draw fit
-  if(gui.fittingSp == 3){
+  if(gui.fittingSp == 5){
     if((drawing.lowerLimit < fitpar.fitEndCh)&&(drawing.upperLimit > fitpar.fitStartCh)){
       cairo_set_line_width(cr, 3.0);
       cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
@@ -1308,7 +1307,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
     }
 
     //draw peak position indicators
-    if(gui.fittingSp == 2){
+    if((gui.fittingSp >= 2)&&(gui.fittingSp < 5)){
       //put markers at guessed positions
       cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
       cairo_set_line_width(cr, 2.0);
@@ -1319,7 +1318,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
         cairo_stroke_preserve(cr);
         cairo_fill(cr);
       }
-    }else if(gui.fittingSp == 3){
+    }else if(gui.fittingSp == 5){
       //put markers at fitted positions
       cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
       cairo_set_line_width(cr, 2.0);

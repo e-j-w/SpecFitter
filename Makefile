@@ -7,7 +7,7 @@ CFLAGS = -I. -I./src/lin_eq_solver -O3 -Wall -Wshadow -Wunreachable-code -std=c9
 all: lin_eq_solver jf3-resources.c jf3
 
 jf3: src/jf3.c src/jf3.h src/read_data.c src/read_config.c src/fit_data.c src/spectrum_drawing.c src/utils.c jf3-resources.c src/lin_eq_solver/lin_eq_solver.o
-	gcc src/jf3.c $(CFLAGS) -lm `pkg-config --cflags --libs gtk+-3.0` -export-dynamic -o jf3 src/lin_eq_solver/lin_eq_solver.o
+	gcc src/jf3.c $(CFLAGS) -lm -lpthread `pkg-config --cflags --libs gtk+-3.0` -export-dynamic -o jf3 src/lin_eq_solver/lin_eq_solver.o
 	rm jf3-resources.c
 
 jf3-resources.c: data/jf3.gresource.xml data/jf3.glade $(resources)

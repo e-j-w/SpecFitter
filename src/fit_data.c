@@ -384,73 +384,27 @@ int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFra
 }
 
 
-//do some math (assuming a Gaussian peak shape) to get a better initial estimate of the peak width
-double widthGuess(const double centroidCh, const double widthInit){
-
-  double centroidYVal = getDispSpBinVal(0,centroidCh-drawing.lowerLimit);
-  centroidYVal -= fitpar.fitParVal[0] + fitpar.fitParVal[1]*centroidCh;
-  double HWInit = 2.35482*widthInit/2.; //initial half-width
-  double FWHighEdgeVal = getDispSpBinVal(0,centroidCh+HWInit-drawing.lowerLimit);
-  FWHighEdgeVal -= fitpar.fitParVal[0] + fitpar.fitParVal[1]*(centroidCh+HWInit);
-  double FWLowEdgeVal = getDispSpBinVal(0,centroidCh-HWInit-drawing.lowerLimit);
-  FWLowEdgeVal -= fitpar.fitParVal[0] + fitpar.fitParVal[1]*(centroidCh-HWInit);
-  
-  if(centroidYVal != 0.){
-    //get average ratio of half-values from centroid y-value
-    double avgRatio = (fabs(centroidYVal/FWHighEdgeVal) + fabs(centroidYVal/FWLowEdgeVal))/2.;
-    if(avgRatio > 1.){
-      return HWInit*2./(2.*sqrt(2.*log(avgRatio)));
-    }  
-  }
-  
-  return widthInit; //give up
-
-}
-
-int performGausFit(){
-
-  int ndf = (int)((fitpar.fitEndCh - fitpar.fitStartCh)/(1.0*drawing.contractFactor)) - (3+(3*fitpar.numFitPeaks));
-  if(ndf <= 0){
-    printf("Not enough degrees of freedom to fit!\n");
-    return 0;
-  }
-
+//fitting routine to run on its own thread
+void* performGausFit(void *threadid){
   int i;
-  fitpar.errFound = 0;
-
-  //width parameters
-  fitpar.widthFGH[0] = 3.;
-  fitpar.widthFGH[1] = 2.;
-  fitpar.widthFGH[2] = 0.;
-
-  //assign initial guesses for background
-  fitpar.fitParVal[0] = (getDispSpBinVal(0,fitpar.fitStartCh-drawing.lowerLimit) + getDispSpBinVal(0,fitpar.fitEndCh-drawing.lowerLimit))/2.0;
-  fitpar.fitParVal[1] = (getDispSpBinVal(0,fitpar.fitEndCh-drawing.lowerLimit) - getDispSpBinVal(0,fitpar.fitStartCh-drawing.lowerLimit))/(fitpar.fitEndCh - fitpar.fitStartCh);
-  fitpar.fitParVal[2] = 0.0;
-
-  //assign initial guesses for non-linear params
-  for(i=0;i<fitpar.numFitPeaks;i++){
-    fitpar.fitParVal[6+(3*i)] = getDispSpBinVal(0,fitpar.fitPeakInitGuess[i]-drawing.lowerLimit) - fitpar.fitParVal[0] - fitpar.fitParVal[1]*fitpar.fitPeakInitGuess[i];
-    fitpar.fitParVal[7+(3*i)] = fitpar.fitPeakInitGuess[i];
-    fitpar.fitParVal[8+(3*i)] = widthGuess(fitpar.fitPeakInitGuess[i],getFWHM(fitpar.fitPeakInitGuess[i],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482);
-  }
-
-  //printf("Initial guesses: %f %f %f %f %f %f\n",fitpar.fitParVal[0],fitpar.fitParVal[1],fitpar.fitParVal[2],fitpar.fitParVal[6],fitpar.fitParVal[7],fitpar.fitParVal[8]);
-
   lin_eq_type linEq;
 
-
   //do non-linearized fit
-  int numNLIterTry = 500;
+  int numNLIterTry = 50;
   int numNLIter = nonLinearizedGausFit(numNLIterTry, 0.0001, &linEq);
   if(numNLIter == -1){
     printf("Non-linear fit converged.\n");
     fitpar.errFound = getParameterErrors(&linEq);
   }else if (numNLIter >= numNLIterTry){
-    printf("Fit did not converge after %i iterations.  Giving up...\n",numNLIter);
+    printf("Fit did not converge after %i iterations.  Continuing...\n",numNLIter);
+    gui.fittingSp = 4;
+    update_gui_fit_state();
+    nonLinearizedGausFit(numNLIterTry*10, 0.0001, &linEq);
   }else{
     printf("WARNING: failed fit, iteration %i.\n",numNLIter);
-    return 0;
+    gui.fittingSp = 0;
+    update_gui_fit_state();
+    pthread_exit(NULL);
   }
 
   //get fit parameter uncertainties
@@ -483,11 +437,78 @@ int performGausFit(){
     }
   }
     
-  printf("\nFit result - chisq/ndf: %f\nA: %f +/- %f, B: %f +/- %f, C: %f +/- %f\n",getFitChisq()/(1.0*ndf),fitpar.fitParVal[0],fitpar.fitParErr[0],fitpar.fitParVal[1],fitpar.fitParErr[1],fitpar.fitParVal[2],fitpar.fitParErr[2]);
+  printf("\nFit result - chisq/ndf: %f\nA: %f +/- %f, B: %f +/- %f, C: %f +/- %f\n",getFitChisq()/(1.0*fitpar.ndf),fitpar.fitParVal[0],fitpar.fitParErr[0],fitpar.fitParVal[1],fitpar.fitParErr[1],fitpar.fitParVal[2],fitpar.fitParErr[2]);
   for(i=0;i<fitpar.numFitPeaks;i++){
     printf("A%i: %f +/- %f, P%i: %f +/- %f, W%i: %f +/- %f\n",i+1,fitpar.fitParVal[6+(3*i)],fitpar.fitParErr[6+(3*i)],i+1,fitpar.fitParVal[7+(3*i)],fitpar.fitParErr[7+(3*i)],i+1,fitpar.fitParVal[8+(3*i)],fitpar.fitParErr[8+(3*i)]);
   }
   printf("\n");
+  gui.fittingSp = 5;
+  update_gui_fit_state();
+  pthread_exit(NULL);
+}
+
+
+//do some math (assuming a Gaussian peak shape) to get a better initial estimate of the peak width
+double widthGuess(const double centroidCh, const double widthInit){
+
+  double centroidYVal = getDispSpBinVal(0,centroidCh-drawing.lowerLimit);
+  centroidYVal -= fitpar.fitParVal[0] + fitpar.fitParVal[1]*centroidCh;
+  double HWInit = 2.35482*widthInit/2.; //initial half-width
+  double FWHighEdgeVal = getDispSpBinVal(0,centroidCh+HWInit-drawing.lowerLimit);
+  FWHighEdgeVal -= fitpar.fitParVal[0] + fitpar.fitParVal[1]*(centroidCh+HWInit);
+  double FWLowEdgeVal = getDispSpBinVal(0,centroidCh-HWInit-drawing.lowerLimit);
+  FWLowEdgeVal -= fitpar.fitParVal[0] + fitpar.fitParVal[1]*(centroidCh-HWInit);
+  
+  if(centroidYVal != 0.){
+    //get average ratio of half-values from centroid y-value
+    double avgRatio = (fabs(centroidYVal/FWHighEdgeVal) + fabs(centroidYVal/FWLowEdgeVal))/2.;
+    if(avgRatio > 1.){
+      return HWInit*2./(2.*sqrt(2.*log(avgRatio)));
+    }  
+  }
+  
+  return widthInit; //give up
+
+}
+
+int startGausFit(){
+
+  fitpar.ndf = (int)((fitpar.fitEndCh - fitpar.fitStartCh)/(1.0*drawing.contractFactor)) - (3+(3*fitpar.numFitPeaks));
+  if(fitpar.ndf <= 0){
+    printf("Not enough degrees of freedom to fit!\n");
+    return 0;
+  }
+
+  gui.fittingSp = 3;
+  update_gui_fit_state();
+
+  int i;
+  fitpar.errFound = 0;
+
+  //width parameters
+  fitpar.widthFGH[0] = 3.;
+  fitpar.widthFGH[1] = 2.;
+  fitpar.widthFGH[2] = 0.;
+
+  //assign initial guesses for background
+  fitpar.fitParVal[0] = (getDispSpBinVal(0,fitpar.fitStartCh-drawing.lowerLimit) + getDispSpBinVal(0,fitpar.fitEndCh-drawing.lowerLimit))/2.0;
+  fitpar.fitParVal[1] = (getDispSpBinVal(0,fitpar.fitEndCh-drawing.lowerLimit) - getDispSpBinVal(0,fitpar.fitStartCh-drawing.lowerLimit))/(fitpar.fitEndCh - fitpar.fitStartCh);
+  fitpar.fitParVal[2] = 0.0;
+
+  //assign initial guesses for non-linear params
+  for(i=0;i<fitpar.numFitPeaks;i++){
+    fitpar.fitParVal[6+(3*i)] = getDispSpBinVal(0,fitpar.fitPeakInitGuess[i]-drawing.lowerLimit) - fitpar.fitParVal[0] - fitpar.fitParVal[1]*fitpar.fitPeakInitGuess[i];
+    fitpar.fitParVal[7+(3*i)] = fitpar.fitPeakInitGuess[i];
+    fitpar.fitParVal[8+(3*i)] = widthGuess(fitpar.fitPeakInitGuess[i],getFWHM(fitpar.fitPeakInitGuess[i],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482);
+  }
+
+  //printf("Initial guesses: %f %f %f %f %f %f\n",fitpar.fitParVal[0],fitpar.fitParVal[1],fitpar.fitParVal[2],fitpar.fitParVal[6],fitpar.fitParVal[7],fitpar.fitParVal[8]);
+  pthread_t fitThread;
+  int err = pthread_create(&fitThread, NULL, performGausFit, NULL);
+  if(err){
+    printf("WARNING: Couldn't initialize thread for fit.\n");
+    return 0;
+  }
   
   return 1;
 }

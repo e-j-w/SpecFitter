@@ -1,5 +1,7 @@
 /* J. Williams, 2020 */
 
+
+
 //function for opening a single file without UI (ie. from the command line)
 //if append=1, append this file to already opened files
 void openSingleFile(char *filename, int append){
@@ -290,7 +292,7 @@ void on_zoom_scale_changed(GtkRange *range, gpointer user_data){
 void on_contract_scale_changed(GtkRange *range, gpointer user_data){
   int oldContractFactor = drawing.contractFactor;
   drawing.contractFactor = (int)gtk_range_get_value(range); //modify the contraction factor
-  if(gui.fittingSp == 3){
+  if(gui.fittingSp == 5){
     int i;
     //rescale fit (optimization - don't refit until scale is released)
     for(i=0;i<fitpar.numFitPeaks;i++){
@@ -305,10 +307,9 @@ void on_contract_scale_changed(GtkRange *range, gpointer user_data){
 }
 
 void on_contract_scale_button_release(GtkWidget *widget, GdkEvent *event, gpointer user_data){
-  if((gui.deferFit)&&(gui.fittingSp == 3)){
+  if((gui.deferFit)&&(gui.fittingSp == 5)){
     gui.deferFit = 0; //unset the flag
-    performGausFit(); //refit
-    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
+    startGausFit(); //refit
   }
 }
 
@@ -587,13 +588,6 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
     }else{
       drawing.multiplotMode++; //value of 0 means no multiplot
     }
-    
-    //handle fitting
-    if(drawing.multiplotMode > 1){
-      gui.fittingSp = 0; //clear any fits being displayed
-    }else if(gui.fittingSp == 3){
-      performGausFit(); //refit
-    }
 
     gui.deferSpSelChange = 1;
     gtk_spin_button_set_value(spectrum_selector, drawing.multiPlots[0]+1);
@@ -604,12 +598,20 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
       printf("%i ",drawing.multiPlots[i]);
     }
     printf(", multiplot mode: %i\n",drawing.multiplotMode);
-    if(drawing.multiplotMode >= 2){
+    if(drawing.multiplotMode > 1){
       //multiple spectra displayed simultaneously, cannot fit
       gtk_widget_set_sensitive(GTK_WIDGET(fit_button),FALSE);
     }else{
       gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
     }
+    
+    //handle fitting
+    if(drawing.multiplotMode > 1){
+      gui.fittingSp = 0; //clear any fits being displayed
+    }else if(gui.fittingSp == 5){
+      startGausFit(); //refit
+    }
+    
     gtk_widget_hide(GTK_WIDGET(multiplot_window)); //close the multiplot window
     gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
   }
@@ -624,8 +626,8 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data
     drawing.numMultiplotSp = 1;//unset multiplot
     
     //handle fitting
-    if(gui.fittingSp == 3){
-      performGausFit(); //refit
+    if(gui.fittingSp == 5){
+      startGausFit(); //refit
     }
 
     gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE); //no multiplot, therefore can fit
@@ -643,7 +645,7 @@ void on_fit_button_clicked(GtkButton *b)
   //spectrum must be open to fit
   if(rawdata.openedSp){
     //cannot be already fitting
-    if((gui.fittingSp == 0)||(gui.fittingSp == 3)){
+    if((gui.fittingSp == 0)||(gui.fittingSp == 5)){
       //must be displaying only a single spectrum
       if(drawing.multiplotMode < 2){
 
@@ -656,12 +658,7 @@ void on_fit_button_clicked(GtkButton *b)
         fitpar.fitEndCh = -1;
         fitpar.numFitPeaks = 0;
         //update widgets
-        gtk_widget_set_sensitive(GTK_WIDGET(open_button),FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
-        gtk_label_set_text(revealer_info_label,"Right-click to set fit region lower and upper bounds.");
-        gtk_revealer_set_reveal_child(revealer_info_panel, TRUE);
+        update_gui_fit_state();
       }
     }
   }
@@ -670,24 +667,17 @@ void on_fit_button_clicked(GtkButton *b)
 
 void on_fit_fit_button_clicked(GtkButton *b)
 {
-  performGausFit(); //perform the fit
-  gui.fittingSp = 3;
+  startGausFit(); //perform the fit
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
   //update widgets
-  gtk_widget_set_sensitive(GTK_WIDGET(open_button),TRUE);
-  gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
-  gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
-  gtk_revealer_set_reveal_child(revealer_info_panel, FALSE);
+  update_gui_fit_state();
 }
 
 void on_fit_cancel_button_clicked(GtkButton *b)
 {
   gui.fittingSp = 0;
   //update widgets
-  gtk_widget_set_sensitive(GTK_WIDGET(open_button),TRUE);
-  gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
-  gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
-  gtk_revealer_set_reveal_child(revealer_info_panel, FALSE);
+  update_gui_fit_state();
 }
 
 void on_toggle_discard_empty(GtkToggleButton *togglebutton, gpointer user_data)
@@ -774,3 +764,59 @@ void on_about_button_clicked(GtkButton *b)
   gtk_window_present(GTK_WINDOW(about_dialog)); //show the window
 }
 
+
+//update the gui state while/after fitting
+void update_gui_fit_state(){
+  switch(gui.fittingSp){
+    case 5:
+      gtk_widget_set_sensitive(GTK_WIDGET(open_button),TRUE);
+      if(rawdata.openedSp)
+        gtk_widget_set_sensitive(GTK_WIDGET(append_button),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(contract_scale),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),TRUE);
+      gtk_widget_hide(GTK_WIDGET(fit_spinner));
+      gtk_revealer_set_reveal_child(revealer_info_panel, FALSE);
+      gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw to show the fit
+      break;
+    case 4:
+      gtk_label_set_text(revealer_info_label,"Refining fit...");
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
+      break;
+    case 3:
+      gtk_label_set_text(revealer_info_label,"Fitting...");
+      gtk_widget_show(GTK_WIDGET(fit_spinner));
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(contract_scale),FALSE);
+      gtk_revealer_set_reveal_child(revealer_info_panel, TRUE);
+      break;
+    case 2:
+      gtk_label_set_text(revealer_info_label,"Right-click at approximate peak positions.");
+      break;
+    case 1:
+      gtk_widget_set_sensitive(GTK_WIDGET(open_button),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(append_button),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_button),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
+      gtk_label_set_text(revealer_info_label,"Right-click to set fit region lower and upper bounds.");
+      gtk_revealer_set_reveal_child(revealer_info_panel, TRUE);
+      break;
+    case 0:
+    default:
+      gtk_widget_set_sensitive(GTK_WIDGET(open_button),TRUE);
+      if(rawdata.openedSp)
+        gtk_widget_set_sensitive(GTK_WIDGET(append_button),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),TRUE);
+      gtk_widget_hide(GTK_WIDGET(fit_spinner));
+      gtk_revealer_set_reveal_child(revealer_info_panel, FALSE);
+      gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw to hide any fit
+      break;
+  }
+}

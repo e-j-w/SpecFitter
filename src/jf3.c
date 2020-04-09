@@ -10,7 +10,6 @@
 #include "spectrum_drawing.c"
 #include "gui.c"
 
-
 int main(int argc, char *argv[])
 {
   
@@ -53,10 +52,13 @@ int main(int argc, char *argv[])
   shortcuts_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "shortcuts_button"));
   about_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "about_button"));
   bottom_info_text = GTK_LABEL(gtk_builder_get_object(builder, "bottom_info_text"));
+
+  //fit interface UI elements
   revealer_info_panel = GTK_REVEALER(gtk_builder_get_object(builder, "revealer_info_panel"));
   revealer_info_label = GTK_LABEL(gtk_builder_get_object(builder, "revealer_info_label"));
   fit_cancel_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_cancel_button"));
   fit_fit_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_fit_button"));
+  fit_spinner = GTK_SPINNER(gtk_builder_get_object(builder, "fit_spinner"));
 
   //calibration window UI elements
   calibrate_ok_button = GTK_WIDGET(gtk_builder_get_object(builder, "options_ok_button"));
@@ -212,6 +214,7 @@ int main(int argc, char *argv[])
   gtk_widget_set_sensitive(GTK_WIDGET(display_button),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(zoom_scale),FALSE);
+  gtk_widget_hide(GTK_WIDGET(fit_spinner));
 
   //hide widgets that can't be seen yet
   gtk_revealer_set_reveal_child(revealer_info_panel, FALSE);
