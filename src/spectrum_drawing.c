@@ -196,6 +196,17 @@ void on_toggle_cursor(GtkToggleButton *togglebutton, gpointer user_data)
     gui.drawSpCursor=-1;
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
 }
+//used for keyboard shortcut
+void toggle_cursor(){
+  if(rawdata.openedSp){
+    if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cursor_draw_button))){
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cursor_draw_button),FALSE);
+    }else{
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cursor_draw_button),TRUE);
+    }
+  }
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+}
 
 
 //function handling mouse wheel scrolling to zoom the displayed spectrum
