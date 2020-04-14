@@ -1,6 +1,16 @@
 /* J. Williams, 2020 */
 
-
+void showPreferences(int page){
+  gtk_notebook_set_current_page(preferences_notebook,page);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(discard_empty_checkbutton),rawdata.dropEmptySpectra);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bin_errors_checkbutton),gui.showBinErrors);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(round_errors_checkbutton),gui.roundErrors);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dark_theme_checkbutton),gui.preferDarkTheme);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autozoom_checkbutton),gui.autoZoom);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_label_checkbutton),gui.drawSpLabels);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(relative_widths_checkbutton),fitpar.fixRelativeWidths);
+  gtk_window_present(preferences_window); //show the window
+}
 
 //function for opening a single file without UI (ie. from the command line)
 //if append=1, append this file to already opened files
@@ -680,6 +690,11 @@ void on_fit_cancel_button_clicked(GtkButton *b)
   update_gui_fit_state();
 }
 
+void on_fit_preferences_button_clicked(GtkButton *b)
+{
+  showPreferences(1);
+}
+
 void on_toggle_discard_empty(GtkToggleButton *togglebutton, gpointer user_data)
 {
   if(gtk_toggle_button_get_active(togglebutton))
@@ -727,15 +742,17 @@ void on_toggle_spectrum_label(GtkToggleButton *togglebutton, gpointer user_data)
     gui.drawSpLabels=0;
 }
 
+void on_toggle_relative_widths(GtkToggleButton *togglebutton, gpointer user_data)
+{
+  if(gtk_toggle_button_get_active(togglebutton))
+    fitpar.fixRelativeWidths=1;
+  else
+    fitpar.fixRelativeWidths=0;
+}
+
 void on_preferences_button_clicked(GtkButton *b)
 {
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(discard_empty_checkbutton),rawdata.dropEmptySpectra);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bin_errors_checkbutton),gui.showBinErrors);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(round_errors_checkbutton),gui.roundErrors);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dark_theme_checkbutton),gui.preferDarkTheme);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autozoom_checkbutton),gui.autoZoom);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_label_checkbutton),gui.drawSpLabels);
-  gtk_window_present(preferences_window); //show the window
+  showPreferences(0);
 }
 
 void on_preferences_apply_button_clicked(GtkButton *b)

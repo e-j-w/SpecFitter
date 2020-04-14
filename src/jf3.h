@@ -50,7 +50,7 @@ GtkGesture *spectrum_drag_gesture;
 //fit overlay/revealer
 GtkRevealer *revealer_info_panel;
 GtkLabel *revealer_info_label;
-GtkButton *fit_cancel_button, *fit_fit_button;
+GtkButton *fit_cancel_button, *fit_fit_button, *fit_preferences_button;
 GtkSpinner *fit_spinner;
 //Calibration dialog
 GtkWidget *calibrate_ok_button, *remove_calibration_button;
@@ -71,7 +71,9 @@ GtkComboBoxText *multiplot_mode_combobox;
 //preferences dialog
 GtkModelButton *preferences_button;
 GtkWindow *preferences_window;
+GtkNotebook *preferences_notebook;
 GtkCheckButton *discard_empty_checkbutton, *bin_errors_checkbutton, *round_errors_checkbutton, *dark_theme_checkbutton, *spectrum_label_checkbutton, *autozoom_checkbutton;
+GtkCheckButton *relative_widths_checkbutton;
 GtkButton *preferences_apply_button, *preferences_cancel_button;
 //shortcuts window
 GtkModelButton *shortcuts_button;
@@ -138,6 +140,8 @@ struct {
   double fitParVal[6+(3*MAX_FIT_PK)]; //parameter values found by the fitter
   double fitParErr[6+(3*MAX_FIT_PK)]; //errors in parameter values
   int numFitPeaks; //number of peaks to fit
+  char fixRelativeWidths; //0=don't fix width, 1=fix widths
+  double relWidths[MAX_FIT_PK]; //relative width factors
   char errFound; //whether or not paramter errors have been found
 } fitpar;
 

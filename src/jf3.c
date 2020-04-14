@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
   revealer_info_label = GTK_LABEL(gtk_builder_get_object(builder, "revealer_info_label"));
   fit_cancel_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_cancel_button"));
   fit_fit_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_fit_button"));
+  fit_preferences_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_preferences_button"));
   fit_spinner = GTK_SPINNER(gtk_builder_get_object(builder, "fit_spinner"));
 
   //calibration window UI elements
@@ -80,12 +81,14 @@ int main(int argc, char *argv[])
 
   //preferences window UI elements
   preferences_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "preferences_button"));
+  preferences_notebook = GTK_NOTEBOOK(gtk_builder_get_object(builder, "preferences_notebook"));
   discard_empty_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "discard_empty_checkbutton"));
   bin_errors_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "bin_errors_checkbutton"));
   round_errors_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "round_errors_checkbutton"));
   autozoom_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "autozoom_checkbutton"));
   dark_theme_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "dark_theme_checkbutton"));
   spectrum_label_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "spectrum_label_checkbutton"));
+  relative_widths_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "relative_widths_checkbutton"));
   preferences_apply_button = GTK_BUTTON(gtk_builder_get_object(builder, "preferences_apply_button"));
   preferences_cancel_button = GTK_BUTTON(gtk_builder_get_object(builder, "preferences_cancel_button"));
 
@@ -113,6 +116,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (fit_button), "clicked", G_CALLBACK (on_fit_button_clicked), NULL);
   g_signal_connect (G_OBJECT (fit_fit_button), "clicked", G_CALLBACK (on_fit_fit_button_clicked), NULL);
   g_signal_connect (G_OBJECT (fit_cancel_button), "clicked", G_CALLBACK (on_fit_cancel_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (fit_preferences_button), "clicked", G_CALLBACK (on_fit_preferences_button_clicked), NULL);
   g_signal_connect (G_OBJECT (display_button), "clicked", G_CALLBACK (on_display_button_clicked), NULL);
   g_signal_connect (G_OBJECT (calibrate_ok_button), "clicked", G_CALLBACK (on_calibrate_ok_button_clicked), NULL);
   g_signal_connect (G_OBJECT (remove_calibration_button), "clicked", G_CALLBACK (on_remove_calibration_button_clicked), NULL);
@@ -125,6 +129,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (round_errors_checkbutton), "toggled", G_CALLBACK (on_toggle_round_errors), NULL);
   g_signal_connect (G_OBJECT (dark_theme_checkbutton), "toggled", G_CALLBACK (on_toggle_dark_theme), NULL);
   g_signal_connect (G_OBJECT (spectrum_label_checkbutton), "toggled", G_CALLBACK (on_toggle_spectrum_label), NULL);
+  g_signal_connect (G_OBJECT (relative_widths_checkbutton), "toggled", G_CALLBACK (on_toggle_relative_widths), NULL);
   g_signal_connect (G_OBJECT (autozoom_checkbutton), "toggled", G_CALLBACK (on_toggle_autozoom), NULL);
   g_signal_connect (G_OBJECT (preferences_apply_button), "clicked", G_CALLBACK (on_preferences_apply_button_clicked), NULL);
   g_signal_connect (G_OBJECT (preferences_button), "clicked", G_CALLBACK (on_preferences_button_clicked), NULL);
@@ -198,6 +203,7 @@ int main(int argc, char *argv[])
   gui.roundErrors = 0;
   gui.autoZoom = 1;
   gui.preferDarkTheme = 0;
+  fitpar.fixRelativeWidths = 1;
   fitpar.fitStartCh = -1;
   fitpar.fitEndCh = -1;
   fitpar.numFitPeaks = 0;

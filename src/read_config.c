@@ -69,6 +69,13 @@ int readConfigFile(FILE *file)
 					gui.drawSpLabels = 0;
 				}
 			}
+			if(strcmp(par,"fix_relative_widths") == 0){
+				if(strcmp(val,"yes") == 0){
+					fitpar.fixRelativeWidths = 1;
+				}else{
+					fitpar.fixRelativeWidths = 0;
+				}
+			}
 			if(strcmp(par,"autozoom") == 0){
 				if(strcmp(val,"yes") == 0){
 					gui.autoZoom = 1;
@@ -149,6 +156,11 @@ int writeConfigFile(FILE *file)
 		fprintf(file,"autozoom=yes\n");
 	}else{
 		fprintf(file,"autozoom=no\n");
+	}
+	if(fitpar.fixRelativeWidths == 1){
+		fprintf(file,"fix_relative_widths=yes\n");
+	}else{
+		fprintf(file,"fix_relative_widths=no\n");
 	}
 
 	return 1;

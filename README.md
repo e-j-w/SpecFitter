@@ -34,8 +34,9 @@ Conversion codes for some of these data formats are available in the [FileConvTo
 ### Peak fitting
 
 * Fit multiple Gaussian peak shapes on quadratic background (iterative least-squares fitter).
+* Relative peak widths may be fixed (recommended for gamma-ray spectroscopy) or allowed to freely vary. 
 
-## How to build
+## How to build / install
 
 So far the program has only been tested with Linux-based systems.  A Makefile is provided, build the program using:
 
@@ -49,13 +50,16 @@ This will place the `jf3` binary in `/usr/bin` and a desktop entry file in `/usr
 
 ```sudo make uninstall```
 
-This build process has been tested on CentOS 7 and Arch Linux (as of April 2020) under the GNOME desktop environment.
+### Compatibility
+
+The build process has been tested on CentOS 7 and Arch Linux (as of April 2020) under the GNOME desktop environment.  It should more-or-less work on any Linux distro that satisfies the build dependencies below.  It may be possible to build this on other platforms (OSX, *BSD, WSL, etc.), but that hasn't been tested.
 
 ### Build dependencies
 
 * GNU make
 * gcc
-* GTK 3 (`gtk3-devel` in CentOS)
+* pkg-config (`pkgconf` in Arch Linux)
+* GTK3 (`gtk3-devel` in CentOS)
 
 
 ## Usage notes
@@ -67,12 +71,6 @@ This build process has been tested on CentOS 7 and Arch Linux (as of April 2020)
 ## Screenshot
 
 ![jf3 user interface screenshot](https://raw.githubusercontent.com/e-j-w/e-j-w.github.io/master/media/jf3.png "jf3 user interface")
-
-
-## Future plans
-
-* Peak labels?
-* Import of spectra exported from ROOT?
 
 ## Credits
 
