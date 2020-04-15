@@ -66,7 +66,7 @@ GtkListStore *multiplot_liststore;
 GtkTreeView *multiplot_tree_view;
 GtkTreeViewColumn *multiplot_column1, *multiplot_column2;
 GtkTreeSelection *multiplot_tree_selection;
-GtkCellRenderer *multiplot_cr1, *multiplot_cr2;
+GtkCellRenderer *multiplot_cr1, *multiplot_cr2, *multiplot_cr3;
 GtkComboBoxText *multiplot_mode_combobox;
 //preferences dialog
 GtkModelButton *preferences_button;
@@ -120,6 +120,7 @@ struct {
   int contractFactor; //the number of channels per bin (default=1)
   char multiplotMode; //0=no multiplot, 1=summed spectra, 2=overlay spectra (common scaling), 3=overlay spectra (independent scaling), 4=stacked view
   int numMultiplotSp; //number of spectra to show in multiplot mode
+  double scaleFactor[NSPECT]; //scaling factors for each spectrum
   int multiPlots[NSPECT]; //indices of all the spectra to show in multiplot mode
   float spColors[MAX_DISP_SP*3];
 } drawing;

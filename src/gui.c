@@ -22,10 +22,11 @@ void openSingleFile(char *filename, int append){
   int numSp = readSpectrumDataFile(filename,rawdata.hist,rawdata.numSpOpened);
   if(numSp > 0){ //see read_data.c
       rawdata.openedSp = 1;
-      //set comments for spectra just opened
+      //set comments and scaling for spectra just opened
       for (i = rawdata.numSpOpened; i < (rawdata.numSpOpened+numSp); i++){
         snprintf(rawdata.histComment[i],256,"Spectrum %i of %s",i-rawdata.numSpOpened+1,basename((char*)filename));
         //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
+        drawing.scaleFactor[i] = 1.00;
       }
       rawdata.numSpOpened += numSp;
       //select the first non-empty spectrum by default
@@ -113,6 +114,7 @@ void on_open_button_clicked(GtkButton *b)
         for (j = rawdata.numSpOpened; j < (rawdata.numSpOpened+numSp); j++){
           snprintf(rawdata.histComment[j],256,"Spectrum %i of %s",j-rawdata.numSpOpened+1,basename((char*)filename));
           //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
+          drawing.scaleFactor[i] = 1.00;
         }
         rawdata.numSpOpened += numSp;
         //select the first non-empty spectrum by default
@@ -227,6 +229,7 @@ void on_append_button_clicked(GtkButton *b)
         for (j = rawdata.numSpOpened; j < (rawdata.numSpOpened+numSp); j++){
           snprintf(rawdata.histComment[j],256,"Spectrum %i of %s",j-rawdata.numSpOpened+1,basename((char*)filename));
           //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
+          drawing.scaleFactor[i] = 1.00;
         }
         rawdata.numSpOpened += numSp;
         gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened);
@@ -397,57 +400,6 @@ void on_remove_calibration_button_clicked(GtkButton *b)
   
 }
 
-void on_multiplot_row_activated(GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *column, gpointer user_data){
-  
-  //don't toggle a row if a multiple toggle was jsut performed
-  if(gui.deferToggleRow){
-    gui.deferToggleRow = 0;
-    return;
-  }
-  
-  GtkTreeIter iter;
-  gboolean toggleVal = FALSE;
-  gboolean val = FALSE;
-  GtkTreeModel *model = gtk_tree_view_get_model(tree_view);
-
-  //get the value of the cell which was toggled
-  gtk_tree_model_get_iter(model,&iter,path);
-  gtk_tree_model_get(model,&iter,1,&val,-1); //get the boolean value
-  if(val==FALSE){
-    toggleVal=TRUE;
-  }else{
-    toggleVal=FALSE;
-  }
-  //single cell toggle
-  gtk_list_store_set(multiplot_liststore,&iter,1,toggleVal,-1); //set the boolean value (change checkbox value)
-  
-  int selectedSpCount = 0;
-  int spInd = 0;
-  gboolean readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
-  while (readingTreeModel)
-  {
-    gtk_tree_model_get(model,&iter,1,&val,2,&spInd,-1); //get whether the spectrum is selected and the spectrum index
-    if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
-      if(val==TRUE){
-        selectedSpCount++;
-      }
-    }
-    readingTreeModel = gtk_tree_model_iter_next (model, &iter);
-  }
-  if(selectedSpCount > 1){
-    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),TRUE);
-  }else{
-    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),FALSE);
-  }
-  if(selectedSpCount < 1){
-    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_ok_button),FALSE);
-  }else{
-    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_ok_button),TRUE);
-  }
-  //printf("toggled %i\n",val);
-  //gtk_widget_queue_draw(GTK_WIDGET(multiplot_window));
-}
-
 void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
   int i;
   GtkTreeIter iter;
@@ -467,7 +419,8 @@ void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
   //GList *list;
   GList * rowList = gtk_tree_selection_get_selected_rows(gtk_tree_view_get_selection(multiplot_tree_view),&model);
   //printf("List length: %i, toggleVal: %i\n",g_list_length(rowList),toggleVal);
-  if(g_list_length(rowList) > 1){
+  int llength = g_list_length(rowList);
+  if(llength > 1){
     for(i = 0; i < g_list_length(rowList); i++){
       gtk_tree_model_get_iter(model,&iter,g_list_nth_data(rowList, i));
       gtk_tree_model_get(model,&iter,1,&val,-1); //get the boolean value
@@ -477,18 +430,19 @@ void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
         val=FALSE;
       }
       gtk_list_store_set(multiplot_liststore,&iter,1,val,-1); //set the boolean value (change checkbox value)
-      
     }
     gui.deferToggleRow = 1;
-    g_list_free_full(rowList,(GDestroyNotify)gtk_tree_path_free);
+  }else if(llength == 1){
+    gtk_list_store_set(multiplot_liststore,&iter,1,!val,-1); //set the boolean value (change checkbox value)
   }
+  g_list_free_full(rowList,(GDestroyNotify)gtk_tree_path_free);
   
   int selectedSpCount = 0;
   int spInd = 0;
   gboolean readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
   while (readingTreeModel)
   {
-    gtk_tree_model_get(model,&iter,1,&val,2,&spInd,-1); //get whether the spectrum is selected and the spectrum index
+    gtk_tree_model_get(model,&iter,1,&val,3,&spInd,-1); //get whether the spectrum is selected and the spectrum index
     if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
       if(val==TRUE){
         selectedSpCount++;
@@ -510,26 +464,56 @@ void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
   //gtk_widget_queue_draw(GTK_WIDGET(multiplot_window));
 }
 
+void on_multiplot_scaling_edited(GtkCellRendererText *c, gchar *path_string, gchar *new_text, gpointer user_data){
+  //int i;
+  GtkTreeIter iter;
+  gdouble val = 1.0;
+  gint spInd = -1;
+  GtkTreeModel *model = gtk_tree_view_get_model(multiplot_tree_view);
+
+  //get the value of the cell which was toggled
+  gtk_tree_model_get_iter_from_string(model, &iter, path_string);
+  val = atof(new_text);
+  gtk_tree_model_get(model,&iter,3,&spInd,-1); //get the spectrum index
+  if((spInd >= 0)&&(spInd < NSPECT)){
+    drawing.scaleFactor[spInd] = val;
+    printf("Set scaling for spectrum %i to %.2f\n",spInd,drawing.scaleFactor[spInd]);
+  }else{
+    printf("WARNING: scale factor belongs to invalid spectrum number (%i).\n",spInd);
+    return;
+  }
+
+  char scaleFacStr[16];
+  snprintf(scaleFacStr,16,"%.2f",drawing.scaleFactor[spInd]);
+  gtk_list_store_set(multiplot_liststore,&iter,2,scaleFacStr,-1); //set the string
+
+  //gtk_widget_queue_draw(GTK_WIDGET(multiplot_window));
+}
+
 void on_multiplot_button_clicked(GtkButton *b)
 {
   GtkTreeIter iter;
   gboolean val = FALSE;
   GtkTreeModel *model = gtk_tree_view_get_model(multiplot_tree_view);
   int i;
+  char scaleFacStr[16];
   gtk_list_store_clear(multiplot_liststore);
   for(i=0;i<rawdata.numSpOpened;i++){
+    snprintf(scaleFacStr,16,"%.2f",drawing.scaleFactor[i]);
     gtk_list_store_append(multiplot_liststore,&iter);
     gtk_list_store_set(multiplot_liststore, &iter, 0, rawdata.histComment[i], -1);
     gtk_list_store_set(multiplot_liststore, &iter, 1, isSpSelected(i), -1);
-    gtk_list_store_set(multiplot_liststore, &iter, 2, i, -1);
+    gtk_list_store_set(multiplot_liststore, &iter, 2, scaleFacStr, -1);
+    gtk_list_store_set(multiplot_liststore, &iter, 3, i, -1);
   }
 
   int selectedSpCount = 0;
   int spInd = 0;
   gboolean readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
+ 
   while (readingTreeModel)
   {
-    gtk_tree_model_get(model,&iter,1,&val,2,&spInd,-1); //get whether the spectrum is selected and the spectrum index
+    gtk_tree_model_get(model,&iter,1,&val,3,&spInd,-1); //get whether the spectrum is selected and the spectrum index
     if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
       if(val==TRUE){
         selectedSpCount++;
@@ -537,6 +521,7 @@ void on_multiplot_button_clicked(GtkButton *b)
     }
     readingTreeModel = gtk_tree_model_iter_next (model, &iter);
   }
+  
   if(selectedSpCount > 1){
     gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),TRUE);
   }else{
@@ -557,7 +542,7 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
   readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
   while (readingTreeModel)
   {
-    gtk_tree_model_get(model,&iter,1,&val,2,&spInd,-1); //get whether the spectrum is selected and the spectrum index
+    gtk_tree_model_get(model,&iter,1,&val,3,&spInd,-1); //get whether the spectrum is selected and the spectrum index
     if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
       if(val==TRUE){
         drawing.multiPlots[selectedSpCount]=spInd;

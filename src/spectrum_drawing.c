@@ -71,7 +71,7 @@ float getDispSpBinVal(int dispSpNum, int bin){
         case 1:
           //sum spectra
           for(k=0;k<drawing.numMultiplotSp;k++){
-            val += rawdata.hist[drawing.multiPlots[k]][drawing.lowerLimit+bin+j];
+            val += drawing.scaleFactor[drawing.multiPlots[k]]*rawdata.hist[drawing.multiPlots[k]][drawing.lowerLimit+bin+j];
           }
           break;
         case 4:
@@ -82,7 +82,7 @@ float getDispSpBinVal(int dispSpNum, int bin){
           //overlay (common scaling)
         case 0:
           //no multiplot
-          val += rawdata.hist[drawing.multiPlots[dispSpNum]][drawing.lowerLimit+bin+j];
+          val += drawing.scaleFactor[drawing.multiPlots[dispSpNum]]*rawdata.hist[drawing.multiPlots[dispSpNum]][drawing.lowerLimit+bin+j];
           break;
         default:
           break;
@@ -693,7 +693,11 @@ void drawPlotLabel(cairo_t *cr, float clip_x1, float clip_x2, float clip_y2, dou
       }
       for(i=0;i<drawing.numMultiplotSp;i++){
         cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
-        strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[i]]);
+        if(drawing.scaleFactor[drawing.multiPlots[i]] == 1.0){
+          strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[i]]);
+        }else{
+          snprintf(plotLabel,256,"%s (scaled by %.2f)",rawdata.histComment[drawing.multiPlots[i]],drawing.scaleFactor[drawing.multiPlots[i]]);
+        }
         cairo_text_extents(cr, plotLabel, &extents);
         cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, (clip_y2-40.0)*((drawing.numMultiplotSp-i-1)/(drawing.numMultiplotSp*1.0)) + labelYOffset);
         cairo_show_text(cr, plotLabel);
@@ -704,7 +708,11 @@ void drawPlotLabel(cairo_t *cr, float clip_x1, float clip_x2, float clip_y2, dou
       //overlaid spectra
       for(i=0;i<drawing.numMultiplotSp;i++){
         cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
-        strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[i]]);
+        if(drawing.scaleFactor[drawing.multiPlots[i]] == 1.0){
+          strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[i]]);
+        }else{
+          snprintf(plotLabel,256,"%s (scaled by %.2f)",rawdata.histComment[drawing.multiPlots[i]],drawing.scaleFactor[drawing.multiPlots[i]]);
+        }
         cairo_text_extents(cr, plotLabel, &extents);
         cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, 40.0 + 18.0*i);
         cairo_show_text(cr, plotLabel);
@@ -718,7 +726,11 @@ void drawPlotLabel(cairo_t *cr, float clip_x1, float clip_x2, float clip_y2, dou
       cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, 40.0);
       cairo_show_text(cr, plotLabel);
       for(i=0;i<drawing.numMultiplotSp;i++){
-        strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[i]]);
+        if(drawing.scaleFactor[drawing.multiPlots[i]] == 1.0){
+          strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[i]]);
+        }else{
+          snprintf(plotLabel,256,"%s (scaled by %.2f)",rawdata.histComment[drawing.multiPlots[i]],drawing.scaleFactor[drawing.multiPlots[i]]);
+        }
         cairo_text_extents(cr, plotLabel, &extents);
         cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, 40.0 + 18.0*(i+1));
         cairo_show_text(cr, plotLabel);
@@ -727,7 +739,11 @@ void drawPlotLabel(cairo_t *cr, float clip_x1, float clip_x2, float clip_y2, dou
     case 0:
       //single plot mode
       setTextColor(cr);
-      strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[0]]);
+      if(drawing.scaleFactor[drawing.multiPlots[0]] == 1.0){
+        strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[0]]);
+      }else{
+        snprintf(plotLabel,256,"%s (scaled by %.2f)",rawdata.histComment[drawing.multiPlots[0]],drawing.scaleFactor[drawing.multiPlots[0]]);
+      }
       cairo_text_extents(cr, plotLabel, &extents);
       cairo_move_to(cr, (clip_x2-clip_x1)*0.95 - extents.width, 40.0);
       cairo_show_text(cr, plotLabel);

@@ -29,6 +29,7 @@ Conversion codes for some of these data formats are available in the [FileConvTo
     * Show spectra in a "stacked" view (tiled vertically with a common x-axis).
 * Zoom and pan using the mouse (mouse wheel, click and drag).
 * Display in linear or logarithmic scale on the y-axis.
+* Rescale spectra, to perform operations such as background subtraction.
 * Rebin spectra, with results displayed in real time.
 
 ### Peak fitting
@@ -36,19 +37,7 @@ Conversion codes for some of these data formats are available in the [FileConvTo
 * Fit multiple Gaussian peak shapes on quadratic background (iterative least-squares fitter).
 * Relative peak widths may be fixed (recommended for gamma-ray spectroscopy) or allowed to freely vary. 
 
-## How to build / install
-
-So far the program has only been tested with Linux-based systems.  A Makefile is provided, build the program using:
-
-```make``` 
-
-The program can be installed for all users with:
-
-```sudo make install```
-
-This will place the `jf3` binary in `/usr/bin` and a desktop entry file in `/usr/share/applications` (for desktop environment integration).  These changes can be undone with:
-
-```sudo make uninstall```
+## Getting started
 
 ### Compatibility
 
@@ -61,6 +50,20 @@ The build process has been tested on CentOS 7 and Arch Linux (as of April 2020) 
 * pkg-config (`pkgconf` in Arch Linux)
 * GTK3 (`gtk3-devel` in CentOS)
 
+### Build instructions
+
+A Makefile is provided, build the program using:
+
+```make``` 
+
+The resulting `jf3` executable can be run directly from the command line or your file manager.  Optionally, the program can be installed for all users with:
+
+```sudo make install```
+
+This will place the `jf3` binary in `/usr/bin` and a desktop entry file in `/usr/share/applications` (for desktop environment integration).  These changes can be undone with:
+
+```sudo make uninstall```
+
 
 ## Usage notes
 
@@ -71,7 +74,3 @@ The build process has been tested on CentOS 7 and Arch Linux (as of April 2020) 
 ## Screenshot
 
 ![jf3 user interface screenshot](https://raw.githubusercontent.com/e-j-w/e-j-w.github.io/master/media/jf3.png "jf3 user interface")
-
-## Credits
-
-Developer/Maintainer: Jonathan Williams
