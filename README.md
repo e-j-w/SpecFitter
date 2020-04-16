@@ -35,7 +35,8 @@ Conversion codes for some of these data formats are available in the [FileConvTo
 ### Peak fitting
 
 * Fit multiple Gaussian peak shapes on quadratic background (iterative least-squares fitter).
-* Relative peak widths may be fixed (recommended for gamma-ray spectroscopy) or allowed to freely vary. 
+* Relative peak widths may be fixed (recommended for gamma-ray spectroscopy) or allowed to freely vary.
+* Weight by the data (taking background subtraction into account) or by the fit function.  Or don't weight the fit at all.
 
 ## Getting started
 
@@ -65,7 +66,7 @@ This will place the `jf3` binary in `/usr/bin` and a desktop entry file in `/usr
 ```sudo make uninstall```
 
 
-## Usage notes
+## Usage tips
 
 * Preferences are stored in a plaintext configuration file on a per-user basis at `$HOME/.config/jf3/jf3.conf`.
 * When running the program from the command line, it is possible to automatically open files by specifying the filename(s) as arguments (eg. `jf3 /path/to/file1 /path/to/file2`).

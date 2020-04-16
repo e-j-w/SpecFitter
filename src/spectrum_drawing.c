@@ -52,12 +52,9 @@ float getCursorChannel(float cursorx, float cursory){
   return -1; //
 }
 
-//get the value of the ith bin of the displayed spectrum
-//i is in channel units, offset from drawing.lowerLimit
-//for contracted spectra, the original channel units are retained, but the sum
-//of j bins is returned, where j is the contraction factor
-//spNum is the displayed spectrum number (for multiplot), 0 is the first displayed spectrum
-float getDispSpBinVal(int dispSpNum, int bin){
+
+//if getWeight is set, will return weight values for fitting
+float getSpBinValOrWeight(const int dispSpNum, const int bin, const int getWeight){
 
   if((dispSpNum >= drawing.numMultiplotSp)||(dispSpNum < 0)){
     //invalid displayed spectrum number
@@ -70,8 +67,14 @@ float getDispSpBinVal(int dispSpNum, int bin){
       switch(drawing.multiplotMode){
         case 1:
           //sum spectra
-          for(k=0;k<drawing.numMultiplotSp;k++){
-            val += drawing.scaleFactor[drawing.multiPlots[k]]*rawdata.hist[drawing.multiPlots[k]][drawing.lowerLimit+bin+j];
+          if(getWeight){
+            for(k=0;k<drawing.numMultiplotSp;k++){
+              val += drawing.scaleFactor[drawing.multiPlots[k]]*drawing.scaleFactor[drawing.multiPlots[k]]*fabs(rawdata.hist[drawing.multiPlots[k]][bin+j]);
+            }
+          }else{
+            for(k=0;k<drawing.numMultiplotSp;k++){
+              val += drawing.scaleFactor[drawing.multiPlots[k]]*rawdata.hist[drawing.multiPlots[k]][bin+j];
+            }
           }
           break;
         case 4:
@@ -82,7 +85,7 @@ float getDispSpBinVal(int dispSpNum, int bin){
           //overlay (common scaling)
         case 0:
           //no multiplot
-          val += drawing.scaleFactor[drawing.multiPlots[dispSpNum]]*rawdata.hist[drawing.multiPlots[dispSpNum]][drawing.lowerLimit+bin+j];
+          val += drawing.scaleFactor[drawing.multiPlots[dispSpNum]]*rawdata.hist[drawing.multiPlots[dispSpNum]][bin+j];
           break;
         default:
           break;
@@ -90,6 +93,20 @@ float getDispSpBinVal(int dispSpNum, int bin){
     }
   
   return val;
+}
+//get the value of the ith bin of the displayed spectrum
+//i is in channel units, offset from drawing.lowerLimit
+//for contracted spectra, the original channel units are retained, but the sum
+//of j bins is returned, where j is the contraction factor
+//spNum is the displayed spectrum number (for multiplot), 0 is the first displayed spectrum
+float getDispSpBinVal(const int dispSpNum, const int bin){
+  return getSpBinValOrWeight(dispSpNum,drawing.lowerLimit+bin,0);
+}
+float getSpBinVal(const int dispSpNum, const int bin){
+  return getSpBinValOrWeight(dispSpNum,bin,0);
+}
+float getSpBinFitWeight(const int dispSpNum, const int bin){
+  return getSpBinValOrWeight(dispSpNum,bin,1);
 }
 
 //function setting the plotting limits for the spectrum based on the zoom level

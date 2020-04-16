@@ -1,7 +1,8 @@
 /* J. Williams, 2020 */
 
 //forward declarations
-float getDispSpBinVal(int dispSpNum, int bin);
+float getSpBinVal(const int dispSpNum, const int bin);
+float getSpBinFitWeight(const int dispSpNum, const int bin);
 
 //update the gui state while/after fitting
 gboolean update_gui_fit_state(){
@@ -146,7 +147,7 @@ double getFitChisq(){
   double yval,xval;
   for (i=fitpar.fitStartCh;i<=fitpar.fitEndCh;i+=drawing.contractFactor){
     xval = i;
-    yval = getDispSpBinVal(0,i-drawing.lowerLimit);
+    yval = getSpBinVal(0,i);
     //background term
     f = fitpar.fitParVal[0] + fitpar.fitParVal[1]*xval + fitpar.fitParVal[2]*xval*xval;
     //gaussian(s)
@@ -254,7 +255,7 @@ int setupFitSums(lin_eq_type *linEq, double flambda){
   memset(linEq->solution,0,sizeof(linEq->solution));
   memset(linEq->inv_matrix,0,sizeof(linEq->inv_matrix));
   memset(cmatrix,0,sizeof(cmatrix));
-  double xval,yval,ydiff;
+  double xval,weight,ydiff;
   int peakNum, peakNum2, parNum, parNum2;
 
   if(fitpar.fixRelativeWidths){
@@ -262,50 +263,59 @@ int setupFitSums(lin_eq_type *linEq, double flambda){
     long double widthDerSum;
 
     for (i=fitpar.fitStartCh;i<=fitpar.fitEndCh;i+=drawing.contractFactor){
-      xval = (double)(i);
-      yval = getDispSpBinVal(0,i-drawing.lowerLimit);
 
-      if(yval != 0){
+      xval = (double)(i);
+      ydiff = getSpBinVal(0,i) - evalFit(xval);
+
+      if(fitpar.weightMode == 0){
+        weight = getSpBinFitWeight(0,i);
+      }else if(fitpar.weightMode == 1){
+        weight = evalFit(xval);
+      }else{
+        weight = 1.;
+      }
+
+      if(weight != 0){
 
         widthDerSum = 0.;
-        ydiff = yval - evalFit(xval);
-        if(yval < 1.)
-          yval = 1.;
+        
+        //if(weight < 1.)
+        //  weight = 1.;
       
         //parameters 0-2: background
-        linEq->matrix[0][0] += 1./yval;
-        linEq->matrix[0][1] += xval/yval;
-        linEq->matrix[0][2] += xval*xval/yval;
-        linEq->matrix[1][2] += xval*xval*xval/yval;
-        linEq->matrix[2][2] += xval*xval*xval*xval/yval;
-        linEq->vector[0] += ydiff/yval;
-        linEq->vector[1] += ydiff*xval/yval;
-        linEq->vector[2] += ydiff*xval*xval/yval;
+        linEq->matrix[0][0] += 1./weight;
+        linEq->matrix[0][1] += xval/weight;
+        linEq->matrix[0][2] += xval*xval/weight;
+        linEq->matrix[1][2] += xval*xval*xval/weight;
+        linEq->matrix[2][2] += xval*xval*xval*xval/weight;
+        linEq->vector[0] += ydiff/weight;
+        linEq->vector[1] += ydiff*xval/weight;
+        linEq->vector[2] += ydiff*xval*xval/weight;
 
         //parameter 3: width
         for(j=0;j<fitpar.numFitPeaks;j++){
           widthDerSum += evalGaussTermDerivative(j,xval,2);
         }
-        linEq->matrix[0][3] += widthDerSum/yval;
-        linEq->matrix[1][3] += xval*widthDerSum/yval;
-        linEq->matrix[2][3] += xval*xval*widthDerSum/yval;
-        linEq->matrix[3][3] += widthDerSum*widthDerSum/yval;
-        linEq->vector[3] += ydiff*widthDerSum/yval;
+        linEq->matrix[0][3] += widthDerSum/weight;
+        linEq->matrix[1][3] += xval*widthDerSum/weight;
+        linEq->matrix[2][3] += xval*xval*widthDerSum/weight;
+        linEq->matrix[3][3] += widthDerSum*widthDerSum/weight;
+        linEq->vector[3] += ydiff*widthDerSum/weight;
       
         //parameters 4 and above: amplitudes, positions
         for(j=4;j<linEq->dim;j++){
           peakNum = (int)((j-4)/2);
           parNum = j % 2;
-          linEq->matrix[0][j] += evalGaussTermDerivative(peakNum,xval,parNum)/yval;
-          linEq->matrix[1][j] += xval*evalGaussTermDerivative(peakNum,xval,parNum)/yval;
-          linEq->matrix[2][j] += xval*xval*evalGaussTermDerivative(peakNum,xval,parNum)/yval;
-          linEq->matrix[3][j] += widthDerSum*evalGaussTermDerivative(peakNum,xval,parNum)/yval;
-          linEq->vector[j] += ydiff*evalGaussTermDerivative(peakNum,xval,parNum)/yval;
+          linEq->matrix[0][j] += evalGaussTermDerivative(peakNum,xval,parNum)/weight;
+          linEq->matrix[1][j] += xval*evalGaussTermDerivative(peakNum,xval,parNum)/weight;
+          linEq->matrix[2][j] += xval*xval*evalGaussTermDerivative(peakNum,xval,parNum)/weight;
+          linEq->matrix[3][j] += widthDerSum*evalGaussTermDerivative(peakNum,xval,parNum)/weight;
+          linEq->vector[j] += ydiff*evalGaussTermDerivative(peakNum,xval,parNum)/weight;
           //printf("j: %i, j-4/2: %i, jmod2: %i\n",j,(int)(j-4)/2,j % 2);
           for(k=4;k<linEq->dim;k++){
             peakNum2 = (int)((k-4)/2);
             parNum2 = k % 2;
-            linEq->matrix[j][k] += evalGaussTermDerivative(peakNum,xval,parNum)*evalGaussTermDerivative(peakNum2,xval,parNum2)/yval;
+            linEq->matrix[j][k] += evalGaussTermDerivative(peakNum,xval,parNum)*evalGaussTermDerivative(peakNum2,xval,parNum2)/weight;
           }
         }
       }
@@ -329,38 +339,47 @@ int setupFitSums(lin_eq_type *linEq, double flambda){
     linEq->dim = 3 + (3*fitpar.numFitPeaks);
 
     for (i=fitpar.fitStartCh;i<=fitpar.fitEndCh;i+=drawing.contractFactor){
-      xval = (double)(i);
-      yval = getDispSpBinVal(0,i-drawing.lowerLimit);
 
-      if(yval != 0){
-        ydiff = yval - evalFit(xval);
-        if(yval < 1.)
-          yval = 1.;
+      xval = (double)(i);
+      ydiff = getSpBinVal(0,i) - evalFit(xval);
+      
+      if(fitpar.weightMode == 0){
+        weight = getSpBinFitWeight(0,i);
+      }else if(fitpar.weightMode == 1){
+        weight = evalFit(xval);
+      }else{
+        weight = 1.;
+      }
+
+      if(weight != 0){
+
+        //if(weight < 1.)
+        //  weight = 1.;
       
         //parameters 0-2: background
-        linEq->matrix[0][0] += 1./yval;
-        linEq->matrix[0][1] += xval/yval;
-        linEq->matrix[0][2] += xval*xval/yval;
-        linEq->matrix[1][2] += xval*xval*xval/yval;
-        linEq->matrix[2][2] += xval*xval*xval*xval/yval;
-        linEq->vector[0] += ydiff/yval;
-        linEq->vector[1] += ydiff*xval/yval;
-        linEq->vector[2] += ydiff*xval*xval/yval;
+        linEq->matrix[0][0] += 1./weight;
+        linEq->matrix[0][1] += xval/weight;
+        linEq->matrix[0][2] += xval*xval/weight;
+        linEq->matrix[1][2] += xval*xval*xval/weight;
+        linEq->matrix[2][2] += xval*xval*xval*xval/weight;
+        linEq->vector[0] += ydiff/weight;
+        linEq->vector[1] += ydiff*xval/weight;
+        linEq->vector[2] += ydiff*xval*xval/weight;
 
         //parameters 3 and above: amplitudes, positions, widths
         for(j=3;j<linEq->dim;j++){
           peakNum = (int)((j-3)/3);
           parNum = j % 3;
-          linEq->matrix[0][j] += evalGaussTermDerivative(peakNum,xval,parNum)/yval;
-          linEq->matrix[1][j] += xval*evalGaussTermDerivative(peakNum,xval,parNum)/yval;
-          linEq->matrix[2][j] += xval*xval*evalGaussTermDerivative(peakNum,xval,parNum)/yval;
-          linEq->vector[j] += ydiff*evalGaussTermDerivative(peakNum,xval,parNum)/yval;
+          linEq->matrix[0][j] += evalGaussTermDerivative(peakNum,xval,parNum)/weight;
+          linEq->matrix[1][j] += xval*evalGaussTermDerivative(peakNum,xval,parNum)/weight;
+          linEq->matrix[2][j] += xval*xval*evalGaussTermDerivative(peakNum,xval,parNum)/weight;
+          linEq->vector[j] += ydiff*evalGaussTermDerivative(peakNum,xval,parNum)/weight;
           //printf("j: %i, j-3/3: %i, jmod3: %i\n",j,(int)(j-3)/3,j % 3);
           for(k=3;k<linEq->dim;k++){
             peakNum2 = (int)((k-3)/3);
             parNum2 = k % 3;
-            linEq->matrix[j][k] += evalGaussTermDerivative(peakNum,xval,parNum)*evalGaussTermDerivative(peakNum2,xval,parNum2)/yval;
-            //printf("yval: %f, j: %i, k: %i, evalgaussder j: %f, evalgaussder k: %f\n",yval,j,k,evalGaussTermDerivative((int)(j-3)/3,xval,j % 3),evalGaussTermDerivative((int)(k-3)/3,xval,k % 3));
+            linEq->matrix[j][k] += evalGaussTermDerivative(peakNum,xval,parNum)*evalGaussTermDerivative(peakNum2,xval,parNum2)/weight;
+            //printf("weight: %f, j: %i, k: %i, evalgaussder j: %f, evalgaussder k: %f\n",weight,j,k,evalGaussTermDerivative((int)(j-3)/3,xval,j % 3),evalGaussTermDerivative((int)(k-3)/3,xval,k % 3));
           }
         }
       }
@@ -376,8 +395,6 @@ int setupFitSums(lin_eq_type *linEq, double flambda){
       linEq->matrix[i][2] = linEq->matrix[2][i];
     }
   }
-
-  
 
   /*printf("Orig Matrix\n");
   for(i=0;i<linEq->dim;i++){
@@ -451,7 +468,7 @@ int areParsValid(){
     if(fabs(fitpar.fitParVal[8+(3*i)]) > (fitRange)/2.){
       return 0;
     }
-    if(getDispSpBinVal(0,fitpar.fitPeakInitGuess[i]-drawing.lowerLimit) > 0){
+    if(getSpBinVal(0,fitpar.fitPeakInitGuess[i]) > 0){
       if(fitpar.fitParVal[6+(3*i)] < 0.){
         return 0;
       }
@@ -657,12 +674,12 @@ gpointer performGausFitThreaded(){
 //do some math (assuming a Gaussian peak shape) to get a better initial estimate of the peak width
 double widthGuess(const double centroidCh, const double widthInit){
 
-  double centroidYVal = getDispSpBinVal(0,centroidCh-drawing.lowerLimit);
+  double centroidYVal = getSpBinVal(0,centroidCh);
   centroidYVal -= fitpar.fitParVal[0] + fitpar.fitParVal[1]*centroidCh;
   double HWInit = 2.35482*widthInit/2.; //initial half-width
-  double FWHighEdgeVal = getDispSpBinVal(0,centroidCh+HWInit-drawing.lowerLimit);
+  double FWHighEdgeVal = getSpBinVal(0,centroidCh+HWInit);
   FWHighEdgeVal -= fitpar.fitParVal[0] + fitpar.fitParVal[1]*(centroidCh+HWInit);
-  double FWLowEdgeVal = getDispSpBinVal(0,centroidCh-HWInit-drawing.lowerLimit);
+  double FWLowEdgeVal = getSpBinVal(0,centroidCh-HWInit);
   FWLowEdgeVal -= fitpar.fitParVal[0] + fitpar.fitParVal[1]*(centroidCh-HWInit);
   
   if(centroidYVal != 0.){
@@ -697,13 +714,13 @@ int startGausFit(){
   fitpar.widthFGH[2] = 0.;
 
   //assign initial guesses for background
-  fitpar.fitParVal[0] = (getDispSpBinVal(0,fitpar.fitStartCh-drawing.lowerLimit) + getDispSpBinVal(0,fitpar.fitEndCh-drawing.lowerLimit))/2.0;
-  fitpar.fitParVal[1] = (getDispSpBinVal(0,fitpar.fitEndCh-drawing.lowerLimit) - getDispSpBinVal(0,fitpar.fitStartCh-drawing.lowerLimit))/(fitpar.fitEndCh - fitpar.fitStartCh);
+  fitpar.fitParVal[0] = (getSpBinVal(0,fitpar.fitStartCh) + getSpBinVal(0,fitpar.fitEndCh))/2.0;
+  fitpar.fitParVal[1] = (getSpBinVal(0,fitpar.fitEndCh) - getSpBinVal(0,fitpar.fitStartCh))/(fitpar.fitEndCh - fitpar.fitStartCh);
   fitpar.fitParVal[2] = 0.0;
 
   //assign initial guesses for non-linear params
   for(i=0;i<fitpar.numFitPeaks;i++){
-    fitpar.fitParVal[6+(3*i)] = getDispSpBinVal(0,fitpar.fitPeakInitGuess[i]-drawing.lowerLimit) - fitpar.fitParVal[0] - fitpar.fitParVal[1]*fitpar.fitPeakInitGuess[i];
+    fitpar.fitParVal[6+(3*i)] = getSpBinVal(0,fitpar.fitPeakInitGuess[i]) - fitpar.fitParVal[0] - fitpar.fitParVal[1]*fitpar.fitPeakInitGuess[i];
     fitpar.fitParVal[7+(3*i)] = fitpar.fitPeakInitGuess[i];
   }
 
@@ -723,6 +740,12 @@ int startGausFit(){
     for(i=0;i<fitpar.numFitPeaks;i++){
       fitpar.fitParVal[8+(3*i)] = widthGuess(fitpar.fitPeakInitGuess[i],getFWHM(fitpar.fitPeakInitGuess[i],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482);
     }
+  }
+
+  if(fitpar.weightMode == 0){
+    printf("Weighting using data.\n");
+  }else if(fitpar.weightMode == 1){
+    printf("Weighting using fit function.\n");
   }
 
   //printf("Initial guesses: %f %f %f %f %f %f\n",fitpar.fitParVal[0],fitpar.fitParVal[1],fitpar.fitParVal[2],fitpar.fitParVal[6],fitpar.fitParVal[7],fitpar.fitParVal[8]);

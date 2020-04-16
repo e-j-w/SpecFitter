@@ -75,6 +75,7 @@ GtkNotebook *preferences_notebook;
 GtkCheckButton *discard_empty_checkbutton, *bin_errors_checkbutton, *round_errors_checkbutton, *dark_theme_checkbutton, *spectrum_label_checkbutton, *autozoom_checkbutton;
 GtkCheckButton *relative_widths_checkbutton;
 GtkButton *preferences_apply_button, *preferences_cancel_button;
+GtkComboBoxText *weight_mode_combobox;
 //shortcuts window
 GtkModelButton *shortcuts_button;
 GtkShortcutsWindow *shortcuts_window;
@@ -142,6 +143,7 @@ struct {
   double fitParErr[6+(3*MAX_FIT_PK)]; //errors in parameter values
   int numFitPeaks; //number of peaks to fit
   char fixRelativeWidths; //0=don't fix width, 1=fix widths
+  char weightMode; //0=weight using data (properly weighting for background subtraction), 1=weight using fit, 2=no weights
   double relWidths[MAX_FIT_PK]; //relative width factors
   char errFound; //whether or not paramter errors have been found
 } fitpar;

@@ -962,10 +962,6 @@ Author: Jonathan Williams
         <property name="width_request">400</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">10</property>
-        <property name="margin_right">10</property>
-        <property name="margin_top">10</property>
-        <property name="margin_bottom">10</property>
         <property name="orientation">vertical</property>
         <property name="spacing">10</property>
         <child>
@@ -1166,6 +1162,50 @@ Author: Jonathan Williams
                     <property name="position">1</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="tooltip_text" translatable="yes">Set the technique used for weighting individual channels in the fit.
+Weight by scaled data - Weights are proportional to the data value, taking into account the effects of scaling for summed or subtracted spectra.
+Weight by fit function - Weights are proportional to the fit function values determined during each fit iteration.</property>
+                    <property name="spacing">10</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Fit weighting mode</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBoxText" id="weight_mode_combobox">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="active">0</property>
+                        <items>
+                          <item id="&lt;Enter ID&gt;" translatable="yes">Weight by scaled data</item>
+                          <item translatable="yes">Weight by fit function</item>
+                          <item translatable="yes">No weighting</item>
+                        </items>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="position">1</property>
@@ -1196,31 +1236,18 @@ Author: Jonathan Williams
           </packing>
         </child>
         <child>
-          <object class="GtkSeparator">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="halign">end</property>
+            <property name="margin_left">10</property>
+            <property name="margin_right">10</property>
+            <property name="margin_bottom">10</property>
+            <property name="orientation">vertical</property>
             <property name="spacing">10</property>
             <child>
-              <object class="GtkButton" id="preferences_cancel_button">
-                <property name="label">gtk-cancel</property>
-                <property name="width_request">100</property>
-                <property name="height_request">40</property>
+              <object class="GtkSeparator">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
+                <property name="can_focus">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1229,27 +1256,56 @@ Author: Jonathan Williams
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="preferences_apply_button">
-                <property name="label">gtk-apply</property>
-                <property name="width_request">100</property>
-                <property name="height_request">40</property>
+              <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
+                <property name="can_focus">False</property>
                 <property name="halign">end</property>
-                <property name="use_stock">True</property>
+                <property name="spacing">10</property>
+                <child>
+                  <object class="GtkButton" id="preferences_cancel_button">
+                    <property name="label">gtk-cancel</property>
+                    <property name="width_request">100</property>
+                    <property name="height_request">40</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_stock">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="preferences_apply_button">
+                    <property name="label">gtk-apply</property>
+                    <property name="width_request">100</property>
+                    <property name="height_request">40</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="halign">end</property>
+                    <property name="use_stock">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="position">1</property>
               </packing>
             </child>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">3</property>
+            <property name="position">1</property>
           </packing>
         </child>
       </object>
@@ -1536,14 +1592,11 @@ Author: Jonathan Williams
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="fit_cancel_button">
-                    <property name="label">gtk-cancel</property>
-                    <property name="width_request">100</property>
+                  <object class="GtkButton" id="fit_preferences_button">
+                    <property name="label" translatable="yes">Preferences...</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="halign">end</property>
-                    <property name="use_stock">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1553,11 +1606,14 @@ Author: Jonathan Williams
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="fit_preferences_button">
-                    <property name="label" translatable="yes">Preferences...</property>
+                  <object class="GtkButton" id="fit_cancel_button">
+                    <property name="label">gtk-cancel</property>
+                    <property name="width_request">100</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="halign">end</property>
+                    <property name="use_stock">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>

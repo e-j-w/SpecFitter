@@ -76,6 +76,11 @@ int readConfigFile(FILE *file)
 					fitpar.fixRelativeWidths = 0;
 				}
 			}
+			if(strcmp(par,"fit_weight_mode") == 0){
+				int intVal = atoi(val);
+				if((intVal >= 0)&&(intVal <= 2))
+					fitpar.weightMode = intVal;
+			}
 			if(strcmp(par,"autozoom") == 0){
 				if(strcmp(val,"yes") == 0){
 					gui.autoZoom = 1;
@@ -161,6 +166,13 @@ int writeConfigFile(FILE *file)
 		fprintf(file,"fix_relative_widths=yes\n");
 	}else{
 		fprintf(file,"fix_relative_widths=no\n");
+	}
+	if(fitpar.weightMode == 0){
+		fprintf(file,"fit_weight_mode=0\n");
+	}else if(fitpar.weightMode == 1){
+		fprintf(file,"fit_weight_mode=1\n");
+	}else if(fitpar.weightMode == 2){
+		fprintf(file,"fit_weight_mode=2\n");
 	}
 
 	return 1;
