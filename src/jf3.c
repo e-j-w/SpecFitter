@@ -17,6 +17,8 @@ int main(int argc, char *argv[])
 
   builder = gtk_builder_new_from_resource("/resources/jf3.glade"); //get UI layout from glade XML file
   gtk_builder_add_from_resource (builder, "/resources/shortcuts_window.ui", NULL);
+  spIconPixbuf = gdk_pixbuf_new_from_resource("/resources/icon-spectrum-symbolic", NULL);
+  spIconPixbufDark = gdk_pixbuf_new_from_resource("/resources/icon-spectrum-symbolic-dark", NULL);
 
   //windows
   window = GTK_WINDOW(gtk_builder_get_object(builder, "window"));
@@ -46,12 +48,14 @@ int main(int argc, char *argv[])
   calibrate_button = GTK_WIDGET(gtk_builder_get_object(builder, "calibrate_button"));
   fit_button = GTK_WIDGET(gtk_builder_get_object(builder, "fit_button"));
   display_button = GTK_WIDGET(gtk_builder_get_object(builder, "display_button"));
+  display_button_icon = GTK_IMAGE(gtk_builder_get_object(builder, "display_button_icon"));
   spectrum_drawing_area = GTK_WIDGET(gtk_builder_get_object(builder, "spectrumdrawingarea"));
   spectrum_drag_gesture = gtk_gesture_drag_new(spectrum_drawing_area); //without this, cannot click away from menus onto the drawing area, needs further investigation
   zoom_scale = GTK_SCALE(gtk_builder_get_object(builder, "zoom_scale"));
   shortcuts_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "shortcuts_button"));
   about_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "about_button"));
   bottom_info_text = GTK_LABEL(gtk_builder_get_object(builder, "bottom_info_text"));
+  no_sp_box = GTK_BOX(gtk_builder_get_object(builder, "no_sp_box"));
 
   //fit interface UI elements
   revealer_info_panel = GTK_REVEALER(gtk_builder_get_object(builder, "revealer_info_panel"));
@@ -102,8 +106,6 @@ int main(int argc, char *argv[])
   logscale_button = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "logscalebutton"));
   cursor_draw_button = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "cursordrawbutton"));
   contract_scale = GTK_SCALE(gtk_builder_get_object(builder, "contract_scale"));
-
-
 
 
   //connect signals
@@ -213,7 +215,8 @@ int main(int argc, char *argv[])
 
   gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);
   gtk_adjustment_set_upper(spectrum_selector_adjustment, 1);
-  gtk_label_set_text(bottom_info_text,"No spectrum loaded.");
+  //gtk_label_set_text(bottom_info_text,"No spectrum loaded.");
+  gtk_label_set_text(bottom_info_text,"");
   
   //'gray out' widgets that can't be used yet
   gtk_widget_set_sensitive(GTK_WIDGET(append_button),FALSE);
@@ -280,6 +283,11 @@ int main(int argc, char *argv[])
 
   //set whether dark theme is preferred
   g_object_set(gtk_settings_get_default(),"gtk-application-prefer-dark-theme", gui.preferDarkTheme, NULL);
+  if(gui.preferDarkTheme){
+    gtk_image_set_from_pixbuf(display_button_icon, spIconPixbufDark);
+  }else{
+    gtk_image_set_from_pixbuf(display_button_icon, spIconPixbuf);
+  }
 
   //startup UI
   gtk_widget_show(GTK_WIDGET(window)); //show the window

@@ -39,6 +39,8 @@ GtkLabel *bottom_info_text;
 GtkWidget *file_open_dialog;
 GtkFileFilter *file_filter;
 GtkAccelGroup *main_window_accelgroup;
+GtkBox *no_sp_box;
+GtkImage *display_button_icon;
 //display menu
 GtkSpinButton *spectrum_selector;
 GtkCheckButton *autoscale_button, *logscale_button, *cursor_draw_button;
@@ -81,6 +83,9 @@ GtkModelButton *shortcuts_button;
 GtkShortcutsWindow *shortcuts_window;
 //builder
 GtkBuilder *builder;
+
+//custom icons
+GdkPixbuf *spIconPixbuf, *spIconPixbufDark;
 
 //non-GTK GUI globals
 struct {

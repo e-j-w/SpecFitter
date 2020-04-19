@@ -40,6 +40,7 @@ void openSingleFile(char *filename, int append){
         gtk_widget_set_sensitive(GTK_WIDGET(display_button),TRUE);
         gtk_widget_set_sensitive(GTK_WIDGET(zoom_scale),TRUE);
         gtk_label_set_text(bottom_info_text,"");
+        gtk_widget_hide(GTK_WIDGET(no_sp_box));
         if(numSp > 1){
           gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
           gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
@@ -130,6 +131,7 @@ void on_open_button_clicked(GtkButton *b)
           gtk_widget_set_sensitive(GTK_WIDGET(display_button),TRUE);
           gtk_widget_set_sensitive(GTK_WIDGET(zoom_scale),TRUE);
           gtk_label_set_text(bottom_info_text,"");
+          gtk_widget_hide(GTK_WIDGET(no_sp_box));
           if(numSp > 1){
             gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
             gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
@@ -711,6 +713,11 @@ void on_toggle_dark_theme(GtkToggleButton *togglebutton, gpointer user_data)
   
   //set whether dark theme is preferred
   g_object_set(gtk_settings_get_default(),"gtk-application-prefer-dark-theme", gui.preferDarkTheme, NULL);
+  if(gui.preferDarkTheme){
+    gtk_image_set_from_pixbuf(display_button_icon, spIconPixbufDark);
+  }else{
+    gtk_image_set_from_pixbuf(display_button_icon, spIconPixbuf);
+  }
 }
 void on_toggle_autozoom(GtkToggleButton *togglebutton, gpointer user_data)
 {
@@ -754,6 +761,11 @@ void on_preferences_cancel_button_clicked(GtkButton *b)
   updatePrefsFromConfigFile(); //rather than updating the config file, read from it to revert settings
   //set whether dark theme is preferred
   g_object_set(gtk_settings_get_default(),"gtk-application-prefer-dark-theme", gui.preferDarkTheme, NULL);
+  if(gui.preferDarkTheme){
+    gtk_image_set_from_pixbuf(display_button_icon, spIconPixbufDark);
+  }else{
+    gtk_image_set_from_pixbuf(display_button_icon, spIconPixbuf);
+  }
   //hide the dialog
   gtk_widget_hide(GTK_WIDGET(preferences_window)); //close the multiplot window
 }

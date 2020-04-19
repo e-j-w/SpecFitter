@@ -1497,7 +1497,7 @@ Weight by fit function - Weights are proportional to the fit function values det
             <property name="use_popover">False</property>
             <property name="popover">display_popover</property>
             <child>
-              <object class="GtkImage">
+              <object class="GtkImage" id="display_button_icon">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="icon_name">emblem-photos-symbolic</property>
@@ -1536,7 +1536,48 @@ Weight by fit function - Weights are proportional to the fit function values det
             <property name="margin_left">6</property>
             <property name="margin_right">6</property>
             <child>
-              <placeholder/>
+              <object class="GtkBox" id="no_sp_box">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">10</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="valign">end</property>
+                    <property name="vexpand">True</property>
+                    <property name="pixel_size">100</property>
+                    <property name="icon_name">action-unavailable-symbolic</property>
+                    <property name="icon_size">6</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="valign">start</property>
+                    <property name="vexpand">True</property>
+                    <property name="label" translatable="yes">No spectrum data opened</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="index">-1</property>
+              </packing>
             </child>
             <child type="overlay">
               <object class="GtkDrawingArea" id="spectrumdrawingarea">
@@ -1592,11 +1633,14 @@ Weight by fit function - Weights are proportional to the fit function values det
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="fit_preferences_button">
-                    <property name="label" translatable="yes">Preferences...</property>
+                  <object class="GtkButton" id="fit_cancel_button">
+                    <property name="label">gtk-cancel</property>
+                    <property name="width_request">100</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="halign">end</property>
+                    <property name="use_stock">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1606,14 +1650,11 @@ Weight by fit function - Weights are proportional to the fit function values det
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="fit_cancel_button">
-                    <property name="label">gtk-cancel</property>
-                    <property name="width_request">100</property>
+                  <object class="GtkButton" id="fit_preferences_button">
+                    <property name="label" translatable="yes">Preferences...</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="halign">end</property>
-                    <property name="use_stock">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
