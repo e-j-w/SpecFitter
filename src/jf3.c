@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
 
   builder = gtk_builder_new_from_resource("/resources/jf3.glade"); //get UI layout from glade XML file
   gtk_builder_add_from_resource (builder, "/resources/shortcuts_window.ui", NULL);
+  appIcon = gdk_pixbuf_new_from_resource("/resources/jf3-application-icon.svg", NULL);
   spIconPixbuf = gdk_pixbuf_new_from_resource("/resources/icon-spectrum-symbolic", NULL);
   spIconPixbufDark = gdk_pixbuf_new_from_resource("/resources/icon-spectrum-symbolic-dark", NULL);
 
@@ -288,6 +289,10 @@ int main(int argc, char *argv[])
   }else{
     gtk_image_set_from_pixbuf(display_button_icon, spIconPixbuf);
   }
+
+  //gtk_window_set_default_icon(appIcon);
+  //gtk_window_set_icon(window,appIcon);
+  gtk_about_dialog_set_logo(about_dialog, appIcon);
 
   //startup UI
   gtk_widget_show(GTK_WIDGET(window)); //show the window

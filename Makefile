@@ -24,8 +24,9 @@ install:
 	else \
 		read -p "Press any key to continue..." ; \
 		cp jf3 /usr/bin ; \
+		cp data/jf3-application-icon.svg /usr/share/icons/hicolor/scalable/apps ; \
 		cp data/jf3.desktop /usr/share/applications ; \
-		update-desktop-database ; \
+		update-desktop-database /usr/share/applications; \
 		echo "Done!" ; \
 	fi
 	
@@ -37,8 +38,9 @@ uninstall:
 	else \
 		read -p "Press any key to continue..." ; \
 		rm /usr/bin/jf3 ; \
+		rm /usr/share/icons/hicolor/scalable/apps/jf3-application-icon.svg ; \
 		rm /usr/share/applications/jf3.desktop ; \
-		update-desktop-database ; \
+		update-desktop-database /usr/share/applications; \
 		echo "Done!" ; \
 	fi
 

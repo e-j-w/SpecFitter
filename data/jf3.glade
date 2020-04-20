@@ -96,7 +96,7 @@ Author: Jonathan Williams
     <property name="comments" translatable="yes">A 1D spectrum viewer and fitter application.</property>
     <property name="website">https://github.com/e-j-w/jf3</property>
     <property name="authors">Jonathan Williams</property>
-    <property name="logo_icon_name">utilities-system-monitor</property>
+    <property name="logo">jf3-application-icon.svg</property>
     <property name="license_type">mit-x11</property>
     <child type="titlebar">
       <placeholder/>
@@ -645,7 +645,7 @@ Author: Jonathan Williams
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Channels / bin</property>
+                <property name="label" translatable="yes">Channels / Bin</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1245,17 +1245,6 @@ Weight by fit function - Weights are proportional to the fit function values det
             <property name="orientation">vertical</property>
             <property name="spacing">10</property>
             <child>
-              <object class="GtkSeparator">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -1417,7 +1406,7 @@ Weight by fit function - Weights are proportional to the fit function values det
     <property name="window_position">center</property>
     <property name="default_width">600</property>
     <property name="default_height">400</property>
-    <property name="icon_name">utilities-system-monitor</property>
+    <property name="icon">jf3-application-icon.svg</property>
     <property name="gravity">center</property>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="header_bar">

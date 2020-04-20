@@ -85,7 +85,7 @@ GtkShortcutsWindow *shortcuts_window;
 GtkBuilder *builder;
 
 //custom icons
-GdkPixbuf *spIconPixbuf, *spIconPixbufDark;
+GdkPixbuf *appIcon, *spIconPixbuf, *spIconPixbufDark;
 
 //non-GTK GUI globals
 struct {
