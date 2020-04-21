@@ -97,7 +97,6 @@ int main(int argc, char *argv[])
   relative_widths_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "relative_widths_checkbutton"));
   weight_mode_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "weight_mode_combobox"));
   preferences_apply_button = GTK_BUTTON(gtk_builder_get_object(builder, "preferences_apply_button"));
-  preferences_cancel_button = GTK_BUTTON(gtk_builder_get_object(builder, "preferences_cancel_button"));
 
   //display menu UI elements
   multiplot_button = GTK_WIDGET(gtk_builder_get_object(builder, "multiplot_button"));
@@ -138,7 +137,6 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (autozoom_checkbutton), "toggled", G_CALLBACK (on_toggle_autozoom), NULL);
   g_signal_connect (G_OBJECT (preferences_apply_button), "clicked", G_CALLBACK (on_preferences_apply_button_clicked), NULL);
   g_signal_connect (G_OBJECT (preferences_button), "clicked", G_CALLBACK (on_preferences_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (preferences_cancel_button), "clicked", G_CALLBACK (on_preferences_cancel_button_clicked), NULL);
   gtk_widget_set_events(spectrum_drawing_area, gtk_widget_get_events (spectrum_drawing_area) | GDK_SCROLL_MASK | GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK); //allow mouse scrolling over the drawing area
   g_signal_connect (G_OBJECT (cal_entry_const), "preedit-changed", G_CALLBACK (on_cal_par_activate), NULL);
   g_signal_connect (G_OBJECT (cal_entry_lin), "preedit-changed", G_CALLBACK (on_cal_par_activate), NULL);
@@ -154,6 +152,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (multiplot_cr3), "edited", G_CALLBACK (on_multiplot_scaling_edited), NULL);
   g_signal_connect (G_OBJECT (calibrate_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (multiplot_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect (G_OBJECT (preferences_window), "delete-event", G_CALLBACK (on_preferences_cancel_button_clicked), NULL);
   g_signal_connect (G_OBJECT (preferences_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (shortcuts_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (about_dialog), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
@@ -290,8 +289,8 @@ int main(int argc, char *argv[])
     gtk_image_set_from_pixbuf(display_button_icon, spIconPixbuf);
   }
 
-  //gtk_window_set_default_icon(appIcon);
-  //gtk_window_set_icon(window,appIcon);
+  gtk_window_set_default_icon(appIcon);
+  gtk_window_set_icon(window,appIcon);
   gtk_about_dialog_set_logo(about_dialog, appIcon);
 
   //startup UI

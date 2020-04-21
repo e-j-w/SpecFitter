@@ -116,7 +116,7 @@ void on_open_button_clicked(GtkButton *b)
         for (j = rawdata.numSpOpened; j < (rawdata.numSpOpened+numSp); j++){
           snprintf(rawdata.histComment[j],256,"Spectrum %i of %s",j-rawdata.numSpOpened+1,basename((char*)filename));
           //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
-          drawing.scaleFactor[i] = 1.00;
+          drawing.scaleFactor[j] = 1.00;
         }
         rawdata.numSpOpened += numSp;
         //select the first non-empty spectrum by default
@@ -232,7 +232,7 @@ void on_append_button_clicked(GtkButton *b)
         for (j = rawdata.numSpOpened; j < (rawdata.numSpOpened+numSp); j++){
           snprintf(rawdata.histComment[j],256,"Spectrum %i of %s",j-rawdata.numSpOpened+1,basename((char*)filename));
           //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
-          drawing.scaleFactor[i] = 1.00;
+          drawing.scaleFactor[j] = 1.00;
         }
         rawdata.numSpOpened += numSp;
         gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened);

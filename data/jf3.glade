@@ -951,7 +951,6 @@ Author: Jonathan Williams
     <property name="modal">True</property>
     <property name="window_position">center-always</property>
     <property name="type_hint">dialog</property>
-    <property name="deletable">False</property>
     <property name="gravity">center</property>
     <property name="attached_to">window</property>
     <child type="titlebar">
@@ -1251,22 +1250,6 @@ Weight by fit function - Weights are proportional to the fit function values det
                 <property name="halign">end</property>
                 <property name="spacing">10</property>
                 <child>
-                  <object class="GtkButton" id="preferences_cancel_button">
-                    <property name="label">gtk-cancel</property>
-                    <property name="width_request">100</property>
-                    <property name="height_request">40</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="use_stock">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkButton" id="preferences_apply_button">
                     <property name="label">gtk-apply</property>
                     <property name="width_request">100</property>
@@ -1401,6 +1384,8 @@ Weight by fit function - Weights are proportional to the fit function values det
     </child>
   </object>
   <object class="GtkWindow" id="window">
+    <property name="width_request">800</property>
+    <property name="height_request">580</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">jf3 Spectrum Viewer</property>
     <property name="window_position">center</property>
@@ -1518,8 +1503,6 @@ Weight by fit function - Weights are proportional to the fit function values det
         </child>
         <child>
           <object class="GtkOverlay">
-            <property name="width_request">800</property>
-            <property name="height_request">480</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_left">6</property>
@@ -1537,7 +1520,7 @@ Weight by fit function - Weights are proportional to the fit function values det
                     <property name="valign">end</property>
                     <property name="vexpand">True</property>
                     <property name="pixel_size">100</property>
-                    <property name="icon_name">action-unavailable-symbolic</property>
+                    <property name="icon_name">dialog-information-symbolic</property>
                     <property name="icon_size">6</property>
                   </object>
                   <packing>
@@ -1622,14 +1605,11 @@ Weight by fit function - Weights are proportional to the fit function values det
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="fit_cancel_button">
-                    <property name="label">gtk-cancel</property>
-                    <property name="width_request">100</property>
+                  <object class="GtkButton" id="fit_preferences_button">
+                    <property name="label" translatable="yes">Preferences...</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="halign">end</property>
-                    <property name="use_stock">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1639,11 +1619,14 @@ Weight by fit function - Weights are proportional to the fit function values det
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="fit_preferences_button">
-                    <property name="label" translatable="yes">Preferences...</property>
+                  <object class="GtkButton" id="fit_cancel_button">
+                    <property name="label">gtk-cancel</property>
+                    <property name="width_request">100</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="halign">end</property>
+                    <property name="use_stock">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
