@@ -1519,7 +1519,7 @@ Weight by fit function - Weights are proportional to the fit function values det
                     <property name="can_focus">False</property>
                     <property name="valign">end</property>
                     <property name="vexpand">True</property>
-                    <property name="pixel_size">100</property>
+                    <property name="pixel_size">30</property>
                     <property name="icon_name">dialog-information-symbolic</property>
                     <property name="icon_size">6</property>
                   </object>

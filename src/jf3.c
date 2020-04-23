@@ -143,8 +143,8 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (cal_entry_quad), "preedit-changed", G_CALLBACK (on_cal_par_activate), NULL);
   g_signal_connect (G_OBJECT (zoom_scale), "value-changed", G_CALLBACK (on_zoom_scale_changed), NULL);
   g_signal_connect (G_OBJECT (contract_scale), "value-changed", G_CALLBACK (on_contract_scale_changed), NULL);
-  g_signal_connect (G_OBJECT (contract_scale), "button-release-event", G_CALLBACK (on_contract_scale_button_release), NULL);
-  gtk_widget_set_events(GTK_WIDGET(contract_scale), gtk_widget_get_events (GTK_WIDGET(contract_scale)) | GDK_BUTTON_RELEASE_MASK);
+  //g_signal_connect (G_OBJECT (contract_scale), "button-release-event", G_CALLBACK (on_contract_scale_button_release), NULL);
+  //gtk_widget_set_events(GTK_WIDGET(contract_scale), gtk_widget_get_events (GTK_WIDGET(contract_scale)) | GDK_BUTTON_RELEASE_MASK);
   g_signal_connect (G_OBJECT (shortcuts_button), "clicked", G_CALLBACK (on_shortcuts_button_clicked), NULL);
   g_signal_connect (G_OBJECT (about_button), "clicked", G_CALLBACK (on_about_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_ok_button), "clicked", G_CALLBACK (on_multiplot_ok_button_clicked), NULL);

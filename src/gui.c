@@ -39,11 +39,11 @@ void openSingleFile(char *filename, int append){
         gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),TRUE);
         gtk_widget_set_sensitive(GTK_WIDGET(display_button),TRUE);
         gtk_widget_set_sensitive(GTK_WIDGET(zoom_scale),TRUE);
+        gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
         gtk_label_set_text(bottom_info_text,"");
         gtk_widget_hide(GTK_WIDGET(no_sp_box));
-        if(numSp > 1){
+        if(rawdata.numSpOpened > 1){
           gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
-          gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
         }
         //set the range of selectable spectra values
         gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);
@@ -130,11 +130,11 @@ void on_open_button_clicked(GtkButton *b)
           gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),TRUE);
           gtk_widget_set_sensitive(GTK_WIDGET(display_button),TRUE);
           gtk_widget_set_sensitive(GTK_WIDGET(zoom_scale),TRUE);
+          gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
           gtk_label_set_text(bottom_info_text,"");
           gtk_widget_hide(GTK_WIDGET(no_sp_box));
-          if(numSp > 1){
+          if(rawdata.numSpOpened > 1){
             gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
-            gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
           }
           //set the range of selectable spectra values
           gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);
@@ -235,6 +235,9 @@ void on_append_button_clicked(GtkButton *b)
           drawing.scaleFactor[j] = 1.00;
         }
         rawdata.numSpOpened += numSp;
+        if(rawdata.numSpOpened > 1){
+          gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
+        }
         gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened);
       }else if (numSp == -1){
         //too many files opened
