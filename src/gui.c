@@ -313,23 +313,15 @@ void on_contract_scale_changed(GtkRange *range, gpointer user_data){
   drawing.contractFactor = (int)gtk_range_get_value(range); //modify the contraction factor
   if(gui.fittingSp == 5){
     int i;
-    //rescale fit (optimization - don't refit until scale is released)
+    //rescale fit (optimization - don't refit)
     for(i=0;i<fitpar.numFitPeaks;i++){
       fitpar.fitParVal[6+(3*i)] *= 1.0*drawing.contractFactor/oldContractFactor;
     }
     for(i=0;i<3;i++){
       fitpar.fitParVal[i] *= 1.0*drawing.contractFactor/oldContractFactor;
     }
-    gui.deferFit = 1;
   }
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
-}
-
-void on_contract_scale_button_release(GtkWidget *widget, GdkEvent *event, gpointer user_data){
-  if((gui.deferFit)&&(gui.fittingSp == 5)){
-    gui.deferFit = 0; //unset the flag
-    startGausFit(); //refit
-  }
 }
 
 void on_calibrate_button_clicked(GtkButton *b)

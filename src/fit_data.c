@@ -279,8 +279,8 @@ int setupFitSums(lin_eq_type *linEq, double flambda){
 
         widthDerSum = 0.;
         
-        //if(weight < 1.)
-        //  weight = 1.;
+        if(weight < 1.)
+          weight = 1.;
       
         //parameters 0-2: background
         linEq->matrix[0][0] += 1./weight;
@@ -729,6 +729,7 @@ int startGausFit(){
     printf("Fitting with relative peak widths fixed.\n");
     double firstWidthInitGuess = getFWHM(fitpar.fitPeakInitGuess[0],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482;
     fitpar.fitParVal[8] = widthGuess(fitpar.fitPeakInitGuess[0],firstWidthInitGuess);
+    //printf("width guess: %f\n",fitpar.fitParVal[8]);
     for(i=1;i<fitpar.numFitPeaks;i++){
       fitpar.fitParVal[8+(3*i)] = fitpar.fitParVal[8]*(getFWHM(fitpar.fitPeakInitGuess[i],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482)/firstWidthInitGuess;
     }

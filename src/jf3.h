@@ -96,7 +96,6 @@ struct {
   char drawSpCursor; //0 = don't draw vertical cursor on spectrum, 1=draw, -1=drawing disabled
   char drawSpLabels; //0 = don't draw labels, 1 = draw labels
   char fittingSp; //0=not fitting, 1=selecting limits, 2=selecting peaks, 3=fitting, 4=refining fit, 5=fitted (display fit)
-  char deferFit; //0=no action, 1=fit is being deferred until a later time
   int deferSpSelChange;
   int deferToggleRow;
   char showBinErrors; //0=don't show, 1=show
