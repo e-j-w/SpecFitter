@@ -78,6 +78,7 @@ GtkCheckButton *discard_empty_checkbutton, *bin_errors_checkbutton, *round_error
 GtkCheckButton *relative_widths_checkbutton;
 GtkButton *preferences_apply_button;
 GtkComboBoxText *weight_mode_combobox;
+GtkCheckButton *popup_results_checkbutton;
 //shortcuts window
 GtkModelButton *shortcuts_button;
 GtkShortcutsWindow *shortcuts_window;
@@ -102,6 +103,7 @@ struct {
   char roundErrors; //0=don't round, 1=round
   char autoZoom; //0=don't autozoom, 1=autozoom
   char preferDarkTheme; //0=prefer light, 1=prefer dark
+  char popupFitResults; //0=don't popup results after fit, 1=popup results
 } gui;
 
 //imported data globals

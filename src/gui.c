@@ -9,6 +9,7 @@ void showPreferences(int page){
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autozoom_checkbutton),gui.autoZoom);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_label_checkbutton),gui.drawSpLabels);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(relative_widths_checkbutton),fitpar.fixRelativeWidths);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(popup_results_checkbutton),gui.popupFitResults);
   gtk_combo_box_set_active(GTK_COMBO_BOX(weight_mode_combobox),fitpar.weightMode);
   gtk_window_present(preferences_window); //show the window
 }
@@ -736,6 +737,14 @@ void on_toggle_relative_widths(GtkToggleButton *togglebutton, gpointer user_data
     fitpar.fixRelativeWidths=1;
   else
     fitpar.fixRelativeWidths=0;
+}
+
+void on_toggle_popup_results(GtkToggleButton *togglebutton, gpointer user_data)
+{
+  if(gtk_toggle_button_get_active(togglebutton))
+    gui.popupFitResults=1;
+  else
+    gui.popupFitResults=0;
 }
 
 void on_preferences_button_clicked(GtkButton *b)

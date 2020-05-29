@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.2 
+<!-- Generated with glade 3.36.0 
 
 The MIT License (MIT)
 
@@ -96,11 +96,9 @@ Author: Jonathan Williams
     <property name="comments" translatable="yes">A 1D spectrum viewer and fitter application.</property>
     <property name="website">https://github.com/e-j-w/jf3</property>
     <property name="authors">Jonathan Williams</property>
+    <property name="artists">Jonathan Williams</property>
     <property name="logo">jf3-application-icon.svg</property>
     <property name="license_type">mit-x11</property>
-    <child type="titlebar">
-      <placeholder/>
-    </child>
     <child internal-child="vbox">
       <object class="GtkBox">
         <property name="can_focus">False</property>
@@ -122,6 +120,9 @@ Author: Jonathan Williams
         </child>
       </object>
     </child>
+    <child type="titlebar">
+      <placeholder/>
+    </child>
   </object>
   <object class="GtkWindow" id="calibration_window">
     <property name="can_focus">False</property>
@@ -132,9 +133,6 @@ Author: Jonathan Williams
     <property name="type_hint">dialog</property>
     <property name="gravity">center</property>
     <property name="attached_to">window</property>
-    <child type="titlebar">
-      <placeholder/>
-    </child>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
@@ -420,6 +418,9 @@ Author: Jonathan Williams
         </child>
       </object>
     </child>
+    <child type="titlebar">
+      <placeholder/>
+    </child>
   </object>
   <object class="GtkPopover" id="display_popover">
     <property name="can_focus">False</property>
@@ -689,9 +690,6 @@ Author: Jonathan Williams
     <property name="type_hint">dialog</property>
     <property name="gravity">center</property>
     <property name="attached_to">window</property>
-    <child type="titlebar">
-      <placeholder/>
-    </child>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
@@ -796,7 +794,7 @@ Author: Jonathan Williams
                                 <property name="max_width_chars">4</property>
                                 <property name="placeholder_text">1.00</property>
                                 <property name="adjustment">scale_adjustment</property>
-                                <property name="climb_rate">0.10000000000000001</property>
+                                <property name="climb_rate">0.1</property>
                                 <property name="digits">2</property>
                               </object>
                               <attributes>
@@ -942,6 +940,9 @@ Author: Jonathan Williams
         </child>
       </object>
     </child>
+    <child type="titlebar">
+      <placeholder/>
+    </child>
   </object>
   <object class="GtkWindow" id="preferences_window">
     <property name="width_request">400</property>
@@ -953,9 +954,6 @@ Author: Jonathan Williams
     <property name="type_hint">dialog</property>
     <property name="gravity">center</property>
     <property name="attached_to">window</property>
-    <child type="titlebar">
-      <placeholder/>
-    </child>
     <child>
       <object class="GtkBox">
         <property name="width_request">400</property>
@@ -1205,6 +1203,39 @@ Weight by fit function - Weights are proportional to the fit function values det
                     <property name="position">2</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">Fit Display</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="popup_results_checkbutton">
+                    <property name="label" translatable="yes">Popup results when finished fitting</property>
+                    <property name="name">drop_empty_checkbox</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">If checked, will show fit results in a popup dialog.  Fit results for a given peak can also be seen in the status bar by moving the cursor over that peak.</property>
+                    <property name="halign">start</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">4</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="position">1</property>
@@ -1281,6 +1312,9 @@ Weight by fit function - Weights are proportional to the fit function values det
           </packing>
         </child>
       </object>
+    </child>
+    <child type="titlebar">
+      <placeholder/>
     </child>
   </object>
   <object class="GtkPopoverMenu" id="primary_menu">
@@ -1393,98 +1427,6 @@ Weight by fit function - Weights are proportional to the fit function values det
     <property name="default_height">400</property>
     <property name="icon">jf3-application-icon.svg</property>
     <property name="gravity">center</property>
-    <child type="titlebar">
-      <object class="GtkHeaderBar" id="header_bar">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="title" translatable="yes">jf3 Spectrum Viewer</property>
-        <property name="show_close_button">True</property>
-        <child>
-          <object class="GtkButtonBox">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="layout_style">expand</property>
-            <child>
-              <object class="GtkButton" id="open_button">
-                <property name="label" translatable="yes">Open...</property>
-                <property name="width_request">80</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Open a file containing spectra (.txt, .mca, .fmca, .spe format).</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="append_button">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Append file(s) containing spectra to the already opened spectra.</property>
-                <property name="halign">start</property>
-                <child>
-                  <object class="GtkImage">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="icon_name">list-add-symbolic</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="position">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkMenuButton" id="primary_menu_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="direction">none</property>
-            <property name="popover">primary_menu</property>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkMenuButton" id="display_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Show display options for the loaded spectra.</property>
-            <property name="use_popover">False</property>
-            <property name="popover">display_popover</property>
-            <child>
-              <object class="GtkImage" id="display_button_icon">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">emblem-photos-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
-      </object>
-    </child>
     <child>
       <object class="GtkBox" id="box1">
         <property name="visible">True</property>
@@ -1605,11 +1547,14 @@ Weight by fit function - Weights are proportional to the fit function values det
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="fit_preferences_button">
-                    <property name="label" translatable="yes">Preferences...</property>
+                  <object class="GtkButton" id="fit_cancel_button">
+                    <property name="label">gtk-cancel</property>
+                    <property name="width_request">100</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="halign">end</property>
+                    <property name="use_stock">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1619,14 +1564,11 @@ Weight by fit function - Weights are proportional to the fit function values det
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="fit_cancel_button">
-                    <property name="label">gtk-cancel</property>
-                    <property name="width_request">100</property>
+                  <object class="GtkButton" id="fit_preferences_button">
+                    <property name="label" translatable="yes">Preferences...</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="halign">end</property>
-                    <property name="use_stock">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1746,6 +1688,98 @@ Weight by fit function - Weights are proportional to the fit function values det
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <child type="titlebar">
+      <object class="GtkHeaderBar" id="header_bar">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="title" translatable="yes">jf3 Spectrum Viewer</property>
+        <property name="show_close_button">True</property>
+        <child>
+          <object class="GtkMenuButton" id="primary_menu_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="direction">none</property>
+            <property name="popover">primary_menu</property>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="pack_type">end</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButtonBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="layout_style">expand</property>
+            <child>
+              <object class="GtkButton" id="open_button">
+                <property name="label" translatable="yes">Open...</property>
+                <property name="width_request">80</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Open a file containing spectra (.txt, .mca, .fmca, .spe format).</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="append_button">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Append file(s) containing spectra to the already opened spectra.</property>
+                <property name="halign">start</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="icon_name">list-add-symbolic</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkMenuButton" id="display_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Show display options for the loaded spectra.</property>
+            <property name="use_popover">False</property>
+            <property name="popover">display_popover</property>
+            <child>
+              <object class="GtkImage" id="display_button_icon">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_name">emblem-photos-symbolic</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="pack_type">end</property>
             <property name="position">3</property>
           </packing>
         </child>

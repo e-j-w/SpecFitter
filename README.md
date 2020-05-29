@@ -6,8 +6,6 @@
 
 A (1D) spectrum viewer and fitter app, with functionality inspired by the `gf3` program for gamma-ray spectroscopy in the [RadWare](https://radware.phy.ornl.gov/) software package.
 
-**DISCLAIMER**: This is a work in progress and under active development - results are not guaranteed.
-
 ## Features
 
 ### Supported file formats
@@ -42,7 +40,7 @@ Conversion codes for some of these data formats are available in the [FileConvTo
 
 ### Compatibility
 
-The build process has been tested on CentOS 7 and Arch Linux (as of April 2020) under the GNOME desktop environment.  It should more-or-less work on any Linux distro that satisfies the build dependencies below.  It may be possible to build this on other platforms (OSX, *BSD, WSL, etc.), but that hasn't been tested.
+The build process has been tested on CentOS 7 and Arch Linux (as of May 2020) under the GNOME desktop environment.  It should more-or-less work on any Linux distro that satisfies the build dependencies below.  It may be possible to build this on other platforms (OSX, *BSD, WSL, etc.), but that hasn't been tested.
 
 ### Build dependencies
 

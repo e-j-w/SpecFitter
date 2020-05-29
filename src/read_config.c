@@ -76,6 +76,13 @@ int readConfigFile(FILE *file)
 					fitpar.fixRelativeWidths = 0;
 				}
 			}
+			if(strcmp(par,"popup_fit_results") == 0){
+				if(strcmp(val,"yes") == 0){
+					gui.popupFitResults = 1;
+				}else{
+					gui.popupFitResults = 0;
+				}
+			}
 			if(strcmp(par,"fit_weight_mode") == 0){
 				int intVal = atoi(val);
 				if((intVal >= 0)&&(intVal <= 2))
@@ -166,6 +173,11 @@ int writeConfigFile(FILE *file)
 		fprintf(file,"fix_relative_widths=yes\n");
 	}else{
 		fprintf(file,"fix_relative_widths=no\n");
+	}
+	if(gui.popupFitResults == 1){
+		fprintf(file,"popup_fit_results=yes\n");
+	}else{
+		fprintf(file,"popup_fit_results=no\n");
 	}
 	if(fitpar.weightMode == 0){
 		fprintf(file,"fit_weight_mode=0\n");

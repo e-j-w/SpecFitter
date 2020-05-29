@@ -3,6 +3,7 @@
 //forward declarations
 float getSpBinVal(const int dispSpNum, const int bin);
 float getSpBinFitWeight(const int dispSpNum, const int bin);
+double getFitChisq();
 
 //update the gui state while/after fitting
 gboolean update_gui_fit_state(){
@@ -59,6 +60,43 @@ gboolean update_gui_fit_state(){
       break;
   }
   return FALSE; //stop running
+}
+
+void printFitResults(){
+
+  int i;
+  char fitResStr[1024];
+  GtkDialogFlags flags; 
+  GtkWidget *message_dialog;
+
+  int length = 0;
+  if(gui.popupFitResults==0){
+    length += snprintf(fitResStr+length,1024-length,"\nFit result - chisq/ndf: %f\nA: %f +/- %f, B: %f +/- %f, C: %f +/- %f\n",getFitChisq()/(1.0*fitpar.ndf),fitpar.fitParVal[0],fitpar.fitParErr[0],fitpar.fitParVal[1],fitpar.fitParErr[1],fitpar.fitParVal[2],fitpar.fitParErr[2]);
+  }else{
+    length += snprintf(fitResStr+length,1024-length,"Chisq/NDF: %f\n\nBackground\nA: %f +/- %f, B: %f +/- %f, C: %f +/- %f\n\nPeaks\n",getFitChisq()/(1.0*fitpar.ndf),fitpar.fitParVal[0],fitpar.fitParErr[0],fitpar.fitParVal[1],fitpar.fitParErr[1],fitpar.fitParVal[2],fitpar.fitParErr[2]);
+  }
+  for(i=0;i<fitpar.numFitPeaks;i++){
+    length += snprintf(fitResStr+length,1024-length,"A%i: %f +/- %f, P%i: %f +/- %f, W%i: %f +/- %f\n",i+1,fitpar.fitParVal[6+(3*i)],fitpar.fitParErr[6+(3*i)],i+1,fitpar.fitParVal[7+(3*i)],fitpar.fitParErr[7+(3*i)],i+1,fitpar.fitParVal[8+(3*i)],fitpar.fitParErr[8+(3*i)]);
+  }
+  if(gui.popupFitResults==0)
+    length += snprintf(fitResStr+length,1024-length,"\n");
+
+  switch (gui.popupFitResults)
+  {
+    case 1:
+      //show a dialog box with the fit results
+      flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+      message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, "Fit results");
+      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),fitResStr);
+      gtk_dialog_run (GTK_DIALOG (message_dialog));
+      gtk_widget_destroy (message_dialog);
+      break;
+    default:
+      //only print to the console
+      printf(fitResStr);
+      break;
+  }
+      
 }
 
 double getFWHM(double chan, double widthF, double widthG, double widthH){
@@ -655,14 +693,11 @@ void performGausFit(){
       fitpar.fitParVal[8+(3*i)] = fabs(fitpar.fitParVal[8+(3*i)]);
     }
   }
-    
-  printf("\nFit result - chisq/ndf: %f\nA: %f +/- %f, B: %f +/- %f, C: %f +/- %f\n",getFitChisq()/(1.0*fitpar.ndf),fitpar.fitParVal[0],fitpar.fitParErr[0],fitpar.fitParVal[1],fitpar.fitParErr[1],fitpar.fitParVal[2],fitpar.fitParErr[2]);
-  for(i=0;i<fitpar.numFitPeaks;i++){
-    printf("A%i: %f +/- %f, P%i: %f +/- %f, W%i: %f +/- %f\n",i+1,fitpar.fitParVal[6+(3*i)],fitpar.fitParErr[6+(3*i)],i+1,fitpar.fitParVal[7+(3*i)],fitpar.fitParErr[7+(3*i)],i+1,fitpar.fitParVal[8+(3*i)],fitpar.fitParErr[8+(3*i)]);
-  }
-  printf("\n");
+  
   gui.fittingSp = 5;
   g_idle_add(update_gui_fit_state,NULL);
+  printFitResults();
+
 }
 gpointer performGausFitThreaded(){
   performGausFit();
