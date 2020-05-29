@@ -66,27 +66,28 @@ gboolean update_gui_fit_state(){
 void printFitResults(){
 
   int i;
-  char fitResStr[1024];
+  const int strSize = 1024;
+  char *fitResStr = malloc(strSize);
   GtkDialogFlags flags; 
   GtkWidget *message_dialog;
 
   int length = 0;
   if(gui.popupFitResults==0){
-    length += snprintf(fitResStr+length,1024-length,"\nFit result - chisq/ndf: %f\nA: %f +/- %f, B: %f +/- %f, C: %f +/- %f\n",getFitChisq()/(1.0*fitpar.ndf),fitpar.fitParVal[0],fitpar.fitParErr[0],fitpar.fitParVal[1],fitpar.fitParErr[1],fitpar.fitParVal[2],fitpar.fitParErr[2]);
+    length += snprintf(fitResStr+length,strSize-length,"\nFit result - chisq/ndf: %f\nA: %f +/- %f, B: %f +/- %f, C: %f +/- %f\n",getFitChisq()/(1.0*fitpar.ndf),fitpar.fitParVal[0],fitpar.fitParErr[0],fitpar.fitParVal[1],fitpar.fitParErr[1],fitpar.fitParVal[2],fitpar.fitParErr[2]);
   }else{
     if(calpar.calMode == 1)
-      length += snprintf(fitResStr+length,1024-length,"Chisq/NDF: %f\n\nBackground\nA: %f +/- %f, B: %f +/- %f, C: %f +/- %f\n\n",getFitChisq()/(1.0*fitpar.ndf),fitpar.fitParVal[0],fitpar.fitParErr[0],fitpar.fitParVal[1],fitpar.fitParErr[1],fitpar.fitParVal[2],fitpar.fitParErr[2]);
+      length += snprintf(fitResStr+length,strSize-length,"Chisq/NDF: %f\n\nBackground\nA: %f +/- %f, B: %f +/- %f, C: %f +/- %f\n\n",getFitChisq()/(1.0*fitpar.ndf),fitpar.fitParVal[0],fitpar.fitParErr[0],fitpar.fitParVal[1],fitpar.fitParErr[1],fitpar.fitParVal[2],fitpar.fitParErr[2]);
     else
-      length += snprintf(fitResStr+length,1024-length,"Chisq/NDF: %f\n\nBackground\nA: %f +/- %f, B: %f +/- %f, C: %f +/- %f\n\nPeaks\n",getFitChisq()/(1.0*fitpar.ndf),getCalVal(fitpar.fitParVal[0]),getCalVal(fitpar.fitParErr[0]),getCalVal(fitpar.fitParVal[1]),getCalVal(fitpar.fitParErr[1]),getCalVal(fitpar.fitParVal[2]),getCalVal(fitpar.fitParErr[2]));
+      length += snprintf(fitResStr+length,strSize-length,"Chisq/NDF: %f\n\nBackground\nA: %f +/- %f, B: %f +/- %f, C: %f +/- %f\n\nPeaks\n",getFitChisq()/(1.0*fitpar.ndf),getCalVal(fitpar.fitParVal[0]),getCalVal(fitpar.fitParErr[0]),getCalVal(fitpar.fitParVal[1]),getCalVal(fitpar.fitParErr[1]),getCalVal(fitpar.fitParVal[2]),getCalVal(fitpar.fitParErr[2]));
   }
   for(i=0;i<fitpar.numFitPeaks;i++){
     if(calpar.calMode == 1)
-      length += snprintf(fitResStr+length,1024-length,"Peak %i:\nHeight: %f +/- %f, Position: %f +/- %f, Width: %f +/- %f\n",i+1,fitpar.fitParVal[6+(3*i)],fitpar.fitParErr[6+(3*i)],getCalVal(fitpar.fitParVal[7+(3*i)]),getCalVal(fitpar.fitParErr[7+(3*i)]),getCalVal(fitpar.fitParVal[8+(3*i)]),getCalVal(fitpar.fitParErr[8+(3*i)]));
+      length += snprintf(fitResStr+length,strSize-length,"Peak %i:\nHeight: %f +/- %f, Position: %f +/- %f, Width: %f +/- %f\n",i+1,fitpar.fitParVal[6+(3*i)],fitpar.fitParErr[6+(3*i)],getCalVal(fitpar.fitParVal[7+(3*i)]),getCalVal(fitpar.fitParErr[7+(3*i)]),getCalVal(fitpar.fitParVal[8+(3*i)]),getCalVal(fitpar.fitParErr[8+(3*i)]));
     else
-      length += snprintf(fitResStr+length,1024-length,"Peak %i:\nHeight: %f +/- %f, Position: %f +/- %f, Width: %f +/- %f\n",i+1,fitpar.fitParVal[6+(3*i)],fitpar.fitParErr[6+(3*i)],fitpar.fitParVal[7+(3*i)],fitpar.fitParErr[7+(3*i)],fitpar.fitParVal[8+(3*i)],fitpar.fitParErr[8+(3*i)]);
+      length += snprintf(fitResStr+length,strSize-length,"Peak %i:\nHeight: %f +/- %f, Position: %f +/- %f, Width: %f +/- %f\n",i+1,fitpar.fitParVal[6+(3*i)],fitpar.fitParErr[6+(3*i)],fitpar.fitParVal[7+(3*i)],fitpar.fitParErr[7+(3*i)],fitpar.fitParVal[8+(3*i)],fitpar.fitParErr[8+(3*i)]);
   }
   if(gui.popupFitResults==0)
-    length += snprintf(fitResStr+length,1024-length,"\n");
+    length += snprintf(fitResStr+length,strSize-length,"\n");
 
   switch (gui.popupFitResults)
   {
@@ -103,6 +104,8 @@ void printFitResults(){
       printf(fitResStr);
       break;
   }
+
+  free(fitResStr);
       
 }
 
