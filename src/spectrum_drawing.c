@@ -36,6 +36,11 @@ int isSpSelected(int spNum){
   return 0;
 }
 
+//get a calibrated value from an uncalibrated one
+double getCalVal(double val){
+  return calpar.calpar0 + calpar.calpar1*val + calpar.calpar2*val*val;
+}
+
 //converts cursor position units to channel units on the displayed spectrum
 //return value is float to allow sub-channel prescision, cast it to int if needed
 float getCursorChannel(float cursorx, float cursory){
@@ -393,8 +398,8 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
             //multiple visible plots
             if(calpar.calMode == 1){
               int cursorChanEnd = cursorChanRounded + drawing.contractFactor;
-              float cal_lowerChanLimit = calpar.calpar0 + calpar.calpar1*cursorChanRounded + calpar.calpar2*cursorChanRounded*cursorChanRounded;
-              float cal_upperChanLimit = calpar.calpar0 + calpar.calpar1*cursorChanEnd + calpar.calpar2*cursorChanEnd*cursorChanEnd;
+              float cal_lowerChanLimit = getCalVal(cursorChanRounded);
+              float cal_upperChanLimit = getCalVal(cursorChanEnd);
               statusBarLabelp += snprintf(statusBarLabelp,50,"%s: %0.1f - %0.1f, Values:", calpar.calUnit, cal_lowerChanLimit, cal_upperChanLimit);
             }else{
               if(drawing.contractFactor <= 1){
@@ -421,8 +426,8 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
             getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,gui.showBinErrors,gui.roundErrors);
             if(calpar.calMode == 1){
               int cursorChanEnd = cursorChanRounded + drawing.contractFactor;
-              float cal_lowerChanLimit = calpar.calpar0 + calpar.calpar1*cursorChanRounded + calpar.calpar2*cursorChanRounded*cursorChanRounded;
-              float cal_upperChanLimit = calpar.calpar0 + calpar.calpar1*cursorChanEnd + calpar.calpar2*cursorChanEnd*cursorChanEnd;
+              float cal_lowerChanLimit = getCalVal(cursorChanRounded);
+              float cal_upperChanLimit = getCalVal(cursorChanEnd);
               snprintf(statusBarLabel,256,"%s: %0.1f - %0.1f, Value: %s", calpar.calUnit,cal_lowerChanLimit,cal_upperChanLimit,binValStr);
             }else{
               if(drawing.contractFactor <= 1){
@@ -438,11 +443,11 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
       default:
         //print highlighted peak info
         if(calpar.calMode == 1){
-          float calCentr = calpar.calpar0 + calpar.calpar1*fitpar.fitParVal[7+(3*highlightedPeak)] + calpar.calpar2*fitpar.fitParVal[7+(3*highlightedPeak)]*fitpar.fitParVal[7+(3*highlightedPeak)];
-          float calWidth = calpar.calpar0 + calpar.calpar1*fitpar.fitParVal[8+(3*highlightedPeak)] + calpar.calpar2*fitpar.fitParVal[8+(3*highlightedPeak)]*fitpar.fitParVal[8+(3*highlightedPeak)];
+          float calCentr = getCalVal(fitpar.fitParVal[7+(3*highlightedPeak)]);
+          float calWidth = getCalVal(fitpar.fitParVal[8+(3*highlightedPeak)]);
           if(fitpar.errFound){
-            float calCentrErr = calpar.calpar0 + calpar.calpar1*fitpar.fitParErr[7+(3*highlightedPeak)] + calpar.calpar2*fitpar.fitParErr[7+(3*highlightedPeak)]*fitpar.fitParErr[7+(3*highlightedPeak)];
-            float calWidthErr = calpar.calpar0 + calpar.calpar1*fitpar.fitParErr[8+(3*highlightedPeak)] + calpar.calpar2*fitpar.fitParErr[8+(3*highlightedPeak)]*fitpar.fitParErr[8+(3*highlightedPeak)];
+            float calCentrErr = getCalVal(fitpar.fitParErr[7+(3*highlightedPeak)]);
+            float calWidthErr = getCalVal(fitpar.fitParErr[8+(3*highlightedPeak)]);
             char fitParStr[3][50];
             getFormattedValAndUncertainty(evalPeakArea(highlightedPeak),evalPeakAreaErr(highlightedPeak),fitParStr[0],50,1,gui.roundErrors);
             getFormattedValAndUncertainty(calCentr,calCentrErr,fitParStr[1],50,1,gui.roundErrors);
@@ -572,8 +577,8 @@ float getAxisXPos(int axisVal, float clip_x1, float clip_x2){
   int cal_upperLimit = drawing.upperLimit;
   if(calpar.calMode==1){
     //calibrate
-    cal_lowerLimit = calpar.calpar0 + calpar.calpar1*drawing.lowerLimit + calpar.calpar2*drawing.lowerLimit*drawing.lowerLimit;
-    cal_upperLimit = calpar.calpar0 + calpar.calpar1*drawing.upperLimit + calpar.calpar2*drawing.upperLimit*drawing.upperLimit;
+    cal_lowerLimit = getCalVal(drawing.lowerLimit);
+    cal_upperLimit = getCalVal(drawing.upperLimit);
   }
   if((axisVal < cal_lowerLimit)||(axisVal >= cal_upperLimit))
     return -1; //value is off the visible axis
@@ -851,8 +856,8 @@ int getPlotRangeXUnits(){
   int cal_upperLimit = drawing.upperLimit;
   if(calpar.calMode==1){
     //calibrate
-    cal_lowerLimit = calpar.calpar0 + calpar.calpar1*drawing.lowerLimit + calpar.calpar2*drawing.lowerLimit*drawing.lowerLimit;
-    cal_upperLimit = calpar.calpar0 + calpar.calpar1*drawing.upperLimit + calpar.calpar2*drawing.upperLimit*drawing.upperLimit;
+    cal_lowerLimit = getCalVal(drawing.lowerLimit);
+    cal_upperLimit = getCalVal(drawing.upperLimit);
   }
   return cal_upperLimit - cal_lowerLimit;
 }
