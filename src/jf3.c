@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
   gui.roundErrors = 0;
   gui.autoZoom = 1;
   gui.preferDarkTheme = 0;
-  gui.popupFitResults = 0;
+  gui.popupFitResults = 1;
   fitpar.fixRelativeWidths = 1;
   fitpar.fitStartCh = -1;
   fitpar.fitEndCh = -1;
