@@ -185,6 +185,7 @@ int main(int argc, char *argv[])
   rawdata.numSpOpened = 0;
   drawing.multiplotMode = 0;
   drawing.numMultiplotSp = 1;
+  drawing.highlightedPeak = -1;
   drawing.spColors[0] = 220/255.; drawing.spColors[1] = 50/255.; drawing.spColors[2] = 47/255.;      //RGB values for color 1 (solarized red)
   drawing.spColors[3] = 38/255.; drawing.spColors[4] = 139/255.; drawing.spColors[5] = 210/255.;     //RGB values for color 2 (solarized blue)
   drawing.spColors[6] = 0.0; drawing.spColors[7] = 0.8; drawing.spColors[8] = 0.0;                   //RGB values for color 3

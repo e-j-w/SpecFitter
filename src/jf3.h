@@ -130,6 +130,7 @@ struct {
   double scaleFactor[NSPECT]; //scaling factors for each spectrum
   int multiPlots[NSPECT]; //indices of all the spectra to show in multiplot mode
   float spColors[MAX_DISP_SP*3];
+  signed char highlightedPeak; //the peak to highlight when drawing spectra, -1=don't highlight
 } drawing;
 
 //calibration globals
