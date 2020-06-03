@@ -137,8 +137,8 @@ Author: Jonathan Williams
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">10</property>
-        <property name="margin_right">10</property>
+        <property name="margin_start">10</property>
+        <property name="margin_end">10</property>
         <property name="margin_top">10</property>
         <property name="margin_bottom">10</property>
         <property name="orientation">vertical</property>
@@ -392,7 +392,7 @@ Author: Jonathan Williams
             </child>
             <child>
               <object class="GtkButton" id="options_ok_button">
-                <property name="label">gtk-apply</property>
+                <property name="label">Apply</property>
                 <property name="width_request">100</property>
                 <property name="height_request">40</property>
                 <property name="visible">True</property>
@@ -400,7 +400,6 @@ Author: Jonathan Williams
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Apply all changes and return.</property>
                 <property name="halign">end</property>
-                <property name="use_stock">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -430,10 +429,10 @@ Author: Jonathan Williams
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">10</property>
-        <property name="margin_right">10</property>
-        <property name="margin_top">10</property>
-        <property name="margin_bottom">10</property>
+        <property name="margin_start">6</property>
+        <property name="margin_end">6</property>
+        <property name="margin_top">6</property>
+        <property name="margin_bottom">6</property>
         <property name="orientation">vertical</property>
         <property name="spacing">10</property>
         <child>
@@ -694,8 +693,8 @@ Author: Jonathan Williams
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">10</property>
-        <property name="margin_right">10</property>
+        <property name="margin_start">10</property>
+        <property name="margin_end">10</property>
         <property name="margin_top">10</property>
         <property name="margin_bottom">10</property>
         <property name="orientation">vertical</property>
@@ -914,7 +913,7 @@ Author: Jonathan Williams
             <property name="spacing">10</property>
             <child>
               <object class="GtkButton" id="multiplot_ok_button">
-                <property name="label">gtk-apply</property>
+                <property name="label">Apply</property>
                 <property name="width_request">100</property>
                 <property name="height_request">40</property>
                 <property name="visible">True</property>
@@ -922,7 +921,6 @@ Author: Jonathan Williams
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Apply all changes and return.</property>
                 <property name="halign">end</property>
-                <property name="use_stock">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -969,8 +967,8 @@ Author: Jonathan Williams
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">10</property>
-                <property name="margin_right">10</property>
+                <property name="margin_start">10</property>
+                <property name="margin_end">10</property>
                 <property name="margin_top">10</property>
                 <property name="margin_bottom">10</property>
                 <property name="orientation">vertical</property>
@@ -1120,8 +1118,8 @@ Author: Jonathan Williams
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">10</property>
-                <property name="margin_right">10</property>
+                <property name="margin_start">10</property>
+                <property name="margin_end">10</property>
                 <property name="margin_top">10</property>
                 <property name="margin_bottom">10</property>
                 <property name="orientation">vertical</property>
@@ -1269,8 +1267,8 @@ Weight by fit function - Weights are proportional to the fit function values det
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_left">10</property>
-            <property name="margin_right">10</property>
+            <property name="margin_start">10</property>
+            <property name="margin_end">10</property>
             <property name="margin_bottom">10</property>
             <property name="orientation">vertical</property>
             <property name="spacing">10</property>
@@ -1282,14 +1280,13 @@ Weight by fit function - Weights are proportional to the fit function values det
                 <property name="spacing">10</property>
                 <child>
                   <object class="GtkButton" id="preferences_apply_button">
-                    <property name="label">gtk-apply</property>
+                    <property name="label">Apply</property>
                     <property name="width_request">100</property>
                     <property name="height_request">40</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="halign">end</property>
-                    <property name="use_stock">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1325,10 +1322,10 @@ Weight by fit function - Weights are proportional to the fit function values det
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">10</property>
-        <property name="margin_right">10</property>
-        <property name="margin_top">10</property>
-        <property name="margin_bottom">10</property>
+        <property name="margin_start">6</property>
+        <property name="margin_end">6</property>
+        <property name="margin_top">6</property>
+        <property name="margin_bottom">6</property>
         <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
@@ -1433,22 +1430,11 @@ Weight by fit function - Weights are proportional to the fit function values det
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkSeparator">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkOverlay">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_left">6</property>
-            <property name="margin_right">6</property>
+            <property name="margin_start">6</property>
+            <property name="margin_end">6</property>
             <child>
               <object class="GtkBox" id="no_sp_box">
                 <property name="visible">True</property>
@@ -1515,8 +1501,8 @@ Weight by fit function - Weights are proportional to the fit function values det
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">10</property>
-                <property name="margin_right">10</property>
+                <property name="margin_start">10</property>
+                <property name="margin_end">10</property>
                 <property name="margin_top">6</property>
                 <property name="margin_bottom">6</property>
                 <property name="spacing">10</property>
@@ -1548,13 +1534,12 @@ Weight by fit function - Weights are proportional to the fit function values det
                 </child>
                 <child>
                   <object class="GtkButton" id="fit_cancel_button">
-                    <property name="label">gtk-cancel</property>
+                    <property name="label">Cancel</property>
                     <property name="width_request">100</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="halign">end</property>
-                    <property name="use_stock">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1606,8 +1591,8 @@ Weight by fit function - Weights are proportional to the fit function values det
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_left">10</property>
-            <property name="margin_right">10</property>
+            <property name="margin_start">10</property>
+            <property name="margin_end">10</property>
             <property name="margin_top">2</property>
             <property name="margin_bottom">2</property>
             <property name="spacing">10</property>
