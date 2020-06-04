@@ -95,11 +95,12 @@ void on_open_button_clicked(GtkButton *b)
   file_open_dialog = gtk_file_chooser_dialog_new ("Open Spectrum File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, NULL);
   gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(file_open_dialog), TRUE);
   file_filter = gtk_file_filter_new();
-  gtk_file_filter_set_name(file_filter,"Spectrum Data (.txt, .mca, .fmca, .spe)");
+  gtk_file_filter_set_name(file_filter,"Spectrum Data (.txt, .mca, .fmca, .spe, .C)");
   gtk_file_filter_add_pattern(file_filter,"*.txt");
   gtk_file_filter_add_pattern(file_filter,"*.mca");
   gtk_file_filter_add_pattern(file_filter,"*.fmca");
   gtk_file_filter_add_pattern(file_filter,"*.spe");
+  gtk_file_filter_add_pattern(file_filter,"*.C");
   gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(file_open_dialog),file_filter);
 
   int openErr = 0; //to track if there are any errors when opening spectra
@@ -213,10 +214,12 @@ void on_append_button_clicked(GtkButton *b)
   file_open_dialog = gtk_file_chooser_dialog_new ("Add More Spectrum File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, NULL);
   gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(file_open_dialog), TRUE);
   file_filter = gtk_file_filter_new();
-  gtk_file_filter_set_name(file_filter,"Spectrum Data (.txt, .mca, .fmca, .spe)");
+  gtk_file_filter_set_name(file_filter,"Spectrum Data (.txt, .mca, .fmca, .spe, .C)");
+  gtk_file_filter_add_pattern(file_filter,"*.txt");
   gtk_file_filter_add_pattern(file_filter,"*.mca");
   gtk_file_filter_add_pattern(file_filter,"*.fmca");
   gtk_file_filter_add_pattern(file_filter,"*.spe");
+  gtk_file_filter_add_pattern(file_filter,"*.C");
   gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(file_open_dialog),file_filter);
 
   int openErr = 0; //to track if there are any errors when opening spectra
