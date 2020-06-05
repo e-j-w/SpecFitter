@@ -101,6 +101,7 @@ int main(int argc, char *argv[])
 
   //display menu UI elements
   multiplot_button = GTK_WIDGET(gtk_builder_get_object(builder, "multiplot_button"));
+  sum_all_button = GTK_BUTTON(gtk_builder_get_object(builder, "sum_all_button"));
   spectrum_selector = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spectrumselector"));
   spectrum_selector_adjustment = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "spectrum_selector_adjustment"));
   autoscale_button = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "autoscalebutton"));
@@ -118,6 +119,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (append_button), "clicked", G_CALLBACK (on_append_button_clicked), NULL);
   g_signal_connect (G_OBJECT (calibrate_button), "clicked", G_CALLBACK (on_calibrate_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_button), "clicked", G_CALLBACK (on_multiplot_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (sum_all_button), "clicked", G_CALLBACK (on_sum_all_button_clicked), NULL);
   g_signal_connect (G_OBJECT (fit_button), "clicked", G_CALLBACK (on_fit_button_clicked), NULL);
   g_signal_connect (G_OBJECT (fit_fit_button), "clicked", G_CALLBACK (on_fit_fit_button_clicked), NULL);
   g_signal_connect (G_OBJECT (fit_cancel_button), "clicked", G_CALLBACK (on_fit_cancel_button_clicked), NULL);

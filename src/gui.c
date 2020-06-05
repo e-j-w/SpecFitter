@@ -615,6 +615,33 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
   
 }
 
+void on_sum_all_button_clicked(GtkButton *b)
+{
+
+  //set all opened spectra to be drawn, in sum mode 
+
+  int i;
+  drawing.multiplotMode = 1;//sum spectra
+  drawing.numMultiplotSp = rawdata.numSpOpened;
+  if(drawing.numMultiplotSp > NSPECT)
+    drawing.numMultiplotSp = NSPECT;
+  
+  for(i=0;i<drawing.numMultiplotSp;i++){
+    drawing.multiPlots[i] = i;
+  }
+
+  //clear fit if necessary
+  if(gui.fittingSp == 5){
+    gui.fittingSp = 0;
+    //update widgets
+    update_gui_fit_state();
+  }
+
+  gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE); //sum mode, therefore can fit
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+
+}
+
 void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data)
 {
   if(!gui.deferSpSelChange){
@@ -622,9 +649,11 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data
     drawing.multiplotMode = 0;//unset multiplot, if it is being used
     drawing.numMultiplotSp = 1;//unset multiplot
     
-    //handle fitting
+    //clear fit if necessary
     if(gui.fittingSp == 5){
-      startGausFit(); //refit
+      gui.fittingSp = 0;
+      //update widgets
+      update_gui_fit_state();
     }
 
     gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE); //no multiplot, therefore can fit

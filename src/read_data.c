@@ -263,6 +263,8 @@ int readROOT(const char *filename, double outHist[NSPECT][S32K], int outHistStar
 					//printf("Histogram name: %s\n",tok);
 					strncpy(histName,tok,255);
 					histNum++;
+					//get rid of any previous histogram values (for when overwriting other histos)
+					memset(outHist[outHistStartSp+histNum-1],0,sizeof(outHist[outHistStartSp+histNum-1]));
 				}
 			}
   }else{

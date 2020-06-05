@@ -519,7 +519,7 @@ int areParsValid(){
     if(fitpar.fitParVal[7+(3*i)] > fitpar.fitEndCh){
       return 0;
     }
-    if(fabs(fitpar.fitParVal[7+(3*i)] - fitpar.fitPeakInitGuess[i]) > (fitRange)/4.){
+    if(fabs(fitpar.fitParVal[7+(3*i)] - fitpar.fitPeakInitGuess[i]) > (fitRange)/2.){
       return 0;
     }
     if(fabs(fitpar.fitParVal[8+(3*i)]) > (fitRange)/2.){
@@ -731,19 +731,33 @@ double widthGuess(const double centroidCh, const double widthInit){
   double centroidYVal = getSpBinVal(0,centroidCh);
   centroidYVal -= fitpar.fitParVal[0] + fitpar.fitParVal[1]*centroidCh;
   double HWInit = 2.35482*widthInit/2.; //initial half-width
-  double FWHighEdgeVal = getSpBinVal(0,centroidCh+HWInit);
+  double FWHighEdgeVal = (getSpBinVal(0,centroidCh+HWInit) + getSpBinVal(0,centroidCh+HWInit+drawing.contractFactor) + getSpBinVal(0,centroidCh+HWInit-drawing.contractFactor))/3.;
   FWHighEdgeVal -= fitpar.fitParVal[0] + fitpar.fitParVal[1]*(centroidCh+HWInit);
-  double FWLowEdgeVal = getSpBinVal(0,centroidCh-HWInit);
+  double FWLowEdgeVal = (getSpBinVal(0,centroidCh-HWInit) + getSpBinVal(0,centroidCh-HWInit+drawing.contractFactor) + getSpBinVal(0,centroidCh-HWInit-drawing.contractFactor))/3.;
   FWLowEdgeVal -= fitpar.fitParVal[0] + fitpar.fitParVal[1]*(centroidCh-HWInit);
   
   if(centroidYVal != 0.){
     //get average ratio of half-values from centroid y-value
-    double avgRatio = (fabs(centroidYVal/FWHighEdgeVal) + fabs(centroidYVal/FWLowEdgeVal))/2.;
+    double highRatio = fabs(centroidYVal/FWHighEdgeVal);
+    double lowRatio = fabs(centroidYVal/FWLowEdgeVal);
+    double avgRatio = 0.;
+    if((highRatio > 1.)&&(lowRatio > 1.)){
+      avgRatio = (fabs(centroidYVal/FWHighEdgeVal) + fabs(centroidYVal/FWLowEdgeVal))/2.;
+    }else if(highRatio > 1.){
+      avgRatio = highRatio;
+    }else{
+      avgRatio = lowRatio;
+    }
     if(avgRatio > 1.){
+      //printf("Width guess: %f\n",HWInit*2./(2.*sqrt(2.*log(avgRatio))));
       return HWInit*2./(2.*sqrt(2.*log(avgRatio)));
     }  
   }
-  
+
+  //assume width is at least 2 bins
+  if(widthInit < drawing.contractFactor*2.)
+    return drawing.contractFactor*2.;
+
   return widthInit; //give up
 
 }

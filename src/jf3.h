@@ -46,6 +46,7 @@ GtkSpinButton *spectrum_selector;
 GtkCheckButton *autoscale_button, *logscale_button, *cursor_draw_button;
 GtkScale *contract_scale, *zoom_scale; //*pan_scale;
 GtkAdjustment *spectrum_selector_adjustment, *contract_adjustment;
+GtkButton *sum_all_button;
 //spectrum drawing
 GtkWidget *spectrum_drawing_area;
 GtkGesture *spectrum_drag_gesture;
