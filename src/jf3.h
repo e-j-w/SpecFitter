@@ -105,6 +105,7 @@ struct {
   char autoZoom; //0=don't autozoom, 1=autozoom
   char preferDarkTheme; //0=prefer light, 1=prefer dark
   char popupFitResults; //0=don't popup results after fit, 1=popup results
+  char useZoomAnimations; //0=don't use, 1=use
 } gui;
 
 //imported data globals
@@ -120,8 +121,8 @@ struct {
 //spectrum drawing globals
 struct {
   int lowerLimit, upperLimit; //lower and upper limits to plot spectrum (in uncalibrated units ie. channels)
-  int xChanFocus; //x channel to focus on when zooming
-  float zoomLevel; //1.0 = zoomed out fully (on x axis)
+  int xChanFocus, xChanFocusChangePerFrame, xChanToFocus; //x channel to focus on when zooming
+  float zoomLevel, zoomToLevel; //1.0 = zoomed out fully (on x axis)
   int autoScale; //0=don't autoscale y axis, 1=autoscale y axis
   int logScale; //0=draw in linear scale, 1=draw in log scale (y-axis)
   float scaleLevelMax[MAX_DISP_SP], scaleLevelMin[MAX_DISP_SP]; //the y scale values, ie. the maximum and minimum values to show on the y axis
