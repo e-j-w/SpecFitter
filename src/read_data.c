@@ -237,19 +237,20 @@ int readROOT(const char *filename, double outHist[NSPECT][S32K], int outHistStar
 				//printf("%s",str); //print the line
 				tok = strtok (str," *->(),");
 				if(histType>0){
-
-					if((strncmp(tok,histName,256)==0)&&(histNum>0)){
-						if(histType==1){
-							//parse TH1F
-							tok = strtok (NULL," *->(),");
-							if(strncmp(tok,"SetBinContent",256)==0){
+					if(outHistStartSp+histNum<=NSPECT){
+						if((strncmp(tok,histName,256)==0)&&(histNum>0)){
+							if(histType==1){
+								//parse TH1F
 								tok = strtok (NULL," *->(),");
-								ind=atoi(tok);
-								tok = strtok (NULL," *->(),");
-								val=atof(tok);
-								//printf("Read bin %i with value %f\n",ind,val);
-								if((ind>=0)&&(ind<S32K)){
-									outHist[outHistStartSp+histNum-1][ind]=val;
+								if(strncmp(tok,"SetBinContent",256)==0){
+									tok = strtok (NULL," *->(),");
+									ind=atoi(tok);
+									tok = strtok (NULL," *->(),");
+									val=atof(tok);
+									//printf("Read bin %i with value %f\n",ind,val);
+									if((ind>=0)&&(ind<S32K)){
+										outHist[outHistStartSp+histNum-1][ind]=val;
+									}
 								}
 							}
 						}
@@ -264,7 +265,9 @@ int readROOT(const char *filename, double outHist[NSPECT][S32K], int outHistStar
 					strncpy(histName,tok,255);
 					histNum++;
 					//get rid of any previous histogram values (for when overwriting other histos)
-					memset(outHist[outHistStartSp+histNum-1],0,sizeof(outHist[outHistStartSp+histNum-1]));
+					if(outHistStartSp+histNum<=NSPECT){
+						memset(outHist[outHistStartSp+histNum-1],0,sizeof(outHist[outHistStartSp+histNum-1]));
+					}
 				}
 			}
   }else{
