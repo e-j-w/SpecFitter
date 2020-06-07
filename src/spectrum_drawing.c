@@ -1,5 +1,9 @@
 /* J. Williams, 2020 */
 
+//This file contains routines for drawing spectra using Cairo.
+//The main routine is drawSpectrumArea (near the bottom), helper 
+//subroutines are above it.
+
 //set the default text color, depending on the
 void setTextColor(cairo_t *cr){
   if(gui.preferDarkTheme){
@@ -230,6 +234,18 @@ void toggle_cursor(){
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
 }
 
+//This callback implements a delay after zooming in of 60 frames, during which the 
+//focused x-value cannot be changed.  This is so that of the user rapidly scrolls over
+//a region of interest, that region stays focused in the zoomed-in spectrum.
+//The callback is removed after 60 frames, or if the user starts zooming out.
+gboolean zoom_delay_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gpointer user_data){
+  gui.framesSinceZoom++;
+  if((gui.framesSinceZoom > 60)||(drawing.zoomToLevel < drawing.zoomLevel)){
+    gui.framesSinceZoom = -1;
+    return G_SOURCE_REMOVE;
+  }
+  return G_SOURCE_CONTINUE;
+}
 
 gboolean zoom_in_tick_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gpointer user_data){
   drawing.zoomLevel *= 1.15;
@@ -289,10 +305,25 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
     // Determine GtkDrawingArea dimensions
     gdk_window_get_geometry (wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
     if(gui.useZoomAnimations){
-      drawing.zoomToLevel = drawing.zoomLevel * 2.0;
-      drawing.xChanToFocus = drawing.lowerLimit + (((e->x)-80.0)/(dasize.width-80.0))*(drawing.upperLimit - drawing.lowerLimit);
-      drawing.xChanFocusChangePerFrame = (drawing.xChanToFocus - drawing.xChanFocus)/5.;
-      gtk_widget_add_tick_callback (widget, zoom_in_tick_callback, NULL, NULL);
+      //check if we are already zooming
+      if(gui.framesSinceZoom >= 0){
+        //continue zooming, but don't change the focused channel
+        if(gui.framesSinceZoom > 0){
+          gtk_widget_add_tick_callback (widget, zoom_in_tick_callback, NULL, NULL);
+        }
+        gui.framesSinceZoom = 0;
+        drawing.zoomToLevel = drawing.zoomToLevel * 2.0;
+        drawing.xChanFocusChangePerFrame = (drawing.xChanToFocus - drawing.xChanFocus)/5.;
+      }else{
+        gui.framesSinceZoom = 0;
+        drawing.zoomToLevel = drawing.zoomLevel * 2.0;
+        drawing.xChanToFocus = drawing.lowerLimit + (((e->x)-80.0)/(dasize.width-80.0))*(drawing.upperLimit - drawing.lowerLimit);
+        drawing.xChanFocusChangePerFrame = (drawing.xChanToFocus - drawing.xChanFocus)/5.;
+        gtk_widget_add_tick_callback (widget, zoom_in_tick_callback, NULL, NULL);
+        gtk_widget_add_tick_callback (widget, zoom_delay_callback, NULL, NULL);
+      }
+      
+      
     }else{
       drawing.zoomLevel *= 2.0;
       drawing.xChanFocus = drawing.lowerLimit + (((e->x)-80.0)/(dasize.width-80.0))*(drawing.upperLimit - drawing.lowerLimit);

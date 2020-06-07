@@ -107,6 +107,7 @@ struct {
   char preferDarkTheme; //0=prefer light, 1=prefer dark
   char popupFitResults; //0=don't popup results after fit, 1=popup results
   char useZoomAnimations; //0=don't use, 1=use
+  int framesSinceZoom;
 } gui;
 
 //imported data globals

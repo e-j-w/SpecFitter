@@ -181,6 +181,7 @@ int main(int argc, char *argv[])
   drawing.scaleLevelMin[0] = 0.0;
   drawing.xChanFocus = 0;
   drawing.zoomLevel = 1.0;
+  drawing.zoomToLevel = 1.0;
   drawing.contractFactor = 1;
   drawing.autoScale = 1;
   drawing.logScale = 0;
@@ -214,6 +215,7 @@ int main(int argc, char *argv[])
   gui.preferDarkTheme = 0;
   gui.popupFitResults = 1;
   gui.useZoomAnimations = 1;
+  gui.framesSinceZoom = -1;
   fitpar.fixRelativeWidths = 1;
   fitpar.fitStartCh = -1;
   fitpar.fitEndCh = -1;

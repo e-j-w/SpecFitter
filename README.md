@@ -4,7 +4,7 @@
 
 ## Description
 
-A (1D) spectrum viewer and fitter app, with functionality inspired by the `gf3` program for gamma-ray spectroscopy in the [RadWare](https://radware.phy.ornl.gov/) software package.
+A (1D) spectrum viewer and fitter app, with functionality inspired by the `gf3` program for gamma-ray spectroscopy in the [RadWare](https://radware.phy.ornl.gov/) software package.  Takes advantage of the modern GTK toolkit to provide smooth rendering and (hopefully) a very intuitive user interface.
 
 ## Features
 
