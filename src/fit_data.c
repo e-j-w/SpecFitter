@@ -65,7 +65,7 @@ gboolean update_gui_fit_state(){
   return FALSE; //stop running
 }
 
-void printFitResults(){
+gboolean print_fit_results(){
 
   int i;
   const int strSize = 1024;
@@ -115,7 +115,7 @@ void printFitResults(){
   }
 
   free(fitResStr);
-      
+  return FALSE; //stop running
 }
 
 double getFWHM(double chan, double widthF, double widthG, double widthH){
@@ -715,7 +715,7 @@ void performGausFit(){
   
   gui.fittingSp = 5;
   g_idle_add(update_gui_fit_state,NULL);
-  printFitResults();
+  g_idle_add(print_fit_results,NULL);
 
 }
 gpointer performGausFitThreaded(){
