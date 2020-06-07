@@ -6,6 +6,7 @@ void showPreferences(int page){
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bin_errors_checkbutton),gui.showBinErrors);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(round_errors_checkbutton),gui.roundErrors);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dark_theme_checkbutton),gui.preferDarkTheme);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(animation_checkbutton),gui.useZoomAnimations);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autozoom_checkbutton),gui.autoZoom);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_label_checkbutton),gui.drawSpLabels);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(relative_widths_checkbutton),fitpar.fixRelativeWidths);
@@ -746,6 +747,13 @@ void on_toggle_dark_theme(GtkToggleButton *togglebutton, gpointer user_data)
   }else{
     gtk_image_set_from_pixbuf(display_button_icon, spIconPixbuf);
   }
+}
+void on_toggle_animation(GtkToggleButton *togglebutton, gpointer user_data)
+{
+  if(gtk_toggle_button_get_active(togglebutton))
+    gui.useZoomAnimations=1;
+  else
+    gui.useZoomAnimations=0;
 }
 void on_toggle_autozoom(GtkToggleButton *togglebutton, gpointer user_data)
 {

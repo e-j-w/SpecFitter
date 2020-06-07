@@ -97,6 +97,7 @@ int main(int argc, char *argv[])
   relative_widths_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "relative_widths_checkbutton"));
   weight_mode_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "weight_mode_combobox"));
   popup_results_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "popup_results_checkbutton"));
+  animation_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "animation_checkbutton"));
   preferences_apply_button = GTK_BUTTON(gtk_builder_get_object(builder, "preferences_apply_button"));
 
   //display menu UI elements
@@ -138,6 +139,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (spectrum_label_checkbutton), "toggled", G_CALLBACK (on_toggle_spectrum_label), NULL);
   g_signal_connect (G_OBJECT (relative_widths_checkbutton), "toggled", G_CALLBACK (on_toggle_relative_widths), NULL);
   g_signal_connect (G_OBJECT (popup_results_checkbutton), "toggled", G_CALLBACK (on_toggle_popup_results), NULL);
+  g_signal_connect (G_OBJECT (animation_checkbutton), "toggled", G_CALLBACK (on_toggle_animation), NULL);
   g_signal_connect (G_OBJECT (autozoom_checkbutton), "toggled", G_CALLBACK (on_toggle_autozoom), NULL);
   g_signal_connect (G_OBJECT (preferences_apply_button), "clicked", G_CALLBACK (on_preferences_apply_button_clicked), NULL);
   g_signal_connect (G_OBJECT (preferences_button), "clicked", G_CALLBACK (on_preferences_button_clicked), NULL);

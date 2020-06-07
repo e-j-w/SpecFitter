@@ -232,7 +232,7 @@ void toggle_cursor(){
 
 
 gboolean zoom_in_tick_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gpointer user_data){
-  drawing.zoomLevel *= 1.072;
+  drawing.zoomLevel *= 1.15;
   drawing.xChanFocus += drawing.xChanFocusChangePerFrame;
   if(drawing.zoomLevel > drawing.zoomToLevel){
     drawing.zoomLevel = drawing.zoomToLevel;
@@ -247,7 +247,7 @@ gboolean zoom_in_tick_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gp
 }
 
 gboolean zoom_out_tick_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gpointer user_data){
-  drawing.zoomLevel *= 0.933;
+  drawing.zoomLevel *= 0.87;
   if(drawing.zoomLevel < drawing.zoomToLevel){
     drawing.zoomLevel = drawing.zoomToLevel;
     gtk_range_set_value(GTK_RANGE(zoom_scale),log(drawing.zoomLevel)/log(2.));//base 2 log of zoom
@@ -291,7 +291,7 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
     if(gui.useZoomAnimations){
       drawing.zoomToLevel = drawing.zoomLevel * 2.0;
       drawing.xChanToFocus = drawing.lowerLimit + (((e->x)-80.0)/(dasize.width-80.0))*(drawing.upperLimit - drawing.lowerLimit);
-      drawing.xChanFocusChangePerFrame = (drawing.xChanToFocus - drawing.xChanFocus)/10.;
+      drawing.xChanFocusChangePerFrame = (drawing.xChanToFocus - drawing.xChanFocus)/5.;
       gtk_widget_add_tick_callback (widget, zoom_in_tick_callback, NULL, NULL);
     }else{
       drawing.zoomLevel *= 2.0;

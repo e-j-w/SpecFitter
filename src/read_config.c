@@ -62,6 +62,13 @@ int readConfigFile(FILE *file)
 					gui.preferDarkTheme = 0;
 				}
 			}
+			if(strcmp(par,"use_drawing_animation") == 0){
+				if(strcmp(val,"yes") == 0){
+					gui.useZoomAnimations = 1;
+				}else{
+					gui.useZoomAnimations = 0;
+				}
+			}
 			if(strcmp(par,"draw_sp_labels") == 0){
 				if(strcmp(val,"yes") == 0){
 					gui.drawSpLabels = 1;
@@ -158,6 +165,11 @@ int writeConfigFile(FILE *file)
 		fprintf(file,"prefer_dark_theme=yes\n");
 	}else{
 		fprintf(file,"prefer_dark_theme=no\n");
+	}
+	if(gui.useZoomAnimations == 1){
+		fprintf(file,"use_drawing_animation=yes\n");
+	}else{
+		fprintf(file,"use_drawing_animation=no\n");
 	}
 	if(gui.drawSpLabels == 1){
 		fprintf(file,"draw_sp_labels=yes\n");

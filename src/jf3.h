@@ -80,6 +80,7 @@ GtkCheckButton *relative_widths_checkbutton;
 GtkButton *preferences_apply_button;
 GtkComboBoxText *weight_mode_combobox;
 GtkCheckButton *popup_results_checkbutton;
+GtkCheckButton *animation_checkbutton;
 //shortcuts window
 GtkModelButton *shortcuts_button;
 GtkShortcutsWindow *shortcuts_window;
