@@ -383,6 +383,9 @@ Author: Jonathan Williams
                 <property name="hexpand">False</property>
                 <property name="image">undo_image</property>
                 <property name="always_show_image">True</property>
+                <style>
+                  <class name="destructive-action"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -429,10 +432,10 @@ Author: Jonathan Williams
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_start">6</property>
-        <property name="margin_end">6</property>
-        <property name="margin_top">6</property>
-        <property name="margin_bottom">6</property>
+        <property name="margin_start">10</property>
+        <property name="margin_end">10</property>
+        <property name="margin_top">10</property>
+        <property name="margin_bottom">10</property>
         <property name="orientation">vertical</property>
         <property name="spacing">10</property>
         <child>
@@ -470,7 +473,6 @@ Author: Jonathan Williams
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="max_length">3</property>
-                        <property name="text" translatable="yes">0</property>
                         <property name="input_purpose">digits</property>
                         <property name="adjustment">spectrum_selector_adjustment</property>
                         <property name="snap_to_ticks">True</property>
@@ -1269,12 +1271,12 @@ Weight by fit function - Weights are proportional to the fit function values det
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkCheckButton" id="dark_theme_checkbutton">
-                    <property name="label" translatable="yes"> Prefer dark theme</property>
+                  <object class="GtkCheckButton" id="animation_checkbutton">
+                    <property name="label" translatable="yes"> Enable animations</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">If checked, will use the dark GTK theme variant if available.</property>
+                    <property name="tooltip_text" translatable="yes">If checked, animations will be enabled for drawing spectra.  Disable if low latency is preferred.</property>
                     <property name="halign">start</property>
                     <property name="draw_indicator">True</property>
                   </object>
@@ -1285,12 +1287,12 @@ Weight by fit function - Weights are proportional to the fit function values det
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkCheckButton" id="animation_checkbutton">
-                    <property name="label" translatable="yes"> Enable animations</property>
+                  <object class="GtkCheckButton" id="dark_theme_checkbutton">
+                    <property name="label" translatable="yes"> Prefer dark theme</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">If checked, animations will be enabled for drawing spectra.  Disable if low latency is preferred.</property>
+                    <property name="tooltip_text" translatable="yes">If checked, will use the dark GTK theme variant if available.</property>
                     <property name="halign">start</property>
                     <property name="draw_indicator">True</property>
                   </object>
@@ -1382,10 +1384,10 @@ Weight by fit function - Weights are proportional to the fit function values det
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_start">6</property>
-        <property name="margin_end">6</property>
-        <property name="margin_top">6</property>
-        <property name="margin_bottom">6</property>
+        <property name="margin_start">10</property>
+        <property name="margin_end">10</property>
+        <property name="margin_top">10</property>
+        <property name="margin_bottom">10</property>
         <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
@@ -1619,7 +1621,7 @@ Weight by fit function - Weights are proportional to the fit function values det
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="pack_type">end</property>
-                    <property name="position">2</property>
+                    <property name="position">3</property>
                   </packing>
                 </child>
                 <child>
@@ -1630,6 +1632,9 @@ Weight by fit function - Weights are proportional to the fit function values det
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="halign">end</property>
+                    <style>
+                      <class name="suggested-action"/>
+                    </style>
                   </object>
                   <packing>
                     <property name="expand">False</property>
