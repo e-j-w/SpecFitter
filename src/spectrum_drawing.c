@@ -239,8 +239,9 @@ void toggle_cursor(){
 //a region of interest, that region stays focused in the zoomed-in spectrum.
 //The callback is removed after 60 frames, or if the user starts zooming out.
 gboolean zoom_delay_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gpointer user_data){
+  //printf("tick %i\n",gui.framesSinceZoom);
   gui.framesSinceZoom++;
-  if((gui.framesSinceZoom > 60)||(drawing.zoomToLevel < drawing.zoomLevel)){
+  if((gui.framesSinceZoom > 60)||((gui.useZoomAnimations)&&(drawing.zoomToLevel < drawing.zoomLevel))){
     gui.framesSinceZoom = -1;
     return G_SOURCE_REMOVE;
   }
@@ -292,7 +293,7 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
       drawing.zoomToLevel = drawing.zoomLevel * 0.5;
       if(drawing.zoomToLevel < 1.0)
         drawing.zoomToLevel = 1.0;
-      gtk_widget_add_tick_callback (widget, zoom_out_tick_callback, NULL, NULL);
+      gtk_widget_add_tick_callback(widget, zoom_out_tick_callback, NULL, NULL);
     }else{
       drawing.zoomLevel *= 0.5;
       if(drawing.zoomLevel < 1.0)
@@ -322,11 +323,13 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
         gtk_widget_add_tick_callback (widget, zoom_in_tick_callback, NULL, NULL);
         gtk_widget_add_tick_callback (widget, zoom_delay_callback, NULL, NULL);
       }
-      
-      
     }else{
+      if(gui.framesSinceZoom < 0){
+        drawing.xChanFocus = drawing.lowerLimit + (((e->x)-80.0)/(dasize.width-80.0))*(drawing.upperLimit - drawing.lowerLimit);
+        gtk_widget_add_tick_callback (widget, zoom_delay_callback, NULL, NULL);
+      }
+      gui.framesSinceZoom = 0;
       drawing.zoomLevel *= 2.0;
-      drawing.xChanFocus = drawing.lowerLimit + (((e->x)-80.0)/(dasize.width-80.0))*(drawing.upperLimit - drawing.lowerLimit);
     }
   }
   if(!(gui.useZoomAnimations)){
