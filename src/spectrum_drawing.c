@@ -524,7 +524,6 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
             }
             break;
         }
-        
         break;
       default:
         //print highlighted peak info
@@ -558,8 +557,6 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
     }
     gtk_label_set_text(bottom_info_text,statusBarLabel);
 
-    
-
     //draw cursor on plot (expensive, requires redraw of plot itself)
     if((gui.draggingSp == 0)&&(gui.drawSpCursor != -1)){
       //don't redraw if the cursor hasn't moved, that would be st00pid
@@ -571,7 +568,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
     }
 
   }else{
-    gtk_label_set_text(bottom_info_text,"");
+    gtk_label_set_text(bottom_info_text,"Drag spectrum to pan, mouse wheel to zoom.");
     if(gui.drawSpCursor == 1){
       gui.drawSpCursor = 0; //hide vertical cursor
       gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
@@ -959,6 +956,9 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 	}
 
   //printf("Drawing spectrum!\n");
+  
+  if(gui.draggingSp == 0)
+    gtk_label_set_text(bottom_info_text,"Drag spectrum to pan, mouse wheel to zoom.");
 
   GdkRectangle dasize;  // GtkDrawingArea size
   GdkWindow *wwindow = gtk_widget_get_window(widget);
