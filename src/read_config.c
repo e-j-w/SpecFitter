@@ -43,37 +43,37 @@ int readConfigFile(FILE *file)
 			}
 			if(strcmp(par,"show_bin_errors") == 0){
 				if(strcmp(val,"yes") == 0){
-					gui.showBinErrors = 1;
+					guiglobals.showBinErrors = 1;
 				}else{
-					gui.showBinErrors = 0;
+					guiglobals.showBinErrors = 0;
 				}
 			}
 			if(strcmp(par,"round_errors") == 0){
 				if(strcmp(val,"yes") == 0){
-					gui.roundErrors = 1;
+					guiglobals.roundErrors = 1;
 				}else{
-					gui.roundErrors = 0;
+					guiglobals.roundErrors = 0;
 				}
 			}
 			if(strcmp(par,"prefer_dark_theme") == 0){
 				if(strcmp(val,"yes") == 0){
-					gui.preferDarkTheme = 1;
+					guiglobals.preferDarkTheme = 1;
 				}else{
-					gui.preferDarkTheme = 0;
+					guiglobals.preferDarkTheme = 0;
 				}
 			}
 			if(strcmp(par,"use_drawing_animation") == 0){
 				if(strcmp(val,"yes") == 0){
-					gui.useZoomAnimations = 1;
+					guiglobals.useZoomAnimations = 1;
 				}else{
-					gui.useZoomAnimations = 0;
+					guiglobals.useZoomAnimations = 0;
 				}
 			}
 			if(strcmp(par,"draw_sp_labels") == 0){
 				if(strcmp(val,"yes") == 0){
-					gui.drawSpLabels = 1;
+					guiglobals.drawSpLabels = 1;
 				}else{
-					gui.drawSpLabels = 0;
+					guiglobals.drawSpLabels = 0;
 				}
 			}
 			if(strcmp(par,"fix_relative_widths") == 0){
@@ -85,9 +85,9 @@ int readConfigFile(FILE *file)
 			}
 			if(strcmp(par,"popup_fit_results") == 0){
 				if(strcmp(val,"yes") == 0){
-					gui.popupFitResults = 1;
+					guiglobals.popupFitResults = 1;
 				}else{
-					gui.popupFitResults = 0;
+					guiglobals.popupFitResults = 0;
 				}
 			}
 			if(strcmp(par,"fit_weight_mode") == 0){
@@ -97,9 +97,9 @@ int readConfigFile(FILE *file)
 			}
 			if(strcmp(par,"autozoom") == 0){
 				if(strcmp(val,"yes") == 0){
-					gui.autoZoom = 1;
+					guiglobals.autoZoom = 1;
 				}else{
-					gui.autoZoom = 0;
+					guiglobals.autoZoom = 0;
 				}
 			}
 			if(strcmp(par,"calibrate") == 0){
@@ -122,6 +122,10 @@ int readConfigFile(FILE *file)
 				val[15] = '\0'; //truncate string
 				strcpy(calpar.calUnit,val);
 			}
+			if(strcmp(par,"cal_unit_y") == 0){
+				val[31] = '\0'; //truncate string
+				strcpy(calpar.calYUnit,val);
+			}
 			
 
 		}
@@ -139,6 +143,7 @@ int writeConfigFile(FILE *file)
 		fprintf(file,"cal_parameter1=%f\n",calpar.calpar1);
 		fprintf(file,"cal_parameter2=%f\n",calpar.calpar2);
 		fprintf(file,"cal_unit=%s\n",calpar.calUnit);
+		fprintf(file,"cal_unit_y=%s\n",calpar.calYUnit);
 	}else{
 		fprintf(file,"calibrate=no\n");
 		fprintf(file,"cal_parameter0=0.0\n");
@@ -151,32 +156,32 @@ int writeConfigFile(FILE *file)
 	}else{
 		fprintf(file,"discard_empty_spectra=no\n");
 	}
-	if(gui.showBinErrors == 1){
+	if(guiglobals.showBinErrors == 1){
 		fprintf(file,"show_bin_errors=yes\n");
 	}else{
 		fprintf(file,"show_bin_errors=no\n");
 	}
-	if(gui.roundErrors == 1){
+	if(guiglobals.roundErrors == 1){
 		fprintf(file,"round_errors=yes\n");
 	}else{
 		fprintf(file,"round_errors=no\n");
 	}
-	if(gui.preferDarkTheme == 1){
+	if(guiglobals.preferDarkTheme == 1){
 		fprintf(file,"prefer_dark_theme=yes\n");
 	}else{
 		fprintf(file,"prefer_dark_theme=no\n");
 	}
-	if(gui.useZoomAnimations == 1){
+	if(guiglobals.useZoomAnimations == 1){
 		fprintf(file,"use_drawing_animation=yes\n");
 	}else{
 		fprintf(file,"use_drawing_animation=no\n");
 	}
-	if(gui.drawSpLabels == 1){
+	if(guiglobals.drawSpLabels == 1){
 		fprintf(file,"draw_sp_labels=yes\n");
 	}else{
 		fprintf(file,"draw_sp_labels=no\n");
 	}
-	if(gui.autoZoom == 1){
+	if(guiglobals.autoZoom == 1){
 		fprintf(file,"autozoom=yes\n");
 	}else{
 		fprintf(file,"autozoom=no\n");
@@ -186,7 +191,7 @@ int writeConfigFile(FILE *file)
 	}else{
 		fprintf(file,"fix_relative_widths=no\n");
 	}
-	if(gui.popupFitResults == 1){
+	if(guiglobals.popupFitResults == 1){
 		fprintf(file,"popup_fit_results=yes\n");
 	}else{
 		fprintf(file,"popup_fit_results=no\n");

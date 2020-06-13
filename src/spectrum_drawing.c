@@ -6,7 +6,7 @@
 
 //set the default text color, depending on the
 void setTextColor(cairo_t *cr){
-  if(gui.preferDarkTheme){
+  if(guiglobals.preferDarkTheme){
     cairo_set_source_rgb (cr, 0.7, 0.7, 0.7);
   }else{
     cairo_set_source_rgb (cr, 0.3, 0.3, 0.3);
@@ -217,9 +217,9 @@ void toggle_logscale(){
 void on_toggle_cursor(GtkToggleButton *togglebutton, gpointer user_data)
 {
   if(gtk_toggle_button_get_active(togglebutton))
-    gui.drawSpCursor=0;
+    guiglobals.drawSpCursor=0;
   else
-    gui.drawSpCursor=-1;
+    guiglobals.drawSpCursor=-1;
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
 }
 //used for keyboard shortcut
@@ -239,10 +239,10 @@ void toggle_cursor(){
 //a region of interest, that region stays focused in the zoomed-in spectrum.
 //The callback is removed after 60 frames, or if the user starts zooming out.
 gboolean zoom_delay_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gpointer user_data){
-  //printf("tick %i\n",gui.framesSinceZoom);
-  gui.framesSinceZoom++;
-  if((gui.framesSinceZoom > 60)||((gui.useZoomAnimations)&&(drawing.zoomToLevel < drawing.zoomLevel))){
-    gui.framesSinceZoom = -1;
+  //printf("tick %i\n",guiglobals.framesSinceZoom);
+  guiglobals.framesSinceZoom++;
+  if((guiglobals.framesSinceZoom > 60)||((guiglobals.useZoomAnimations)&&(drawing.zoomToLevel < drawing.zoomLevel))){
+    guiglobals.framesSinceZoom = -1;
     return G_SOURCE_REMOVE;
   }
   return G_SOURCE_CONTINUE;
@@ -289,7 +289,7 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
 
   if((e->direction == 1)&&(drawing.zoomLevel > 1.0)){
     //printf("Scrolling down at %f %f!\n",e->x,e->y);
-    if(gui.useZoomAnimations){
+    if(guiglobals.useZoomAnimations){
       drawing.zoomToLevel = drawing.zoomLevel * 0.5;
       if(drawing.zoomToLevel < 1.0)
         drawing.zoomToLevel = 1.0;
@@ -305,18 +305,18 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
     GdkWindow *wwindow = gtk_widget_get_window(widget);
     // Determine GtkDrawingArea dimensions
     gdk_window_get_geometry (wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
-    if(gui.useZoomAnimations){
+    if(guiglobals.useZoomAnimations){
       //check if we are already zooming
-      if(gui.framesSinceZoom >= 0){
+      if(guiglobals.framesSinceZoom >= 0){
         //continue zooming, but don't change the focused channel
-        if(gui.framesSinceZoom > 0){
+        if(guiglobals.framesSinceZoom > 0){
           gtk_widget_add_tick_callback (widget, zoom_in_tick_callback, NULL, NULL);
         }
-        gui.framesSinceZoom = 0;
+        guiglobals.framesSinceZoom = 0;
         drawing.zoomToLevel = drawing.zoomToLevel * 2.0;
         drawing.xChanFocusChangePerFrame = (drawing.xChanToFocus - drawing.xChanFocus)/5.;
       }else{
-        gui.framesSinceZoom = 0;
+        guiglobals.framesSinceZoom = 0;
         drawing.zoomToLevel = drawing.zoomLevel * 2.0;
         drawing.xChanToFocus = drawing.lowerLimit + (((e->x)-80.0)/(dasize.width-80.0))*(drawing.upperLimit - drawing.lowerLimit);
         drawing.xChanFocusChangePerFrame = (drawing.xChanToFocus - drawing.xChanFocus)/5.;
@@ -324,15 +324,15 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
         gtk_widget_add_tick_callback (widget, zoom_delay_callback, NULL, NULL);
       }
     }else{
-      if(gui.framesSinceZoom < 0){
+      if(guiglobals.framesSinceZoom < 0){
         drawing.xChanFocus = drawing.lowerLimit + (((e->x)-80.0)/(dasize.width-80.0))*(drawing.upperLimit - drawing.lowerLimit);
         gtk_widget_add_tick_callback (widget, zoom_delay_callback, NULL, NULL);
       }
-      gui.framesSinceZoom = 0;
+      guiglobals.framesSinceZoom = 0;
       drawing.zoomLevel *= 2.0;
     }
   }
-  if(!(gui.useZoomAnimations)){
+  if(!(guiglobals.useZoomAnimations)){
     gtk_range_set_value(GTK_RANGE(zoom_scale),log(drawing.zoomLevel)/log(2.));//base 2 log of zoom
     gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
   }
@@ -343,10 +343,10 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
   if ((event->type == GDK_BUTTON_PRESS) && (event->button == 3)){
     //right mouse button being pressed
     float cursorChan = getCursorChannel(event->x, event->y);
-    switch(gui.fittingSp){
+    switch(guiglobals.fittingSp){
       case 5:
         //fit being displayed, clear it on right click
-        gui.fittingSp = 0;
+        guiglobals.fittingSp = 0;
         gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
         break;
       case 2:
@@ -383,7 +383,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
         //check if both limits have been set
         if((fitpar.fitStartCh >= 0)&&(fitpar.fitEndCh >=0)){
           printf("Fit limits: channel %i through %i\n",fitpar.fitStartCh,fitpar.fitEndCh);
-          gui.fittingSp = 2;
+          guiglobals.fittingSp = 2;
           update_gui_fit_state();
         }
         gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
@@ -408,15 +408,15 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
   //printf("Cursor pos: %f %f\n",event->x,event->y);
   if (event->state & GDK_BUTTON1_MASK){
     //left mouse button being pressed
-    if(gui.draggingSp == 0){
+    if(guiglobals.draggingSp == 0){
       //start drag
-      gui.draggingSp = 1;
-      if(gui.drawSpCursor == 1)
-        gui.drawSpCursor = 0; //hide vertical cursor while dragging
-      gui.dragstartul=drawing.upperLimit;
-      gui.dragstartll=drawing.lowerLimit;
-      gui.dragStartX = event->x;
-      //printf("Drag started! dragstartll=%i, dragstartul=%i\n",gui.dragstartll,gui.dragstartul);
+      guiglobals.draggingSp = 1;
+      if(guiglobals.drawSpCursor == 1)
+        guiglobals.drawSpCursor = 0; //hide vertical cursor while dragging
+      guiglobals.dragstartul=drawing.upperLimit;
+      guiglobals.dragstartll=drawing.lowerLimit;
+      guiglobals.dragStartX = event->x;
+      //printf("Drag started! dragstartll=%i, dragstartul=%i\n",guiglobals.dragstartll,guiglobals.dragstartul);
     }else{
       //continue drag
       //printf("Drag updated!\n");
@@ -425,15 +425,15 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
       // Determine GtkDrawingArea dimensions
       gdk_window_get_geometry (gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
       int limitWidth = drawing.upperLimit-drawing.lowerLimit;
-      drawing.upperLimit = gui.dragstartul - ((2.*(event->x - gui.dragStartX)/(dasize.width))*limitWidth);
-      drawing.lowerLimit = gui.dragstartll - ((2.*(event->x - gui.dragStartX)/(dasize.width))*limitWidth);
+      drawing.upperLimit = guiglobals.dragstartul - ((2.*(event->x - guiglobals.dragStartX)/(dasize.width))*limitWidth);
+      drawing.lowerLimit = guiglobals.dragstartll - ((2.*(event->x - guiglobals.dragStartX)/(dasize.width))*limitWidth);
       drawing.xChanFocus = drawing.lowerLimit + (drawing.upperLimit - drawing.lowerLimit)/2.;
-      //printf("startx = %f, x = %f, drawing.lowerLimit = %i, drawing.upperLimit = %i, width = %i, focus = %i\n",gui.dragStartX,event->x,drawing.lowerLimit,drawing.upperLimit,dasize.width,drawing.xChanFocus);
+      //printf("startx = %f, x = %f, drawing.lowerLimit = %i, drawing.upperLimit = %i, width = %i, focus = %i\n",guiglobals.dragStartX,event->x,drawing.lowerLimit,drawing.upperLimit,dasize.width,drawing.xChanFocus);
       gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
     }
   }else{
     //no button press
-    gui.draggingSp = 0;
+    guiglobals.draggingSp = 0;
   }
 
   
@@ -441,7 +441,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
   if(cursorChan >= 0){
 
     int peakToHighlight = -1;
-    if(gui.fittingSp == 5){
+    if(guiglobals.fittingSp == 5){
       //check if the cursor is over a peak
       int i;
       for(i=0;i<fitpar.numFitPeaks;i++){
@@ -496,11 +496,11 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
             }
             for(i=0;i<(drawing.numMultiplotSp-1);i++){
               binVal = getDispSpBinVal(i,cursorChanRounded-drawing.lowerLimit);
-              getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,gui.showBinErrors,gui.roundErrors);
+              getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,guiglobals.showBinErrors,guiglobals.roundErrors);
               statusBarLabelp += snprintf(statusBarLabelp,17," %s,", binValStr);
             }
             binVal = getDispSpBinVal(drawing.numMultiplotSp-1,cursorChanRounded-drawing.lowerLimit);
-            getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,gui.showBinErrors,gui.roundErrors);
+            getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,guiglobals.showBinErrors,guiglobals.roundErrors);
             binValStr[15] = '\0'; //truncate string (staying safe with sprintf, working around compiler warning when using snprintf instead)
             statusBarLabelp += sprintf(statusBarLabelp," %s", binValStr);
             break;
@@ -509,7 +509,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
           default:
             //single plot
             binVal = getDispSpBinVal(0,cursorChanRounded-drawing.lowerLimit);
-            getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,gui.showBinErrors,gui.roundErrors);
+            getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,guiglobals.showBinErrors,guiglobals.roundErrors);
             if(calpar.calMode == 1){
               int cursorChanEnd = cursorChanRounded + drawing.contractFactor;
               float cal_lowerChanLimit = getCalVal(cursorChanRounded);
@@ -534,9 +534,9 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
             float calCentrErr = getCalVal(fitpar.fitParErr[7+(3*drawing.highlightedPeak)]);
             float calWidthErr = getCalVal(fitpar.fitParErr[8+(3*drawing.highlightedPeak)]);
             char fitParStr[3][50];
-            getFormattedValAndUncertainty(evalPeakArea(drawing.highlightedPeak),evalPeakAreaErr(drawing.highlightedPeak),fitParStr[0],50,1,gui.roundErrors);
-            getFormattedValAndUncertainty(calCentr,calCentrErr,fitParStr[1],50,1,gui.roundErrors);
-            getFormattedValAndUncertainty(2.35482*calWidth,2.35482*calWidthErr,fitParStr[2],50,1,gui.roundErrors);
+            getFormattedValAndUncertainty(evalPeakArea(drawing.highlightedPeak),evalPeakAreaErr(drawing.highlightedPeak),fitParStr[0],50,1,guiglobals.roundErrors);
+            getFormattedValAndUncertainty(calCentr,calCentrErr,fitParStr[1],50,1,guiglobals.roundErrors);
+            getFormattedValAndUncertainty(2.35482*calWidth,2.35482*calWidthErr,fitParStr[2],50,1,guiglobals.roundErrors);
             snprintf(statusBarLabel,256,"Area: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
           }else{
             snprintf(statusBarLabel,256,"Area: %0.3f, Centroid: %0.3f, FWHM: %0.3f",evalPeakArea(drawing.highlightedPeak),calCentr,2.35482*calWidth);
@@ -544,9 +544,9 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
         }else{
           if(fitpar.errFound){
             char fitParStr[3][50];
-            getFormattedValAndUncertainty(evalPeakArea(drawing.highlightedPeak),evalPeakAreaErr(drawing.highlightedPeak),fitParStr[0],50,1,gui.roundErrors);
-            getFormattedValAndUncertainty(fitpar.fitParVal[7+(3*drawing.highlightedPeak)],fitpar.fitParErr[7+(3*drawing.highlightedPeak)],fitParStr[1],50,1,gui.roundErrors);
-            getFormattedValAndUncertainty(2.35482*fitpar.fitParVal[8+(3*drawing.highlightedPeak)],2.35482*fitpar.fitParErr[8+(3*drawing.highlightedPeak)],fitParStr[2],50,1,gui.roundErrors);
+            getFormattedValAndUncertainty(evalPeakArea(drawing.highlightedPeak),evalPeakAreaErr(drawing.highlightedPeak),fitParStr[0],50,1,guiglobals.roundErrors);
+            getFormattedValAndUncertainty(fitpar.fitParVal[7+(3*drawing.highlightedPeak)],fitpar.fitParErr[7+(3*drawing.highlightedPeak)],fitParStr[1],50,1,guiglobals.roundErrors);
+            getFormattedValAndUncertainty(2.35482*fitpar.fitParVal[8+(3*drawing.highlightedPeak)],2.35482*fitpar.fitParErr[8+(3*drawing.highlightedPeak)],fitParStr[2],50,1,guiglobals.roundErrors);
             snprintf(statusBarLabel,256,"Area: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
           }else{
             snprintf(statusBarLabel,256,"Area: %0.3f, Centroid: %0.3f, FWHM: %0.3f",evalPeakArea(drawing.highlightedPeak),fitpar.fitParVal[7+(3*drawing.highlightedPeak)],2.35482*fitpar.fitParVal[8+(3*drawing.highlightedPeak)]);
@@ -558,19 +558,19 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
     gtk_label_set_text(bottom_info_text,statusBarLabel);
 
     //draw cursor on plot (expensive, requires redraw of plot itself)
-    if((gui.draggingSp == 0)&&(gui.drawSpCursor != -1)){
+    if((guiglobals.draggingSp == 0)&&(guiglobals.drawSpCursor != -1)){
       //don't redraw if the cursor hasn't moved, that would be st00pid
-      if(fabs(gui.cursorPosX - event->x) >= 1.0){
-        gui.cursorPosX = event->x;
-        gui.drawSpCursor = 1; //draw vertical cursor
+      if(fabs(guiglobals.cursorPosX - event->x) >= 1.0){
+        guiglobals.cursorPosX = event->x;
+        guiglobals.drawSpCursor = 1; //draw vertical cursor
         gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
       }
     }
 
   }else{
     gtk_label_set_text(bottom_info_text,"Drag spectrum to pan, mouse wheel to zoom.");
-    if(gui.drawSpCursor == 1){
-      gui.drawSpCursor = 0; //hide vertical cursor
+    if(guiglobals.drawSpCursor == 1){
+      guiglobals.drawSpCursor = 0; //hide vertical cursor
       gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
     }
   }
@@ -957,7 +957,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 
   //printf("Drawing spectrum!\n");
   
-  if(gui.draggingSp == 0)
+  if(guiglobals.draggingSp == 0)
     gtk_label_set_text(bottom_info_text,"Drag spectrum to pan, mouse wheel to zoom.");
 
   GdkRectangle dasize;  // GtkDrawingArea size
@@ -985,7 +985,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   double plotFontSize = 13.5;
 
   //draw label(s) for the plot
-  if(gui.drawSpLabels){
+  if(guiglobals.drawSpLabels){
     setTextColor(cr);
     drawPlotLabel(cr,clip_x1,clip_x2,clip_y2, plotFontSize); //draw plot label(s)
     cairo_stroke(cr);
@@ -1186,7 +1186,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   }
 
   //draw fit
-  if(gui.fittingSp == 5){
+  if(guiglobals.fittingSp == 5){
     if((drawing.lowerLimit < fitpar.fitEndCh)&&(drawing.upperLimit > fitpar.fitStartCh)){
       cairo_set_line_width(cr, 3.0);
       cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
@@ -1409,32 +1409,35 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 
   //draw axis labels
   setTextColor(cr);
-  char axisLabel[16];
+  char axisLabel[16],axisYLabel[32];
   cairo_text_extents_t extents; //for getting dimensions needed to center text labels
   //x axis
   if(calpar.calMode == 0){
-    sprintf(axisLabel,"Channel #"); //set string for label
+    //set default strings for labels
+    sprintf(axisLabel,"Channel #");
+    sprintf(axisYLabel,"Value");
   }else{
-    strcpy(axisLabel,calpar.calUnit); //set label to calibrated units
+    //set labels to calibrated units
+    strcpy(axisLabel,calpar.calUnit);
+    sprintf(axisYLabel,calpar.calYUnit);
   }
   cairo_text_extents(cr, axisLabel, &extents);
   cairo_set_font_size(cr, plotFontSize*1.2);
   cairo_move_to(cr, (clip_x2-clip_x1)*0.55 - (extents.width/2), -clip_y1-1.0);
   cairo_show_text(cr, axisLabel);
   //y axis
-  sprintf(axisLabel,"Value"); //set string for label
-  cairo_text_extents(cr, axisLabel, &extents);
+  cairo_text_extents(cr, axisYLabel, &extents);
   cairo_set_font_size(cr, plotFontSize*1.2);
-  cairo_move_to(cr, clip_x1+16.0, (clip_y1-clip_y2)*0.5);
+  cairo_move_to(cr, clip_x1+16.0, (clip_y1-clip_y2)*0.525 + (extents.width/2));
   cairo_save(cr); //store the context before the rotation
   cairo_rotate(cr, 1.5*3.14159);
   cairo_translate(cr, (clip_x2-clip_x1)*0.015, -1.0*((clip_y1-clip_y2)*0.5)); //so that the origin is at the lower left
-  cairo_show_text(cr, axisLabel);
+  cairo_show_text(cr, axisYLabel);
   cairo_stroke(cr);
   cairo_restore(cr); //recall the unrotated context
 
   //draw cursors at fit limits if needed
-  if(gui.fittingSp > 0){
+  if(guiglobals.fittingSp > 0){
     if(fitpar.fitStartCh >= 0){
       float cursorPos = getXPosFromCh(fitpar.fitStartCh, clip_x1, clip_x2,0);
       if(cursorPos>=0){
@@ -1457,7 +1460,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
     }
 
     //draw peak position indicators
-    if((gui.fittingSp >= 2)&&(gui.fittingSp < 5)){
+    if((guiglobals.fittingSp >= 2)&&(guiglobals.fittingSp < 5)){
       //put markers at guessed positions
       cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
       cairo_set_line_width(cr, 2.0);
@@ -1468,7 +1471,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
         cairo_stroke_preserve(cr);
         cairo_fill(cr);
       }
-    }else if(gui.fittingSp == 5){
+    }else if(guiglobals.fittingSp == 5){
       //put markers at fitted positions
       cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
       cairo_set_line_width(cr, 2.0);
@@ -1483,12 +1486,12 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   }
 
   //draw cursor at mouse position
-  if(gui.drawSpCursor == 1){
+  if(guiglobals.drawSpCursor == 1){
     //printf("Drawing cursor!\n");
     cairo_set_line_width(cr, 1.0);
     setTextColor(cr);
-    cairo_move_to(cr, gui.cursorPosX, -40.0);
-    cairo_line_to(cr, gui.cursorPosX, -dasize.height);
+    cairo_move_to(cr, guiglobals.cursorPosX, -40.0);
+    cairo_line_to(cr, guiglobals.cursorPosX, -dasize.height);
     cairo_stroke(cr);
   }
 

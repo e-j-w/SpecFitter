@@ -58,7 +58,7 @@ GtkSpinner *fit_spinner;
 //Calibration dialog
 GtkWidget *calibrate_ok_button, *remove_calibration_button;
 GtkWindow *calibrate_window;
-GtkEntry *cal_entry_unit, *cal_entry_const, *cal_entry_lin, *cal_entry_quad;
+GtkEntry *cal_entry_unit, *cal_entry_const, *cal_entry_lin, *cal_entry_quad, *cal_entry_y_axis;
 //'About' dialog
 GtkAboutDialog *about_dialog;
 GtkModelButton *about_button;
@@ -108,7 +108,7 @@ struct {
   char popupFitResults; //0=don't popup results after fit, 1=popup results
   char useZoomAnimations; //0=don't use, 1=use
   int framesSinceZoom;
-} gui;
+} guiglobals;
 
 //imported data globals
 struct {
@@ -142,6 +142,7 @@ struct {
   char calMode; //0=no calibration, 1=calibration enabled
   float calpar0,calpar1,calpar2; //0th, 1st, and 2nd order calibration parameters
   char calUnit[16]; //name of the unit used for calibration
+  char calYUnit[32]; //name of the y-axis units
 } calpar;
 
 //fitting globals

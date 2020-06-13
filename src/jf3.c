@@ -70,6 +70,7 @@ int main(int argc, char *argv[])
   calibrate_ok_button = GTK_WIDGET(gtk_builder_get_object(builder, "options_ok_button"));
   remove_calibration_button = GTK_WIDGET(gtk_builder_get_object(builder, "remove_calibration_button"));
   cal_entry_unit = GTK_ENTRY(gtk_builder_get_object(builder, "calibration_unit_entry"));
+  cal_entry_y_axis = GTK_ENTRY(gtk_builder_get_object(builder, "y_axis_entry"));
   cal_entry_const = GTK_ENTRY(gtk_builder_get_object(builder, "cal_entry_const"));
   cal_entry_lin = GTK_ENTRY(gtk_builder_get_object(builder, "cal_entry_lin"));
   cal_entry_quad = GTK_ENTRY(gtk_builder_get_object(builder, "cal_entry_quad"));
@@ -203,19 +204,19 @@ int main(int argc, char *argv[])
   drawing.spColors[27] = 181/255.; drawing.spColors[28] = 137/255.; drawing.spColors[29] = 0.0;      //RGB values for color 10 (solarized yellow)
   drawing.spColors[30] = 0.5; drawing.spColors[31] = 0.5; drawing.spColors[32] = 0.5;                //RGB values for color 11
   drawing.spColors[33] = 0.7; drawing.spColors[34] = 0.0; drawing.spColors[35] = 0.3;                //RGB values for color 12
-  gui.fittingSp = 0;
-  gui.deferSpSelChange = 0;
-  gui.deferToggleRow = 0;
-  gui.draggingSp = 0;
-  gui.drawSpCursor = -1; //disabled by default
-  gui.drawSpLabels = 1; //enabled by default
-  gui.showBinErrors = 1;
-  gui.roundErrors = 0;
-  gui.autoZoom = 1;
-  gui.preferDarkTheme = 0;
-  gui.popupFitResults = 1;
-  gui.useZoomAnimations = 1;
-  gui.framesSinceZoom = -1;
+  guiglobals.fittingSp = 0;
+  guiglobals.deferSpSelChange = 0;
+  guiglobals.deferToggleRow = 0;
+  guiglobals.draggingSp = 0;
+  guiglobals.drawSpCursor = -1; //disabled by default
+  guiglobals.drawSpLabels = 1; //enabled by default
+  guiglobals.showBinErrors = 1;
+  guiglobals.roundErrors = 0;
+  guiglobals.autoZoom = 1;
+  guiglobals.preferDarkTheme = 0;
+  guiglobals.popupFitResults = 1;
+  guiglobals.useZoomAnimations = 1;
+  guiglobals.framesSinceZoom = -1;
   fitpar.fixRelativeWidths = 1;
   fitpar.fitStartCh = -1;
   fitpar.fitEndCh = -1;
@@ -290,8 +291,8 @@ int main(int argc, char *argv[])
   }
 
   //set whether dark theme is preferred
-  g_object_set(gtk_settings_get_default(),"gtk-application-prefer-dark-theme", gui.preferDarkTheme, NULL);
-  if(gui.preferDarkTheme){
+  g_object_set(gtk_settings_get_default(),"gtk-application-prefer-dark-theme", guiglobals.preferDarkTheme, NULL);
+  if(guiglobals.preferDarkTheme){
     gtk_image_set_from_pixbuf(display_button_icon, spIconPixbufDark);
   }else{
     gtk_image_set_from_pixbuf(display_button_icon, spIconPixbuf);

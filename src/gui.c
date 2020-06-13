@@ -3,14 +3,14 @@
 void showPreferences(int page){
   gtk_notebook_set_current_page(preferences_notebook,page);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(discard_empty_checkbutton),rawdata.dropEmptySpectra);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bin_errors_checkbutton),gui.showBinErrors);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(round_errors_checkbutton),gui.roundErrors);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dark_theme_checkbutton),gui.preferDarkTheme);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(animation_checkbutton),gui.useZoomAnimations);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autozoom_checkbutton),gui.autoZoom);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_label_checkbutton),gui.drawSpLabels);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bin_errors_checkbutton),guiglobals.showBinErrors);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(round_errors_checkbutton),guiglobals.roundErrors);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dark_theme_checkbutton),guiglobals.preferDarkTheme);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(animation_checkbutton),guiglobals.useZoomAnimations);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autozoom_checkbutton),guiglobals.autoZoom);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_label_checkbutton),guiglobals.drawSpLabels);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(relative_widths_checkbutton),fitpar.fixRelativeWidths);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(popup_results_checkbutton),gui.popupFitResults);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(popup_results_checkbutton),guiglobals.popupFitResults);
   gtk_combo_box_set_active(GTK_COMBO_BOX(weight_mode_combobox),fitpar.weightMode);
   gtk_window_present(preferences_window); //show the window
 }
@@ -82,7 +82,7 @@ void openSingleFile(char *filename, int append){
   }
 
   //autozoom if needed
-  if(gui.autoZoom){
+  if(guiglobals.autoZoom){
     autoZoom();
     gtk_range_set_value(GTK_RANGE(zoom_scale),log2(drawing.zoomLevel));
   }
@@ -127,7 +127,7 @@ void on_open_button_clicked(GtkButton *b)
         if(sel >=0){
           drawing.multiPlots[0] = sel;
           drawing.multiplotMode = 0; //files just opened, disable multiplot
-          gui.fittingSp = 0; //files just opened, reset fit state
+          guiglobals.fittingSp = 0; //files just opened, reset fit state
           gtk_widget_set_sensitive(GTK_WIDGET(append_button),TRUE);
           gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
           gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),TRUE);
@@ -198,7 +198,7 @@ void on_open_button_clicked(GtkButton *b)
   }
   
   //autozoom if needed
-  if(gui.autoZoom){
+  if(guiglobals.autoZoom){
     autoZoom();
     gtk_range_set_value(GTK_RANGE(zoom_scale),log2(drawing.zoomLevel));
   }
@@ -316,7 +316,7 @@ void on_zoom_scale_changed(GtkRange *range, gpointer user_data){
 void on_contract_scale_changed(GtkRange *range, gpointer user_data){
   int oldContractFactor = drawing.contractFactor;
   drawing.contractFactor = (int)gtk_range_get_value(range); //modify the contraction factor
-  if(gui.fittingSp == 5){
+  if(guiglobals.fittingSp == 5){
     int i;
     //rescale fit (optimization - don't refit)
     for(i=0;i<fitpar.numFitPeaks;i++){
@@ -340,6 +340,7 @@ void on_calibrate_button_clicked(GtkButton *b)
     sprintf(str,"%.3f",calpar.calpar2);
     gtk_entry_set_text(cal_entry_quad,str);
     gtk_entry_set_text(cal_entry_unit,calpar.calUnit);
+    gtk_entry_set_text(cal_entry_y_axis,calpar.calYUnit);
     gtk_widget_set_sensitive(GTK_WIDGET(remove_calibration_button),TRUE);
   }else{
     gtk_widget_set_sensitive(GTK_WIDGET(remove_calibration_button),FALSE);
@@ -367,9 +368,13 @@ void on_cal_par_activate (GtkEntry *entry, gpointer  user_data){
 void on_calibrate_ok_button_clicked(GtkButton *b)
 {
   //apply settings here!
-  strcpy(calpar.calUnit,gtk_entry_get_text(cal_entry_unit));
+  strncpy(calpar.calUnit,gtk_entry_get_text(cal_entry_unit),12);
   if(strcmp(calpar.calUnit,"")==0){
-    strcpy(calpar.calUnit,"Cal. Units");
+    strncpy(calpar.calUnit,"Cal. Units",12);
+  }
+  strncpy(calpar.calYUnit,gtk_entry_get_text(cal_entry_y_axis),28);
+  if(strcmp(calpar.calYUnit,"")==0){
+    strncpy(calpar.calYUnit,"Value",28);
   }
   calpar.calpar0 = (float)strtod(gtk_entry_get_text(cal_entry_const),NULL);
   calpar.calpar1 = (float)strtod(gtk_entry_get_text(cal_entry_lin),NULL);
@@ -434,7 +439,7 @@ void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
       }
       gtk_list_store_set(multiplot_liststore,&iter,1,val,-1); //set the boolean value (change checkbox value)
     }
-    gui.deferToggleRow = 1;
+    guiglobals.deferToggleRow = 1;
   }else if(llength == 1){
     gtk_list_store_set(multiplot_liststore,&iter,1,!val,-1); //set the boolean value (change checkbox value)
   }
@@ -587,7 +592,7 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
       drawing.multiplotMode++; //value of 0 means no multiplot
     }
 
-    gui.deferSpSelChange = 1;
+    guiglobals.deferSpSelChange = 1;
     gtk_spin_button_set_value(spectrum_selector, drawing.multiPlots[0]+1);
     
     printf("Number of spectra selected for plotting: %i.  Selected spectra: ", drawing.numMultiplotSp);
@@ -605,8 +610,8 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
     
     //handle fitting
     if(drawing.multiplotMode > 1){
-      gui.fittingSp = 0; //clear any fits being displayed
-    }else if(gui.fittingSp == 5){
+      guiglobals.fittingSp = 0; //clear any fits being displayed
+    }else if(guiglobals.fittingSp == 5){
       startGausFit(); //refit
     }
     
@@ -632,8 +637,8 @@ void on_sum_all_button_clicked(GtkButton *b)
   }
 
   //clear fit if necessary
-  if(gui.fittingSp == 5){
-    gui.fittingSp = 0;
+  if(guiglobals.fittingSp == 5){
+    guiglobals.fittingSp = 0;
     //update widgets
     update_gui_fit_state();
   }
@@ -645,14 +650,14 @@ void on_sum_all_button_clicked(GtkButton *b)
 
 void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data)
 {
-  if(!gui.deferSpSelChange){
+  if(!guiglobals.deferSpSelChange){
     drawing.multiPlots[0] = gtk_spin_button_get_value_as_int(spin_button) - 1;
     drawing.multiplotMode = 0;//unset multiplot, if it is being used
     drawing.numMultiplotSp = 1;//unset multiplot
     
     //clear fit if necessary
-    if(gui.fittingSp == 5){
-      gui.fittingSp = 0;
+    if(guiglobals.fittingSp == 5){
+      guiglobals.fittingSp = 0;
       //update widgets
       update_gui_fit_state();
     }
@@ -661,7 +666,7 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data
     //printf("Set selected spectrum to %i\n",dispSp);
     gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
   }else{
-    gui.deferSpSelChange = 0;
+    guiglobals.deferSpSelChange = 0;
   }
   
 }
@@ -672,13 +677,13 @@ void on_fit_button_clicked(GtkButton *b)
   //spectrum must be open to fit
   if(rawdata.openedSp){
     //cannot be already fitting
-    if((gui.fittingSp == 0)||(gui.fittingSp == 5)){
+    if((guiglobals.fittingSp == 0)||(guiglobals.fittingSp == 5)){
       //must be displaying only a single spectrum
       if(drawing.multiplotMode < 2){
 
         //safe to fit
       
-        gui.fittingSp = 1;
+        guiglobals.fittingSp = 1;
         memset(fitpar.fitParVal,0,sizeof(fitpar.fitParVal));
         //set default values
         fitpar.fitStartCh = -1;
@@ -702,7 +707,7 @@ void on_fit_fit_button_clicked(GtkButton *b)
 
 void on_fit_cancel_button_clicked(GtkButton *b)
 {
-  gui.fittingSp = 0;
+  guiglobals.fittingSp = 0;
   //update widgets
   update_gui_fit_state();
 }
@@ -722,27 +727,27 @@ void on_toggle_discard_empty(GtkToggleButton *togglebutton, gpointer user_data)
 void on_toggle_bin_errors(GtkToggleButton *togglebutton, gpointer user_data)
 {
   if(gtk_toggle_button_get_active(togglebutton))
-    gui.showBinErrors=1;
+    guiglobals.showBinErrors=1;
   else
-    gui.showBinErrors=0;
+    guiglobals.showBinErrors=0;
 }
 void on_toggle_round_errors(GtkToggleButton *togglebutton, gpointer user_data)
 {
   if(gtk_toggle_button_get_active(togglebutton))
-    gui.roundErrors=1;
+    guiglobals.roundErrors=1;
   else
-    gui.roundErrors=0;
+    guiglobals.roundErrors=0;
 }
 void on_toggle_dark_theme(GtkToggleButton *togglebutton, gpointer user_data)
 {
   if(gtk_toggle_button_get_active(togglebutton))
-    gui.preferDarkTheme=1;
+    guiglobals.preferDarkTheme=1;
   else
-    gui.preferDarkTheme=0;
+    guiglobals.preferDarkTheme=0;
   
   //set whether dark theme is preferred
-  g_object_set(gtk_settings_get_default(),"gtk-application-prefer-dark-theme", gui.preferDarkTheme, NULL);
-  if(gui.preferDarkTheme){
+  g_object_set(gtk_settings_get_default(),"gtk-application-prefer-dark-theme", guiglobals.preferDarkTheme, NULL);
+  if(guiglobals.preferDarkTheme){
     gtk_image_set_from_pixbuf(display_button_icon, spIconPixbufDark);
   }else{
     gtk_image_set_from_pixbuf(display_button_icon, spIconPixbuf);
@@ -751,24 +756,24 @@ void on_toggle_dark_theme(GtkToggleButton *togglebutton, gpointer user_data)
 void on_toggle_animation(GtkToggleButton *togglebutton, gpointer user_data)
 {
   if(gtk_toggle_button_get_active(togglebutton))
-    gui.useZoomAnimations=1;
+    guiglobals.useZoomAnimations=1;
   else
-    gui.useZoomAnimations=0;
+    guiglobals.useZoomAnimations=0;
 }
 void on_toggle_autozoom(GtkToggleButton *togglebutton, gpointer user_data)
 {
   if(gtk_toggle_button_get_active(togglebutton))
-    gui.autoZoom=1;
+    guiglobals.autoZoom=1;
   else
-    gui.autoZoom=0;
+    guiglobals.autoZoom=0;
 }
 
 void on_toggle_spectrum_label(GtkToggleButton *togglebutton, gpointer user_data)
 {
   if(gtk_toggle_button_get_active(togglebutton))
-    gui.drawSpLabels=1;
+    guiglobals.drawSpLabels=1;
   else
-    gui.drawSpLabels=0;
+    guiglobals.drawSpLabels=0;
 }
 
 void on_toggle_relative_widths(GtkToggleButton *togglebutton, gpointer user_data)
@@ -782,9 +787,9 @@ void on_toggle_relative_widths(GtkToggleButton *togglebutton, gpointer user_data
 void on_toggle_popup_results(GtkToggleButton *togglebutton, gpointer user_data)
 {
   if(gtk_toggle_button_get_active(togglebutton))
-    gui.popupFitResults=1;
+    guiglobals.popupFitResults=1;
   else
-    gui.popupFitResults=0;
+    guiglobals.popupFitResults=0;
 }
 
 void on_preferences_button_clicked(GtkButton *b)
@@ -804,8 +809,8 @@ void on_preferences_cancel_button_clicked(GtkButton *b)
 {
   updatePrefsFromConfigFile(); //rather than updating the config file, read from it to revert settings
   //set whether dark theme is preferred
-  g_object_set(gtk_settings_get_default(),"gtk-application-prefer-dark-theme", gui.preferDarkTheme, NULL);
-  if(gui.preferDarkTheme){
+  g_object_set(gtk_settings_get_default(),"gtk-application-prefer-dark-theme", guiglobals.preferDarkTheme, NULL);
+  if(guiglobals.preferDarkTheme){
     gtk_image_set_from_pixbuf(display_button_icon, spIconPixbufDark);
   }else{
     gtk_image_set_from_pixbuf(display_button_icon, spIconPixbuf);

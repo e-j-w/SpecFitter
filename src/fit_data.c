@@ -10,7 +10,7 @@ double getFitChisq();
 
 //update the gui state while/after fitting
 gboolean update_gui_fit_state(){
-  switch(gui.fittingSp){
+  switch(guiglobals.fittingSp){
     case 5:
       gtk_widget_set_sensitive(GTK_WIDGET(open_button),TRUE);
       if(rawdata.openedSp)
@@ -76,28 +76,32 @@ gboolean print_fit_results(){
 
   int length = 0;
   if(calpar.calMode == 1){
-    getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[0]),getCalVal(fitpar.fitParErr[0]),fitParStr[0],50,1,gui.roundErrors);
-    getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[1]),getCalVal(fitpar.fitParErr[1]),fitParStr[1],50,1,gui.roundErrors);
-    getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[2]),getCalVal(fitpar.fitParErr[2]),fitParStr[2],50,1,gui.roundErrors);
+    getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[0]),getCalVal(fitpar.fitParErr[0]),fitParStr[0],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[1]),getCalVal(fitpar.fitParErr[1]),fitParStr[1],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[2]),getCalVal(fitpar.fitParErr[2]),fitParStr[2],50,1,guiglobals.roundErrors);
   }else{
-    getFormattedValAndUncertainty(fitpar.fitParVal[0],fitpar.fitParErr[0],fitParStr[0],50,1,gui.roundErrors);
-    getFormattedValAndUncertainty(fitpar.fitParVal[1],fitpar.fitParErr[1],fitParStr[1],50,1,gui.roundErrors);
-    getFormattedValAndUncertainty(fitpar.fitParVal[2],fitpar.fitParErr[2],fitParStr[2],50,1,gui.roundErrors);
+    getFormattedValAndUncertainty(fitpar.fitParVal[0],fitpar.fitParErr[0],fitParStr[0],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty(fitpar.fitParVal[1],fitpar.fitParErr[1],fitParStr[1],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty(fitpar.fitParVal[2],fitpar.fitParErr[2],fitParStr[2],50,1,guiglobals.roundErrors);
   }
   length += snprintf(fitResStr+length,strSize-length,"Chisq/NDF: %f\n\nBackground\nA: %s, B: %s, C: %s\n\nPeaks",getFitChisq()/(1.0*fitpar.ndf),fitParStr[0],fitParStr[1],fitParStr[2]);
   for(i=0;i<fitpar.numFitPeaks;i++){
-    getFormattedValAndUncertainty(evalPeakArea(i),evalPeakAreaErr(i),fitParStr[0],50,1,gui.roundErrors);
+    getFormattedValAndUncertainty(evalPeakArea(i),evalPeakAreaErr(i),fitParStr[0],50,1,guiglobals.roundErrors);
     if(calpar.calMode == 1){
-      getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[7+(3*i)]),getCalVal(fitpar.fitParErr[7+(3*i)]),fitParStr[1],50,1,gui.roundErrors);
-      getFormattedValAndUncertainty(2.35482*getCalVal(fitpar.fitParVal[8+(3*i)]),2.35482*getCalVal(fitpar.fitParErr[8+(3*i)]),fitParStr[2],50,1,gui.roundErrors);
+      getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[7+(3*i)]),getCalVal(fitpar.fitParErr[7+(3*i)]),fitParStr[1],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty(2.35482*getCalVal(fitpar.fitParVal[8+(3*i)]),2.35482*getCalVal(fitpar.fitParErr[8+(3*i)]),fitParStr[2],50,1,guiglobals.roundErrors);
     }else{
-      getFormattedValAndUncertainty(fitpar.fitParVal[7+(3*i)],fitpar.fitParErr[7+(3*i)],fitParStr[1],50,1,gui.roundErrors);
-      getFormattedValAndUncertainty(2.35482*fitpar.fitParVal[8+(3*i)],2.35482*fitpar.fitParErr[8+(3*i)],fitParStr[2],50,1,gui.roundErrors);
+      getFormattedValAndUncertainty(fitpar.fitParVal[7+(3*i)],fitpar.fitParErr[7+(3*i)],fitParStr[1],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty(2.35482*fitpar.fitParVal[8+(3*i)],2.35482*fitpar.fitParErr[8+(3*i)],fitParStr[2],50,1,guiglobals.roundErrors);
     }
-    length += snprintf(fitResStr+length,strSize-length,"\nPeak %i Area: %s, Centroid: %s, FWHM: %s",i+1,fitParStr[0],fitParStr[1],fitParStr[2]);
+    int len = snprintf(fitResStr+length,strSize-length,"\nPeak %i Area: %s, Centroid: %s, FWHM: %s",i+1,fitParStr[0],fitParStr[1],fitParStr[2]);
+    if((len < 0)||(len >= strSize-length)){
+      break;
+    }
+    length += len;
   }
 
-  switch (gui.popupFitResults)
+  switch (guiglobals.popupFitResults)
   {
     case 1:
       //show a dialog box with the fit results
@@ -312,7 +316,7 @@ int setupFitSums(lin_eq_type *linEq, double flambda){
   memset(linEq->solution,0,sizeof(linEq->solution));
   memset(linEq->inv_matrix,0,sizeof(linEq->inv_matrix));
   memset(cmatrix,0,sizeof(cmatrix));
-  double xval,weight,ydiff;
+  long double xval,weight,ydiff;
   int peakNum, peakNum2, parNum, parNum2;
 
   if(fitpar.fixRelativeWidths){
@@ -321,7 +325,7 @@ int setupFitSums(lin_eq_type *linEq, double flambda){
 
     for (i=fitpar.fitStartCh;i<=fitpar.fitEndCh;i+=drawing.contractFactor){
 
-      xval = (double)(i);
+      xval = (long double)(i);
       ydiff = getSpBinVal(0,i) - evalFit(xval);
 
       if(fitpar.weightMode == 0){
@@ -673,12 +677,12 @@ void performGausFit(){
     fitpar.errFound = getParameterErrors(&linEq);
   }else if (numNLIter >= numNLIterTry){
     printf("Fit did not converge after %i iterations.  Continuing...\n",numNLIter);
-    gui.fittingSp = 4;
+    guiglobals.fittingSp = 4;
     g_idle_add(update_gui_fit_state,NULL);
     nonLinearizedGausFit(numNLIterTry*10, 0.0001, &linEq);
   }else{
     printf("WARNING: failed fit, iteration %i.\n",numNLIter);
-    gui.fittingSp = 0;
+    guiglobals.fittingSp = 0;
     g_idle_add(update_gui_fit_state,NULL);
     return;
   }
@@ -713,7 +717,7 @@ void performGausFit(){
     }
   }
   
-  gui.fittingSp = 5;
+  guiglobals.fittingSp = 5;
   g_idle_add(update_gui_fit_state,NULL);
   g_idle_add(print_fit_results,NULL);
 
@@ -770,7 +774,7 @@ int startGausFit(){
     return 0;
   }
 
-  gui.fittingSp = 3;
+  guiglobals.fittingSp = 3;
   g_idle_add(update_gui_fit_state,NULL);
 
   int i;
