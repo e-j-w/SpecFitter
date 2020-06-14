@@ -31,12 +31,13 @@
 /* GUI globals */
 GtkWindow *window;
 GtkHeaderBar *header_bar;
-GtkWidget *open_button, *append_button;
-GtkWidget *fit_button, *display_button;
+GtkButton *open_button, *append_button;
+GtkButton *fit_button, *display_button;
 GtkPopover *display_popover;
-GtkWidget *calibrate_button;
+GtkButton *calibrate_button;
+GtkButton *save_button;
 GtkLabel *bottom_info_text;
-GtkWidget *file_open_dialog;
+GtkFileChooser *file_open_dialog, *file_save_dialog;
 GtkFileFilter *file_filter;
 GtkAccelGroup *main_window_accelgroup;
 GtkBox *no_sp_box;
@@ -115,7 +116,7 @@ struct {
   double hist[NSPECT][S32K]; //spectrum histogram data
   char histComment[NSPECT][256]; //spectrum description/comment
   char openedSp; //0=not opened, 1=opened
-  int numSpOpened; //number of spectra in the opened file(s)
+  char numSpOpened; //number of spectra in the opened file(s)
   int numFilesOpened; //number of files containing spectra opened
   char dropEmptySpectra; //0=don't discard, 1=discard
 } rawdata;

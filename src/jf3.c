@@ -6,6 +6,7 @@
 #include "utils.c"
 #include "read_data.c"
 #include "read_config.c"
+#include "write_data.c"
 #include "fit_data.c"
 #include "spectrum_drawing.c"
 #include "gui.c"
@@ -44,11 +45,12 @@ int main(int argc, char *argv[])
   display_popover = GTK_POPOVER(gtk_builder_get_object(builder, "display_popover"));
 
   //main window UI elements
-  open_button = GTK_WIDGET(gtk_builder_get_object(builder, "open_button"));
-  append_button = GTK_WIDGET(gtk_builder_get_object(builder, "append_button"));
-  calibrate_button = GTK_WIDGET(gtk_builder_get_object(builder, "calibrate_button"));
-  fit_button = GTK_WIDGET(gtk_builder_get_object(builder, "fit_button"));
-  display_button = GTK_WIDGET(gtk_builder_get_object(builder, "display_button"));
+  open_button = GTK_BUTTON(gtk_builder_get_object(builder, "open_button"));
+  append_button = GTK_BUTTON(gtk_builder_get_object(builder, "append_button"));
+  calibrate_button = GTK_BUTTON(gtk_builder_get_object(builder, "calibrate_button"));
+  fit_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_button"));
+  save_button = GTK_BUTTON(gtk_builder_get_object(builder, "save_button"));
+  display_button = GTK_BUTTON(gtk_builder_get_object(builder, "display_button"));
   display_button_icon = GTK_IMAGE(gtk_builder_get_object(builder, "display_button_icon"));
   spectrum_drawing_area = GTK_WIDGET(gtk_builder_get_object(builder, "spectrumdrawingarea"));
   spectrum_drag_gesture = gtk_gesture_drag_new(spectrum_drawing_area); //without this, cannot click away from menus onto the drawing area, needs further investigation
@@ -120,6 +122,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (open_button), "clicked", G_CALLBACK (on_open_button_clicked), NULL);
   g_signal_connect (G_OBJECT (append_button), "clicked", G_CALLBACK (on_append_button_clicked), NULL);
   g_signal_connect (G_OBJECT (calibrate_button), "clicked", G_CALLBACK (on_calibrate_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (save_button), "clicked", G_CALLBACK (on_save_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_button), "clicked", G_CALLBACK (on_multiplot_button_clicked), NULL);
   g_signal_connect (G_OBJECT (sum_all_button), "clicked", G_CALLBACK (on_sum_all_button_clicked), NULL);
   g_signal_connect (G_OBJECT (fit_button), "clicked", G_CALLBACK (on_fit_button_clicked), NULL);
@@ -231,6 +234,7 @@ int main(int argc, char *argv[])
   gtk_widget_set_sensitive(GTK_WIDGET(append_button),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),FALSE);
+  gtk_widget_set_sensitive(GTK_WIDGET(save_button),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(fit_button),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(display_button),FALSE);

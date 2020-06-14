@@ -5,6 +5,7 @@ jf3-resources.c
 *.mca
 *.fmca
 *.spe
+*.jf3
 *.out
 *.o
 *.compiled

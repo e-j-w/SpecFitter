@@ -24,44 +24,45 @@ void openSingleFile(char *filename, int append){
     rawdata.numSpOpened=0;
   int numSp = readSpectrumDataFile(filename,rawdata.hist,rawdata.numSpOpened);
   if(numSp > 0){ //see read_data.c
-      rawdata.openedSp = 1;
-      //set comments and scaling for spectra just opened
-      for (i = rawdata.numSpOpened; i < (rawdata.numSpOpened+numSp); i++){
-        snprintf(rawdata.histComment[i],256,"Spectrum %i of %s",i-rawdata.numSpOpened+1,basename((char*)filename));
-        //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
-        drawing.scaleFactor[i] = 1.00;
-      }
-      rawdata.numSpOpened += numSp;
-      //select the first non-empty spectrum by default
-      int sel = getFirstNonemptySpectrum(rawdata.numSpOpened);
-      if(sel >=0){
-        drawing.multiPlots[0] = sel;
-        drawing.multiplotMode = 0; //file just opened, disable multiplot
-        gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(display_button),TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(zoom_scale),TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
-        gtk_label_set_text(bottom_info_text,"");
-        gtk_widget_hide(GTK_WIDGET(no_sp_box));
-        if(rawdata.numSpOpened > 1){
-          gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
-        }
-        //set the range of selectable spectra values
-        gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);
-        gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened);
-        gtk_spin_button_set_value(spectrum_selector, sel+1);
-      }else{
-        //no spectra with any data in the selected file
-        openErr = 2;
-      }
-    }else if (numSp == -1){
-      //too many files opened
-      openErr = 3;
-    }else{
-      //improper file format
-      openErr = 1;
+    rawdata.openedSp = 1;
+    //set comments and scaling for spectra just opened
+    for (i = rawdata.numSpOpened; i < (rawdata.numSpOpened+numSp); i++){
+      snprintf(rawdata.histComment[i],256,"Spectrum %i of %s",i-rawdata.numSpOpened+1,basename((char*)filename));
+      //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
+      drawing.scaleFactor[i] = 1.00;
     }
+    rawdata.numSpOpened += numSp;
+    //select the first non-empty spectrum by default
+    int sel = getFirstNonemptySpectrum(rawdata.numSpOpened);
+    if(sel >=0){
+      drawing.multiPlots[0] = sel;
+      drawing.multiplotMode = 0; //file just opened, disable multiplot
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(display_button),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(zoom_scale),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(save_button),TRUE);
+      gtk_label_set_text(bottom_info_text,"");
+      gtk_widget_hide(GTK_WIDGET(no_sp_box));
+      if(rawdata.numSpOpened > 1){
+        gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
+      }
+      //set the range of selectable spectra values
+      gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);
+      gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened);
+      gtk_spin_button_set_value(spectrum_selector, sel+1);
+    }else{
+      //no spectra with any data in the selected file
+      openErr = 2;
+    }
+  }else if (numSp == -1){
+    //too many files opened
+    openErr = 3;
+  }else{
+    //improper file format
+    openErr = 1;
+  }
   
   if(openErr>0){
     char errMsg[256];
@@ -93,23 +94,24 @@ void on_open_button_clicked(GtkButton *b)
 {
   int i,j;
   
-  file_open_dialog = gtk_file_chooser_dialog_new ("Open Spectrum File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, NULL);
-  gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(file_open_dialog), TRUE);
+  file_open_dialog = GTK_FILE_CHOOSER(gtk_file_chooser_dialog_new("Open Spectrum File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, NULL));
+  gtk_file_chooser_set_select_multiple(file_open_dialog, TRUE);
   file_filter = gtk_file_filter_new();
-  gtk_file_filter_set_name(file_filter,"Spectrum Data (.txt, .mca, .fmca, .spe, .C)");
+  gtk_file_filter_set_name(file_filter,"Spectrum Data (.jf3, .txt, .mca, .fmca, .spe, .C)");
   gtk_file_filter_add_pattern(file_filter,"*.txt");
   gtk_file_filter_add_pattern(file_filter,"*.mca");
   gtk_file_filter_add_pattern(file_filter,"*.fmca");
   gtk_file_filter_add_pattern(file_filter,"*.spe");
   gtk_file_filter_add_pattern(file_filter,"*.C");
-  gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(file_open_dialog),file_filter);
+  gtk_file_filter_add_pattern(file_filter,"*.jf3");
+  gtk_file_chooser_add_filter(file_open_dialog,file_filter);
 
   int openErr = 0; //to track if there are any errors when opening spectra
   if (gtk_dialog_run(GTK_DIALOG(file_open_dialog)) == GTK_RESPONSE_ACCEPT)
   {
     rawdata.numSpOpened = 0; //reset the open spectra
     char *filename = NULL;
-    GSList *file_list = gtk_file_chooser_get_filenames(GTK_FILE_CHOOSER(file_open_dialog));
+    GSList *file_list = gtk_file_chooser_get_filenames(file_open_dialog);
     for(i=0;i<g_slist_length(file_list);i++){
       filename = g_slist_nth_data(file_list,i);
       int numSp = readSpectrumDataFile(filename,rawdata.hist,rawdata.numSpOpened);
@@ -134,6 +136,7 @@ void on_open_button_clicked(GtkButton *b)
           gtk_widget_set_sensitive(GTK_WIDGET(display_button),TRUE);
           gtk_widget_set_sensitive(GTK_WIDGET(zoom_scale),TRUE);
           gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
+          gtk_widget_set_sensitive(GTK_WIDGET(save_button),TRUE);
           gtk_label_set_text(bottom_info_text,"");
           gtk_widget_hide(GTK_WIDGET(no_sp_box));
           if(rawdata.numSpOpened > 1){
@@ -159,7 +162,7 @@ void on_open_button_clicked(GtkButton *b)
       }
     }
 
-    gtk_widget_destroy(file_open_dialog);
+    gtk_widget_destroy(GTK_WIDGET(file_open_dialog));
 
     if(openErr>0){
       GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
@@ -194,7 +197,7 @@ void on_open_button_clicked(GtkButton *b)
     g_slist_free(file_list);
     g_free(filename);
   }else{
-    gtk_widget_destroy(file_open_dialog);
+    gtk_widget_destroy(GTK_WIDGET(file_open_dialog));
   }
   
   //autozoom if needed
@@ -212,22 +215,23 @@ void on_append_button_clicked(GtkButton *b)
 {
   int i,j;
   
-  file_open_dialog = gtk_file_chooser_dialog_new ("Add More Spectrum File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, NULL);
-  gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(file_open_dialog), TRUE);
+  file_open_dialog = GTK_FILE_CHOOSER(gtk_file_chooser_dialog_new ("Add More Spectrum File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, NULL));
+  gtk_file_chooser_set_select_multiple(file_open_dialog, TRUE);
   file_filter = gtk_file_filter_new();
-  gtk_file_filter_set_name(file_filter,"Spectrum Data (.txt, .mca, .fmca, .spe, .C)");
+  gtk_file_filter_set_name(file_filter,"Spectrum Data (.jf3, .txt, .mca, .fmca, .spe, .C)");
   gtk_file_filter_add_pattern(file_filter,"*.txt");
   gtk_file_filter_add_pattern(file_filter,"*.mca");
   gtk_file_filter_add_pattern(file_filter,"*.fmca");
   gtk_file_filter_add_pattern(file_filter,"*.spe");
   gtk_file_filter_add_pattern(file_filter,"*.C");
-  gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(file_open_dialog),file_filter);
+  gtk_file_filter_add_pattern(file_filter,"*.jf3");
+  gtk_file_chooser_add_filter(file_open_dialog,file_filter);
 
   int openErr = 0; //to track if there are any errors when opening spectra
   if (gtk_dialog_run(GTK_DIALOG(file_open_dialog)) == GTK_RESPONSE_ACCEPT)
   {
     char *filename = NULL;
-    GSList *file_list = gtk_file_chooser_get_filenames(GTK_FILE_CHOOSER(file_open_dialog));
+    GSList *file_list = gtk_file_chooser_get_filenames(file_open_dialog);
     for(i=0;i<g_slist_length(file_list);i++){
       filename = g_slist_nth_data(file_list,i);
       int numSp = readSpectrumDataFile(filename,rawdata.hist,rawdata.numSpOpened);
@@ -255,7 +259,7 @@ void on_append_button_clicked(GtkButton *b)
       }
     }
 
-    gtk_widget_destroy(file_open_dialog);
+    gtk_widget_destroy(GTK_WIDGET(file_open_dialog));
 
     if(openErr>0){
       GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
@@ -290,9 +294,62 @@ void on_append_button_clicked(GtkButton *b)
     g_slist_free(file_list);
     g_free(filename);
   }else{
-    gtk_widget_destroy(file_open_dialog);
+    gtk_widget_destroy(GTK_WIDGET(file_open_dialog));
   }
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+  
+}
+
+void on_save_button_clicked(GtkButton *b)
+{
+
+  file_save_dialog = GTK_FILE_CHOOSER(gtk_file_chooser_dialog_new ("Save Spectrum Data", window, GTK_FILE_CHOOSER_ACTION_SAVE, "Cancel", GTK_RESPONSE_CANCEL, "Save", GTK_RESPONSE_ACCEPT, NULL));
+  gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
+
+  int saveErr = 0; //to track if there are any errors when opening spectra
+  if (gtk_dialog_run(GTK_DIALOG(file_save_dialog)) == GTK_RESPONSE_ACCEPT)
+  {
+    char *filename = NULL;
+    filename = gtk_file_chooser_get_filename(file_save_dialog);
+    const char *dot = strrchr(filename, '.'); //get the file extension
+    if((dot != NULL)&&(strcmp(dot + 1, "jf3") == 0)){
+      //write file
+      writeJF3(filename, rawdata.hist);
+    }else{
+      //save as a .jf3 file by default
+      strcat(filename,".jf3");
+      //write file
+      writeJF3(filename, rawdata.hist);
+    }
+
+    gtk_widget_destroy(GTK_WIDGET(file_save_dialog));
+
+    if(saveErr>0){
+      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+      GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error saving spectrum data!");
+      char errMsg[256];
+      switch (saveErr)
+      {
+        case 1:
+          snprintf(errMsg,256,"Error writing to file %s.",filename);
+          break;
+        default:
+          snprintf(errMsg,256,"Unknown error saving spectrum data.");
+          break;
+      }
+      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),errMsg);
+      gtk_dialog_run (GTK_DIALOG (message_dialog));
+      gtk_widget_destroy (message_dialog);
+    }else{
+      //update the status bar
+      char saveMsg[256];
+      snprintf(saveMsg,256,"Saved data to file %s.",filename);
+      gtk_label_set_text(bottom_info_text,saveMsg);
+    }
+    g_free(filename);
+  }else{
+    gtk_widget_destroy(GTK_WIDGET(file_save_dialog));
+  }
   
 }
 

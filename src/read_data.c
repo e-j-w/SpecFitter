@@ -1,5 +1,102 @@
 /* J. Williams, 2020 */
 
+//File contains functions for reading spectra of various formats.
+//.jf3 - compressed multiple spectra, with comments
+//.mca - integer array
+//.fmca - float array
+//.spe - RadWare
+//.C - ROOT macro
+//.txt - column plaintext data (compatible with spreadsheet software)
+
+
+//function reads an .jf3 file into a double array and returns the array
+int readJF3(const char *filename, double outHist[NSPECT][S32K], int outHistStartSp)
+{
+	int i,j;
+	unsigned char ucharBuf, numSpec;
+	FILE *inp;
+
+	if ((inp = fopen(filename, "r")) == NULL) //open the file
+	{
+		printf("ERROR: Cannot open the input file: %s\n", filename);
+		printf("Check that the file exists.\n");
+		exit(-1);
+	}
+
+	fread(&ucharBuf, sizeof(unsigned char), 1, inp);
+	if(ucharBuf==0){
+		//version 0 of file format
+		fread(&ucharBuf, sizeof(unsigned char), 1, inp);
+		numSpec = ucharBuf;
+		if(numSpec > 0){
+
+			if((numSpec + outHistStartSp)>NSPECT){
+				printf("Cannot open file %s, number of spectra would exceed maximum!\n", filename);
+				return -1; //over-import error
+			}
+
+			//read labels
+			for(i=0;i<numSpec;i++){
+				fread(rawdata.histComment[i+outHistStartSp],sizeof(rawdata.histComment[i+outHistStartSp]), 1, inp);
+			}
+
+			//read spectra
+			signed char scharBuf;
+			char doneSp;
+			int spInd;
+			float val;
+			for(i=0;i<numSpec;i++){
+				
+				doneSp = 0;
+				spInd = 0;
+				while(doneSp==0){
+					//read packet header
+					fread(&scharBuf,sizeof(signed char), 1, inp);
+					//printf("read packet counter: %i\n",scharBuf);
+					if(scharBuf == 0){
+						fread(&val,sizeof(float), 1, inp); //read in final value
+						outHist[i+outHistStartSp][spInd] = (double)val;
+						spInd++;
+						doneSp = 1; //move on to the next spectrum
+					}else if(scharBuf > 0){
+						//duplicated entries
+						fread(&val,sizeof(float), 1, inp); //read in value
+						for(j=0;j<scharBuf;j++){
+							outHist[i+outHistStartSp][spInd+j] = (double)val;
+						}
+						spInd += scharBuf;
+					}else{
+						//non-duplicated entries
+						int numEntr = abs(scharBuf);
+						for(j=0;j<numEntr;j++){
+							fread(&val,sizeof(float), 1, inp); //read in value
+							outHist[i+outHistStartSp][spInd+j] = (double)val;
+							//printf("val %f\n",val);
+						}
+						spInd += numEntr;
+					}
+
+				}
+
+				//fill the rest of the histogram
+				for(j=spInd;j<S32K;j++)
+					outHist[i+outHistStartSp][j] = 0.;
+				
+			}
+
+		}else{
+			printf("ERROR: file %s contains no spectra.\n",filename);
+			return 0;
+		}
+	}else{
+		printf("ERROR: file %s has unknown .jf3 file format version (%i).\n",filename,ucharBuf);
+		return 0;
+	}
+
+	fclose(inp);
+	return numSpec;
+}
+
 //function reads an .mca file into a double array and returns the number of spectra read in
 int readMCA(const char *filename, double outHist[NSPECT][S32K], int outHistStartSp)
 {
@@ -108,8 +205,6 @@ int readSPE(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 	float inpHist[4096];
 	FILE *inp;
 
-	memset(outHist, 0, sizeof(*outHist));
-
 	if ((inp = fopen(filename, "r")) == NULL) //open the file
 	{
 		printf("ERROR: Cannot open the input file: %s\n", filename);
@@ -121,7 +216,7 @@ int readSPE(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 	{
 		printf("ERROR: Cannot read header from the .spe file: %s\n", filename);
 		printf("Verify that the format of the file is correct.\n");
-		exit(-1);
+		return 0;
 	}
 	int numElementsRead = fread(inpHist, sizeof(float), 4096, inp);
 	if (numElementsRead < 1)
@@ -129,7 +224,7 @@ int readSPE(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 		printf("ERROR: Cannot read spectrum from the .spe file: %s\n", filename);
 		printf("fread code: %i\n",numElementsRead);
 		printf("Verify that the format of the file is correct.\n");
-		exit(-1);
+		return 0;
 	}
 
 	if(outHistStartSp>=NSPECT){
@@ -155,8 +250,6 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 	FILE *inp;
 	double num[NSPECT];
 	int numColumns = 0; // the detected number of columns in the first line
-
-	memset(outHist, 0, sizeof(*outHist));
 
 	if ((inp = fopen(filename, "r")) == NULL){ //open the file
 		printf("ERROR: Cannot open the input file: %s\n", filename);
@@ -274,7 +367,7 @@ int readROOT(const char *filename, double outHist[NSPECT][S32K], int outHistStar
 		printf("Specified file %s has nothing in it.\n",filename);
 		free(histName);
 		free(str);
-		return -1;
+		return 0;
   }
 
 	fclose(inp);
@@ -300,8 +393,9 @@ int readSpectrumDataFile(const char *filename, double outHist[NSPECT][S32K], int
 		numSpec = readTXT(filename, outHist, outHistStartSp);
 	else if (strcmp(dot + 1, "C") == 0)
 		numSpec = readROOT(filename, outHist, outHistStartSp);
-	else
-	{
+	else if (strcmp(dot + 1, "jf3") == 0)
+		numSpec = readJF3(filename, outHist, outHistStartSp);
+	else{
 		//printf("Improper format of input file: %s\n", filename);
 		//printf("Supported file formats are: integer array (.mca), float array (.fmca), or radware (.spe) files.\n");
 		return 0;
