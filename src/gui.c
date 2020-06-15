@@ -9,6 +9,7 @@ void showPreferences(int page){
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(animation_checkbutton),guiglobals.useZoomAnimations);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autozoom_checkbutton),guiglobals.autoZoom);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_label_checkbutton),guiglobals.drawSpLabels);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_comment_checkbutton),guiglobals.drawSpComments);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(relative_widths_checkbutton),fitpar.fixRelativeWidths);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(popup_results_checkbutton),guiglobals.popupFitResults);
   gtk_combo_box_set_active(GTK_COMBO_BOX(weight_mode_combobox),fitpar.weightMode);
@@ -405,7 +406,7 @@ void on_calibrate_button_clicked(GtkButton *b)
   gtk_window_present(calibrate_window); //show the window
 }
 
-void on_cal_par_activate (GtkEntry *entry, gpointer  user_data){
+void on_cal_par_activate (GtkEntry *entry, gpointer user_data){
   const gchar *entryText;
   entryText = gtk_entry_get_text(cal_entry_const);
   if(strtod(entryText,NULL)==0.){
@@ -464,6 +465,54 @@ void on_remove_calibration_button_clicked(GtkButton *b)
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
   
 }
+
+
+void on_comment_entry_changed(GtkEntry *entry, gpointer user_data)
+{
+  int len = gtk_entry_get_text_length(entry);
+  if(len==0){
+    gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
+  }else{
+    gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),TRUE);
+  }
+}
+void on_comment_ok_button_clicked(GtkButton *b)
+{
+  if(guiglobals.commentEditInd == -1){
+    //making a new comment
+    if(strcmp(gtk_entry_get_text(comment_entry),"")!=0){
+      strncpy(rawdata.chanComment[(int)rawdata.numChComments],gtk_entry_get_text(comment_entry),256);
+      rawdata.numChComments++;
+    }
+  }else{
+    //editing an existing comment
+    if(guiglobals.commentEditInd < NCHCOM){
+      strncpy(rawdata.chanComment[guiglobals.commentEditInd],gtk_entry_get_text(comment_entry),256);
+    }
+  }
+
+  gtk_widget_hide(GTK_WIDGET(comment_window)); //close the comment window
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
+}
+void on_remove_comment_button_clicked(GtkButton *b)
+{
+  if(guiglobals.commentEditInd == -1){
+    printf("WARNING: attempting to delete a comment that doesn't exist!\n");
+  }else if(guiglobals.commentEditInd < NCHCOM){
+    //shorten the comment array
+    int i;
+    for(i=guiglobals.commentEditInd+1;i<rawdata.numChComments;i++){
+      rawdata.chanCommentCh[i-1]=rawdata.chanCommentCh[i];
+      rawdata.chanCommentSp[i-1]=rawdata.chanCommentSp[i];
+      rawdata.chanCommentVal[i-1]=rawdata.chanCommentVal[i];
+      strncpy(rawdata.chanComment[i-1],rawdata.chanComment[i],256);
+    }
+    rawdata.numChComments--;
+  }
+  gtk_widget_hide(GTK_WIDGET(comment_window)); //close the comment window
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
+}
+
 
 void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
   int i;
@@ -831,6 +880,14 @@ void on_toggle_spectrum_label(GtkToggleButton *togglebutton, gpointer user_data)
     guiglobals.drawSpLabels=1;
   else
     guiglobals.drawSpLabels=0;
+}
+
+void on_toggle_spectrum_comment(GtkToggleButton *togglebutton, gpointer user_data)
+{
+  if(gtk_toggle_button_get_active(togglebutton))
+    guiglobals.drawSpComments=1;
+  else
+    guiglobals.drawSpComments=0;
 }
 
 void on_toggle_relative_widths(GtkToggleButton *togglebutton, gpointer user_data)

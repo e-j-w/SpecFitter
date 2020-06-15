@@ -37,6 +37,124 @@ Author: Jonathan Williams
     <property name="visible">True</property>
     <property name="can_focus">False</property>
   </object>
+  <object class="GtkWindow" id="comment_window">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Add or Edit Comment</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-always</property>
+    <property name="type_hint">dialog</property>
+    <property name="gravity">center</property>
+    <property name="attached_to">window</property>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="margin_start">10</property>
+        <property name="margin_end">10</property>
+        <property name="margin_top">10</property>
+        <property name="margin_bottom">10</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">10</property>
+        <child>
+          <object class="GtkBox" id="tab1_box1">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkEntry" id="comment_entry">
+                <property name="width_request">400</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="halign">start</property>
+                <property name="valign">start</property>
+                <property name="max_length">255</property>
+                <property name="caps_lock_warning">False</property>
+                <property name="placeholder_text" translatable="yes">Enter text...</property>
+                <property name="completion">commententrycompletion</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSeparator">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">6</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="hexpand">True</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkButton" id="remove_comment_button">
+                <property name="label" translatable="yes">Delete Comment</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Remove an existing calibration, and revert to displaying data uncalibrated.</property>
+                <property name="halign">end</property>
+                <property name="hexpand">False</property>
+                <style>
+                  <class name="destructive-action"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="comment_ok_button">
+                <property name="label">Apply</property>
+                <property name="width_request">100</property>
+                <property name="height_request">40</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Apply all changes and return.</property>
+                <property name="halign">end</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack_type">end</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <child type="titlebar">
+      <placeholder/>
+    </child>
+  </object>
+  <object class="GtkEntryCompletion" id="commententrycompletion"/>
   <object class="GtkAdjustment" id="contract_adjustment">
     <property name="lower">1</property>
     <property name="upper">101</property>
@@ -82,6 +200,11 @@ Author: Jonathan Williams
     <property name="can_focus">False</property>
     <property name="icon_name">edit-undo-symbolic</property>
   </object>
+  <object class="GtkImage" id="undo_image1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">edit-undo-symbolic</property>
+  </object>
   <object class="GtkAdjustment" id="zoom_adjustment">
     <property name="upper">10</property>
     <property name="step_increment">1</property>
@@ -94,7 +217,7 @@ Author: Jonathan Williams
     <property name="attached_to">window</property>
     <property name="program_name">jf3 Spectrum Viewer</property>
     <property name="copyright" translatable="yes">© 2020 Jonathan Williams</property>
-    <property name="comments" translatable="yes">A 1D spectrum viewer and fitter application.</property>
+    <property name="comments" translatable="yes">A spectrum/histogram viewer and fitter application.</property>
     <property name="website">https://github.com/e-j-w/jf3</property>
     <property name="authors">Jonathan Williams</property>
     <property name="artists">Jonathan Williams</property>
@@ -1172,15 +1295,6 @@ Author: Jonathan Williams
                     <property name="position">4</property>
                   </packing>
                 </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
               </object>
             </child>
             <child type="tab">
@@ -1372,6 +1486,22 @@ Weight by fit function - Weights are proportional to the fit function values det
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkCheckButton" id="spectrum_comment_checkbutton">
+                    <property name="label" translatable="yes"> Draw comments on spectra</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">If checked, will draw comments which have been written for the displayed spectra.</property>
+                    <property name="halign">start</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkCheckButton" id="animation_checkbutton">
                     <property name="label" translatable="yes"> Enable animations</property>
                     <property name="visible">True</property>
@@ -1384,7 +1514,7 @@ Weight by fit function - Weights are proportional to the fit function values det
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">2</property>
+                    <property name="position">3</property>
                   </packing>
                 </child>
                 <child>
@@ -1400,7 +1530,7 @@ Weight by fit function - Weights are proportional to the fit function values det
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">3</property>
+                    <property name="position">4</property>
                   </packing>
                 </child>
               </object>

@@ -1,7 +1,8 @@
 /* J. Williams, 2020 */
 
 //function writes a .jf3 file
-//header containing: file format version number (unsigned char), number of spectra (unsigned char), label for each spactrum (each 256 element char array)
+//header containing: file format version number (unsigned char), number of spectra (unsigned char), label for each spactrum (each 256 element char array),
+//number of comments (unsigned char), individual comments (comment sp (char), ch (int32), y-val (float32), followed by a 256 element char array for the comment itself)
 //spectrum data is compressed using a basic RLE method: packet header (signed char) specifying number of elements to repeat, then the element as a 32-bit float
 //alternatively, the packet header may be a negative number -n, in which case n non-repeating elements follow as 32-bit floats
 //if the packet header is 0, that is the end of the spectrum  
@@ -21,11 +22,19 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
 	//printf("Number of spectra to write: %i\n",rawdata.numSpOpened);
 
 	ucharBuf = 0; //file version number
-	fwrite(&ucharBuf,sizeof(char),1,out);
+	fwrite(&ucharBuf,sizeof(unsigned char),1,out);
 	ucharBuf = (unsigned char)rawdata.numSpOpened; //number of spectra to write
-	fwrite(&ucharBuf,sizeof(char),1,out);
+	fwrite(&ucharBuf,sizeof(unsigned char),1,out);
 	for(i=0;i<rawdata.numSpOpened;i++){
 		fwrite(&rawdata.histComment[i],sizeof(rawdata.histComment[i]),1,out);
+	}
+	ucharBuf = rawdata.numChComments; //number of comments to write
+	fwrite(&ucharBuf,sizeof(unsigned char),1,out);
+	for(i=0;i<rawdata.numChComments;i++){
+		fwrite(&rawdata.chanCommentSp[i],sizeof(rawdata.chanCommentSp[i]),1,out);
+		fwrite(&rawdata.chanCommentCh[i],sizeof(rawdata.chanCommentCh[i]),1,out);
+		fwrite(&rawdata.chanCommentVal[i],sizeof(rawdata.chanCommentVal[i]),1,out);
+		fwrite(&rawdata.chanComment[i],sizeof(rawdata.chanComment[i]),1,out);
 	}
 
 	float lastBin = 0.;

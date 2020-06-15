@@ -1,7 +1,10 @@
 /* J. Williams, 2020 */
+// jf3 - A simple spectrum viewer app using GTK3, for gamma-ray spectroscopy or similar
 
+//definitions and global variables
 #include "jf3.h"
 
+//subroutines
 #include "jf3-resources.c"
 #include "utils.c"
 #include "read_data.c"
@@ -14,8 +17,9 @@
 int main(int argc, char *argv[])
 {
   
-  gtk_init(&argc, &argv); //initialize Gtk
+  gtk_init(&argc, &argv); //initialize GTK
 
+  //import UI layout and graphics data
   builder = gtk_builder_new_from_resource("/resources/jf3.glade"); //get UI layout from glade XML file
   gtk_builder_add_from_resource (builder, "/resources/shortcuts_window.ui", NULL);
   appIcon = gdk_pixbuf_new_from_resource("/resources/jf3-application-icon.svg", NULL);
@@ -27,6 +31,8 @@ int main(int argc, char *argv[])
   g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL); //quit the program when closing the window
   calibrate_window = GTK_WINDOW(gtk_builder_get_object(builder, "calibration_window"));
   gtk_window_set_transient_for(calibrate_window, window); //center calibrate window on main window
+  comment_window = GTK_WINDOW(gtk_builder_get_object(builder, "comment_window"));
+  gtk_window_set_transient_for(comment_window, window); //center comment window on main window
   multiplot_window = GTK_WINDOW(gtk_builder_get_object(builder, "multiplot_window"));
   gtk_window_set_transient_for(multiplot_window, window); //center multiplot window on main window
   preferences_window = GTK_WINDOW(gtk_builder_get_object(builder, "preferences_window"));
@@ -77,6 +83,11 @@ int main(int argc, char *argv[])
   cal_entry_lin = GTK_ENTRY(gtk_builder_get_object(builder, "cal_entry_lin"));
   cal_entry_quad = GTK_ENTRY(gtk_builder_get_object(builder, "cal_entry_quad"));
 
+  //comment window UI elements
+  comment_ok_button = GTK_BUTTON(gtk_builder_get_object(builder, "comment_ok_button"));
+  remove_comment_button = GTK_BUTTON(gtk_builder_get_object(builder, "remove_comment_button"));
+  comment_entry = GTK_ENTRY(gtk_builder_get_object(builder, "comment_entry"));
+
   //multiplot window UI elements
   multiplot_ok_button = GTK_WIDGET(gtk_builder_get_object(builder, "multiplot_ok_button"));
   multiplot_liststore = GTK_LIST_STORE(gtk_builder_get_object(builder, "multiplot_liststore"));
@@ -97,6 +108,7 @@ int main(int argc, char *argv[])
   autozoom_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "autozoom_checkbutton"));
   dark_theme_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "dark_theme_checkbutton"));
   spectrum_label_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "spectrum_label_checkbutton"));
+  spectrum_comment_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "spectrum_comment_checkbutton"));
   relative_widths_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "relative_widths_checkbutton"));
   weight_mode_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "weight_mode_combobox"));
   popup_results_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "popup_results_checkbutton"));
@@ -131,6 +143,9 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (fit_preferences_button), "clicked", G_CALLBACK (on_fit_preferences_button_clicked), NULL);
   g_signal_connect (G_OBJECT (display_button), "clicked", G_CALLBACK (on_display_button_clicked), NULL);
   g_signal_connect (G_OBJECT (calibrate_ok_button), "clicked", G_CALLBACK (on_calibrate_ok_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (comment_ok_button), "clicked", G_CALLBACK (on_comment_ok_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (remove_comment_button), "clicked", G_CALLBACK (on_remove_comment_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (comment_entry), "changed", G_CALLBACK (on_comment_entry_changed), NULL);
   g_signal_connect (G_OBJECT (remove_calibration_button), "clicked", G_CALLBACK (on_remove_calibration_button_clicked), NULL);
   g_signal_connect (G_OBJECT (spectrum_selector), "value-changed", G_CALLBACK (on_spectrum_selector_changed), NULL);
   g_signal_connect (G_OBJECT (autoscale_button), "toggled", G_CALLBACK (on_toggle_autoscale), NULL);
@@ -141,6 +156,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (round_errors_checkbutton), "toggled", G_CALLBACK (on_toggle_round_errors), NULL);
   g_signal_connect (G_OBJECT (dark_theme_checkbutton), "toggled", G_CALLBACK (on_toggle_dark_theme), NULL);
   g_signal_connect (G_OBJECT (spectrum_label_checkbutton), "toggled", G_CALLBACK (on_toggle_spectrum_label), NULL);
+  g_signal_connect (G_OBJECT (spectrum_comment_checkbutton), "toggled", G_CALLBACK (on_toggle_spectrum_comment), NULL);
   g_signal_connect (G_OBJECT (relative_widths_checkbutton), "toggled", G_CALLBACK (on_toggle_relative_widths), NULL);
   g_signal_connect (G_OBJECT (popup_results_checkbutton), "toggled", G_CALLBACK (on_toggle_popup_results), NULL);
   g_signal_connect (G_OBJECT (animation_checkbutton), "toggled", G_CALLBACK (on_toggle_animation), NULL);
@@ -159,6 +175,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (multiplot_cr2), "toggled", G_CALLBACK (on_multiplot_cell_toggled), NULL);
   g_signal_connect (G_OBJECT (multiplot_cr3), "edited", G_CALLBACK (on_multiplot_scaling_edited), NULL);
   g_signal_connect (G_OBJECT (calibrate_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect (G_OBJECT (comment_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (multiplot_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (preferences_window), "delete-event", G_CALLBACK (on_preferences_cancel_button_clicked), NULL);
   g_signal_connect (G_OBJECT (preferences_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
@@ -192,9 +209,11 @@ int main(int argc, char *argv[])
   calpar.calMode = 0;
   rawdata.dropEmptySpectra = 1;
   rawdata.numSpOpened = 0;
+  rawdata.numChComments = 0;
   drawing.multiplotMode = 0;
   drawing.numMultiplotSp = 1;
   drawing.highlightedPeak = -1;
+  drawing.highlightedComment = -1;
   drawing.spColors[0] = 220/255.; drawing.spColors[1] = 50/255.; drawing.spColors[2] = 47/255.;      //RGB values for color 1 (solarized red)
   drawing.spColors[3] = 38/255.; drawing.spColors[4] = 139/255.; drawing.spColors[5] = 210/255.;     //RGB values for color 2 (solarized blue)
   drawing.spColors[6] = 0.0; drawing.spColors[7] = 0.8; drawing.spColors[8] = 0.0;                   //RGB values for color 3
@@ -213,6 +232,7 @@ int main(int argc, char *argv[])
   guiglobals.draggingSp = 0;
   guiglobals.drawSpCursor = -1; //disabled by default
   guiglobals.drawSpLabels = 1; //enabled by default
+  guiglobals.drawSpComments = 1; //enabled by default
   guiglobals.showBinErrors = 1;
   guiglobals.roundErrors = 0;
   guiglobals.autoZoom = 1;
@@ -308,7 +328,7 @@ int main(int argc, char *argv[])
 
   //startup UI
   gtk_widget_show(GTK_WIDGET(window)); //show the window
-  gtk_main();              //Gtk main loop
+  gtk_main(); //start GTK main loop
 
   return 0;
 }

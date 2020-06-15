@@ -23,10 +23,10 @@
 #define MAX_DISP_SP   12 //maximum number of spectra which may be displayed at once
 #define MAX_FIT_PK    10 //maximum number of peaks which may be fit at once
 
-
-//spectrum data file specs
-#define S32K   32768
-#define NSPECT 100
+//spectrum data file specs (be careful if changing these, can break compatibility)
+#define S32K   32768 //maximum number of channels per spectrum in .mca and .fmca (changing breaks file compatibility)
+#define NSPECT 100 //maximum number of spectra which may be opened at once (for compatibility should be 255 or less)
+#define NCHCOM 128 //maximum number of comments that can be placed by the user on individual channels (for compatibility should be 255 or less)
 
 /* GUI globals */
 GtkWindow *window;
@@ -60,6 +60,10 @@ GtkSpinner *fit_spinner;
 GtkWidget *calibrate_ok_button, *remove_calibration_button;
 GtkWindow *calibrate_window;
 GtkEntry *cal_entry_unit, *cal_entry_const, *cal_entry_lin, *cal_entry_quad, *cal_entry_y_axis;
+//comment dialog
+GtkWindow *comment_window;
+GtkEntry *comment_entry;
+GtkButton *comment_ok_button, *remove_comment_button;
 //'About' dialog
 GtkAboutDialog *about_dialog;
 GtkModelButton *about_button;
@@ -76,7 +80,7 @@ GtkComboBoxText *multiplot_mode_combobox;
 GtkModelButton *preferences_button;
 GtkWindow *preferences_window;
 GtkNotebook *preferences_notebook;
-GtkCheckButton *discard_empty_checkbutton, *bin_errors_checkbutton, *round_errors_checkbutton, *dark_theme_checkbutton, *spectrum_label_checkbutton, *autozoom_checkbutton;
+GtkCheckButton *discard_empty_checkbutton, *bin_errors_checkbutton, *round_errors_checkbutton, *dark_theme_checkbutton, *spectrum_label_checkbutton, *spectrum_comment_checkbutton, *autozoom_checkbutton;
 GtkCheckButton *relative_widths_checkbutton;
 GtkButton *preferences_apply_button;
 GtkComboBoxText *weight_mode_combobox;
@@ -99,12 +103,14 @@ struct {
   float cursorPosX, cursorPosY; //cursor position
   char drawSpCursor; //0 = don't draw vertical cursor on spectrum, 1=draw, -1=drawing disabled
   char drawSpLabels; //0 = don't draw labels, 1 = draw labels
+  char drawSpComments; //0 = don't draw comments, 1 = draw comments
   char fittingSp; //0=not fitting, 1=selecting limits, 2=selecting peaks, 3=fitting, 4=refining fit, 5=fitted (display fit)
   int deferSpSelChange;
   int deferToggleRow;
   char showBinErrors; //0=don't show, 1=show
   char roundErrors; //0=don't round, 1=round
   char autoZoom; //0=don't autozoom, 1=autozoom
+  int commentEditInd;
   char preferDarkTheme; //0=prefer light, 1=prefer dark
   char popupFitResults; //0=don't popup results after fit, 1=popup results
   char useZoomAnimations; //0=don't use, 1=use
@@ -119,6 +125,11 @@ struct {
   char numSpOpened; //number of spectra in the opened file(s)
   int numFilesOpened; //number of files containing spectra opened
   char dropEmptySpectra; //0=don't discard, 1=discard
+  char chanComment[NCHCOM][256]; //channel comment text
+  int chanCommentCh[NCHCOM]; //channels at which channel comments are displayed
+  float chanCommentVal[NCHCOM]; //y-values at which channel comments are displayed
+  char chanCommentSp[NCHCOM]; //spectra at which channel comments are displayed
+  unsigned char numChComments; //number of comments which have been placed
 } rawdata;
 
 //spectrum drawing globals
@@ -136,6 +147,7 @@ struct {
   int multiPlots[NSPECT]; //indices of all the spectra to show in multiplot mode
   float spColors[MAX_DISP_SP*3];
   signed char highlightedPeak; //the peak to highlight when drawing spectra, -1=don't highlight
+  signed char highlightedComment; //the comment to highlight when drawing spectra, -1=don't highlight
 } drawing;
 
 //calibration globals

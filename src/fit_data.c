@@ -127,8 +127,8 @@ double getFWHM(double chan, double widthF, double widthG, double widthH){
 }
 
 //get the value of the fitted gaussian term for a given x value
-double evalGaussTerm(int peakNum, double xval){
-  double evalG;
+long double evalGaussTerm(int peakNum, double xval){
+  long double evalG;
   if(fitpar.fixRelativeWidths){
     evalG = exp(-0.5* pow((xval-fitpar.fitParVal[7+(3*peakNum)]),2.0)/(pow(fitpar.fitParVal[8]*fitpar.relWidths[peakNum],2.0)));
   }else{
@@ -140,8 +140,8 @@ double evalGaussTerm(int peakNum, double xval){
 
 //evaluate the derivative of a gaussian peak term, needed for non-linear fits 
 //derPar: 0=amplitude, 1=centroid, 2=width
-double evalGaussTermDerivative(int peakNum, double xval, int derPar){
-  double evalGDer = evalGaussTerm(peakNum,xval);
+long double evalGaussTermDerivative(int peakNum, double xval, int derPar){
+  long double evalGDer = evalGaussTerm(peakNum,xval);
   switch (derPar){
   case 2:
     evalGDer *= fitpar.fitParVal[6+(3*peakNum)];

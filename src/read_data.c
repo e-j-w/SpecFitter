@@ -37,9 +37,45 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 
 			//read labels
 			for(i=0;i<numSpec;i++){
-				fread(rawdata.histComment[i+outHistStartSp],sizeof(rawdata.histComment[i+outHistStartSp]), 1, inp);
+				if(i<NSPECT){
+					fread(rawdata.histComment[i+outHistStartSp],sizeof(rawdata.histComment[i+outHistStartSp]), 1, inp);
+				}
 			}
 
+			//read comments
+			fread(&ucharBuf, sizeof(unsigned char), 1, inp);
+			if(outHistStartSp == 0){
+				//no comments exist already
+				rawdata.numChComments = ucharBuf;
+				for(i=0;i<rawdata.numChComments;i++){
+					if(i<NCHCOM){
+						fread(&rawdata.chanCommentSp[i],sizeof(rawdata.chanCommentSp[i]), 1, inp);
+						fread(&rawdata.chanCommentCh[i],sizeof(rawdata.chanCommentCh[i]), 1, inp);
+						fread(&rawdata.chanCommentVal[i],sizeof(rawdata.chanCommentVal[i]), 1, inp);
+						fread(rawdata.chanComment[i],sizeof(rawdata.chanComment[i]), 1, inp);
+					}
+				}
+			}else{
+				//appending spectra, comments may already exist
+				for(i=rawdata.numChComments;i<rawdata.numChComments+ucharBuf;i++){
+					if(i<NCHCOM){
+						fread(&rawdata.chanCommentSp[i],sizeof(rawdata.chanCommentSp[i]), 1, inp);
+						rawdata.chanCommentSp[i]+=outHistStartSp; //assign to the correct (appended) spectrum
+						printf("Comment %i went to sp %i\n",i,rawdata.chanCommentSp[i]);
+						fread(&rawdata.chanCommentCh[i],sizeof(rawdata.chanCommentCh[i]), 1, inp);
+						fread(&rawdata.chanCommentVal[i],sizeof(rawdata.chanCommentVal[i]), 1, inp);
+						fread(rawdata.chanComment[i],sizeof(rawdata.chanComment[i]), 1, inp);
+					}
+				}
+				rawdata.numChComments += ucharBuf;
+				if(rawdata.numChComments > NCHCOM){
+					printf("WARNING: over-imported comments.  Truncating.\n");
+					rawdata.numChComments = NCHCOM;
+				}
+			}
+
+			printf("num comments: %i\n",rawdata.numChComments);
+			
 			//read spectra
 			signed char scharBuf;
 			char doneSp;

@@ -76,6 +76,13 @@ int readConfigFile(FILE *file)
 					guiglobals.drawSpLabels = 0;
 				}
 			}
+			if(strcmp(par,"draw_sp_comments") == 0){
+				if(strcmp(val,"yes") == 0){
+					guiglobals.drawSpComments = 1;
+				}else{
+					guiglobals.drawSpComments = 0;
+				}
+			}
 			if(strcmp(par,"fix_relative_widths") == 0){
 				if(strcmp(val,"yes") == 0){
 					fitpar.fixRelativeWidths = 1;
@@ -180,6 +187,11 @@ int writeConfigFile(FILE *file)
 		fprintf(file,"draw_sp_labels=yes\n");
 	}else{
 		fprintf(file,"draw_sp_labels=no\n");
+	}
+	if(guiglobals.drawSpComments == 1){
+		fprintf(file,"draw_sp_comments=yes\n");
+	}else{
+		fprintf(file,"draw_sp_comments=no\n");
 	}
 	if(guiglobals.autoZoom == 1){
 		fprintf(file,"autozoom=yes\n");

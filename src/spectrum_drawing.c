@@ -58,7 +58,78 @@ float getCursorChannel(float cursorx, float cursory){
     return cursorChan;
     //return cursorChan - fmod(cursorChan,drawing.contractFactor);
   }
-  return -1; //
+  return -1; //cursor not over spectrum
+}
+
+//converts cursor position units to y-value on the displayed spectrum
+//this is the value on the displayed y-axis, at the cursor postion
+float getCursorYVal(float cursorx, float cursory){
+  GdkRectangle dasize;  // GtkDrawingArea size
+  GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
+  // Determine GtkDrawingArea dimensions
+  gdk_window_get_geometry (gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
+  if((cursorx > 80.0)&&(cursory < (dasize.height - 40.0))){
+    float cursorVal;
+    switch (drawing.multiplotMode)
+    {
+      case 1:
+      case 0:
+        //single plot mode
+        if(drawing.logScale){
+          if(drawing.scaleLevelMin[0] > 0){
+            cursorVal = pow(10.0,(dasize.height-40.0 - cursory)*log10(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/(dasize.height-40.0)) + drawing.scaleLevelMin[0];
+          }else{
+            cursorVal = pow(10.0,(dasize.height-40.0 - cursory)*log10(drawing.scaleLevelMax[0])/(dasize.height-40.0));
+          }
+        }else{
+          cursorVal = drawing.scaleLevelMax[0] - ((cursory)/(dasize.height-40.0))*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0]);
+          //printf("cursorVal: %f, scaleLevelMin: %f, scaleLevelMax: %f\n",cursorVal,drawing.scaleLevelMin[0],drawing.scaleLevelMax[0]);
+        }
+        break;
+      default:
+        return -1; //not implemented
+        break;
+    }
+    //printf("cursory: %f, cursorVal: %f, scaleMax: %f, scaleMin: %f\n",cursory,cursorVal,drawing.scaleLevelMax[0],drawing.scaleLevelMin[0]);
+    return cursorVal;
+    //return cursorChan - fmod(cursorChan,drawing.contractFactor);
+  }
+  return -1; //cursor not over spectrum
+}
+
+//get the index of the comment at which the cursor is over
+//return -1 if no comment is at the cursor position
+//some shameless magic numbers used to map channel and y-values to comment indicator size
+int getCommentAtCursor(float cursorx, float cursory){
+  int i;
+  GdkRectangle dasize;  // GtkDrawingArea size
+  GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
+  // Determine GtkDrawingArea dimensions
+  gdk_window_get_geometry (gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
+  if((cursorx > 80.0)&&(cursory < (dasize.height - 40.0))){
+    float cursorCh = getCursorChannel(cursorx,cursory);
+    float cursorYVal = getCursorYVal(cursorx,cursory);
+    switch (drawing.multiplotMode)
+    {
+      case 0:
+        //single plot mode
+        for(i=0;i<rawdata.numChComments;i++){
+          if(rawdata.chanCommentSp[i] == drawing.multiPlots[0]){
+            //check proximity to channel
+            if(fabs(rawdata.chanCommentCh[i] - cursorCh) < (30.0*(drawing.upperLimit - drawing.lowerLimit)/dasize.width)){
+              //check proximity to y-val
+              if(fabs(rawdata.chanCommentVal[i] - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/dasize.height)){
+                return i; //this comment is close
+              }
+            }
+          }
+        }
+        break;
+      default:
+        break;
+    }
+  }
+  return -1; //cursor not over a comment, or comments not implemented for the drawing mode
 }
 
 
@@ -234,6 +305,7 @@ void toggle_cursor(){
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
 }
 
+
 //This callback implements a delay after zooming in of 60 frames, during which the 
 //focused x-value cannot be changed.  This is so that of the user rapidly scrolls over
 //a region of interest, that region stays focused in the zoomed-in spectrum.
@@ -392,6 +464,57 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
       default:
         break;
     }
+  }else if((event->type == GDK_DOUBLE_BUTTON_PRESS) && (event->button == 1)){
+    //double click
+    if(rawdata.openedSp){
+      float cursorChan, cursorYVal;
+      cursorChan = getCursorChannel(event->x, event->y);
+      cursorYVal = getCursorYVal(event->x, event->y);
+      if((cursorChan >= 0)&&(cursorYVal > 0)){
+        //user has double clicked on the displayed spectrum
+        switch (drawing.multiplotMode)
+        {
+          case 1:
+            //summed single plot
+            //to be implemented: offer option to create a new summed spectrum and comment on that
+            break;
+          case 0:
+            //single plot being displayed
+            //open a dialog for the user to write a comment
+            //printf("Double click on channel %f, value %f\n",cursorChan,cursorYVal);
+            guiglobals.commentEditInd = getCommentAtCursor(event->x, event->y);
+            if((guiglobals.commentEditInd >= 0)&&(guiglobals.commentEditInd < NCHCOM)){
+              gtk_widget_set_sensitive(GTK_WIDGET(remove_comment_button),TRUE);
+              gtk_entry_set_text(comment_entry, rawdata.chanComment[guiglobals.commentEditInd]);
+              gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),TRUE);
+            }else{
+              if(rawdata.numChComments >= NCHCOM){
+                printf("Cannot add any more comments.\n");
+                GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+                GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot add comment!");
+                gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"The maximum number of comments has been reached.  Older comments must be deleted before more can be added.");
+                gtk_dialog_run (GTK_DIALOG (message_dialog));
+                gtk_widget_destroy (message_dialog);
+                return;
+              }
+              gtk_widget_set_sensitive(GTK_WIDGET(remove_comment_button),FALSE);
+              //setup comment data
+              rawdata.chanCommentVal[(int)rawdata.numChComments] = cursorYVal;
+              rawdata.chanCommentCh[(int)rawdata.numChComments] = cursorChan;
+              rawdata.chanCommentSp[(int)rawdata.numChComments] = drawing.multiPlots[0];
+              gtk_entry_set_text(comment_entry, "");
+              gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
+            }
+            //re-enable comment display
+            guiglobals.drawSpComments=1;
+            //show the window to edit the comment
+            gtk_window_present(comment_window); 
+            break;
+          default:
+            break;
+        }
+      }
+    }
   }
 }
 
@@ -440,6 +563,13 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
 
   if(cursorChan >= 0){
 
+    int commentToHighlight = getCommentAtCursor(event->x, event->y);
+    if(commentToHighlight != drawing.highlightedComment){
+      //highlight the comment
+      drawing.highlightedComment = commentToHighlight;
+      gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+    }
+    
     int peakToHighlight = -1;
     if(guiglobals.fittingSp == 5){
       //check if the cursor is over a peak
@@ -980,6 +1110,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   // Determine the data points to calculate (ie. those in the clipping zone
   gdouble clip_x1 = 0.0, clip_y1 = 0.0, clip_x2 = 0.0, clip_y2 = 0.0;
   cairo_clip_extents(cr, &clip_x1, &clip_y1, &clip_x2, &clip_y2);
+  //printf("clip_x1: %f, clip_x2: %f, clip_y1: %f, clip_y2: %f\n",clip_x1,clip_x2,clip_y1,clip_y2);
   cairo_set_line_width(cr, 2.0);
 
   double plotFontSize = 13.5;
@@ -1193,8 +1324,8 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       float fitDrawX, nextFitDrawX, xpos, nextXpos;
       //draw each peak
       for(i=0;i<fitpar.numFitPeaks;i++){
-        for(fitDrawX=fitpar.fitStartCh; fitDrawX<=fitpar.fitEndCh; fitDrawX+= (clip_x2 - clip_x1 - 80.0)/1000.){
-          nextFitDrawX = fitDrawX + (clip_x2 - clip_x1 - 80.0)/1000.;
+        for(fitDrawX=fitpar.fitStartCh; fitDrawX<=fitpar.fitEndCh; fitDrawX+= 0.5){
+          nextFitDrawX = fitDrawX + 0.5;
           xpos = getXPosFromCh(fitDrawX,clip_x1,clip_x2,1);
           nextXpos = getXPosFromCh(nextFitDrawX,clip_x1,clip_x2,1);
           if((xpos > 0)&&(nextXpos > 0)){
@@ -1204,8 +1335,8 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
         }
       }
       //draw background
-      for(fitDrawX=fitpar.fitStartCh; fitDrawX<=fitpar.fitEndCh; fitDrawX+= (clip_x2 - clip_x1 - 80.0)/1000.){
-        nextFitDrawX = fitDrawX + (clip_x2 - clip_x1 - 80.0)/1000.;
+      for(fitDrawX=fitpar.fitStartCh; fitDrawX<=fitpar.fitEndCh; fitDrawX+= 0.5){
+        nextFitDrawX = fitDrawX + 0.5;
         xpos = getXPosFromCh(fitDrawX,clip_x1,clip_x2,1);
         nextXpos = getXPosFromCh(nextFitDrawX,clip_x1,clip_x2,1);
         if((xpos > 0)&&(nextXpos > 0)){
@@ -1217,8 +1348,8 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       //draw sum of peaks
       if(fitpar.numFitPeaks > 1){
         cairo_set_line_width(cr, 2.0);
-        for(fitDrawX=fitpar.fitStartCh; fitDrawX<=fitpar.fitEndCh; fitDrawX+= (clip_x2 - clip_x1 - 80.0)/1000.){
-          nextFitDrawX = fitDrawX + (clip_x2 - clip_x1 - 80.0)/1000.;
+        for(fitDrawX=fitpar.fitStartCh; fitDrawX<=fitpar.fitEndCh; fitDrawX+= 0.5){
+          nextFitDrawX = fitDrawX + 0.5;
           xpos = getXPosFromCh(fitDrawX,clip_x1,clip_x2,1);
           nextXpos = getXPosFromCh(nextFitDrawX,clip_x1,clip_x2,1);
           if((xpos > 0)&&(nextXpos > 0)){
@@ -1231,8 +1362,8 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       //draw highlighed peak
       if((drawing.highlightedPeak >= 0)&&(drawing.highlightedPeak <= fitpar.numFitPeaks)){
         cairo_set_line_width(cr, 10.0);
-        for(fitDrawX=(fitpar.fitParVal[7+(3*drawing.highlightedPeak)] - 3.*fitpar.fitParVal[8+(3*drawing.highlightedPeak)]);  fitDrawX<=(fitpar.fitParVal[7+(3*drawing.highlightedPeak)] + 3.*fitpar.fitParVal[8+(3*drawing.highlightedPeak)]); fitDrawX+= (clip_x2 - clip_x1 - 80.0)/1000.){
-          nextFitDrawX = fitDrawX + (clip_x2 - clip_x1 - 80.0)/1000.;
+        for(fitDrawX=(fitpar.fitParVal[7+(3*drawing.highlightedPeak)] - 3.*fitpar.fitParVal[8+(3*drawing.highlightedPeak)]);  fitDrawX<=(fitpar.fitParVal[7+(3*drawing.highlightedPeak)] + 3.*fitpar.fitParVal[8+(3*drawing.highlightedPeak)]); fitDrawX+= 0.2){
+          nextFitDrawX = fitDrawX + 0.2;
           xpos = getXPosFromCh(fitDrawX,clip_x1,clip_x2,1);
           nextXpos = getXPosFromCh(nextFitDrawX,clip_x1,clip_x2,1);
           if((xpos > 0)&&(nextXpos > 0)){
@@ -1436,8 +1567,10 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   cairo_stroke(cr);
   cairo_restore(cr); //recall the unrotated context
 
-  //draw cursors at fit limits if needed
+  //draw fit cursors and indicators
   if(guiglobals.fittingSp > 0){
+
+    //draw cursors at fit limits if needed
     if(fitpar.fitStartCh >= 0){
       float cursorPos = getXPosFromCh(fitpar.fitStartCh, clip_x1, clip_x2,0);
       if(cursorPos>=0){
@@ -1462,22 +1595,22 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
     //draw peak position indicators
     if((guiglobals.fittingSp >= 2)&&(guiglobals.fittingSp < 5)){
       //put markers at guessed positions
-      cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
+      cairo_set_source_rgb (cr, 0.0, 0.0, 0.8);
       cairo_set_line_width(cr, 2.0);
       for(i=0;i<fitpar.numFitPeaks;i++){
         if((fitpar.fitPeakInitGuess[i] > drawing.lowerLimit)&&(fitpar.fitPeakInitGuess[i] < drawing.upperLimit)){
-          cairo_arc(cr,getXPosFromCh(fitpar.fitPeakInitGuess[i],clip_x1,clip_x2,1),-30.0-getYPos(getDispSpBinVal(0,fitpar.fitPeakInitGuess[i]-drawing.lowerLimit),0,clip_y1,clip_y2),8.,0.,2*G_PI);
+          cairo_arc(cr,getXPosFromCh(fitpar.fitPeakInitGuess[i],clip_x1,clip_x2,1),(-0.002*(clip_y2 - clip_y1)*30.0)-getYPos(getDispSpBinVal(0,fitpar.fitPeakInitGuess[i]-drawing.lowerLimit),0,clip_y1,clip_y2),5.,0.,2*G_PI);
         }
         cairo_stroke_preserve(cr);
         cairo_fill(cr);
       }
     }else if(guiglobals.fittingSp == 5){
       //put markers at fitted positions
-      cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
+      cairo_set_source_rgb (cr, 0.0, 0.0, 0.8);
       cairo_set_line_width(cr, 2.0);
       for(i=0;i<fitpar.numFitPeaks;i++){
         if((fitpar.fitParVal[7+(3*i)] > drawing.lowerLimit)&&(fitpar.fitParVal[7+(3*i)] < drawing.upperLimit)){
-          cairo_arc(cr,getXPosFromCh(fitpar.fitParVal[7+(3*i)],clip_x1,clip_x2,1),-30.0-getYPos(getDispSpBinVal(0,fitpar.fitParVal[7+(3*i)]-drawing.lowerLimit),0,clip_y1,clip_y2),8.,0.,2*G_PI);
+          cairo_arc(cr,getXPosFromCh(fitpar.fitParVal[7+(3*i)],clip_x1,clip_x2,1),(-0.002*(clip_y2 - clip_y1)*30.0)-getYPos(evalFit(fitpar.fitParVal[7+(3*i)]),0,clip_y1,clip_y2),5.,0.,2*G_PI);
         }
         cairo_stroke_preserve(cr);
         cairo_fill(cr);
@@ -1485,9 +1618,53 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
     }
   }
 
+  //draw comment indicators
+  if(guiglobals.drawSpComments){
+    switch (drawing.multiplotMode)
+    {
+      case 0:
+        //single non-summed spectrum
+        cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
+        
+        for(i=0;i<rawdata.numChComments;i++){
+          if(rawdata.chanCommentSp[i]==drawing.multiPlots[0]){
+            if(rawdata.chanCommentCh[i] > drawing.lowerLimit){
+              if(rawdata.chanCommentCh[i] < drawing.upperLimit){
+                if(rawdata.chanCommentVal[i] > drawing.scaleLevelMin[0]){
+                  if(rawdata.chanCommentVal[i] < drawing.scaleLevelMax[0]){
+                    if(drawing.highlightedComment == i){
+                      cairo_set_line_width(cr, 8.0);
+                    }else{
+                      cairo_set_line_width(cr, 4.0);
+                    }
+                    float xc = getXPosFromCh(rawdata.chanCommentCh[i],clip_x1,clip_x2,1);
+                    float yc = -1.0*getYPos(rawdata.chanCommentVal[i],0,clip_y1,clip_y2);
+                    float radius = 14.0;
+                    cairo_arc(cr,xc,yc,radius,0.,2*G_PI);
+                    cairo_set_font_size(cr, plotFontSize*1.5);
+                    cairo_text_extents(cr, "i", &extents);
+                    cairo_move_to(cr,xc-(extents.width),yc+(extents.height/2.));
+                    cairo_show_text(cr, "i");
+                  }
+                }
+              }
+            }
+          }
+          cairo_stroke(cr);
+          //cairo_fill(cr);
+        }
+        break;
+      default:
+        //comments not implemented
+        break;
+    }
+  }
+  
+
   //draw cursor at mouse position
   if(guiglobals.drawSpCursor == 1){
     //printf("Drawing cursor!\n");
+     cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
     cairo_set_line_width(cr, 1.0);
     setTextColor(cr);
     cairo_move_to(cr, guiglobals.cursorPosX, -40.0);
