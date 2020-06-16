@@ -26,7 +26,7 @@
 //spectrum data file specs (be careful if changing these, can break compatibility)
 #define S32K   32768 //maximum number of channels per spectrum in .mca and .fmca (changing breaks file compatibility)
 #define NSPECT 100 //maximum number of spectra which may be opened at once (for compatibility should be 255 or less)
-#define NCHCOM 128 //maximum number of comments that can be placed by the user on individual channels (for compatibility should be 255 or less)
+#define NCHCOM 1000 //maximum number of comments that can be placed by the user on individual channels
 
 /* GUI globals */
 GtkWindow *window;
@@ -130,7 +130,7 @@ struct {
   int chanCommentCh[NCHCOM]; //channels at which channel comments are displayed
   float chanCommentVal[NCHCOM]; //y-values at which channel comments are displayed
   char chanCommentSp[NCHCOM]; //spectra at which channel comments are displayed
-  unsigned char numChComments; //number of comments which have been placed
+  unsigned int numChComments; //number of comments which have been placed
 } rawdata;
 
 //spectrum drawing globals

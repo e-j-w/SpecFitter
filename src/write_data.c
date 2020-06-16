@@ -11,6 +11,7 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
 	int i, j, k;
 	FILE *out;
 	unsigned char ucharBuf;
+	unsigned int uintBuf;
 
 	if ((out = fopen(filename, "w")) == NULL) //open the file
 	{
@@ -28,8 +29,8 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
 	for(i=0;i<rawdata.numSpOpened;i++){
 		fwrite(&rawdata.histComment[i],sizeof(rawdata.histComment[i]),1,out);
 	}
-	ucharBuf = rawdata.numChComments; //number of comments to write
-	fwrite(&ucharBuf,sizeof(unsigned char),1,out);
+	uintBuf = rawdata.numChComments; //number of comments to write
+	fwrite(&uintBuf,sizeof(unsigned int),1,out);
 	for(i=0;i<rawdata.numChComments;i++){
 		fwrite(&rawdata.chanCommentSp[i],sizeof(rawdata.chanCommentSp[i]),1,out);
 		fwrite(&rawdata.chanCommentCh[i],sizeof(rawdata.chanCommentCh[i]),1,out);

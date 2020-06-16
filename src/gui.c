@@ -315,12 +315,12 @@ void on_save_button_clicked(GtkButton *b)
     const char *dot = strrchr(filename, '.'); //get the file extension
     if((dot != NULL)&&(strcmp(dot + 1, "jf3") == 0)){
       //write file
-      writeJF3(filename, rawdata.hist);
+      saveErr = writeJF3(filename, rawdata.hist);
     }else{
       //save as a .jf3 file by default
       strcat(filename,".jf3");
       //write file
-      writeJF3(filename, rawdata.hist);
+      saveErr = writeJF3(filename, rawdata.hist);
     }
 
     gtk_widget_destroy(GTK_WIDGET(file_save_dialog));
