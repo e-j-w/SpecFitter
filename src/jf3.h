@@ -36,6 +36,7 @@ GtkButton *fit_button, *display_button;
 GtkPopover *display_popover;
 GtkButton *calibrate_button;
 GtkButton *save_button;
+GtkButton *help_button;
 GtkLabel *bottom_info_text;
 GtkFileChooser *file_open_dialog, *file_save_dialog;
 GtkFileFilter *file_filter;
@@ -90,6 +91,9 @@ GtkCheckButton *animation_checkbutton;
 //shortcuts window
 GtkModelButton *shortcuts_button;
 GtkShortcutsWindow *shortcuts_window;
+//help window
+GtkWindow *help_window;
+GtkImage *display_button_icon1, *display_button_icon2;
 //builder
 GtkBuilder *builder;
 

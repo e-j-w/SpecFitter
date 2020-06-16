@@ -39,6 +39,8 @@ int main(int argc, char *argv[])
   gtk_window_set_transient_for(preferences_window, window); //center preferences window on main window
   shortcuts_window = GTK_SHORTCUTS_WINDOW(gtk_builder_get_object(builder, "shortcuts_window"));
   gtk_window_set_transient_for(GTK_WINDOW(shortcuts_window), window); //center shortcuts window on main window
+  help_window = GTK_WINDOW(gtk_builder_get_object(builder, "help_window"));
+  gtk_window_set_transient_for(GTK_WINDOW(help_window), window); //center help window on main window
   about_dialog = GTK_ABOUT_DIALOG(gtk_builder_get_object(builder, "about_dialog"));
   gtk_window_set_transient_for(GTK_WINDOW(about_dialog), window); //center about dialog on main window
   main_window_accelgroup = GTK_ACCEL_GROUP(gtk_builder_get_object(builder, "main_window_accelgroup"));
@@ -56,6 +58,7 @@ int main(int argc, char *argv[])
   calibrate_button = GTK_BUTTON(gtk_builder_get_object(builder, "calibrate_button"));
   fit_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_button"));
   save_button = GTK_BUTTON(gtk_builder_get_object(builder, "save_button"));
+  help_button = GTK_BUTTON(gtk_builder_get_object(builder, "help_button"));
   display_button = GTK_BUTTON(gtk_builder_get_object(builder, "display_button"));
   display_button_icon = GTK_IMAGE(gtk_builder_get_object(builder, "display_button_icon"));
   no_sp_image= GTK_IMAGE(gtk_builder_get_object(builder, "no_sp_image"));
@@ -116,6 +119,10 @@ int main(int argc, char *argv[])
   animation_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "animation_checkbutton"));
   preferences_apply_button = GTK_BUTTON(gtk_builder_get_object(builder, "preferences_apply_button"));
 
+  //help window UI elements
+  display_button_icon1 = GTK_IMAGE(gtk_builder_get_object(builder, "display_button_icon1"));
+  display_button_icon2 = GTK_IMAGE(gtk_builder_get_object(builder, "display_button_icon2"));
+
   //display menu UI elements
   multiplot_button = GTK_WIDGET(gtk_builder_get_object(builder, "multiplot_button"));
   sum_all_button = GTK_BUTTON(gtk_builder_get_object(builder, "sum_all_button"));
@@ -136,6 +143,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (append_button), "clicked", G_CALLBACK (on_append_button_clicked), NULL);
   g_signal_connect (G_OBJECT (calibrate_button), "clicked", G_CALLBACK (on_calibrate_button_clicked), NULL);
   g_signal_connect (G_OBJECT (save_button), "clicked", G_CALLBACK (on_save_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (help_button), "clicked", G_CALLBACK (on_help_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_button), "clicked", G_CALLBACK (on_multiplot_button_clicked), NULL);
   g_signal_connect (G_OBJECT (sum_all_button), "clicked", G_CALLBACK (on_sum_all_button_clicked), NULL);
   g_signal_connect (G_OBJECT (fit_button), "clicked", G_CALLBACK (on_fit_button_clicked), NULL);
@@ -181,6 +189,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (preferences_window), "delete-event", G_CALLBACK (on_preferences_cancel_button_clicked), NULL);
   g_signal_connect (G_OBJECT (preferences_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (shortcuts_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect (G_OBJECT (help_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (about_dialog), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
 
   //setup keyboard shortcuts
@@ -319,9 +328,13 @@ int main(int argc, char *argv[])
   g_object_set(gtk_settings_get_default(),"gtk-application-prefer-dark-theme", guiglobals.preferDarkTheme, NULL);
   if(guiglobals.preferDarkTheme){
     gtk_image_set_from_pixbuf(display_button_icon, spIconPixbufDark);
+    gtk_image_set_from_pixbuf(display_button_icon1, spIconPixbufDark);
+    gtk_image_set_from_pixbuf(display_button_icon2, spIconPixbufDark);
     gtk_image_set_from_pixbuf(no_sp_image, spIconPixbufDark);
   }else{
     gtk_image_set_from_pixbuf(display_button_icon, spIconPixbuf);
+    gtk_image_set_from_pixbuf(display_button_icon1, spIconPixbuf);
+    gtk_image_set_from_pixbuf(display_button_icon2, spIconPixbuf);
     gtk_image_set_from_pixbuf(no_sp_image, spIconPixbuf);
   }
 

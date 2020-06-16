@@ -855,9 +855,13 @@ void on_toggle_dark_theme(GtkToggleButton *togglebutton, gpointer user_data)
   g_object_set(gtk_settings_get_default(),"gtk-application-prefer-dark-theme", guiglobals.preferDarkTheme, NULL);
   if(guiglobals.preferDarkTheme){
     gtk_image_set_from_pixbuf(display_button_icon, spIconPixbufDark);
+    gtk_image_set_from_pixbuf(display_button_icon1, spIconPixbufDark);
+    gtk_image_set_from_pixbuf(display_button_icon2, spIconPixbufDark);
     gtk_image_set_from_pixbuf(no_sp_image, spIconPixbufDark);
   }else{
     gtk_image_set_from_pixbuf(display_button_icon, spIconPixbuf);
+    gtk_image_set_from_pixbuf(display_button_icon1, spIconPixbuf);
+    gtk_image_set_from_pixbuf(display_button_icon2, spIconPixbuf);
     gtk_image_set_from_pixbuf(no_sp_image, spIconPixbuf);
   }
 }
@@ -928,9 +932,13 @@ void on_preferences_cancel_button_clicked(GtkButton *b)
   g_object_set(gtk_settings_get_default(),"gtk-application-prefer-dark-theme", guiglobals.preferDarkTheme, NULL);
   if(guiglobals.preferDarkTheme){
     gtk_image_set_from_pixbuf(display_button_icon, spIconPixbufDark);
+    gtk_image_set_from_pixbuf(display_button_icon1, spIconPixbufDark);
+    gtk_image_set_from_pixbuf(display_button_icon2, spIconPixbufDark);
     gtk_image_set_from_pixbuf(no_sp_image, spIconPixbufDark);
   }else{
     gtk_image_set_from_pixbuf(display_button_icon, spIconPixbuf);
+    gtk_image_set_from_pixbuf(display_button_icon1, spIconPixbuf);
+    gtk_image_set_from_pixbuf(display_button_icon2, spIconPixbuf);
     gtk_image_set_from_pixbuf(no_sp_image, spIconPixbuf);
   }
   //hide the dialog
@@ -940,6 +948,11 @@ void on_preferences_cancel_button_clicked(GtkButton *b)
 void on_shortcuts_button_clicked(GtkButton *b)
 {
   gtk_widget_show_all(GTK_WIDGET(shortcuts_window)); //show the window
+}
+
+void on_help_button_clicked(GtkButton *b)
+{
+  gtk_widget_show_all(GTK_WIDGET(help_window)); //show the window
 }
 
 void on_about_button_clicked(GtkButton *b)
