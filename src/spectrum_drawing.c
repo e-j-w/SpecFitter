@@ -87,14 +87,14 @@ float getCursorYVal(float cursorx, float cursory){
         }
         break;
       default:
-        return -1; //not implemented
+        return 0; //not implemented
         break;
     }
     //printf("cursory: %f, cursorVal: %f, scaleMax: %f, scaleMin: %f\n",cursory,cursorVal,drawing.scaleLevelMax[0],drawing.scaleLevelMin[0]);
     return cursorVal;
     //return cursorChan - fmod(cursorChan,drawing.contractFactor);
   }
-  return -1; //cursor not over spectrum
+  return 0; //cursor not over spectrum
 }
 
 //get the index of the comment at which the cursor is over
@@ -470,7 +470,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
       float cursorChan, cursorYVal;
       cursorChan = getCursorChannel(event->x, event->y);
       cursorYVal = getCursorYVal(event->x, event->y);
-      if((cursorChan >= 0)&&(cursorYVal > 0)){
+      if(cursorChan >= 0){
         //user has double clicked on the displayed spectrum
         switch (drawing.multiplotMode)
         {
@@ -1632,19 +1632,21 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
               if(rawdata.chanCommentCh[i] < drawing.upperLimit){
                 if(rawdata.chanCommentVal[i] > drawing.scaleLevelMin[0]){
                   if(rawdata.chanCommentVal[i] < drawing.scaleLevelMax[0]){
-                    if(drawing.highlightedComment == i){
-                      cairo_set_line_width(cr, 8.0);
-                    }else{
-                      cairo_set_line_width(cr, 4.0);
+                    if((!drawing.logScale)||(rawdata.chanCommentVal[i] > 0)){
+                      if(drawing.highlightedComment == i){
+                        cairo_set_line_width(cr, 8.0);
+                      }else{
+                        cairo_set_line_width(cr, 4.0);
+                      }
+                      float xc = getXPosFromCh(rawdata.chanCommentCh[i],clip_x1,clip_x2,1);
+                      float yc = -1.0*getYPos(rawdata.chanCommentVal[i],0,clip_y1,clip_y2);
+                      float radius = 14.0;
+                      cairo_arc(cr,xc,yc,radius,0.,2*G_PI);
+                      cairo_set_font_size(cr, plotFontSize*1.5);
+                      cairo_text_extents(cr, "i", &extents);
+                      cairo_move_to(cr,xc-(extents.width),yc+(extents.height/2.));
+                      cairo_show_text(cr, "i");
                     }
-                    float xc = getXPosFromCh(rawdata.chanCommentCh[i],clip_x1,clip_x2,1);
-                    float yc = -1.0*getYPos(rawdata.chanCommentVal[i],0,clip_y1,clip_y2);
-                    float radius = 14.0;
-                    cairo_arc(cr,xc,yc,radius,0.,2*G_PI);
-                    cairo_set_font_size(cr, plotFontSize*1.5);
-                    cairo_text_extents(cr, "i", &extents);
-                    cairo_move_to(cr,xc-(extents.width),yc+(extents.height/2.));
-                    cairo_show_text(cr, "i");
                   }
                 }
               }
