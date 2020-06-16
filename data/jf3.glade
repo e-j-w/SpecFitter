@@ -37,123 +37,6 @@ Author: Jonathan Williams
     <property name="visible">True</property>
     <property name="can_focus">False</property>
   </object>
-  <object class="GtkWindow" id="comment_window">
-    <property name="can_focus">False</property>
-    <property name="title" translatable="yes">Add or Edit Comment</property>
-    <property name="resizable">False</property>
-    <property name="modal">True</property>
-    <property name="window_position">center-always</property>
-    <property name="type_hint">dialog</property>
-    <property name="gravity">center</property>
-    <property name="attached_to">window</property>
-    <child>
-      <object class="GtkBox">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="margin_start">10</property>
-        <property name="margin_end">10</property>
-        <property name="margin_top">10</property>
-        <property name="margin_bottom">10</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">10</property>
-        <child>
-          <object class="GtkBox" id="tab1_box1">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="orientation">vertical</property>
-            <property name="spacing">10</property>
-            <child>
-              <object class="GtkEntry" id="comment_entry">
-                <property name="width_request">400</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="halign">start</property>
-                <property name="valign">start</property>
-                <property name="max_length">255</property>
-                <property name="caps_lock_warning">False</property>
-                <property name="placeholder_text" translatable="yes">Enter text...</property>
-                <property name="completion">commententrycompletion</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkSeparator">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">6</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="hexpand">True</property>
-            <property name="spacing">10</property>
-            <child>
-              <object class="GtkButton" id="remove_comment_button">
-                <property name="label" translatable="yes">Delete Comment</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Remove an existing calibration, and revert to displaying data uncalibrated.</property>
-                <property name="halign">end</property>
-                <property name="hexpand">False</property>
-                <style>
-                  <class name="destructive-action"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="comment_ok_button">
-                <property name="label">Apply</property>
-                <property name="width_request">100</property>
-                <property name="height_request">40</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Apply all changes and return.</property>
-                <property name="halign">end</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="pack_type">end</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-    <child type="titlebar">
-      <placeholder/>
-    </child>
-  </object>
   <object class="GtkEntryCompletion" id="commententrycompletion"/>
   <object class="GtkAdjustment" id="contract_adjustment">
     <property name="lower">1</property>
@@ -619,6 +502,123 @@ Author: Jonathan Williams
             </child>
             <child>
               <object class="GtkButton" id="options_ok_button">
+                <property name="label">Apply</property>
+                <property name="width_request">100</property>
+                <property name="height_request">40</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Apply all changes and return.</property>
+                <property name="halign">end</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack_type">end</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <child type="titlebar">
+      <placeholder/>
+    </child>
+  </object>
+  <object class="GtkWindow" id="comment_window">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Add or Edit Comment</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-always</property>
+    <property name="type_hint">dialog</property>
+    <property name="gravity">center</property>
+    <property name="attached_to">window</property>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="margin_start">10</property>
+        <property name="margin_end">10</property>
+        <property name="margin_top">10</property>
+        <property name="margin_bottom">10</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">10</property>
+        <child>
+          <object class="GtkBox" id="tab1_box1">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkEntry" id="comment_entry">
+                <property name="width_request">400</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="halign">start</property>
+                <property name="valign">start</property>
+                <property name="max_length">255</property>
+                <property name="caps_lock_warning">False</property>
+                <property name="placeholder_text" translatable="yes">Enter text...</property>
+                <property name="completion">commententrycompletion</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSeparator">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">6</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="hexpand">True</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkButton" id="remove_comment_button">
+                <property name="label" translatable="yes">Delete Comment</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Remove an existing calibration, and revert to displaying data uncalibrated.</property>
+                <property name="halign">end</property>
+                <property name="hexpand">False</property>
+                <style>
+                  <class name="destructive-action"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="comment_ok_button">
                 <property name="label">Apply</property>
                 <property name="width_request">100</property>
                 <property name="height_request">40</property>
@@ -1760,7 +1760,7 @@ Weight by fit function - Weights are proportional to the fit function values det
                 <property name="orientation">vertical</property>
                 <property name="spacing">10</property>
                 <child>
-                  <object class="GtkImage">
+                  <object class="GtkImage" id="no_sp_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="valign">end</property>

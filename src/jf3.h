@@ -42,6 +42,7 @@ GtkFileFilter *file_filter;
 GtkAccelGroup *main_window_accelgroup;
 GtkBox *no_sp_box;
 GtkImage *display_button_icon;
+GtkImage *no_sp_image;
 //display menu
 GtkSpinButton *spectrum_selector;
 GtkCheckButton *autoscale_button, *logscale_button, *cursor_draw_button;

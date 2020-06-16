@@ -46,7 +46,7 @@ Conversion codes for some of the above data formats are available in the [FileCo
 * Relative peak widths may be fixed (recommended for gamma-ray spectroscopy) or allowed to freely vary.
 * Weight by the data (taking background subtraction into account) or by the fit function.  Or don't weight the fit at all.
 
-### Commenting/Note taking
+### Commenting/note-taking
 
 * Double click anywhere on a plot to write/edit a comment there.
 * Comments are saved alongside spectra when using the **.jf3** file format.

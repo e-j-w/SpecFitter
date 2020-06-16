@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
   save_button = GTK_BUTTON(gtk_builder_get_object(builder, "save_button"));
   display_button = GTK_BUTTON(gtk_builder_get_object(builder, "display_button"));
   display_button_icon = GTK_IMAGE(gtk_builder_get_object(builder, "display_button_icon"));
+  no_sp_image= GTK_IMAGE(gtk_builder_get_object(builder, "no_sp_image"));
   spectrum_drawing_area = GTK_WIDGET(gtk_builder_get_object(builder, "spectrumdrawingarea"));
   spectrum_drag_gesture = gtk_gesture_drag_new(spectrum_drawing_area); //without this, cannot click away from menus onto the drawing area, needs further investigation
   zoom_scale = GTK_SCALE(gtk_builder_get_object(builder, "zoom_scale"));
@@ -318,8 +319,10 @@ int main(int argc, char *argv[])
   g_object_set(gtk_settings_get_default(),"gtk-application-prefer-dark-theme", guiglobals.preferDarkTheme, NULL);
   if(guiglobals.preferDarkTheme){
     gtk_image_set_from_pixbuf(display_button_icon, spIconPixbufDark);
+    gtk_image_set_from_pixbuf(no_sp_image, spIconPixbufDark);
   }else{
     gtk_image_set_from_pixbuf(display_button_icon, spIconPixbuf);
+    gtk_image_set_from_pixbuf(no_sp_image, spIconPixbuf);
   }
 
   gtk_window_set_default_icon(appIcon);
