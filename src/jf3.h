@@ -35,7 +35,7 @@ GtkButton *open_button, *append_button;
 GtkButton *fit_button, *display_button;
 GtkPopover *display_popover;
 GtkButton *calibrate_button;
-GtkButton *save_button;
+GtkButton *to_save_menu_button, *save_button, *save_button_radware;
 GtkButton *help_button;
 GtkLabel *bottom_info_text;
 GtkFileChooser *file_open_dialog, *file_save_dialog;
@@ -70,7 +70,7 @@ GtkButton *comment_ok_button, *remove_comment_button;
 GtkAboutDialog *about_dialog;
 GtkModelButton *about_button;
 //MultiPlot dialog
-GtkWidget *multiplot_button, *multiplot_ok_button;
+GtkButton *multiplot_button, *multiplot_ok_button;
 GtkWindow *multiplot_window;
 GtkListStore *multiplot_liststore;
 GtkTreeView *multiplot_tree_view;
@@ -78,6 +78,11 @@ GtkTreeViewColumn *multiplot_column1, *multiplot_column2;
 GtkTreeSelection *multiplot_tree_selection;
 GtkCellRenderer *multiplot_cr1, *multiplot_cr2, *multiplot_cr3;
 GtkComboBoxText *multiplot_mode_combobox;
+//export data dialog
+GtkWindow *export_options_window;
+GtkComboBoxText *export_mode_combobox;
+GtkCheckButton *export_rebin_checkbutton;
+GtkButton *export_options_save_button;
 //preferences dialog
 GtkModelButton *preferences_button;
 GtkWindow *preferences_window;

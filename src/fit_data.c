@@ -1,9 +1,10 @@
 /* J. Williams, 2020 */
 
+//This file contains routines for fitting displayed spectra.
+//The main fit routine is startGausFit (at the bottom), which
+//in turn calls other subroutines.
+
 //forward declarations
-float getSpBinVal(const int dispSpNum, const int bin);
-float getSpBinFitWeight(const int dispSpNum, const int bin);
-double getCalVal(double val);
 double evalPeakArea(int peakNum);
 double evalPeakAreaErr(int peakNum);
 double getFitChisq();

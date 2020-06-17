@@ -1,12 +1,12 @@
 /* J. Williams, 2020 */
 
-//function writes a .jf3 file
+//routine to write a .jf3 file
 //header containing: file format version number (unsigned char), number of spectra (unsigned char), label for each spactrum (each 256 element char array),
 //number of comments (unsigned char), individual comments (comment sp (char), ch (int32), y-val (float32), followed by a 256 element char array for the comment itself)
 //spectrum data is compressed using a basic RLE method: packet header (signed char) specifying number of elements to repeat, then the element as a 32-bit float
 //alternatively, the packet header may be a negative number -n, in which case n non-repeating elements follow as 32-bit floats
 //if the packet header is 0, that is the end of the spectrum  
-int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
+int writeJF3(const char *filename, const double inpHist[NSPECT][S32K])
 {
 	int i, j, k;
 	FILE *out;
@@ -147,5 +147,113 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
 
 	fclose(out);
 	printf("Wrote data to file: %s\n",filename);
+	return 0;
+}
+
+//routine to export a RadWare compatible file
+//exportMode: 0=write displayed spectrum, 1=write all imported spectra
+int exportSPE(const char *filePrefix, const int exportMode, const int rebin)
+{
+	int i,j;
+	int spID;
+	float val;
+	FILE *out;
+	char outFileName[256];
+
+	//radware file header info
+  int32_t buffSize = 24;
+  char spLabel[8];
+  int32_t arraySize = 4096;
+  int32_t junk = 1;
+	int32_t byteSize = arraySize*4;
+	
+	switch (exportMode)
+	{
+		case 0:
+			//export all
+			for(i=0;i<rawdata.numSpOpened;i++){
+
+				snprintf(outFileName,256,"%s_hist%i.spe",filePrefix,i+1);
+				if((out = fopen(outFileName, "w")) == NULL) //open the file
+				{
+					printf("ERROR: Cannot open the output file: %s\n", outFileName);
+					printf("The file may not be accesible.\n");
+					return 1;
+				}
+
+				//write .spe header
+				strncpy(spLabel,rawdata.histComment[i],7);
+				fwrite(&buffSize,sizeof(int32_t),1,out);
+				fwrite(&spLabel,sizeof(spLabel),1,out);
+				fwrite(&arraySize,sizeof(int32_t),1,out);
+				fwrite(&junk,sizeof(int32_t),1,out);
+				fwrite(&junk,sizeof(int32_t),1,out);
+				fwrite(&junk,sizeof(int32_t),1,out);
+				fwrite(&buffSize,sizeof(int32_t),1,out);
+				fwrite(&byteSize,sizeof(int32_t),1,out);
+				
+				//write histogram
+				if(rebin){
+					for(j=0;j<(arraySize*drawing.contractFactor);j+=drawing.contractFactor){
+						val = getSpBinValRaw(i,j,drawing.scaleFactor[i],drawing.contractFactor);
+						fwrite(&val,sizeof(float),1,out);
+					}
+				}else{
+					for(j=0;j<arraySize;j++){
+						val = getSpBinValRaw(i,j,drawing.scaleFactor[i],1);
+						fwrite(&val,sizeof(float),1,out);
+					}
+				}
+				fwrite(&byteSize,sizeof(int32_t),1,out);
+				fclose(out);
+				printf("Wrote data to file: %s\n",outFileName);
+			}
+			break;
+		default:
+			//export one histogram
+			
+			spID = exportMode-1;
+			if((spID < 0)||(spID >= rawdata.numSpOpened)){
+				printf("ERROR: invalid spectrum index for export.\n");
+				return 2;
+			}
+
+			snprintf(outFileName,256,"%s.spe",filePrefix);
+			if((out = fopen(outFileName, "w")) == NULL) //open the file
+			{
+				printf("ERROR: Cannot open the output file: %s\n", outFileName);
+				printf("The file may not be accesible.\n");
+				return 1;
+			}
+
+			//write .spe header
+			strncpy(spLabel,rawdata.histComment[spID],7);
+			fwrite(&buffSize,sizeof(int32_t),1,out);
+			fwrite(&spLabel,sizeof(spLabel),1,out);
+			fwrite(&arraySize,sizeof(int32_t),1,out);
+			fwrite(&junk,sizeof(int32_t),1,out);
+			fwrite(&junk,sizeof(int32_t),1,out);
+			fwrite(&junk,sizeof(int32_t),1,out);
+			fwrite(&buffSize,sizeof(int32_t),1,out);
+			fwrite(&byteSize,sizeof(int32_t),1,out);
+
+			//write histogram
+			if(rebin){
+				for(i=0;i<(arraySize*drawing.contractFactor);i+=drawing.contractFactor){
+					val = getSpBinValRaw(spID,i,drawing.scaleFactor[spID],drawing.contractFactor);
+					fwrite(&val,sizeof(float),1,out);
+				}
+			}else{
+				for(i=0;i<arraySize;i++){
+					val = getSpBinValRaw(spID,i,drawing.scaleFactor[spID],1);
+					fwrite(&val,sizeof(float),1,out);
+				}
+			}
+			fwrite(&byteSize,sizeof(int32_t),1,out);
+			fclose(out);
+			printf("Wrote data to file: %s\n",outFileName);
+			break;
+	}
+
 	return 0;
 }

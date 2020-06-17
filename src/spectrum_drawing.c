@@ -14,37 +14,6 @@ void setTextColor(cairo_t *cr){
   
 }
 
-int getFirstNonemptySpectrum(int numSpOpened){
-  if(numSpOpened>=NSPECT){
-    return -1;
-  }
-  int i,j;
-  for(i=0;i<numSpOpened;i++){
-    for(j=0;j<S32K;j++){
-      if(rawdata.hist[i][j]!=0.0){
-        return i;
-      }
-    }
-  }
-  return -1;
-}
-
-//used to check whether a spectrum has been selected in multiplot mode
-int isSpSelected(int spNum){
-  int i;
-  for(i=0;i<drawing.numMultiplotSp;i++){
-    if(drawing.multiPlots[i] == spNum){
-      return 1;
-    }
-  }
-  return 0;
-}
-
-//get a calibrated value from an uncalibrated one
-double getCalVal(double val){
-  return calpar.calpar0 + calpar.calpar1*val + calpar.calpar2*val*val;
-}
-
 //converts cursor position units to channel units on the displayed spectrum
 //return value is float to allow sub-channel prescision, cast it to int if needed
 float getCursorChannel(float cursorx, float cursory){
@@ -132,62 +101,6 @@ int getCommentAtCursor(float cursorx, float cursory){
   return -1; //cursor not over a comment, or comments not implemented for the drawing mode
 }
 
-
-//if getWeight is set, will return weight values for fitting
-float getSpBinValOrWeight(const int dispSpNum, const int bin, const int getWeight){
-
-  if((dispSpNum >= drawing.numMultiplotSp)||(dispSpNum < 0)){
-    //invalid displayed spectrum number
-    return 0;
-  }
-
-  int j,k;
-  float val = 0.;
-    for(j=0;j<drawing.contractFactor;j++){
-      switch(drawing.multiplotMode){
-        case 1:
-          //sum spectra
-          if(getWeight){
-            for(k=0;k<drawing.numMultiplotSp;k++){
-              val += drawing.scaleFactor[drawing.multiPlots[k]]*drawing.scaleFactor[drawing.multiPlots[k]]*fabs(rawdata.hist[drawing.multiPlots[k]][bin+j]);
-            }
-          }else{
-            for(k=0;k<drawing.numMultiplotSp;k++){
-              val += drawing.scaleFactor[drawing.multiPlots[k]]*rawdata.hist[drawing.multiPlots[k]][bin+j];
-            }
-          }
-          break;
-        case 4:
-          //stacked
-        case 3:
-          //overlay (independent scaling)
-        case 2:
-          //overlay (common scaling)
-        case 0:
-          //no multiplot
-          val += drawing.scaleFactor[drawing.multiPlots[dispSpNum]]*rawdata.hist[drawing.multiPlots[dispSpNum]][bin+j];
-          break;
-        default:
-          break;
-      }
-    }
-  
-  return val;
-}
-//get the value of the ith bin of the displayed spectrum
-//i is in channel units, offset from drawing.lowerLimit
-//for contracted spectra, the original channel units are retained, but the sum
-//of j bins is returned, where j is the contraction factor
-//spNum is the displayed spectrum number (for multiplot), 0 is the first displayed spectrum
-float getDispSpBinVal(const int dispSpNum, const int bin){
-  return getSpBinValOrWeight(dispSpNum,drawing.lowerLimit+bin,0);
-}
-float getSpBinVal(const int dispSpNum, const int bin){
-  return getSpBinValOrWeight(dispSpNum,bin,0);
-}
-float getSpBinFitWeight(const int dispSpNum, const int bin){
-  return getSpBinValOrWeight(dispSpNum,bin,1);
-}
 
 //function setting the plotting limits for the spectrum based on the zoom level
 //the plotting limits are in UNCALIBRATED units ie. channels

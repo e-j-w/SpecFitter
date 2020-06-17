@@ -3,15 +3,18 @@
 
 //definitions and global variables
 #include "jf3.h"
-
-//subroutines
 #include "jf3-resources.c"
-#include "utils.c"
+
+//routines
+#include "utils.c" //standalone utility functions
+#include "spectrum_data.c" //functions which access imported spectrum/histogram data
+#include "fit_data.c" //functions for fitting imported data
+#include "spectrum_drawing.c" //functions for drawing imported data
+//read/write routines
 #include "read_data.c"
-#include "read_config.c"
 #include "write_data.c"
-#include "fit_data.c"
-#include "spectrum_drawing.c"
+#include "read_config.c"
+//GTK interaction routines
 #include "gui.c"
 
 int main(int argc, char *argv[])
@@ -35,6 +38,8 @@ int main(int argc, char *argv[])
   gtk_window_set_transient_for(comment_window, window); //center comment window on main window
   multiplot_window = GTK_WINDOW(gtk_builder_get_object(builder, "multiplot_window"));
   gtk_window_set_transient_for(multiplot_window, window); //center multiplot window on main window
+  export_options_window = GTK_WINDOW(gtk_builder_get_object(builder, "export_options_window"));
+  gtk_window_set_transient_for(export_options_window, window); //center export options window on main window
   preferences_window = GTK_WINDOW(gtk_builder_get_object(builder, "preferences_window"));
   gtk_window_set_transient_for(preferences_window, window); //center preferences window on main window
   shortcuts_window = GTK_SHORTCUTS_WINDOW(gtk_builder_get_object(builder, "shortcuts_window"));
@@ -57,7 +62,9 @@ int main(int argc, char *argv[])
   append_button = GTK_BUTTON(gtk_builder_get_object(builder, "append_button"));
   calibrate_button = GTK_BUTTON(gtk_builder_get_object(builder, "calibrate_button"));
   fit_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_button"));
+  to_save_menu_button = GTK_BUTTON(gtk_builder_get_object(builder, "to_save_menu_button"));
   save_button = GTK_BUTTON(gtk_builder_get_object(builder, "save_button"));
+  save_button_radware = GTK_BUTTON(gtk_builder_get_object(builder, "save_button_radware"));
   help_button = GTK_BUTTON(gtk_builder_get_object(builder, "help_button"));
   display_button = GTK_BUTTON(gtk_builder_get_object(builder, "display_button"));
   display_button_icon = GTK_IMAGE(gtk_builder_get_object(builder, "display_button_icon"));
@@ -93,7 +100,7 @@ int main(int argc, char *argv[])
   comment_entry = GTK_ENTRY(gtk_builder_get_object(builder, "comment_entry"));
 
   //multiplot window UI elements
-  multiplot_ok_button = GTK_WIDGET(gtk_builder_get_object(builder, "multiplot_ok_button"));
+  multiplot_ok_button = GTK_BUTTON(gtk_builder_get_object(builder, "multiplot_ok_button"));
   multiplot_liststore = GTK_LIST_STORE(gtk_builder_get_object(builder, "multiplot_liststore"));
   multiplot_tree_view = GTK_TREE_VIEW(gtk_builder_get_object(builder, "multiplot_tree_view"));
   multiplot_column1 = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder, "multiplot_column1"));
@@ -102,6 +109,11 @@ int main(int argc, char *argv[])
   multiplot_cr2 = GTK_CELL_RENDERER(gtk_builder_get_object(builder, "multiplot_cr2"));
   multiplot_cr3 = GTK_CELL_RENDERER(gtk_builder_get_object(builder, "multiplot_cr3"));
   multiplot_mode_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "multiplot_mode_combobox"));
+
+  //export options window UI elements
+  export_mode_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "export_mode_combobox"));
+  export_rebin_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "export_rebin_checkbutton"));
+  export_options_save_button = GTK_BUTTON(gtk_builder_get_object(builder, "export_options_save_button"));
 
   //preferences window UI elements
   preferences_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "preferences_button"));
@@ -124,7 +136,7 @@ int main(int argc, char *argv[])
   display_button_icon2 = GTK_IMAGE(gtk_builder_get_object(builder, "display_button_icon2"));
 
   //display menu UI elements
-  multiplot_button = GTK_WIDGET(gtk_builder_get_object(builder, "multiplot_button"));
+  multiplot_button = GTK_BUTTON(gtk_builder_get_object(builder, "multiplot_button"));
   sum_all_button = GTK_BUTTON(gtk_builder_get_object(builder, "sum_all_button"));
   spectrum_selector = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spectrumselector"));
   spectrum_selector_adjustment = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "spectrum_selector_adjustment"));
@@ -143,6 +155,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (append_button), "clicked", G_CALLBACK (on_append_button_clicked), NULL);
   g_signal_connect (G_OBJECT (calibrate_button), "clicked", G_CALLBACK (on_calibrate_button_clicked), NULL);
   g_signal_connect (G_OBJECT (save_button), "clicked", G_CALLBACK (on_save_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (save_button_radware), "clicked", G_CALLBACK (on_save_radware_button_clicked), NULL);
   g_signal_connect (G_OBJECT (help_button), "clicked", G_CALLBACK (on_help_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_button), "clicked", G_CALLBACK (on_multiplot_button_clicked), NULL);
   g_signal_connect (G_OBJECT (sum_all_button), "clicked", G_CALLBACK (on_sum_all_button_clicked), NULL);
@@ -161,6 +174,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (logscale_button), "toggled", G_CALLBACK (on_toggle_logscale), NULL);
   g_signal_connect (G_OBJECT (cursor_draw_button), "toggled", G_CALLBACK (on_toggle_cursor), NULL);
   g_signal_connect (G_OBJECT (discard_empty_checkbutton), "toggled", G_CALLBACK (on_toggle_discard_empty), NULL);
+  g_signal_connect (G_OBJECT (export_options_save_button), "clicked", G_CALLBACK (on_export_save_button_clicked), NULL);
   g_signal_connect (G_OBJECT (bin_errors_checkbutton), "toggled", G_CALLBACK (on_toggle_bin_errors), NULL);
   g_signal_connect (G_OBJECT (round_errors_checkbutton), "toggled", G_CALLBACK (on_toggle_round_errors), NULL);
   g_signal_connect (G_OBJECT (dark_theme_checkbutton), "toggled", G_CALLBACK (on_toggle_dark_theme), NULL);
@@ -186,6 +200,7 @@ int main(int argc, char *argv[])
   g_signal_connect (G_OBJECT (calibrate_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (comment_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (multiplot_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect (G_OBJECT (export_options_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (preferences_window), "delete-event", G_CALLBACK (on_preferences_cancel_button_clicked), NULL);
   g_signal_connect (G_OBJECT (preferences_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (shortcuts_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
@@ -264,7 +279,7 @@ int main(int argc, char *argv[])
   gtk_widget_set_sensitive(GTK_WIDGET(append_button),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),FALSE);
-  gtk_widget_set_sensitive(GTK_WIDGET(save_button),FALSE);
+  gtk_widget_set_sensitive(GTK_WIDGET(to_save_menu_button),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(fit_button),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
   gtk_widget_set_sensitive(GTK_WIDGET(display_button),FALSE);

@@ -43,7 +43,7 @@ void openSingleFile(char *filename, int append){
       gtk_widget_set_sensitive(GTK_WIDGET(display_button),TRUE);
       gtk_widget_set_sensitive(GTK_WIDGET(zoom_scale),TRUE);
       gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
-      gtk_widget_set_sensitive(GTK_WIDGET(save_button),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(to_save_menu_button),TRUE);
       gtk_label_set_text(bottom_info_text,"");
       gtk_widget_hide(GTK_WIDGET(no_sp_box));
       if(rawdata.numSpOpened > 1){
@@ -137,7 +137,7 @@ void on_open_button_clicked(GtkButton *b)
           gtk_widget_set_sensitive(GTK_WIDGET(display_button),TRUE);
           gtk_widget_set_sensitive(GTK_WIDGET(zoom_scale),TRUE);
           gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
-          gtk_widget_set_sensitive(GTK_WIDGET(save_button),TRUE);
+          gtk_widget_set_sensitive(GTK_WIDGET(to_save_menu_button),TRUE);
           gtk_label_set_text(bottom_info_text,"");
           gtk_widget_hide(GTK_WIDGET(no_sp_box));
           if(rawdata.numSpOpened > 1){
@@ -310,18 +310,15 @@ void on_save_button_clicked(GtkButton *b)
   int saveErr = 0; //to track if there are any errors when opening spectra
   if (gtk_dialog_run(GTK_DIALOG(file_save_dialog)) == GTK_RESPONSE_ACCEPT)
   {
-    char *filename = NULL;
-    filename = gtk_file_chooser_get_filename(file_save_dialog);
-    const char *dot = strrchr(filename, '.'); //get the file extension
-    if((dot != NULL)&&(strcmp(dot + 1, "jf3") == 0)){
-      //write file
-      saveErr = writeJF3(filename, rawdata.hist);
-    }else{
-      //save as a .jf3 file by default
-      strcat(filename,".jf3");
-      //write file
-      saveErr = writeJF3(filename, rawdata.hist);
-    }
+    char *fn = NULL;
+    char *tok, fileName[256];
+    fn = gtk_file_chooser_get_filename(file_save_dialog);
+    tok = strtok (fn,".");
+    strncpy(fileName,tok,255);
+    //save as a .jf3 file by default
+    strncat(fileName,".jf3",255);
+    //write file
+    saveErr = writeJF3(fileName, rawdata.hist);
 
     gtk_widget_destroy(GTK_WIDGET(file_save_dialog));
 
@@ -332,7 +329,7 @@ void on_save_button_clicked(GtkButton *b)
       switch (saveErr)
       {
         case 1:
-          snprintf(errMsg,256,"Error writing to file %s.",filename);
+          snprintf(errMsg,256,"Error writing to file %s.",fileName);
           break;
         default:
           snprintf(errMsg,256,"Unknown error saving spectrum data.");
@@ -344,14 +341,82 @@ void on_save_button_clicked(GtkButton *b)
     }else{
       //update the status bar
       char saveMsg[256];
-      snprintf(saveMsg,256,"Saved data to file %s.",filename);
+      snprintf(saveMsg,256,"Saved data to file %s.",fileName);
       gtk_label_set_text(bottom_info_text,saveMsg);
     }
-    g_free(filename);
+    g_free(fn);
   }else{
     gtk_widget_destroy(GTK_WIDGET(file_save_dialog));
   }
   
+}
+
+void on_save_radware_button_clicked(GtkButton *b)
+{
+  int i;
+  gtk_combo_box_text_remove_all(export_mode_combobox);
+  gtk_combo_box_text_insert(export_mode_combobox,0,NULL,"All spectra (separate files)");
+  for(i=0;i<rawdata.numSpOpened;i++){
+    gtk_combo_box_text_insert(export_mode_combobox,i+1,NULL,rawdata.histComment[i]);
+  }
+  gtk_combo_box_set_active(GTK_COMBO_BOX(export_mode_combobox),0); //set the default entry
+  gtk_window_present(export_options_window); //show the window
+}
+
+void on_export_save_button_clicked(GtkButton *b)
+{
+  //get export settings
+  int exportMode = gtk_combo_box_get_active(GTK_COMBO_BOX(export_mode_combobox));
+  int rebin = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_rebin_checkbutton));
+
+  file_save_dialog = GTK_FILE_CHOOSER(gtk_file_chooser_dialog_new ("Export Spectrum Data", window, GTK_FILE_CHOOSER_ACTION_SAVE, "Cancel", GTK_RESPONSE_CANCEL, "Export", GTK_RESPONSE_ACCEPT, NULL));
+  gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
+
+  int saveErr = 0; //to track if there are any errors when opening spectra
+  if (gtk_dialog_run(GTK_DIALOG(file_save_dialog)) == GTK_RESPONSE_ACCEPT)
+  {
+    
+    char *fn = NULL;
+    char *tok, fileName[256];
+    fn = gtk_file_chooser_get_filename(file_save_dialog);
+    tok = strtok (fn,".");
+    strncpy(fileName,tok,255);
+    //write file
+    saveErr = exportSPE(fileName, exportMode, rebin);
+
+    gtk_widget_destroy(GTK_WIDGET(file_save_dialog));
+
+    if(saveErr>0){
+      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+      GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error exporting spectrum data!");
+      char errMsg[256];
+      switch (saveErr)
+      {
+        case 2:
+          snprintf(errMsg,256,"Error processing spectrum data.");
+          break;
+        case 1:
+          snprintf(errMsg,256,"Error writing to file.");
+          break;
+        default:
+          snprintf(errMsg,256,"Unknown error exporting spectrum data.");
+          break;
+      }
+      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),errMsg);
+      gtk_dialog_run (GTK_DIALOG (message_dialog));
+      gtk_widget_destroy (message_dialog);
+    }else{
+      //update the status bar
+      char saveMsg[256];
+      snprintf(saveMsg,256,"Successfully exported data.");
+      gtk_label_set_text(bottom_info_text,saveMsg);
+    }
+    g_free(fn);
+  }else{
+    gtk_widget_destroy(GTK_WIDGET(file_save_dialog));
+  }
+
+  gtk_widget_hide(GTK_WIDGET(export_options_window)); //hide the window
 }
 
 
@@ -947,12 +1012,12 @@ void on_preferences_cancel_button_clicked(GtkButton *b)
 
 void on_shortcuts_button_clicked(GtkButton *b)
 {
-  gtk_widget_show_all(GTK_WIDGET(shortcuts_window)); //show the window
+  gtk_window_present(GTK_WINDOW(shortcuts_window)); //show the window
 }
 
 void on_help_button_clicked(GtkButton *b)
 {
-  gtk_widget_show_all(GTK_WIDGET(help_window)); //show the window
+  gtk_window_present(help_window); //show the window
 }
 
 void on_about_button_clicked(GtkButton *b)
