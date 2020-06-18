@@ -6,7 +6,7 @@
 //spectrum data is compressed using a basic RLE method: packet header (signed char) specifying number of elements to repeat, then the element as a 32-bit float
 //alternatively, the packet header may be a negative number -n, in which case n non-repeating elements follow as 32-bit floats
 //if the packet header is 0, that is the end of the spectrum  
-int writeJF3(const char *filename, const double inpHist[NSPECT][S32K])
+int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
 {
 	int i, j, k;
 	FILE *out;
