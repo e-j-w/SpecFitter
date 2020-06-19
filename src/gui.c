@@ -234,6 +234,12 @@ void on_open_button_clicked(GtkButton *b)
 
 void on_append_button_clicked(GtkButton *b)
 {
+
+  //handle case where this is called by shortcut, and spectra are not open
+  if(rawdata.openedSp == 0){
+    return;
+  }
+
   int i,j;
   
   file_open_dialog = GTK_FILE_CHOOSER(gtk_file_chooser_dialog_new ("Add More Spectrum File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, NULL));
@@ -323,6 +329,10 @@ void on_append_button_clicked(GtkButton *b)
 
 void on_save_button_clicked(GtkButton *b)
 {
+  //handle case where this is called by shortcut, and spectra are not open
+  if(rawdata.openedSp == 0){
+    return;
+  }
 
   file_save_dialog = GTK_FILE_CHOOSER(gtk_file_chooser_dialog_new ("Save Spectrum Data", window, GTK_FILE_CHOOSER_ACTION_SAVE, "Cancel", GTK_RESPONSE_CANCEL, "Save", GTK_RESPONSE_ACCEPT, NULL));
   gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
@@ -691,6 +701,12 @@ void on_multiplot_scaling_edited(GtkCellRendererText *c, gchar *path_string, gch
 
 void on_multiplot_button_clicked(GtkButton *b)
 {
+
+  //handle case where this is called by shortcut, and spectra are not open
+  if(rawdata.openedSp == 0){
+    return;
+  }
+
   GtkTreeIter iter;
   gboolean val = FALSE;
   GtkTreeModel *model = gtk_tree_view_get_model(multiplot_tree_view);
@@ -1211,10 +1227,12 @@ void iniitalizeUIElements(){
   //setup keyboard shortcuts
   gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_f, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_fit_button_clicked), NULL, 0));
   gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_c, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_calibrate_button_clicked), NULL, 0));
-  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_a, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_multiplot_button_clicked), NULL, 0));
+  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_p, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_multiplot_button_clicked), NULL, 0));
   gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_l, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(toggle_logscale), NULL, 0));
-  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_o, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_open_button_clicked), NULL, 0));
   gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_z, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(toggle_cursor), NULL, 0));
+  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_o, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_open_button_clicked), NULL, 0));
+  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_a, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_append_button_clicked), NULL, 0));
+  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_s, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_save_button_clicked), NULL, 0));
 
   //set attributes
   gtk_tree_view_column_add_attribute(multiplot_column2,multiplot_cr2, "active",1);
