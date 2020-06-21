@@ -35,7 +35,7 @@ GtkButton *open_button, *append_button;
 GtkButton *fit_button, *display_button;
 GtkPopover *display_popover;
 GtkButton *calibrate_button;
-GtkButton *to_save_menu_button, *save_button, *save_button_radware;
+GtkButton *to_save_menu_button, *save_button, *save_button_radware, *save_button_text;
 GtkButton *help_button;
 GtkLabel *bottom_info_text;
 GtkFileChooser *file_open_dialog, *file_save_dialog;
@@ -80,6 +80,7 @@ GtkCellRenderer *multiplot_cr1, *multiplot_cr2, *multiplot_cr3;
 GtkComboBoxText *multiplot_mode_combobox;
 //export data dialog
 GtkWindow *export_options_window;
+GtkLabel *export_description_label, *export_note_label;
 GtkComboBoxText *export_mode_combobox;
 GtkCheckButton *export_rebin_checkbutton;
 GtkButton *export_options_save_button;
@@ -125,6 +126,7 @@ struct {
   char popupFitResults; //0=don't popup results after fit, 1=popup results
   char useZoomAnimations; //0=don't use, 1=use
   int framesSinceZoom;
+  char exportFileType; //0=text, 1=radware
 } guiglobals;
 
 //imported data globals

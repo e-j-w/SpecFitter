@@ -257,3 +257,101 @@ int exportSPE(const char *filePrefix, const int exportMode, const int rebin)
 
 	return 0;
 }
+
+//routine to export a plaintext file
+//exportMode: 0=write displayed spectrum, 1=write all imported spectra
+int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
+{
+	int i,j;
+	int spID;
+	int maxArraySize;
+	float val;
+	FILE *out;
+	char outFileName[256];
+
+	snprintf(outFileName,256,"%s.txt",filePrefix);
+	if((out = fopen(outFileName, "w")) == NULL) //open the file
+	{
+		printf("ERROR: Cannot open the output file: %s\n", outFileName);
+		printf("The file may not be accesible.\n");
+		return 1;
+	}
+	
+	switch (exportMode)
+	{
+		case 0:
+			//export all
+
+			//get max array size
+			maxArraySize = S32K;
+			for(j=S32K-1;j>=0;j--){
+				for(i=0;i<rawdata.numSpOpened;i++){
+					if(rawdata.hist[i][j] != 0.){
+						maxArraySize = j+1;
+						break;
+					}
+				}
+				if(maxArraySize < S32K){
+					break;
+				}
+			}
+
+			//write histogram
+			if(rebin){
+				for(j=0;j<maxArraySize;j+=drawing.contractFactor){
+					for(i=0;i<rawdata.numSpOpened;i++){
+						val = getSpBinValRaw(i,j,drawing.scaleFactor[i],drawing.contractFactor);
+						fprintf(out,"%f ",val);
+					}
+					fprintf(out,"\n");
+				}
+			}else{
+				for(j=0;j<maxArraySize;j++){
+					for(i=0;i<rawdata.numSpOpened;i++){
+						val = getSpBinValRaw(i,j,drawing.scaleFactor[i],1);
+						fprintf(out,"%f ",val);
+					}
+					fprintf(out,"\n");
+				}
+			}
+
+			break;
+		default:
+			//export one histogram
+			
+			spID = exportMode-1;
+			if((spID < 0)||(spID >= rawdata.numSpOpened)){
+				printf("ERROR: invalid spectrum index for export.\n");
+				return 2;
+			}
+
+			//get array size
+			maxArraySize = S32K;
+			for(j=S32K-1;j>=0;j--){
+				if(rawdata.hist[spID][j] != 0.){
+					maxArraySize = j+1;
+					break;
+				}
+			}
+
+			//write histogram
+			if(rebin){
+				for(j=0;j<maxArraySize;j+=drawing.contractFactor){
+					val = getSpBinValRaw(spID,j,drawing.scaleFactor[spID],drawing.contractFactor);
+					fprintf(out,"%f\n",val);
+				}
+			}else{
+				for(j=0;j<maxArraySize;j++){
+					val = getSpBinValRaw(spID,j,drawing.scaleFactor[spID],1);
+					fprintf(out,"%f\n",val);
+				}
+			}
+
+			break;
+	}
+
+	fclose(out);
+	printf("Wrote data to file: %s\n",outFileName);
+
+	return 0;
+}

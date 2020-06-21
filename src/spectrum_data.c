@@ -37,10 +37,17 @@ double getCalVal(double val){
 
 //lower level spectrum data access routine which takes rebinning into account
 float getSpBinValRaw(const int spNumRaw, const int bin, const double scaleFactor, const int contractFactor){
+
+  if(spNumRaw >= NSPECT){
+    return 0;
+  }
+
   int i;
   float val = 0.;
   for(i=0;i<contractFactor;i++){
-    val += scaleFactor*rawdata.hist[spNumRaw][bin+i];
+    if((bin+i) < S32K){
+      val += scaleFactor*rawdata.hist[spNumRaw][bin+i];
+    }
   }
   return val;
 }

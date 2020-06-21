@@ -381,9 +381,28 @@ void on_save_button_clicked(GtkButton *b)
   
 }
 
+void on_save_text_button_clicked(GtkButton *b)
+{
+  int i;
+  guiglobals.exportFileType = 0; //exporting to text format
+  gtk_label_set_text(export_description_label,"Export to .txt format:");
+  gtk_widget_hide(GTK_WIDGET(export_note_label));
+  gtk_combo_box_text_remove_all(export_mode_combobox);
+  gtk_combo_box_text_insert(export_mode_combobox,0,NULL,"All spectra (multiple columns)");
+  for(i=0;i<rawdata.numSpOpened;i++){
+    gtk_combo_box_text_insert(export_mode_combobox,i+1,NULL,rawdata.histComment[i]);
+  }
+  gtk_combo_box_set_active(GTK_COMBO_BOX(export_mode_combobox),0); //set the default entry
+  gtk_window_present(export_options_window); //show the window
+}
+
 void on_save_radware_button_clicked(GtkButton *b)
 {
   int i;
+  guiglobals.exportFileType = 1; //exporting to radware format
+  gtk_label_set_text(export_description_label,"Export to .spe format:");
+  gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins.");
+  gtk_widget_show(GTK_WIDGET(export_note_label));
   gtk_combo_box_text_remove_all(export_mode_combobox);
   gtk_combo_box_text_insert(export_mode_combobox,0,NULL,"All spectra (separate files)");
   for(i=0;i<rawdata.numSpOpened;i++){
@@ -411,8 +430,20 @@ void on_export_save_button_clicked(GtkButton *b)
     fn = gtk_file_chooser_get_filename(file_save_dialog);
     tok = strtok (fn,".");
     strncpy(fileName,tok,255);
+
     //write file
-    saveErr = exportSPE(fileName, exportMode, rebin);
+    switch (guiglobals.exportFileType)
+    {
+      case 1:
+        //radware
+        saveErr = exportSPE(fileName, exportMode, rebin);
+        break;
+      case 0:
+      default:
+        //text
+        saveErr = exportTXT(fileName, exportMode, rebin);
+        break;
+    }
 
     gtk_widget_destroy(GTK_WIDGET(file_save_dialog));
 
@@ -1082,6 +1113,7 @@ void iniitalizeUIElements(){
   to_save_menu_button = GTK_BUTTON(gtk_builder_get_object(builder, "to_save_menu_button"));
   save_button = GTK_BUTTON(gtk_builder_get_object(builder, "save_button"));
   save_button_radware = GTK_BUTTON(gtk_builder_get_object(builder, "save_button_radware"));
+  save_button_text = GTK_BUTTON(gtk_builder_get_object(builder, "save_button_text"));
   help_button = GTK_BUTTON(gtk_builder_get_object(builder, "help_button"));
   display_button = GTK_BUTTON(gtk_builder_get_object(builder, "display_button"));
   display_button_icon = GTK_IMAGE(gtk_builder_get_object(builder, "display_button_icon"));
@@ -1128,6 +1160,8 @@ void iniitalizeUIElements(){
   multiplot_mode_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "multiplot_mode_combobox"));
 
   //export options window UI elements
+  export_description_label = GTK_LABEL(gtk_builder_get_object(builder, "export_description_label"));
+  export_note_label = GTK_LABEL(gtk_builder_get_object(builder, "export_note_label"));
   export_mode_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "export_mode_combobox"));
   export_rebin_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "export_rebin_checkbutton"));
   export_options_save_button = GTK_BUTTON(gtk_builder_get_object(builder, "export_options_save_button"));
@@ -1173,6 +1207,7 @@ void iniitalizeUIElements(){
   g_signal_connect (G_OBJECT (calibrate_button), "clicked", G_CALLBACK (on_calibrate_button_clicked), NULL);
   g_signal_connect (G_OBJECT (save_button), "clicked", G_CALLBACK (on_save_button_clicked), NULL);
   g_signal_connect (G_OBJECT (save_button_radware), "clicked", G_CALLBACK (on_save_radware_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (save_button_text), "clicked", G_CALLBACK (on_save_text_button_clicked), NULL);
   g_signal_connect (G_OBJECT (help_button), "clicked", G_CALLBACK (on_help_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_button), "clicked", G_CALLBACK (on_multiplot_button_clicked), NULL);
   g_signal_connect (G_OBJECT (sum_all_button), "clicked", G_CALLBACK (on_sum_all_button_clicked), NULL);
@@ -1284,6 +1319,7 @@ void iniitalizeUIElements(){
   guiglobals.popupFitResults = 1;
   guiglobals.useZoomAnimations = 1;
   guiglobals.framesSinceZoom = -1;
+  guiglobals.exportFileType = 0;
   fitpar.fixRelativeWidths = 1;
   fitpar.fitStartCh = -1;
   fitpar.fitEndCh = -1;
