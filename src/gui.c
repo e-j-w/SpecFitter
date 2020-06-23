@@ -610,21 +610,21 @@ void on_comment_entry_changed(GtkEntry *entry, gpointer user_data)
 }
 void on_comment_ok_button_clicked(GtkButton *b)
 {
-  if(guiglobals.commentEditInd == -1){
-    //making a new comment
-    if(strcmp(gtk_entry_get_text(comment_entry),"")!=0){
+  if(strcmp(gtk_entry_get_text(comment_entry),"")!=0){
+    if(guiglobals.commentEditInd == -1){
+      //making a new comment
       strncpy(rawdata.chanComment[(int)rawdata.numChComments],gtk_entry_get_text(comment_entry),256);
       rawdata.numChComments++;
+    }else{
+      //editing an existing comment
+      if(guiglobals.commentEditInd < NCHCOM){
+        strncpy(rawdata.chanComment[guiglobals.commentEditInd],gtk_entry_get_text(comment_entry),256);
+      }
     }
-  }else{
-    //editing an existing comment
-    if(guiglobals.commentEditInd < NCHCOM){
-      strncpy(rawdata.chanComment[guiglobals.commentEditInd],gtk_entry_get_text(comment_entry),256);
-    }
-  }
 
-  gtk_widget_hide(GTK_WIDGET(comment_window)); //close the comment window
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
+    gtk_widget_hide(GTK_WIDGET(comment_window)); //close the comment window
+    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
+  }
 }
 void on_remove_comment_button_clicked(GtkButton *b)
 {
@@ -1104,6 +1104,8 @@ void iniitalizeUIElements(){
   gtk_window_set_transient_for(GTK_WINDOW(about_dialog), window); //center about dialog on main window
   main_window_accelgroup = GTK_ACCEL_GROUP(gtk_builder_get_object(builder, "main_window_accelgroup"));
   gtk_window_add_accel_group (window, main_window_accelgroup);
+  comment_window_accelgroup = GTK_ACCEL_GROUP(gtk_builder_get_object(builder, "comment_window_accelgroup"));
+  gtk_window_add_accel_group (window, comment_window_accelgroup);
   
   //header bar
   header_bar = GTK_HEADER_BAR(gtk_builder_get_object(builder, "header_bar"));
@@ -1274,6 +1276,7 @@ void iniitalizeUIElements(){
   gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_o, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_open_button_clicked), NULL, 0));
   gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_a, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_append_button_clicked), NULL, 0));
   gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_s, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_save_button_clicked), NULL, 0));
+  gtk_accel_group_connect (comment_window_accelgroup, GDK_KEY_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_comment_ok_button_clicked), NULL, 0));
 
   //set attributes
   gtk_tree_view_column_add_attribute(multiplot_column2,multiplot_cr2, "active",1);

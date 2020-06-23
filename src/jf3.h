@@ -66,6 +66,7 @@ GtkEntry *cal_entry_unit, *cal_entry_const, *cal_entry_lin, *cal_entry_quad, *ca
 GtkWindow *comment_window;
 GtkEntry *comment_entry;
 GtkButton *comment_ok_button, *remove_comment_button;
+GtkAccelGroup *comment_window_accelgroup;
 //'About' dialog
 GtkAboutDialog *about_dialog;
 GtkModelButton *about_button;
