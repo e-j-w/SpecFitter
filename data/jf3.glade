@@ -992,11 +992,11 @@ Author: Jonathan Williams
             </child>
             <child>
               <object class="GtkCheckButton" id="export_rebin_checkbutton">
-                <property name="label" translatable="yes"> Apply rebin factor to exported data</property>
+                <property name="label" translatable="yes"> Apply rebin and scaling factors to exported data</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
-                <property name="tooltip_text" translatable="yes">If checked, the rebin factor set in the display menu will be applied to exported spectra.</property>
+                <property name="tooltip_text" translatable="yes">If checked, the rebin and scaling factors set in the display menu will be applied to exported spectra (ie. the spectra will be exported as drawn, rather than as originally imported).</property>
                 <property name="active">True</property>
                 <property name="draw_indicator">True</property>
               </object>
@@ -1018,7 +1018,7 @@ Author: Jonathan Williams
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="position">3</property>
               </packing>
             </child>
             <child>
@@ -2131,7 +2131,7 @@ Weight by fit function - Weights are proportional to the fit function values det
     <property name="relative_to">primary_menu_button</property>
     <property name="position">bottom</property>
     <child>
-      <object class="GtkBox">
+      <object class="GtkBox" id="main_menu_box">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="margin_start">10</property>
@@ -2275,7 +2275,7 @@ Weight by fit function - Weights are proportional to the fit function values det
       </packing>
     </child>
     <child>
-      <object class="GtkBox">
+      <object class="GtkBox" id="saveas_menu_box">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="margin_start">10</property>

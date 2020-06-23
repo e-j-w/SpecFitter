@@ -6,6 +6,10 @@
 
 A spectrum/histogram viewer and fitter app, with functionality inspired by the `gf3` program for gamma-ray spectroscopy in the [RadWare](https://radware.phy.ornl.gov/) software package.  Takes advantage of the modern GTK toolkit to provide smooth rendering and (hopefully) an easy to understand interface.
 
+## Screenshot
+
+![jf3 user interface screenshot](https://raw.githubusercontent.com/e-j-w/e-j-w.github.io/master/media/jf3.png "jf3 user interface")
+
 ## Features
 
 ### Supported file formats
@@ -50,14 +54,14 @@ Conversion codes for some of the above data formats are available in the [FileCo
 ### Commenting/note-taking
 
 * Double click anywhere on a plot to write/edit a comment there.
-* Comments are saved alongside spectra when using the **.jf3** file format.
+* Comments are saved alongside spectra when using the **.jf3** or **.txt** file formats.
 
 
 ## Getting started
 
 ### Compatibility
 
-The build process has been tested on CentOS 7 and Arch Linux (as of June 2020) under the GNOME desktop environment.  It should work on any Linux distro that satisfies the build dependencies below.  It may be possible to build this on other platforms (OSX, *BSD, WSL, etc.), but that hasn't been tested.
+The build process has been tested on CentOS 7 and Arch Linux (as of June 2020) under the GNOME desktop environment.  It should work on any Linux distro that satisfies the build dependencies below.  It may be possible to build this on other platforms where GTK is [available](https://www.gtk.org/docs/installations/), but that hasn't been tested.
 
 ### Build dependencies
 
@@ -86,7 +90,3 @@ This will place the `jf3` binary in `/usr/bin` and a desktop entry file in `/usr
 * Preferences are stored in a plaintext configuration file on a per-user basis at `$HOME/.config/jf3/jf3.conf`.
 * When running the program from the command line, it is possible to automatically open files by specifying the filename(s) as arguments (eg. `jf3 /path/to/file1 /path/to/file2`).
 * After fitting a spectrum, the onscreen fit can be cleared using the right mouse button.
-
-## Screenshot
-
-![jf3 user interface screenshot](https://raw.githubusercontent.com/e-j-w/e-j-w.github.io/master/media/jf3.png "jf3 user interface")

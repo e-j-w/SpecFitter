@@ -200,7 +200,7 @@ int exportSPE(const char *filePrefix, const int exportMode, const int rebin)
 					}
 				}else{
 					for(j=0;j<arraySize;j++){
-						val = getSpBinValRaw(i,j,drawing.scaleFactor[i],1);
+						val = getSpBinValRaw(i,j,1,1);
 						fwrite(&val,sizeof(float),1,out);
 					}
 				}
@@ -245,7 +245,7 @@ int exportSPE(const char *filePrefix, const int exportMode, const int rebin)
 				}
 			}else{
 				for(i=0;i<arraySize;i++){
-					val = getSpBinValRaw(spID,i,drawing.scaleFactor[spID],1);
+					val = getSpBinValRaw(spID,i,1,1);
 					fwrite(&val,sizeof(float),1,out);
 				}
 			}
@@ -281,6 +281,12 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
 	{
 		case 0:
 			//export all
+
+			//write header
+			for(i=0;i<rawdata.numSpOpened;i++){
+				fprintf(out,"SPECTRUM%i ",i+1);
+			}
+			fprintf(out,"\n");
 
 			//get max array size
 			maxArraySize = S32K;
@@ -325,6 +331,9 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
 				return 2;
 			}
 
+			//write header
+			fprintf(out,"SPECTRUM%i\n",exportMode);
+
 			//get array size
 			maxArraySize = S32K;
 			for(j=S32K-1;j>=0;j--){
@@ -348,6 +357,11 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
 			}
 
 			break;
+	}
+
+	//write comments
+	for(i=0;i<rawdata.numChComments;i++){
+		fprintf(out,"COMMENT %i %i %f %s\n", rawdata.chanCommentSp[i], rawdata.chanCommentCh[i], rawdata.chanCommentVal[i], rawdata.chanComment[i]);
 	}
 
 	fclose(out);

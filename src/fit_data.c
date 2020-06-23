@@ -4,10 +4,10 @@
 //The main fit routine is startGausFit (at the bottom), which
 //in turn calls other subroutines.
 
-//forward declarations
-double evalPeakArea(int peakNum);
-double evalPeakAreaErr(int peakNum);
-double getFitChisq();
+//external declarations
+extern double evalPeakArea(int peakNum);
+extern double evalPeakAreaErr(int peakNum);
+extern double getFitChisq();
 
 //update the gui state while/after fitting
 gboolean update_gui_fit_state(){

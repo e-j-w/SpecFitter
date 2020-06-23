@@ -75,7 +75,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 				}
 			}
 
-			printf("num comments: %i\n",rawdata.numChComments);
+			//printf("num comments: %i\n",rawdata.numChComments);
 			
 			//read spectra
 			signed char scharBuf;
@@ -284,6 +284,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 	int i,j;
 	int numElementsRead = 0;
 	char str[256];
+	char *tok;
 	FILE *inp;
 	double num[NSPECT];
 	int numColumns = 0; // the detected number of columns in the first line
@@ -298,21 +299,45 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 				if(numElementsRead<S32K){
 					if(fgets(str,256,inp)!=NULL){ //get an entire line
 						int numLineEntries = sscanf(str,"%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",&num[0],&num[1],&num[2],&num[3],&num[4],&num[5],&num[6],&num[7],&num[8],&num[9],&num[10],&num[11]);
-						if(numElementsRead==0){
-							numColumns = numLineEntries;
-						}else{
-							if((numLineEntries != numColumns)&&(numLineEntries!=0)){
+						if(numLineEntries > 0){
+							if(numColumns == 0){
+								numColumns = numLineEntries;
+							}else if(numLineEntries != numColumns){
 								printf("ERROR: inconsistent number of columns (%i) in line %i of file: %s\n",numLineEntries,numElementsRead,filename);
 								return 0;
 							}
-						}
-						if(numLineEntries > 0){
 							for(i=0;i<numLineEntries;i++){
 								outHist[outHistStartSp+i][numElementsRead]=num[i];
 							}
 							numElementsRead++;
+						}else{
+							tok = strtok (str," ");
+							if(tok!=NULL){
+								if(strcmp(tok,"COMMENT")==0){
+									if((rawdata.numChComments < NCHCOM)&&(rawdata.numChComments >= 0)){
+										tok = strtok(NULL," ");
+										if(tok!=NULL){
+											rawdata.chanCommentSp[rawdata.numChComments] = (char)atoi(tok);
+											rawdata.chanCommentSp[rawdata.numChComments]+=outHistStartSp; //assign to the correct (appended) spectrum
+											tok = strtok(NULL," ");
+											if(tok!=NULL){
+												rawdata.chanCommentCh[rawdata.numChComments] = atoi(tok);
+												tok = strtok(NULL," ");
+												if(tok!=NULL){
+													rawdata.chanCommentVal[rawdata.numChComments] = atof(tok);
+													tok = strtok(NULL,""); //get the rest of the string
+													if(tok!=NULL){
+														strncpy(rawdata.chanComment[rawdata.numChComments],tok,256);
+														rawdata.chanComment[rawdata.numChComments][strcspn(rawdata.chanComment[rawdata.numChComments], "\r\n")] = 0;//strips newline characters from the string
+														rawdata.numChComments += 1;
+													}
+												}
+											}
+										}
+									}
+								}
+							}
 						}
-						
 					}
 				}else{
 					break;
@@ -332,7 +357,6 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 			outHist[outHistStartSp+i][j]=0.;
 		}
 	}
-	
 
 	fclose(inp);
 	return numColumns;
@@ -366,20 +390,26 @@ int readROOT(const char *filename, double outHist[NSPECT][S32K], int outHistStar
 			{
 				//printf("%s",str); //print the line
 				tok = strtok (str," *->(),");
-				if(histType>0){
-					if(outHistStartSp+histNum<=NSPECT){
-						if((strncmp(tok,histName,256)==0)&&(histNum>0)){
-							if(histType==1){
-								//parse TH1F
-								tok = strtok (NULL," *->(),");
-								if(strncmp(tok,"SetBinContent",256)==0){
+				if(tok!=NULL){
+					if(histType>0){
+						if(outHistStartSp+histNum<=NSPECT){
+							if((strncmp(tok,histName,256)==0)&&(histNum>0)){
+								if(histType==1){
+									//parse TH1F
 									tok = strtok (NULL," *->(),");
-									ind=atoi(tok);
-									tok = strtok (NULL," *->(),");
-									val=atof(tok);
-									//printf("Read bin %i with value %f\n",ind,val);
-									if((ind>=0)&&(ind<S32K)){
-										outHist[outHistStartSp+histNum-1][ind]=val;
+									if((tok!=NULL)&&(strncmp(tok,"SetBinContent",256)==0)){
+										tok = strtok (NULL," *->(),");
+										if(tok!=NULL){
+											ind=atoi(tok);
+											tok = strtok (NULL," *->(),");
+											if(tok!=NULL){
+												val=atof(tok);
+												//printf("Read bin %i with value %f\n",ind,val);
+												if((ind>=0)&&(ind<S32K)){
+													outHist[outHistStartSp+histNum-1][ind]=val;
+												}
+											}
+										}
 									}
 								}
 							}
@@ -387,16 +417,19 @@ int readROOT(const char *filename, double outHist[NSPECT][S32K], int outHistStar
 					}
 				}
 				
+				
 				if((strncmp(tok,"TH1F",256)==0)||(strncmp(tok,"TH1D",256)==0)||(strncmp(tok,"TH1I",256)==0)){
 					//printf("1-D histogram (floating point) found.\n");
 					histType = 1;
 					tok = strtok (NULL," *");
-					//printf("Histogram name: %s\n",tok);
-					strncpy(histName,tok,255);
-					histNum++;
-					//get rid of any previous histogram values (for when overwriting other histos)
-					if(outHistStartSp+histNum<=NSPECT){
-						memset(outHist[outHistStartSp+histNum-1],0,sizeof(outHist[outHistStartSp+histNum-1]));
+					if(tok!=NULL){
+						//printf("Histogram name: %s\n",tok);
+						strncpy(histName,tok,255);
+						histNum++;
+						//get rid of any previous histogram values (for when overwriting other histos)
+						if(outHistStartSp+histNum<=NSPECT){
+							memset(outHist[outHistStartSp+histNum-1],0,sizeof(outHist[outHistStartSp+histNum-1]));
+						}
 					}
 				}
 			}

@@ -41,8 +41,10 @@ void setupUITheme(){
 void openSingleFile(char *filename, int append){
   int i;
   int openErr = 0;
-  if(append!=1)
+  if(append!=1){
     rawdata.numSpOpened=0;
+    rawdata.numChComments=0;
+  }
   int numSp = readSpectrumDataFile(filename,rawdata.hist,rawdata.numSpOpened);
   if(numSp > 0){ //see read_data.c
     rawdata.openedSp = 1;
@@ -131,6 +133,7 @@ void on_open_button_clicked(GtkButton *b)
   if (gtk_dialog_run(GTK_DIALOG(file_open_dialog)) == GTK_RESPONSE_ACCEPT)
   {
     rawdata.numSpOpened = 0; //reset the open spectra
+    rawdata.numChComments = 0; //reset the number of comments
     char *filename = NULL;
     GSList *file_list = gtk_file_chooser_get_filenames(file_open_dialog);
     for(i=0;i<g_slist_length(file_list);i++){
@@ -401,7 +404,10 @@ void on_save_radware_button_clicked(GtkButton *b)
   int i;
   guiglobals.exportFileType = 1; //exporting to radware format
   gtk_label_set_text(export_description_label,"Export to .spe format:");
-  gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins.");
+  if(rawdata.numChComments > 0)
+    gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins.\nComments will not be exported (incomatible with .spe format).");
+  else
+    gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins.");
   gtk_widget_show(GTK_WIDGET(export_note_label));
   gtk_combo_box_text_remove_all(export_mode_combobox);
   gtk_combo_box_text_insert(export_mode_combobox,0,NULL,"All spectra (separate files)");

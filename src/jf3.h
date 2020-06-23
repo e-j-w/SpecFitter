@@ -138,9 +138,9 @@ struct {
   int numFilesOpened; //number of files containing spectra opened
   char dropEmptySpectra; //0=don't discard, 1=discard
   char chanComment[NCHCOM][256]; //channel comment text
+  char chanCommentSp[NCHCOM]; //spectra at which channel comments are displayed
   int chanCommentCh[NCHCOM]; //channels at which channel comments are displayed
   float chanCommentVal[NCHCOM]; //y-values at which channel comments are displayed
-  char chanCommentSp[NCHCOM]; //spectra at which channel comments are displayed
   unsigned int numChComments; //number of comments which have been placed
 } rawdata;
 
