@@ -95,14 +95,17 @@ void show_manage_window(const char showMultiplotLink){
   //show/hide the link to the multiplot dialog as neccesary
   if(showMultiplotLink){
     gtk_widget_show(GTK_WIDGET(manage_multiplot_button));
+    gtk_window_set_title(multiplot_manage_window, "Advanced Plotting");
   }else{
     gtk_widget_hide(GTK_WIDGET(manage_multiplot_button));
+    gtk_window_set_title(multiplot_manage_window, "Manage Spectra");
   }
   
   //no spectra are selected initially, delete button therefore disabled
   gtk_widget_set_sensitive(GTK_WIDGET(manage_delete_button),FALSE);
 
-  gtk_window_present(manage_window); //show the window
+  gtk_stack_set_visible_child(multiplot_manage_stack,GTK_WIDGET(manage_box));
+  gtk_window_present(multiplot_manage_window); //show the window
   
 }
 
@@ -149,7 +152,9 @@ void show_multiplot_window(){
     gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),FALSE);
   }
   
-  gtk_window_present(multiplot_window); //show the window
+  gtk_window_set_title(multiplot_manage_window, "Advanced Plotting");
+  gtk_stack_set_visible_child(multiplot_manage_stack,GTK_WIDGET(multiplot_box));
+  gtk_window_present(multiplot_manage_window); //show the window
 }
 
 //function for opening a single file without UI (ie. from the command line)
@@ -862,7 +867,7 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
 
     //show an error dialog
     GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
-    GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Invalid selection!");
+    GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_manage_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Invalid selection!");
     if(drawing.multiplotMode < 0)
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Please select a plotting mode.");
     if(drawing.numMultiplotSp > MAX_DISP_SP){
@@ -911,7 +916,7 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
       startGausFit(); //refit
     }
     
-    gtk_widget_hide(GTK_WIDGET(multiplot_window)); //close the multiplot window
+    gtk_widget_hide(GTK_WIDGET(multiplot_manage_window)); //close the multiplot/manage window
     gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
   }
   
@@ -919,7 +924,6 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
 
 void on_multiplot_manage_button_clicked(GtkButton *b)
 {
-  gtk_widget_hide(GTK_WIDGET(multiplot_window)); //close the multiplot window
   show_manage_window(1);
 }
 
@@ -930,7 +934,6 @@ void on_manage_spectra_button_clicked(GtkButton *b)
 
 void on_manage_multiplot_button_clicked(GtkButton *b)
 {
-  gtk_widget_hide(GTK_WIDGET(manage_window)); //close the manage window
   show_multiplot_window();
 }
 
@@ -949,6 +952,9 @@ void on_manage_name_cell_edited(GtkCellRendererText *cell, gchar *path_string, g
   }
 
   gtk_list_store_set(manage_liststore,&iter,0,rawdata.histComment[spInd],-1); //set the boolean value (change checkbox value)
+
+  //redraw the spectrum (in case its name changed)
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
 
 }
 
@@ -1039,12 +1045,16 @@ void on_manage_delete_button_clicked(GtkButton *b)
     
   if(rawdata.numSpOpened <= 0){
     setSpOpenView(0); //no spectra available
+    gtk_widget_hide(GTK_WIDGET(multiplot_manage_window)); //close the window
   }else{
     setSpOpenView(1);
+    //redraw the manage window
+    if(gtk_widget_get_visible(GTK_WIDGET(manage_multiplot_button))){
+      show_manage_window(1);
+    }else{
+      show_manage_window(0);
+    }
   }
-    
-  gtk_widget_hide(GTK_WIDGET(manage_window)); //close the multiplot window
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
   
 }
 
@@ -1231,7 +1241,7 @@ void on_preferences_apply_button_clicked(GtkButton *b)
   fitpar.weightMode = gtk_combo_box_get_active(GTK_COMBO_BOX(weight_mode_combobox));
   updateConfigFile();
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
-  gtk_widget_hide(GTK_WIDGET(preferences_window)); //close the multiplot window
+  gtk_widget_hide(GTK_WIDGET(preferences_window)); //close the preferences window
 }
 
 void on_preferences_cancel_button_clicked(GtkButton *b)
@@ -1273,10 +1283,8 @@ void iniitalizeUIElements(){
   gtk_window_set_transient_for(calibrate_window, window); //center calibrate window on main window
   comment_window = GTK_WINDOW(gtk_builder_get_object(builder, "comment_window"));
   gtk_window_set_transient_for(comment_window, window); //center comment window on main window
-  multiplot_window = GTK_WINDOW(gtk_builder_get_object(builder, "multiplot_window"));
-  gtk_window_set_transient_for(multiplot_window, window); //center multiplot window on main window
-  manage_window = GTK_WINDOW(gtk_builder_get_object(builder, "manage_window"));
-  gtk_window_set_transient_for(manage_window, window); //center manage spectra window on main window
+  multiplot_manage_window = GTK_WINDOW(gtk_builder_get_object(builder, "multiplot_manage_window"));
+  gtk_window_set_transient_for(multiplot_manage_window, window); //center multiplot/manage window on main window
   export_options_window = GTK_WINDOW(gtk_builder_get_object(builder, "export_options_window"));
   gtk_window_set_transient_for(export_options_window, window); //center export options window on main window
   preferences_window = GTK_WINDOW(gtk_builder_get_object(builder, "preferences_window"));
@@ -1343,6 +1351,7 @@ void iniitalizeUIElements(){
   comment_entry = GTK_ENTRY(gtk_builder_get_object(builder, "comment_entry"));
 
   //multiplot window UI elements
+  multiplot_box = GTK_WIDGET(gtk_builder_get_object(builder, "multiplot_box"));
   multiplot_ok_button = GTK_BUTTON(gtk_builder_get_object(builder, "multiplot_ok_button"));
   multiplot_make_view_button =  GTK_BUTTON(gtk_builder_get_object(builder, "multiplot_make_view_button"));
   multiplot_manage_button = GTK_BUTTON(gtk_builder_get_object(builder, "multiplot_manage_button"));
@@ -1354,8 +1363,8 @@ void iniitalizeUIElements(){
   multiplot_cr2 = GTK_CELL_RENDERER(gtk_builder_get_object(builder, "multiplot_cr2"));
   multiplot_cr3 = GTK_CELL_RENDERER(gtk_builder_get_object(builder, "multiplot_cr3"));
   multiplot_mode_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "multiplot_mode_combobox"));
-
   //manage spectra window UI elements
+  manage_box = GTK_WIDGET(gtk_builder_get_object(builder, "manage_box"));
   manage_multiplot_button = GTK_BUTTON(gtk_builder_get_object(builder, "manage_multiplot_button"));
   manage_delete_button = GTK_BUTTON(gtk_builder_get_object(builder, "manage_delete_button"));
   manage_liststore = GTK_LIST_STORE(gtk_builder_get_object(builder, "manage_liststore"));
@@ -1365,6 +1374,8 @@ void iniitalizeUIElements(){
   manage_cr1 = GTK_CELL_RENDERER(gtk_builder_get_object(builder, "manage_cr1"));
   manage_cr2 = GTK_CELL_RENDERER(gtk_builder_get_object(builder, "manage_cr2"));
   sp_image = GTK_IMAGE(gtk_builder_get_object(builder, "sp_image"));
+  //stack
+  multiplot_manage_stack = GTK_STACK(gtk_builder_get_object(builder, "multiplot_manage_stack"));
 
   //export options window UI elements
   export_description_label = GTK_LABEL(gtk_builder_get_object(builder, "export_description_label"));
@@ -1464,8 +1475,7 @@ void iniitalizeUIElements(){
   g_signal_connect (G_OBJECT (manage_cr2), "toggled", G_CALLBACK (on_manage_cell_toggled), NULL);
   g_signal_connect (G_OBJECT (calibrate_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (comment_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect (G_OBJECT (multiplot_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect (G_OBJECT (manage_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect (G_OBJECT (multiplot_manage_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (export_options_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (preferences_window), "delete-event", G_CALLBACK (on_preferences_cancel_button_clicked), NULL);
   g_signal_connect (G_OBJECT (preferences_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
@@ -1476,7 +1486,8 @@ void iniitalizeUIElements(){
   //setup keyboard shortcuts
   gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_f, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_fit_button_clicked), NULL, 0));
   gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_c, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_calibrate_button_clicked), NULL, 0));
-  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_p, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_multiplot_button_clicked), NULL, 0));
+  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_p, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(show_multiplot_window), NULL, 0));
+  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_m, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_manage_spectra_button_clicked), NULL, 0));
   gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_l, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(toggle_logscale), NULL, 0));
   gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_z, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(toggle_cursor), NULL, 0));
   gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_o, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_open_button_clicked), NULL, 0));

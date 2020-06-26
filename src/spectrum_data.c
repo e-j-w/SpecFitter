@@ -26,6 +26,9 @@ void deleteSpectrum(int spInd){
       }
       rawdata.numChComments -= 1;
       i -= 1; //indices have shifted, reheck the current index
+    }else if(rawdata.chanCommentSp[i] > spInd){
+      //change to the new index for the spectrum
+      rawdata.chanCommentSp[i] -= 1;
     }
   }
 

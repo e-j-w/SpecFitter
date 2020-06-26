@@ -56,6 +56,13 @@
             <child>
               <object class="GtkShortcutsShortcut">
                 <property name="visible">1</property>
+                <property name="accelerator">M</property>
+                <property name="title" translatable="yes" context="shortcut window">Manage (rename/delete) spectra</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="visible">1</property>
                 <property name="accelerator">F</property>
                 <property name="title" translatable="yes" context="shortcut window">Fit the displayed spectrum</property>
               </object>

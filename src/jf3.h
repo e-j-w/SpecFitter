@@ -71,17 +71,20 @@ GtkAccelGroup *comment_window_accelgroup;
 //'About' dialog
 GtkAboutDialog *about_dialog;
 GtkModelButton *about_button;
-//MultiPlot dialog
+//MultiPlot and manage dialog
+GtkWindow *multiplot_manage_window;
+GtkStack *multiplot_manage_stack;
+//multiplot
+GtkWidget *multiplot_box;
 GtkButton *multiplot_button, *multiplot_ok_button, *multiplot_manage_button, *multiplot_make_view_button;
-GtkWindow *multiplot_window;
 GtkListStore *multiplot_liststore;
 GtkTreeView *multiplot_tree_view;
 GtkTreeViewColumn *multiplot_column1, *multiplot_column2;
 GtkCellRenderer *multiplot_cr1, *multiplot_cr2, *multiplot_cr3;
 GtkComboBoxText *multiplot_mode_combobox;
-//manage spectra dialog
+//manage
+GtkWidget *manage_box;
 GtkButton *manage_multiplot_button, *manage_delete_button;
-GtkWindow *manage_window;
 GtkListStore *manage_liststore;
 GtkTreeView *manage_tree_view;
 GtkTreeViewColumn *manage_column1, *manage_column2;
