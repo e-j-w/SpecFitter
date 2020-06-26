@@ -171,7 +171,6 @@ void openSingleFile(char *filename, int append){
     rawdata.openedSp = 1;
     //set comments and scaling for spectra just opened
     for (i = rawdata.numSpOpened; i < (rawdata.numSpOpened+numSp); i++){
-      snprintf(rawdata.histComment[i],256,"Spectrum %i of %s",i-rawdata.numSpOpened+1,basename((char*)filename));
       //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
       drawing.scaleFactor[i] = 1.00;
     }
@@ -254,7 +253,6 @@ void on_open_button_clicked(GtkButton *b)
         rawdata.openedSp = 1;
         //set comments for spectra just opened
         for (j = rawdata.numSpOpened; j < (rawdata.numSpOpened+numSp); j++){
-          snprintf(rawdata.histComment[j],256,"Spectrum %i of %s",j-rawdata.numSpOpened+1,basename((char*)filename));
           //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
           drawing.scaleFactor[j] = 1.00;
         }
@@ -369,7 +367,6 @@ void on_append_button_clicked(GtkButton *b)
         rawdata.openedSp = 1;
         //set comments for spectra just opened
         for (j = rawdata.numSpOpened; j < (rawdata.numSpOpened+numSp); j++){
-          snprintf(rawdata.histComment[j],256,"Spectrum %i of %s",j-rawdata.numSpOpened+1,basename((char*)filename));
           //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
           drawing.scaleFactor[j] = 1.00;
         }

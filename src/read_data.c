@@ -176,7 +176,8 @@ int readMCA(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 				for (j = 0; j < S32K; j++){
 					outHist[i][j] = (double)tmpHist[j];
 				}
-			}	
+			}
+			snprintf(rawdata.histComment[i],256,"Spectrum %i of %s",i-outHistStartSp+1,basename((char*)filename));
 		}
 	}
 
@@ -226,7 +227,8 @@ int readFMCA(const char *filename, double outHist[NSPECT][S32K], int outHistStar
 			{
 				for (j = 0; j < S32K; j++)
 					outHist[i][j] = (double)tmpHist[j];
-			}	
+			}
+			snprintf(rawdata.histComment[i],256,"Spectrum %i of %s",i-outHistStartSp+1,basename((char*)filename));
 		}
 	}
 
@@ -238,9 +240,12 @@ int readFMCA(const char *filename, double outHist[NSPECT][S32K], int outHistStar
 int readSPE(const char *filename, double outHist[NSPECT][S32K], int outHistStartSp)
 {
 	int i;
-	char header[36];
 	float inpHist[4096];
 	FILE *inp;
+
+	//radware file header info
+  char spLabel[8], header[24];
+  int32_t intBuf = 1;
 
 	if ((inp = fopen(filename, "r")) == NULL) //open the file
 	{
@@ -249,7 +254,10 @@ int readSPE(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 		exit(-1);
 	}
 
-	if (fread(header, 36, 1, inp) != 1)
+	//read .spe header
+	fread(&intBuf,sizeof(int32_t),1,inp);
+	fread(&spLabel,sizeof(spLabel),1,inp);
+	if (fread(header, 24, 1, inp) != 1)
 	{
 		printf("ERROR: Cannot read header from the .spe file: %s\n", filename);
 		printf("Verify that the format of the file is correct.\n");
@@ -274,6 +282,8 @@ int readSPE(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 		outHist[outHistStartSp][i] = (double)inpHist[i];
 	for (i = numElementsRead; i < S32K; i++)
 		outHist[outHistStartSp][i] = 0.;
+
+	snprintf(rawdata.histComment[outHistStartSp],256,"%s %s",spLabel,basename((char*)filename));
 
 	fclose(inp);
 	return 1;
@@ -302,6 +312,10 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 						if(numLineEntries > 0){
 							if(numColumns == 0){
 								numColumns = numLineEntries;
+								//set default histogram titles
+								for(i=0;i<numColumns;i++){
+									snprintf(rawdata.histComment[outHistStartSp+i],256,"Spectrum %i of %s",i,basename((char*)filename));
+								}
 							}else if(numLineEntries != numColumns){
 								printf("ERROR: inconsistent number of columns (%i) in line %i of file: %s\n",numLineEntries,numElementsRead,filename);
 								return 0;
@@ -334,6 +348,18 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 												}
 											}
 										}
+									}
+								}else if(strcmp(tok,"TITLE")==0){
+									tok = strtok(NULL," ");
+									if(tok!=NULL){
+										int spID = atoi(tok) - 1;
+										if((spID >= 0)&&(spID < NSPECT)){
+											tok = strtok(NULL,""); //get the rest of the string
+											if(tok!=NULL){
+												strncpy(rawdata.histComment[spID],tok,256);
+												rawdata.histComment[spID][strcspn(rawdata.histComment[spID], "\r\n")] = 0;//strips newline characters from the string
+											}
+										}						
 									}
 								}
 							}
@@ -430,6 +456,7 @@ int readROOT(const char *filename, double outHist[NSPECT][S32K], int outHistStar
 						if(outHistStartSp+histNum<=NSPECT){
 							memset(outHist[outHistStartSp+histNum-1],0,sizeof(outHist[outHistStartSp+histNum-1]));
 						}
+						snprintf(rawdata.histComment[outHistStartSp+histNum-1],256,"Spectrum %i of %s",histNum,basename((char*)filename));
 					}
 				}
 			}

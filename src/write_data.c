@@ -321,6 +321,11 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
 				}
 			}
 
+			//write histogram titles
+			for(i=0;i<rawdata.numSpOpened;i++){
+				fprintf(out,"TITLE %i %s\n",i+1,rawdata.histComment[i]);
+			}
+
 			break;
 		default:
 			//export one histogram
@@ -355,6 +360,9 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
 					fprintf(out,"%f\n",val);
 				}
 			}
+
+			//write histogram title
+			fprintf(out,"TITLE 1 %s\n",rawdata.histComment[spID]);
 
 			break;
 	}
