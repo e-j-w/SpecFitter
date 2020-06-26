@@ -314,7 +314,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 							tok = strtok (str," ");
 							if(tok!=NULL){
 								if(strcmp(tok,"COMMENT")==0){
-									if((rawdata.numChComments < NCHCOM)&&(rawdata.numChComments >= 0)){
+									if(rawdata.numChComments < NCHCOM){
 										tok = strtok(NULL," ");
 										if(tok!=NULL){
 											rawdata.chanCommentSp[rawdata.numChComments] = (char)atoi(tok);

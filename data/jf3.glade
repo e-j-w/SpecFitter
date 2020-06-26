@@ -37,6 +37,11 @@ Author: Jonathan Williams
     <property name="visible">True</property>
     <property name="can_focus">False</property>
   </object>
+  <object class="GtkImage" id="add_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">list-add-symbolic</property>
+  </object>
   <object class="GtkAccelGroup" id="comment_window_accelgroup"/>
   <object class="GtkEntryCompletion" id="commententrycompletion"/>
   <object class="GtkAdjustment" id="contract_adjustment">
@@ -47,9 +52,24 @@ Author: Jonathan Williams
     <property name="page_increment">10</property>
     <property name="page_size">1</property>
   </object>
+  <object class="GtkImage" id="edit_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">edit-symbolic</property>
+  </object>
   <object class="GtkEntryCompletion" id="entrycompletion1"/>
   <object class="GtkEntryCompletion" id="entrycompletion2"/>
   <object class="GtkAccelGroup" id="main_window_accelgroup"/>
+  <object class="GtkListStore" id="manage_liststore">
+    <columns>
+      <!-- column-name Name -->
+      <column type="gchararray"/>
+      <!-- column-name Delete -->
+      <column type="gboolean"/>
+      <!-- column-name EntryNumber -->
+      <column type="gint"/>
+    </columns>
+  </object>
   <object class="GtkListStore" id="multiplot_liststore">
     <columns>
       <!-- column-name Name -->
@@ -74,17 +94,17 @@ Author: Jonathan Williams
     <property name="step_increment">0.01</property>
     <property name="page_increment">10</property>
   </object>
+  <object class="GtkImage" id="sp_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">edit-symbolic</property>
+  </object>
   <object class="GtkAdjustment" id="spectrum_selector_adjustment">
     <property name="upper">100</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
   <object class="GtkImage" id="undo_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">edit-undo-symbolic</property>
-  </object>
-  <object class="GtkImage" id="undo_image1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="icon_name">edit-undo-symbolic</property>
@@ -482,7 +502,7 @@ Author: Jonathan Williams
             <property name="spacing">10</property>
             <child>
               <object class="GtkButton" id="remove_calibration_button">
-                <property name="label" translatable="yes">Undo Calibration</property>
+                <property name="label" translatable="yes"> Undo Calibration</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -1443,6 +1463,188 @@ Author: Jonathan Williams
       <placeholder/>
     </child>
   </object>
+  <object class="GtkWindow" id="manage_window">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Manage Spectra</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-always</property>
+    <property name="type_hint">dialog</property>
+    <property name="gravity">center</property>
+    <property name="attached_to">window</property>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="margin_start">10</property>
+        <property name="margin_end">10</property>
+        <property name="margin_top">10</property>
+        <property name="margin_bottom">10</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">10</property>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">start</property>
+                <property name="label" translatable="yes">Rename or delete spectra:</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="hscrollbar_policy">never</property>
+                <property name="shadow_type">in</property>
+                <property name="min_content_height">200</property>
+                <child>
+                  <object class="GtkViewport">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkTreeView" id="manage_tree_view">
+                        <property name="width_request">500</property>
+                        <property name="height_request">100</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="model">manage_liststore</property>
+                        <property name="search_column">0</property>
+                        <property name="enable_grid_lines">horizontal</property>
+                        <property name="activate_on_single_click">True</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection">
+                            <property name="mode">multiple</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="manage_column1">
+                            <property name="spacing">6</property>
+                            <property name="title" translatable="yes">Spectrum Name (double click to edit)</property>
+                            <property name="expand">True</property>
+                            <property name="clickable">True</property>
+                            <property name="sort_indicator">True</property>
+                            <property name="sort_column_id">0</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="manage_cr1">
+                                <property name="editable">True</property>
+                              </object>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="manage_column2">
+                            <property name="spacing">6</property>
+                            <property name="sizing">fixed</property>
+                            <property name="fixed_width">80</property>
+                            <property name="max_width">80</property>
+                            <property name="title" translatable="yes">Delete?</property>
+                            <property name="alignment">0.5</property>
+                            <child>
+                              <object class="GtkCellRendererToggle" id="manage_cr2"/>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="padding">6</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkButton" id="manage_multiplot_button">
+                <property name="label" translatable="yes"> Advanced plotting...</property>
+                <property name="height_request">40</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Back to the advanced plotting dialog.</property>
+                <property name="halign">start</property>
+                <property name="image">sp_image</property>
+                <property name="always_show_image">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="manage_delete_button">
+                <property name="label" translatable="yes">Delete selected</property>
+                <property name="height_request">40</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Delete the selected spectra.</property>
+                <style>
+                  <class name="destructive-action"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack_type">end</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <child type="titlebar">
+      <placeholder/>
+    </child>
+  </object>
   <object class="GtkWindow" id="multiplot_window">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Advanced Plotting</property>
@@ -1637,6 +1839,22 @@ Author: Jonathan Williams
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="multiplot_make_view_button">
+                    <property name="label" translatable="yes">Save this view</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Save the selected view, so that it can be recalled later.</property>
+                    <property name="image">add_image</property>
+                    <property name="always_show_image">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
                     <property name="position">2</property>
                   </packing>
                 </child>
@@ -1671,22 +1889,42 @@ Author: Jonathan Williams
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="halign">end</property>
             <property name="spacing">10</property>
             <child>
+              <object class="GtkButton" id="multiplot_manage_button">
+                <property name="label" translatable="yes"> Manage spectra...</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Rename or delete spectra.</property>
+                <property name="halign">start</property>
+                <property name="image">edit_image</property>
+                <property name="always_show_image">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkButton" id="multiplot_ok_button">
-                <property name="label">Apply</property>
+                <property name="label">Plot</property>
                 <property name="width_request">100</property>
                 <property name="height_request">40</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Apply all changes and return.</property>
+                <property name="tooltip_text" translatable="yes">Plot the selected spectra.</property>
                 <property name="halign">end</property>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
+                <property name="pack_type">end</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -1694,7 +1932,6 @@ Author: Jonathan Williams
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="pack_type">end</property>
             <property name="position">2</property>
           </packing>
         </child>
@@ -2171,6 +2408,20 @@ Weight by fit function - Weights are proportional to the fit function values det
           </packing>
         </child>
         <child>
+          <object class="GtkModelButton" id="manage_spectra_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Rename or delete imported spectra.</property>
+            <property name="text" translatable="yes">Manage spectra...</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkSeparator">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
@@ -2178,7 +2429,7 @@ Weight by fit function - Weights are proportional to the fit function values det
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">2</property>
+            <property name="position">3</property>
           </packing>
         </child>
         <child>
@@ -2193,7 +2444,7 @@ Weight by fit function - Weights are proportional to the fit function values det
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">3</property>
+            <property name="position">4</property>
           </packing>
         </child>
         <child>
@@ -2204,7 +2455,7 @@ Weight by fit function - Weights are proportional to the fit function values det
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">4</property>
+            <property name="position">5</property>
           </packing>
         </child>
         <child>
@@ -2217,7 +2468,7 @@ Weight by fit function - Weights are proportional to the fit function values det
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">5</property>
+            <property name="position">6</property>
           </packing>
         </child>
         <child>
@@ -2228,7 +2479,7 @@ Weight by fit function - Weights are proportional to the fit function values det
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">6</property>
+            <property name="position">7</property>
           </packing>
         </child>
         <child>
@@ -2241,7 +2492,7 @@ Weight by fit function - Weights are proportional to the fit function values det
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">7</property>
+            <property name="position">8</property>
           </packing>
         </child>
         <child>
@@ -2254,7 +2505,7 @@ Weight by fit function - Weights are proportional to the fit function values det
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">8</property>
+            <property name="position">9</property>
           </packing>
         </child>
         <child>
@@ -2268,7 +2519,7 @@ Weight by fit function - Weights are proportional to the fit function values det
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">9</property>
+            <property name="position">10</property>
           </packing>
         </child>
       </object>
@@ -2287,6 +2538,20 @@ Weight by fit function - Weights are proportional to the fit function values det
         <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
+          <object class="GtkModelButton" id="save_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Save the full session with comments (file extension .jf3).</property>
+            <property name="text" translatable="yes">jf3 session (.jf3)</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkModelButton" id="to_main_menu_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -2295,20 +2560,6 @@ Weight by fit function - Weights are proportional to the fit function values det
             <property name="text" translatable="yes">Back</property>
             <property name="menu_name">main</property>
             <property name="inverted">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkModelButton" id="save_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Save the full session with comments (file extension .jf3).</property>
-            <property name="text" translatable="yes">jf3 session (.jf3)</property>
           </object>
           <packing>
             <property name="expand">False</property>

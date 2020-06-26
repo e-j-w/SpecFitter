@@ -4,6 +4,46 @@
 //mainly to help other parts of the program with drawing, 
 //fitting, and saving displayed data to disk
 
+void deleteSpectrum(int spInd){
+  
+  //printf("deleting spectrum %i\n",spInd);
+  if((spInd>=NSPECT)||(spInd<0)){
+    printf("WARNING: attempted to delete spectrum at invalid index %i\n",spInd);
+    return;
+  }
+
+  int i,j;
+
+  //delete comments
+  for(i=0;i<rawdata.numChComments;i++){
+    if(rawdata.chanCommentSp[i] == spInd){
+      //delete the comment
+      for(j=i;j<(rawdata.numChComments-1);j++){
+        memcpy(&rawdata.chanComment[j],&rawdata.chanComment[j+1],sizeof(rawdata.chanComment[j]));
+        memcpy(&rawdata.chanCommentSp[j],&rawdata.chanCommentSp[j+1],sizeof(rawdata.chanCommentSp[j]));
+        memcpy(&rawdata.chanCommentCh[j],&rawdata.chanCommentCh[j+1],sizeof(rawdata.chanCommentCh[j]));
+        memcpy(&rawdata.chanCommentVal[j],&rawdata.chanCommentVal[j+1],sizeof(rawdata.chanCommentVal[j]));
+      }
+      rawdata.numChComments -= 1;
+      i -= 1; //indices have shifted, reheck the current index
+    }
+  }
+
+  //delete spectrum data
+  for(i=spInd;i<(rawdata.numSpOpened-1);i++){
+    memcpy(&rawdata.hist[i],&rawdata.hist[i+1],sizeof(rawdata.hist[i]));
+    memcpy(&rawdata.histComment[i],&rawdata.histComment[i+1],sizeof(rawdata.histComment[i]));
+  }
+  rawdata.numSpOpened -= 1;
+
+  if(rawdata.numSpOpened <= 0){
+    rawdata.numSpOpened = 0;
+    rawdata.openedSp = 0;
+  }
+
+  return;
+}
+
 int getFirstNonemptySpectrum(int numSpOpened){
   if(numSpOpened>=NSPECT){
     return -1;

@@ -28,12 +28,128 @@ void setupUITheme(){
     gtk_image_set_from_pixbuf(display_button_icon1, spIconPixbufDark);
     gtk_image_set_from_pixbuf(display_button_icon2, spIconPixbufDark);
     gtk_image_set_from_pixbuf(no_sp_image, spIconPixbufDark);
+    gtk_image_set_from_pixbuf(sp_image, spIconPixbufDark);
   }else{
     gtk_image_set_from_pixbuf(display_button_icon, spIconPixbuf);
     gtk_image_set_from_pixbuf(display_button_icon1, spIconPixbuf);
     gtk_image_set_from_pixbuf(display_button_icon2, spIconPixbuf);
     gtk_image_set_from_pixbuf(no_sp_image, spIconPixbuf);
+    gtk_image_set_from_pixbuf(sp_image, spIconPixbuf);
+
   }
+}
+
+void setSpOpenView(const char spOpened){
+  gtk_label_set_text(bottom_info_text,"");
+  if(spOpened){
+    if(rawdata.numSpOpened > 1){
+      gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
+    }else{
+      gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
+    }
+    gtk_widget_set_sensitive(GTK_WIDGET(append_button),TRUE);
+    gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
+    gtk_widget_set_sensitive(GTK_WIDGET(manage_spectra_button),TRUE);
+    gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),TRUE);
+    gtk_widget_set_sensitive(GTK_WIDGET(display_button),TRUE);
+    gtk_widget_set_sensitive(GTK_WIDGET(zoom_scale),TRUE);
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
+    gtk_widget_set_sensitive(GTK_WIDGET(to_save_menu_button),TRUE);
+    gtk_widget_hide(GTK_WIDGET(no_sp_box));
+  }else{
+    gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
+    gtk_widget_set_sensitive(GTK_WIDGET(append_button),FALSE);
+    gtk_widget_set_sensitive(GTK_WIDGET(fit_button),FALSE);
+    gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
+    gtk_widget_set_sensitive(GTK_WIDGET(manage_spectra_button),FALSE);
+    gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),FALSE);
+    gtk_widget_set_sensitive(GTK_WIDGET(display_button),FALSE);
+    gtk_widget_set_sensitive(GTK_WIDGET(zoom_scale),FALSE);
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),FALSE);
+    gtk_widget_set_sensitive(GTK_WIDGET(to_save_menu_button),FALSE);
+    gtk_widget_show(GTK_WIDGET(no_sp_box));
+    gtk_widget_hide(GTK_WIDGET(fit_spinner));
+    gtk_revealer_set_reveal_child(revealer_info_panel, FALSE);
+  }
+  
+}
+
+void show_manage_window(const char showMultiplotLink){
+
+  //handle case where this is called by shortcut, and spectra are not open
+  if(rawdata.openedSp == 0){
+    return;
+  }
+
+  GtkTreeIter iter;
+  //GtkTreeModel *model = gtk_tree_view_get_model(manage_tree_view);
+  int i;
+  gtk_list_store_clear(manage_liststore);
+  for(i=0;i<rawdata.numSpOpened;i++){
+    gtk_list_store_append(manage_liststore,&iter);
+    gtk_list_store_set(manage_liststore, &iter, 0, rawdata.histComment[i], -1);
+    gtk_list_store_set(manage_liststore, &iter, 1, 0, -1); //start with delete action unselected
+    gtk_list_store_set(manage_liststore, &iter, 2, i, -1);
+  }
+
+  //show/hide the link to the multiplot dialog as neccesary
+  if(showMultiplotLink){
+    gtk_widget_show(GTK_WIDGET(manage_multiplot_button));
+  }else{
+    gtk_widget_hide(GTK_WIDGET(manage_multiplot_button));
+  }
+  
+  //no spectra are selected initially, delete button therefore disabled
+  gtk_widget_set_sensitive(GTK_WIDGET(manage_delete_button),FALSE);
+
+  gtk_window_present(manage_window); //show the window
+  
+}
+
+void show_multiplot_window(){
+
+  //handle case where this is called by shortcut, and spectra are not open
+  if(rawdata.openedSp == 0){
+    return;
+  }
+
+  GtkTreeIter iter;
+  gboolean val = FALSE;
+  GtkTreeModel *model = gtk_tree_view_get_model(multiplot_tree_view);
+  int i;
+  char scaleFacStr[16];
+  gtk_list_store_clear(multiplot_liststore);
+  for(i=0;i<rawdata.numSpOpened;i++){
+    snprintf(scaleFacStr,16,"%.2f",drawing.scaleFactor[i]);
+    gtk_list_store_append(multiplot_liststore,&iter);
+    gtk_list_store_set(multiplot_liststore, &iter, 0, rawdata.histComment[i], -1);
+    gtk_list_store_set(multiplot_liststore, &iter, 1, isSpSelected(i), -1);
+    gtk_list_store_set(multiplot_liststore, &iter, 2, scaleFacStr, -1);
+    gtk_list_store_set(multiplot_liststore, &iter, 3, i, -1);
+  }
+
+  int selectedSpCount = 0;
+  int spInd = 0;
+  gboolean readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
+ 
+  while (readingTreeModel)
+  {
+    gtk_tree_model_get(model,&iter,1,&val,3,&spInd,-1); //get whether the spectrum is selected and the spectrum index
+    if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
+      if(val==TRUE){
+        selectedSpCount++;
+      }
+    }
+    readingTreeModel = gtk_tree_model_iter_next (model, &iter);
+  }
+  
+  if(selectedSpCount > 1){
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),TRUE);
+  }else{
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),FALSE);
+  }
+  
+  gtk_window_present(multiplot_window); //show the window
 }
 
 //function for opening a single file without UI (ie. from the command line)
@@ -60,17 +176,7 @@ void openSingleFile(char *filename, int append){
     if(sel >=0){
       drawing.multiPlots[0] = sel;
       drawing.multiplotMode = 0; //file just opened, disable multiplot
-      gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
-      gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),TRUE);
-      gtk_widget_set_sensitive(GTK_WIDGET(display_button),TRUE);
-      gtk_widget_set_sensitive(GTK_WIDGET(zoom_scale),TRUE);
-      gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
-      gtk_widget_set_sensitive(GTK_WIDGET(to_save_menu_button),TRUE);
-      gtk_label_set_text(bottom_info_text,"");
-      gtk_widget_hide(GTK_WIDGET(no_sp_box));
-      if(rawdata.numSpOpened > 1){
-        gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
-      }
+      setSpOpenView(1);
       //set the range of selectable spectra values
       gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);
       gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened);
@@ -154,18 +260,7 @@ void on_open_button_clicked(GtkButton *b)
           drawing.multiPlots[0] = sel;
           drawing.multiplotMode = 0; //files just opened, disable multiplot
           guiglobals.fittingSp = 0; //files just opened, reset fit state
-          gtk_widget_set_sensitive(GTK_WIDGET(append_button),TRUE);
-          gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
-          gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),TRUE);
-          gtk_widget_set_sensitive(GTK_WIDGET(display_button),TRUE);
-          gtk_widget_set_sensitive(GTK_WIDGET(zoom_scale),TRUE);
-          gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
-          gtk_widget_set_sensitive(GTK_WIDGET(to_save_menu_button),TRUE);
-          gtk_label_set_text(bottom_info_text,"");
-          gtk_widget_hide(GTK_WIDGET(no_sp_box));
-          if(rawdata.numSpOpened > 1){
-            gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
-          }
+          setSpOpenView(1);
           //set the range of selectable spectra values
           gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);
           gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened);
@@ -662,8 +757,7 @@ void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
     toggleVal=FALSE;
   }
 
-  //GList *list;
-  GList * rowList = gtk_tree_selection_get_selected_rows(gtk_tree_view_get_selection(multiplot_tree_view),&model);
+  GList *rowList = gtk_tree_selection_get_selected_rows(gtk_tree_view_get_selection(multiplot_tree_view),&model);
   //printf("List length: %i, toggleVal: %i\n",g_list_length(rowList),toggleVal);
   int llength = g_list_length(rowList);
   if(llength > 1){
@@ -738,49 +832,7 @@ void on_multiplot_scaling_edited(GtkCellRendererText *c, gchar *path_string, gch
 
 void on_multiplot_button_clicked(GtkButton *b)
 {
-
-  //handle case where this is called by shortcut, and spectra are not open
-  if(rawdata.openedSp == 0){
-    return;
-  }
-
-  GtkTreeIter iter;
-  gboolean val = FALSE;
-  GtkTreeModel *model = gtk_tree_view_get_model(multiplot_tree_view);
-  int i;
-  char scaleFacStr[16];
-  gtk_list_store_clear(multiplot_liststore);
-  for(i=0;i<rawdata.numSpOpened;i++){
-    snprintf(scaleFacStr,16,"%.2f",drawing.scaleFactor[i]);
-    gtk_list_store_append(multiplot_liststore,&iter);
-    gtk_list_store_set(multiplot_liststore, &iter, 0, rawdata.histComment[i], -1);
-    gtk_list_store_set(multiplot_liststore, &iter, 1, isSpSelected(i), -1);
-    gtk_list_store_set(multiplot_liststore, &iter, 2, scaleFacStr, -1);
-    gtk_list_store_set(multiplot_liststore, &iter, 3, i, -1);
-  }
-
-  int selectedSpCount = 0;
-  int spInd = 0;
-  gboolean readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
- 
-  while (readingTreeModel)
-  {
-    gtk_tree_model_get(model,&iter,1,&val,3,&spInd,-1); //get whether the spectrum is selected and the spectrum index
-    if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
-      if(val==TRUE){
-        selectedSpCount++;
-      }
-    }
-    readingTreeModel = gtk_tree_model_iter_next (model, &iter);
-  }
-  
-  if(selectedSpCount > 1){
-    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),TRUE);
-  }else{
-    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),FALSE);
-  }
-  
-  gtk_window_present(multiplot_window); //show the window
+  show_multiplot_window();
 }
 
 void on_multiplot_ok_button_clicked(GtkButton *b)
@@ -862,6 +914,137 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
     gtk_widget_hide(GTK_WIDGET(multiplot_window)); //close the multiplot window
     gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
   }
+  
+}
+
+void on_multiplot_manage_button_clicked(GtkButton *b)
+{
+  gtk_widget_hide(GTK_WIDGET(multiplot_window)); //close the multiplot window
+  show_manage_window(1);
+}
+
+void on_manage_spectra_button_clicked(GtkButton *b)
+{
+  show_manage_window(0);
+}
+
+void on_manage_multiplot_button_clicked(GtkButton *b)
+{
+  gtk_widget_hide(GTK_WIDGET(manage_window)); //close the manage window
+  show_multiplot_window();
+}
+
+void on_manage_name_cell_edited(GtkCellRendererText *cell, gchar *path_string, gchar *new_text, gpointer user_data){
+  GtkTreeIter iter;
+  int spInd = 0;
+  GtkTreeModel *model = gtk_tree_view_get_model(manage_tree_view);
+
+  //get the value of the cell which was toggled
+  gtk_tree_model_get_iter_from_string(model, &iter, path_string);
+  gtk_tree_model_get(model,&iter,2,&spInd,-1); //get the spectrum index
+
+  //edit the histogram comment
+  if((spInd>=0)&&(spInd<NSPECT)){
+    snprintf(rawdata.histComment[spInd],256,"%s",new_text);
+  }
+
+  gtk_list_store_set(manage_liststore,&iter,0,rawdata.histComment[spInd],-1); //set the boolean value (change checkbox value)
+
+}
+
+void on_manage_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
+  int i;
+  GtkTreeIter iter;
+  gboolean toggleVal = FALSE;
+  gboolean val = FALSE;
+  GtkTreeModel *model = gtk_tree_view_get_model(manage_tree_view);
+
+  //get the value of the cell which was toggled
+  gtk_tree_model_get_iter_from_string(model, &iter, path_string);
+  gtk_tree_model_get(model,&iter,1,&val,-1); //get the boolean value
+  if(val==FALSE){
+    toggleVal=TRUE;
+  }else{
+    toggleVal=FALSE;
+  }
+
+  GList *rowList = gtk_tree_selection_get_selected_rows(gtk_tree_view_get_selection(manage_tree_view),&model);
+  //printf("List length: %i, toggleVal: %i\n",g_list_length(rowList),toggleVal);
+  int llength = g_list_length(rowList);
+  if(llength > 1){
+    for(i = 0; i < g_list_length(rowList); i++){
+      gtk_tree_model_get_iter(model,&iter,g_list_nth_data(rowList, i));
+      gtk_tree_model_get(model,&iter,1,&val,-1); //get the boolean value
+      if(toggleVal==TRUE){
+        val=TRUE;
+      }else{
+        val=FALSE;
+      }
+      gtk_list_store_set(manage_liststore,&iter,1,val,-1); //set the boolean value (change checkbox value)
+    }
+    guiglobals.deferToggleRow = 1;
+  }else if(llength == 1){
+    gtk_list_store_set(manage_liststore,&iter,1,!val,-1); //set the boolean value (change checkbox value)
+  }
+  g_list_free_full(rowList,(GDestroyNotify)gtk_tree_path_free);
+  
+  int selectedSpCount = 0;
+  int spInd = 0;
+  gboolean readingTreeModel = gtk_tree_model_get_iter_first(model, &iter);
+  while (readingTreeModel)
+  {
+    gtk_tree_model_get(model,&iter,1,&val,2,&spInd,-1); //get whether the spectrum is selected and the spectrum index
+    if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
+      if(val==TRUE){
+        selectedSpCount++;
+      }
+    }
+    readingTreeModel = gtk_tree_model_iter_next (model, &iter);
+  }
+  if(selectedSpCount < 1){
+    gtk_widget_set_sensitive(GTK_WIDGET(manage_delete_button),FALSE);
+  }else{
+    gtk_widget_set_sensitive(GTK_WIDGET(manage_delete_button),TRUE);
+  }
+  //printf("toggled %i\n",val);
+  //gtk_widget_queue_draw(GTK_WIDGET(multiplot_window));
+}
+
+void on_manage_delete_button_clicked(GtkButton *b)
+{
+  GtkTreeIter iter;
+  gboolean readingTreeModel;
+  gboolean val = FALSE;
+  int spInd = 0;
+  int deletedSpCounter = 0;
+  GtkTreeModel *model = gtk_tree_view_get_model(manage_tree_view);
+  readingTreeModel = gtk_tree_model_get_iter_first(model, &iter);
+  while (readingTreeModel)
+  {
+    gtk_tree_model_get(model,&iter,1,&val,2,&spInd,-1); //get whether the spectrum is selected and the spectrum index
+    if(spInd < NSPECT){
+      if(val==TRUE){
+        deleteSpectrum(spInd-deletedSpCounter); //remember that indices are changed each time a spectrum is deleted
+        deletedSpCounter++;
+      }
+    }
+    readingTreeModel = gtk_tree_model_iter_next(model, &iter);
+  }
+
+  //reset to default drawing view
+  drawing.multiplotMode = 0;
+  drawing.multiPlots[0] = 0;
+  gtk_spin_button_set_value(spectrum_selector, drawing.multiPlots[0]+1);
+  guiglobals.fittingSp = 0; //clear any fits being displayed
+    
+  if(rawdata.numSpOpened <= 0){
+    setSpOpenView(0); //no spectra available
+  }else{
+    setSpOpenView(1);
+  }
+    
+  gtk_widget_hide(GTK_WIDGET(manage_window)); //close the multiplot window
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
   
 }
 
@@ -1092,6 +1275,8 @@ void iniitalizeUIElements(){
   gtk_window_set_transient_for(comment_window, window); //center comment window on main window
   multiplot_window = GTK_WINDOW(gtk_builder_get_object(builder, "multiplot_window"));
   gtk_window_set_transient_for(multiplot_window, window); //center multiplot window on main window
+  manage_window = GTK_WINDOW(gtk_builder_get_object(builder, "manage_window"));
+  gtk_window_set_transient_for(manage_window, window); //center manage spectra window on main window
   export_options_window = GTK_WINDOW(gtk_builder_get_object(builder, "export_options_window"));
   gtk_window_set_transient_for(export_options_window, window); //center export options window on main window
   preferences_window = GTK_WINDOW(gtk_builder_get_object(builder, "preferences_window"));
@@ -1118,6 +1303,7 @@ void iniitalizeUIElements(){
   append_button = GTK_BUTTON(gtk_builder_get_object(builder, "append_button"));
   calibrate_button = GTK_BUTTON(gtk_builder_get_object(builder, "calibrate_button"));
   fit_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_button"));
+  manage_spectra_button = GTK_BUTTON(gtk_builder_get_object(builder, "manage_spectra_button"));
   to_save_menu_button = GTK_BUTTON(gtk_builder_get_object(builder, "to_save_menu_button"));
   save_button = GTK_BUTTON(gtk_builder_get_object(builder, "save_button"));
   save_button_radware = GTK_BUTTON(gtk_builder_get_object(builder, "save_button_radware"));
@@ -1125,7 +1311,7 @@ void iniitalizeUIElements(){
   help_button = GTK_BUTTON(gtk_builder_get_object(builder, "help_button"));
   display_button = GTK_BUTTON(gtk_builder_get_object(builder, "display_button"));
   display_button_icon = GTK_IMAGE(gtk_builder_get_object(builder, "display_button_icon"));
-  no_sp_image= GTK_IMAGE(gtk_builder_get_object(builder, "no_sp_image"));
+  no_sp_image = GTK_IMAGE(gtk_builder_get_object(builder, "no_sp_image"));
   spectrum_drawing_area = GTK_WIDGET(gtk_builder_get_object(builder, "spectrumdrawingarea"));
   spectrum_drag_gesture = gtk_gesture_drag_new(spectrum_drawing_area); //without this, cannot click away from menus onto the drawing area, needs further investigation
   zoom_scale = GTK_SCALE(gtk_builder_get_object(builder, "zoom_scale"));
@@ -1158,6 +1344,8 @@ void iniitalizeUIElements(){
 
   //multiplot window UI elements
   multiplot_ok_button = GTK_BUTTON(gtk_builder_get_object(builder, "multiplot_ok_button"));
+  multiplot_make_view_button =  GTK_BUTTON(gtk_builder_get_object(builder, "multiplot_make_view_button"));
+  multiplot_manage_button = GTK_BUTTON(gtk_builder_get_object(builder, "multiplot_manage_button"));
   multiplot_liststore = GTK_LIST_STORE(gtk_builder_get_object(builder, "multiplot_liststore"));
   multiplot_tree_view = GTK_TREE_VIEW(gtk_builder_get_object(builder, "multiplot_tree_view"));
   multiplot_column1 = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder, "multiplot_column1"));
@@ -1166,6 +1354,17 @@ void iniitalizeUIElements(){
   multiplot_cr2 = GTK_CELL_RENDERER(gtk_builder_get_object(builder, "multiplot_cr2"));
   multiplot_cr3 = GTK_CELL_RENDERER(gtk_builder_get_object(builder, "multiplot_cr3"));
   multiplot_mode_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "multiplot_mode_combobox"));
+
+  //manage spectra window UI elements
+  manage_multiplot_button = GTK_BUTTON(gtk_builder_get_object(builder, "manage_multiplot_button"));
+  manage_delete_button = GTK_BUTTON(gtk_builder_get_object(builder, "manage_delete_button"));
+  manage_liststore = GTK_LIST_STORE(gtk_builder_get_object(builder, "manage_liststore"));
+  manage_tree_view = GTK_TREE_VIEW(gtk_builder_get_object(builder, "manage_tree_view"));
+  manage_column1 = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder, "manage_column1"));
+  manage_column2 = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder, "manage_column2"));
+  manage_cr1 = GTK_CELL_RENDERER(gtk_builder_get_object(builder, "manage_cr1"));
+  manage_cr2 = GTK_CELL_RENDERER(gtk_builder_get_object(builder, "manage_cr2"));
+  sp_image = GTK_IMAGE(gtk_builder_get_object(builder, "sp_image"));
 
   //export options window UI elements
   export_description_label = GTK_LABEL(gtk_builder_get_object(builder, "export_description_label"));
@@ -1213,6 +1412,7 @@ void iniitalizeUIElements(){
   g_signal_connect (G_OBJECT (open_button), "clicked", G_CALLBACK (on_open_button_clicked), NULL);
   g_signal_connect (G_OBJECT (append_button), "clicked", G_CALLBACK (on_append_button_clicked), NULL);
   g_signal_connect (G_OBJECT (calibrate_button), "clicked", G_CALLBACK (on_calibrate_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (manage_spectra_button), "clicked", G_CALLBACK (on_manage_spectra_button_clicked), NULL);
   g_signal_connect (G_OBJECT (save_button), "clicked", G_CALLBACK (on_save_button_clicked), NULL);
   g_signal_connect (G_OBJECT (save_button_radware), "clicked", G_CALLBACK (on_save_radware_button_clicked), NULL);
   g_signal_connect (G_OBJECT (save_button_text), "clicked", G_CALLBACK (on_save_text_button_clicked), NULL);
@@ -1255,11 +1455,17 @@ void iniitalizeUIElements(){
   g_signal_connect (G_OBJECT (shortcuts_button), "clicked", G_CALLBACK (on_shortcuts_button_clicked), NULL);
   g_signal_connect (G_OBJECT (about_button), "clicked", G_CALLBACK (on_about_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_ok_button), "clicked", G_CALLBACK (on_multiplot_ok_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (multiplot_manage_button), "clicked", G_CALLBACK (on_multiplot_manage_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_cr2), "toggled", G_CALLBACK (on_multiplot_cell_toggled), NULL);
   g_signal_connect (G_OBJECT (multiplot_cr3), "edited", G_CALLBACK (on_multiplot_scaling_edited), NULL);
+  g_signal_connect (G_OBJECT (manage_multiplot_button), "clicked", G_CALLBACK (on_manage_multiplot_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (manage_delete_button), "clicked", G_CALLBACK (on_manage_delete_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (manage_cr1), "edited", G_CALLBACK (on_manage_name_cell_edited), NULL);
+  g_signal_connect (G_OBJECT (manage_cr2), "toggled", G_CALLBACK (on_manage_cell_toggled), NULL);
   g_signal_connect (G_OBJECT (calibrate_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (comment_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (multiplot_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect (G_OBJECT (manage_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (export_options_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect (G_OBJECT (preferences_window), "delete-event", G_CALLBACK (on_preferences_cancel_button_clicked), NULL);
   g_signal_connect (G_OBJECT (preferences_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
@@ -1280,6 +1486,7 @@ void iniitalizeUIElements(){
 
   //set attributes
   gtk_tree_view_column_add_attribute(multiplot_column2,multiplot_cr2, "active",1);
+  gtk_tree_view_column_add_attribute(manage_column2,manage_cr2, "active",1);
 
   //set default values
   rawdata.openedSp = 0;
@@ -1339,20 +1546,9 @@ void iniitalizeUIElements(){
   //gtk_label_set_text(bottom_info_text,"No spectrum loaded.");
   gtk_label_set_text(bottom_info_text,"");
   
-  //'gray out' widgets that can't be used yet
-  gtk_widget_set_sensitive(GTK_WIDGET(append_button),FALSE);
-  gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
-  gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),FALSE);
-  gtk_widget_set_sensitive(GTK_WIDGET(to_save_menu_button),FALSE);
-  gtk_widget_set_sensitive(GTK_WIDGET(fit_button),FALSE);
-  gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
-  gtk_widget_set_sensitive(GTK_WIDGET(display_button),FALSE);
-  gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),FALSE);
-  gtk_widget_set_sensitive(GTK_WIDGET(zoom_scale),FALSE);
-  gtk_widget_hide(GTK_WIDGET(fit_spinner));
+  setSpOpenView(0); //'gray out' widgets that can't be used yet
 
-  //hide widgets that can't be seen yet
-  gtk_revealer_set_reveal_child(revealer_info_panel, FALSE);
+  gtk_widget_hide(GTK_WIDGET(multiplot_make_view_button)); //not implemented yet
 
   //setup UI element appearance at startup
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autoscale_button), drawing.autoScale);

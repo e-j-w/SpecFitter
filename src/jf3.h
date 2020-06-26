@@ -35,6 +35,7 @@ GtkButton *open_button, *append_button;
 GtkButton *fit_button, *display_button;
 GtkPopover *display_popover;
 GtkButton *calibrate_button;
+GtkButton *manage_spectra_button;
 GtkButton *to_save_menu_button, *save_button, *save_button_radware, *save_button_text;
 GtkButton *help_button;
 GtkLabel *bottom_info_text;
@@ -71,14 +72,21 @@ GtkAccelGroup *comment_window_accelgroup;
 GtkAboutDialog *about_dialog;
 GtkModelButton *about_button;
 //MultiPlot dialog
-GtkButton *multiplot_button, *multiplot_ok_button;
+GtkButton *multiplot_button, *multiplot_ok_button, *multiplot_manage_button, *multiplot_make_view_button;
 GtkWindow *multiplot_window;
 GtkListStore *multiplot_liststore;
 GtkTreeView *multiplot_tree_view;
 GtkTreeViewColumn *multiplot_column1, *multiplot_column2;
-GtkTreeSelection *multiplot_tree_selection;
 GtkCellRenderer *multiplot_cr1, *multiplot_cr2, *multiplot_cr3;
 GtkComboBoxText *multiplot_mode_combobox;
+//manage spectra dialog
+GtkButton *manage_multiplot_button, *manage_delete_button;
+GtkWindow *manage_window;
+GtkListStore *manage_liststore;
+GtkTreeView *manage_tree_view;
+GtkTreeViewColumn *manage_column1, *manage_column2;
+GtkCellRenderer *manage_cr1, *manage_cr2;
+GtkImage *sp_image;
 //export data dialog
 GtkWindow *export_options_window;
 GtkLabel *export_description_label, *export_note_label;
