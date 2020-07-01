@@ -24,7 +24,7 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
 
 	ucharBuf = 0; //file version number
 	fwrite(&ucharBuf,sizeof(unsigned char),1,out);
-	ucharBuf = (unsigned char)rawdata.numSpOpened; //number of spectra to write
+	ucharBuf = rawdata.numSpOpened; //number of spectra to write
 	fwrite(&ucharBuf,sizeof(unsigned char),1,out);
 	for(i=0;i<rawdata.numSpOpened;i++){
 		fwrite(&rawdata.histComment[i],sizeof(rawdata.histComment[i]),1,out);

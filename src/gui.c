@@ -28,14 +28,11 @@ void setupUITheme(){
     gtk_image_set_from_pixbuf(display_button_icon1, spIconPixbufDark);
     gtk_image_set_from_pixbuf(display_button_icon2, spIconPixbufDark);
     gtk_image_set_from_pixbuf(no_sp_image, spIconPixbufDark);
-    gtk_image_set_from_pixbuf(sp_image, spIconPixbufDark);
   }else{
     gtk_image_set_from_pixbuf(display_button_icon, spIconPixbuf);
     gtk_image_set_from_pixbuf(display_button_icon1, spIconPixbuf);
     gtk_image_set_from_pixbuf(display_button_icon2, spIconPixbuf);
     gtk_image_set_from_pixbuf(no_sp_image, spIconPixbuf);
-    gtk_image_set_from_pixbuf(sp_image, spIconPixbuf);
-
   }
 }
 
@@ -74,13 +71,26 @@ void setSpOpenView(const char spOpened){
   
 }
 
-void show_manage_window(const char showMultiplotLink){
+void on_multiplot_manage_stack_switcher_changed(){
 
-  //handle case where this is called by shortcut, and spectra are not open
-  if(rawdata.openedSp == 0){
-    return;
+  GtkWidget *stackW = gtk_stack_get_visible_child(multiplot_manage_stack);
+  if(strcmp(gtk_widget_get_name(stackW),"page0")==0){
+    //printf("Spectra tab open\n");
+    gtk_stack_set_visible_child(multiplot_manage_button_stack,GTK_WIDGET(multiplot_ok_button));
+  }else if(strcmp(gtk_widget_get_name(stackW),"page1")==0){
+    //printf("Views tab open\n");
+    gtk_stack_set_visible_child(multiplot_manage_button_stack,GTK_WIDGET(multiplot_ok_button));
+  }else if(strcmp(gtk_widget_get_name(stackW),"page2")==0){
+    //printf("Manage Data tab open\n");
+    gtk_stack_set_visible_child(multiplot_manage_button_stack,GTK_WIDGET(manage_delete_button));
+  }else{
+    printf("WARINING: multiplot/manage dialog has unknown tab (%s) open.\n",gtk_widget_get_name(stackW));
   }
+}
 
+
+//setup the tree view in the manage window
+void setup_manage_window(){
   GtkTreeIter iter;
   //GtkTreeModel *model = gtk_tree_view_get_model(manage_tree_view);
   int i;
@@ -92,30 +102,12 @@ void show_manage_window(const char showMultiplotLink){
     gtk_list_store_set(manage_liststore, &iter, 2, i, -1);
   }
 
-  //show/hide the link to the multiplot dialog as neccesary
-  if(showMultiplotLink){
-    gtk_widget_show(GTK_WIDGET(manage_multiplot_button));
-    gtk_window_set_title(multiplot_manage_window, "Advanced Plotting");
-  }else{
-    gtk_widget_hide(GTK_WIDGET(manage_multiplot_button));
-    gtk_window_set_title(multiplot_manage_window, "Manage Spectra");
-  }
-  
   //no spectra are selected initially, delete button therefore disabled
   gtk_widget_set_sensitive(GTK_WIDGET(manage_delete_button),FALSE);
-
-  gtk_stack_set_visible_child(multiplot_manage_stack,GTK_WIDGET(manage_box));
-  gtk_window_present(multiplot_manage_window); //show the window
-  
 }
 
-void show_multiplot_window(){
-
-  //handle case where this is called by shortcut, and spectra are not open
-  if(rawdata.openedSp == 0){
-    return;
-  }
-
+//setup all of the tree views in the multiplot window
+void setup_multiplot_window(){
   GtkTreeIter iter;
   gboolean val = FALSE;
   GtkTreeModel *model = gtk_tree_view_get_model(multiplot_tree_view);
@@ -151,9 +143,48 @@ void show_multiplot_window(){
   }else{
     gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),FALSE);
   }
+}
+
+void show_manage_window(const char showMultiplotLink){
+
+  //handle case where this is called by shortcut, and spectra are not open
+  if(rawdata.openedSp == 0){
+    return;
+  }
+
+  setup_manage_window(); //setup tree view
+
+  //show/hide the link to the multiplot dialog as neccesary
+  if(showMultiplotLink){
+    setup_multiplot_window(); //setup tree views
+    gtk_widget_show(GTK_WIDGET(multiplot_manage_stack_switcher));
+    gtk_window_set_title(multiplot_manage_window, "Advanced Plotting");
+  }else{
+    gtk_widget_hide(GTK_WIDGET(multiplot_manage_stack_switcher));
+    gtk_window_set_title(multiplot_manage_window, "Manage Data");
+  }
+
+  gtk_stack_set_visible_child(multiplot_manage_stack,GTK_WIDGET(manage_box));
+  gtk_stack_set_visible_child(multiplot_manage_button_stack,GTK_WIDGET(manage_delete_button));
+  gtk_window_present(multiplot_manage_window); //show the window
   
+}
+
+void show_multiplot_window(){
+
+  //handle case where this is called by shortcut, and spectra are not open
+  if(rawdata.openedSp == 0){
+    return;
+  }
+
+  setup_multiplot_window();
+  setup_manage_window();
+  
+  gtk_widget_show(GTK_WIDGET(multiplot_manage_stack_switcher));
+
   gtk_window_set_title(multiplot_manage_window, "Advanced Plotting");
   gtk_stack_set_visible_child(multiplot_manage_stack,GTK_WIDGET(multiplot_box));
+  gtk_stack_set_visible_child(multiplot_manage_button_stack,GTK_WIDGET(multiplot_ok_button));
   gtk_window_present(multiplot_manage_window); //show the window
 }
 
@@ -837,6 +868,76 @@ void on_multiplot_button_clicked(GtkButton *b)
   show_multiplot_window();
 }
 
+void on_multiplot_make_view_button_clicked(GtkButton *b)
+{
+
+  if(rawdata.numViews >= MAXNVIEWS){
+    //show an error dialog
+    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+    GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_manage_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot create view!");
+    gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Too many views have been created.  Delete one first before creating a new one.");
+    gtk_dialog_run (GTK_DIALOG (message_dialog));
+    gtk_widget_destroy (message_dialog);
+    return;
+  }
+
+  GtkTreeIter iter;
+  gboolean readingTreeModel;
+  gboolean val = FALSE;
+  int spInd = 0;
+  int selectedSpCount = 0;
+  GtkTreeModel *model = gtk_tree_view_get_model(multiplot_tree_view);
+  readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
+  while (readingTreeModel)
+  {
+    gtk_tree_model_get(model,&iter,1,&val,3,&spInd,-1); //get whether the spectrum is selected and the spectrum index
+    if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
+      if(val==TRUE){
+        rawdata.viewMultiPlots[rawdata.numViews][selectedSpCount]=spInd;
+        selectedSpCount++;
+      }
+    }
+    readingTreeModel = gtk_tree_model_iter_next (model, &iter);
+  }
+
+  rawdata.viewNumMultiplotSp[rawdata.numViews] = selectedSpCount;
+  rawdata.viewMultiplotMode[rawdata.numViews] = gtk_combo_box_get_active(GTK_COMBO_BOX(multiplot_mode_combobox));
+
+
+  if((rawdata.viewNumMultiplotSp[rawdata.numViews] > MAX_DISP_SP)||((rawdata.viewMultiplotMode[rawdata.numViews] < 0))){
+    //show an error dialog
+    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+    GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_manage_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Invalid selection for view!");
+    if(rawdata.viewMultiplotMode[rawdata.numViews] < 0)
+      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Please select a plotting mode.");
+    if(rawdata.viewNumMultiplotSp[rawdata.numViews] > MAX_DISP_SP){
+      char errStr[256];
+      snprintf(errStr,256,"The maximum number of spectra\nthat may be plotted at once is %i.",MAX_DISP_SP);
+      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),errStr);
+    }
+
+    gtk_dialog_run (GTK_DIALOG (message_dialog));
+    gtk_widget_destroy (message_dialog);
+    
+  }else{
+    //set drawing mode for view
+    if(rawdata.viewNumMultiplotSp[rawdata.numViews] == 1){
+      rawdata.viewMultiplotMode[rawdata.numViews] = 0;
+    }else{
+      rawdata.viewMultiplotMode[rawdata.numViews]++; //value of 0 means no multiplot
+    }
+    
+    printf("Number of spectra selected for plotting: %i.  Selected spectra: ", rawdata.viewNumMultiplotSp[rawdata.numViews]);
+    int i;
+    for(i=0;i<rawdata.viewNumMultiplotSp[rawdata.numViews];i++){
+      printf("%i ",rawdata.viewMultiPlots[rawdata.numViews][i]);
+    }
+    printf(", multiplot mode: %i\n",rawdata.viewMultiplotMode[rawdata.numViews]);
+
+  }
+  
+}
+
 void on_multiplot_ok_button_clicked(GtkButton *b)
 {
   GtkTreeIter iter;
@@ -919,19 +1020,9 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
   
 }
 
-void on_multiplot_manage_button_clicked(GtkButton *b)
-{
-  show_manage_window(1);
-}
-
 void on_manage_spectra_button_clicked(GtkButton *b)
 {
   show_manage_window(0);
-}
-
-void on_manage_multiplot_button_clicked(GtkButton *b)
-{
-  show_multiplot_window();
 }
 
 void on_manage_name_cell_edited(GtkCellRendererText *cell, gchar *path_string, gchar *new_text, gpointer user_data){
@@ -949,6 +1040,8 @@ void on_manage_name_cell_edited(GtkCellRendererText *cell, gchar *path_string, g
   }
 
   gtk_list_store_set(manage_liststore,&iter,0,rawdata.histComment[spInd],-1); //set the boolean value (change checkbox value)
+
+  setup_multiplot_window(); //redraw the tree list
 
   //redraw the spectrum (in case its name changed)
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
@@ -1046,7 +1139,7 @@ void on_manage_delete_button_clicked(GtkButton *b)
   }else{
     setSpOpenView(1);
     //redraw the manage window
-    if(gtk_widget_get_visible(GTK_WIDGET(manage_multiplot_button))){
+    if(gtk_widget_get_visible(GTK_WIDGET(multiplot_manage_stack_switcher))){
       show_manage_window(1);
     }else{
       show_manage_window(0);
@@ -1351,7 +1444,6 @@ void iniitalizeUIElements(){
   multiplot_box = GTK_WIDGET(gtk_builder_get_object(builder, "multiplot_box"));
   multiplot_ok_button = GTK_BUTTON(gtk_builder_get_object(builder, "multiplot_ok_button"));
   multiplot_make_view_button =  GTK_BUTTON(gtk_builder_get_object(builder, "multiplot_make_view_button"));
-  multiplot_manage_button = GTK_BUTTON(gtk_builder_get_object(builder, "multiplot_manage_button"));
   multiplot_liststore = GTK_LIST_STORE(gtk_builder_get_object(builder, "multiplot_liststore"));
   multiplot_tree_view = GTK_TREE_VIEW(gtk_builder_get_object(builder, "multiplot_tree_view"));
   multiplot_column1 = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder, "multiplot_column1"));
@@ -1362,7 +1454,6 @@ void iniitalizeUIElements(){
   multiplot_mode_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "multiplot_mode_combobox"));
   //manage spectra window UI elements
   manage_box = GTK_WIDGET(gtk_builder_get_object(builder, "manage_box"));
-  manage_multiplot_button = GTK_BUTTON(gtk_builder_get_object(builder, "manage_multiplot_button"));
   manage_delete_button = GTK_BUTTON(gtk_builder_get_object(builder, "manage_delete_button"));
   manage_liststore = GTK_LIST_STORE(gtk_builder_get_object(builder, "manage_liststore"));
   manage_tree_view = GTK_TREE_VIEW(gtk_builder_get_object(builder, "manage_tree_view"));
@@ -1370,9 +1461,10 @@ void iniitalizeUIElements(){
   manage_column2 = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder, "manage_column2"));
   manage_cr1 = GTK_CELL_RENDERER(gtk_builder_get_object(builder, "manage_cr1"));
   manage_cr2 = GTK_CELL_RENDERER(gtk_builder_get_object(builder, "manage_cr2"));
-  sp_image = GTK_IMAGE(gtk_builder_get_object(builder, "sp_image"));
   //stack
   multiplot_manage_stack = GTK_STACK(gtk_builder_get_object(builder, "multiplot_manage_stack"));
+  multiplot_manage_stack_switcher = GTK_STACK_SWITCHER(gtk_builder_get_object(builder, "multiplot_manage_stack_switcher"));
+  multiplot_manage_button_stack = GTK_STACK(gtk_builder_get_object(builder, "multiplot_manage_button_stack"));
 
   //export options window UI elements
   export_description_label = GTK_LABEL(gtk_builder_get_object(builder, "export_description_label"));
@@ -1410,7 +1502,6 @@ void iniitalizeUIElements(){
   logscale_button = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "logscalebutton"));
   cursor_draw_button = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "cursordrawbutton"));
   contract_scale = GTK_SCALE(gtk_builder_get_object(builder, "contract_scale"));
-
 
   //connect signals
   g_signal_connect (G_OBJECT (spectrum_drawing_area), "draw", G_CALLBACK (drawSpectrumArea), NULL);
@@ -1462,11 +1553,11 @@ void iniitalizeUIElements(){
   g_signal_connect (G_OBJECT (contract_scale), "value-changed", G_CALLBACK (on_contract_scale_changed), NULL);
   g_signal_connect (G_OBJECT (shortcuts_button), "clicked", G_CALLBACK (on_shortcuts_button_clicked), NULL);
   g_signal_connect (G_OBJECT (about_button), "clicked", G_CALLBACK (on_about_button_clicked), NULL);
+  g_signal_connect (G_OBJECT (multiplot_manage_stack_switcher), "button-release-event", G_CALLBACK (on_multiplot_manage_stack_switcher_changed), NULL);
+  g_signal_connect (G_OBJECT (multiplot_make_view_button), "clicked", G_CALLBACK (on_multiplot_make_view_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_ok_button), "clicked", G_CALLBACK (on_multiplot_ok_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (multiplot_manage_button), "clicked", G_CALLBACK (on_multiplot_manage_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_cr2), "toggled", G_CALLBACK (on_multiplot_cell_toggled), NULL);
   g_signal_connect (G_OBJECT (multiplot_cr3), "edited", G_CALLBACK (on_multiplot_scaling_edited), NULL);
-  g_signal_connect (G_OBJECT (manage_multiplot_button), "clicked", G_CALLBACK (on_manage_multiplot_button_clicked), NULL);
   g_signal_connect (G_OBJECT (manage_delete_button), "clicked", G_CALLBACK (on_manage_delete_button_clicked), NULL);
   g_signal_connect (G_OBJECT (manage_cr1), "edited", G_CALLBACK (on_manage_name_cell_edited), NULL);
   g_signal_connect (G_OBJECT (manage_cr2), "toggled", G_CALLBACK (on_manage_cell_toggled), NULL);
@@ -1555,8 +1646,6 @@ void iniitalizeUIElements(){
   gtk_label_set_text(bottom_info_text,"");
   
   setSpOpenView(0); //'gray out' widgets that can't be used yet
-
-  gtk_widget_hide(GTK_WIDGET(multiplot_make_view_button)); //not implemented yet
 
   //setup UI element appearance at startup
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autoscale_button), drawing.autoScale);

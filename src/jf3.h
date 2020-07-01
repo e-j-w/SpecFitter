@@ -24,9 +24,10 @@
 #define MAX_FIT_PK    10 //maximum number of peaks which may be fit at once
 
 //spectrum data file specs (be careful if changing these, can break compatibility)
-#define S32K   32768 //maximum number of channels per spectrum in .mca and .fmca (changing breaks file compatibility)
-#define NSPECT 100 //maximum number of spectra which may be opened at once (for compatibility should be 255 or less)
-#define NCHCOM 1000 //maximum number of comments that can be placed by the user on individual channels
+#define S32K      32768 //maximum number of channels per spectrum in .mca and .fmca (changing breaks file compatibility)
+#define NSPECT    100   //maximum number of spectra which may be opened at once (for compatibility should be 255 or less)
+#define MAXNVIEWS 100   //maximum number of views which can be saved by the user
+#define NCHCOM    1000  //maximum number of comments that can be placed by the user on individual channels
 
 /* GUI globals */
 GtkWindow *window;
@@ -73,23 +74,28 @@ GtkAboutDialog *about_dialog;
 GtkModelButton *about_button;
 //MultiPlot and manage dialog
 GtkWindow *multiplot_manage_window;
-GtkStack *multiplot_manage_stack;
+GtkStack *multiplot_manage_stack, *multiplot_manage_button_stack;
+GtkStackSwitcher *multiplot_manage_stack_switcher;
 //multiplot
 GtkWidget *multiplot_box;
-GtkButton *multiplot_button, *multiplot_ok_button, *multiplot_manage_button, *multiplot_make_view_button;
+GtkButton *multiplot_button, *multiplot_ok_button, *multiplot_make_view_button;
 GtkListStore *multiplot_liststore;
 GtkTreeView *multiplot_tree_view;
 GtkTreeViewColumn *multiplot_column1, *multiplot_column2;
 GtkCellRenderer *multiplot_cr1, *multiplot_cr2, *multiplot_cr3;
 GtkComboBoxText *multiplot_mode_combobox;
+//view
+GtkListStore *view_liststore;
+GtkTreeView *view_tree_view;
+GtkTreeViewColumn *view_column1, *view_column2;
+GtkCellRenderer *view_cr1, *view_cr2;
 //manage
 GtkWidget *manage_box;
-GtkButton *manage_multiplot_button, *manage_delete_button;
+GtkButton *manage_delete_button;
 GtkListStore *manage_liststore;
 GtkTreeView *manage_tree_view;
 GtkTreeViewColumn *manage_column1, *manage_column2;
 GtkCellRenderer *manage_cr1, *manage_cr2;
-GtkImage *sp_image;
 //export data dialog
 GtkWindow *export_options_window;
 GtkLabel *export_description_label, *export_note_label;
@@ -141,19 +147,24 @@ struct {
   char exportFileType; //0=text, 1=radware
 } guiglobals;
 
-//imported data globals
+//raw histogram data globals
 struct {
   double hist[NSPECT][S32K]; //spectrum histogram data
   char histComment[NSPECT][256]; //spectrum description/comment
   char openedSp; //0=not opened, 1=opened
-  char numSpOpened; //number of spectra in the opened file(s)
-  int numFilesOpened; //number of files containing spectra opened
-  char dropEmptySpectra; //0=don't discard, 1=discard
+  unsigned char numSpOpened; //number of spectra in the opened file(s)
+  unsigned char numFilesOpened; //number of files containing spectra opened
+  char viewMultiplotMode[MAXNVIEWS]; //multiplot mode for each saved view
+  int viewNumMultiplotSp[MAXNVIEWS]; //number of spectra to show for each saved view
+  double viewScaleFactor[MAXNVIEWS][NSPECT]; //scaling factors for each spectrum in each saved view
+  int viewMultiPlots[MAXNVIEWS][NSPECT]; //indices of all the spectra to show for each saved view
+  unsigned char numViews; //number of views that have been saved
   char chanComment[NCHCOM][256]; //channel comment text
   char chanCommentSp[NCHCOM]; //spectra at which channel comments are displayed
   int chanCommentCh[NCHCOM]; //channels at which channel comments are displayed
   float chanCommentVal[NCHCOM]; //y-values at which channel comments are displayed
   unsigned int numChComments; //number of comments which have been placed
+  char dropEmptySpectra; //0=don't discard empty spectra on import, 1=discard
 } rawdata;
 
 //spectrum drawing globals

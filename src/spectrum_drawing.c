@@ -16,7 +16,7 @@ void setTextColor(cairo_t *cr){
 
 //converts cursor position units to channel units on the displayed spectrum
 //return value is float to allow sub-channel prescision, cast it to int if needed
-float getCursorChannel(float cursorx, float cursory){
+float getCursorChannel(const float cursorx, const float cursory){
   GdkRectangle dasize;  // GtkDrawingArea size
   GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
   // Determine GtkDrawingArea dimensions
@@ -32,7 +32,7 @@ float getCursorChannel(float cursorx, float cursory){
 
 //converts cursor position units to y-value on the displayed spectrum
 //this is the value on the displayed y-axis, at the cursor postion
-float getCursorYVal(float cursorx, float cursory){
+float getCursorYVal(const float cursorx, const float cursory){
   GdkRectangle dasize;  // GtkDrawingArea size
   GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
   // Determine GtkDrawingArea dimensions
@@ -69,7 +69,7 @@ float getCursorYVal(float cursorx, float cursory){
 //get the index of the comment at which the cursor is over
 //return -1 if no comment is at the cursor position
 //some shameless magic numbers used to map channel and y-values to comment indicator size
-int getCommentAtCursor(float cursorx, float cursory){
+int getCommentAtCursor(const float cursorx, const float cursory){
   int i;
   GdkRectangle dasize;  // GtkDrawingArea size
   GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
@@ -472,8 +472,6 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
     guiglobals.draggingSp = 0;
   }
 
-  
-
   if(cursorChan >= 0){
 
     int commentToHighlight = getCommentAtCursor(event->x, event->y);
@@ -635,7 +633,7 @@ float getXPos(const int bin, const float clip_x1, const float clip_x2){
 //get the screen position of a channel (or fractional channel)
 //returns -1 if offscreen
 //if halfBinOffset=1, will offset by half a bin (for drawing fits)
-float getXPosFromCh(float chVal, float clip_x1, float clip_x2, int halfBinOffset){
+float getXPosFromCh(const float chVal, const float clip_x1, const float clip_x2, const unsigned char halfBinOffset){
   if((chVal < drawing.lowerLimit)||(chVal > drawing.upperLimit)){
     return -1;
   }
@@ -699,7 +697,7 @@ float getYPos(const float val, const int multiplotSpNum, const float clip_y1, co
 }
 
 //axis tick drawing
-float getAxisXPos(int axisVal, float clip_x1, float clip_x2){
+float getAxisXPos(const int axisVal, const float clip_x1, const float clip_x2){
   int cal_lowerLimit = drawing.lowerLimit;
   int cal_upperLimit = drawing.upperLimit;
   if(calpar.calMode==1){
@@ -712,7 +710,7 @@ float getAxisXPos(int axisVal, float clip_x1, float clip_x2){
   
   return clip_x1 + 80.0 + (clip_x2-clip_x1-80.0)*(axisVal - cal_lowerLimit)/(cal_upperLimit - cal_lowerLimit);
 }
-void drawXAxisTick(int axisVal, cairo_t *cr, float clip_x1, float clip_x2, float clip_y1, float clip_y2, double baseFontSize){
+void drawXAxisTick(const int axisVal, cairo_t *cr, const float clip_x1, const float clip_x2, const float clip_y1, const float clip_y2, const double baseFontSize){
   int axisPos = getAxisXPos(axisVal,clip_x1,clip_x2);
   if(axisPos >= 0){
     //axis position is valid
@@ -727,7 +725,7 @@ void drawXAxisTick(int axisVal, cairo_t *cr, float clip_x1, float clip_x2, float
     cairo_show_text(cr, tickLabel);
   }
 }
-float getAxisYPos(float axisVal, int multiplotSpNum, float clip_y2){
+float getAxisYPos(const float axisVal, const int multiplotSpNum, const float clip_y2){
   float posVal;
   switch(drawing.multiplotMode){
     case 4:
@@ -770,7 +768,7 @@ float getAxisYPos(float axisVal, int multiplotSpNum, float clip_y2){
   //printf("clip_y2: %f, multiplotsp: %i, axisval: %f, posval: %f\n",clip_y2,multiplotSpNum,axisVal,posVal);
   return posVal;
 }
-void drawYAxisTick(float axisVal, int multiplotSpNum, cairo_t *cr, float clip_x1, float clip_x2, float clip_y1, float clip_y2, double baseFontSize){
+void drawYAxisTick(const float axisVal, const int multiplotSpNum, cairo_t *cr, const float clip_x1, const float clip_x2, const float clip_y1, const float clip_y2, const double baseFontSize){
   if((axisVal < drawing.scaleLevelMin[multiplotSpNum])||(axisVal >= drawing.scaleLevelMax[multiplotSpNum])){
     //printf("axisval:%f,scalemin:%f,scalemax:%f\n",axisVal,drawing.scaleLevelMin[multiplotSpNum],drawing.scaleLevelMax[multiplotSpNum]);
     return; //invalid axis value,
@@ -827,7 +825,7 @@ void drawYAxisTick(float axisVal, int multiplotSpNum, cairo_t *cr, float clip_x1
   }
 }
 
-void drawPlotLabel(cairo_t *cr, float clip_x1, float clip_x2, float clip_y2, double baseFontSize){
+void drawPlotLabel(cairo_t *cr, const float clip_x1, const float clip_x2, const float clip_y2, const double baseFontSize){
   char plotLabel[256];
   int i;
   cairo_text_extents_t extents; //get dimensions needed to justify text labels
@@ -1574,7 +1572,6 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
         break;
     }
   }
-  
 
   //draw cursor at mouse position
   if(guiglobals.drawSpCursor == 1){
@@ -1586,7 +1583,6 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data)
     cairo_line_to(cr, guiglobals.cursorPosX, -dasize.height);
     cairo_stroke(cr);
   }
-
 
   return;
 }

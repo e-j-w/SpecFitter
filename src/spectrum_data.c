@@ -4,7 +4,7 @@
 //mainly to help other parts of the program with drawing, 
 //fitting, and saving displayed data to disk
 
-void deleteSpectrum(int spInd){
+void deleteSpectrum(const int spInd){
   
   //printf("deleting spectrum %i\n",spInd);
   if((spInd>=NSPECT)||(spInd<0)){
@@ -37,17 +37,17 @@ void deleteSpectrum(int spInd){
     memcpy(&rawdata.hist[i],&rawdata.hist[i+1],sizeof(rawdata.hist[i]));
     memcpy(&rawdata.histComment[i],&rawdata.histComment[i+1],sizeof(rawdata.histComment[i]));
   }
-  rawdata.numSpOpened -= 1;
-
-  if(rawdata.numSpOpened <= 0){
-    rawdata.numSpOpened = 0;
+  if(rawdata.numSpOpened > 0){
+    rawdata.numSpOpened -= 1;
+  }
+  if(rawdata.numSpOpened == 0){
     rawdata.openedSp = 0;
   }
 
   return;
 }
 
-int getFirstNonemptySpectrum(int numSpOpened){
+int getFirstNonemptySpectrum(const int numSpOpened){
   if(numSpOpened>=NSPECT){
     return -1;
   }
@@ -63,7 +63,7 @@ int getFirstNonemptySpectrum(int numSpOpened){
 }
 
 //used to check whether a spectrum has been selected in multiplot mode
-int isSpSelected(int spNum){
+int isSpSelected(const int spNum){
   int i;
   for(i=0;i<drawing.numMultiplotSp;i++){
     if(drawing.multiPlots[i] == spNum){
@@ -74,7 +74,7 @@ int isSpSelected(int spNum){
 }
 
 //get a calibrated value from an uncalibrated one
-double getCalVal(double val){
+double getCalVal(const double val){
   return calpar.calpar0 + calpar.calpar1*val + calpar.calpar2*val*val;
 }
 

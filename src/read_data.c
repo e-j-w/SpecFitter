@@ -1,16 +1,15 @@
 /* J. Williams, 2020 */
 
 //File contains functions for reading spectra of various formats.
-//.jf3 - compressed multiple spectra, with comments
+//.jf3 - compressed multiple spectra, with titles and comments
+//.txt - column plaintext data (compatible with spreadsheet software), with titles and comments
+//.spe - RadWare, with title
 //.mca - integer array
 //.fmca - float array
-//.spe - RadWare
 //.C - ROOT macro
-//.txt - column plaintext data (compatible with spreadsheet software)
-
 
 //function reads an .jf3 file into a double array and returns the array
-int readJF3(const char *filename, double outHist[NSPECT][S32K], int outHistStartSp)
+int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp)
 {
 	int i,j;
 	unsigned char ucharBuf, numSpec;
@@ -135,7 +134,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 }
 
 //function reads an .mca file into a double array and returns the number of spectra read in
-int readMCA(const char *filename, double outHist[NSPECT][S32K], int outHistStartSp)
+int readMCA(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp)
 {
 	int i, j;
 	int tmpHist[S32K];
@@ -186,7 +185,7 @@ int readMCA(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 }
 
 //function reads an .fmca file into a double array and returns the number of spectra read in
-int readFMCA(const char *filename, double outHist[NSPECT][S32K], int outHistStartSp)
+int readFMCA(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp)
 {
 	int i, j;
 	float tmpHist[S32K];
@@ -289,7 +288,7 @@ int readSPE(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 	return 1;
 }
 
-int readTXT(const char *filename, double outHist[NSPECT][S32K], int outHistStartSp)
+int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp)
 {
 	int i,j;
 	int numElementsRead = 0;
@@ -389,7 +388,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 }
 
 //function reads an .C ROOT macro file into a double array and returns the number of spectra read in
-int readROOT(const char *filename, double outHist[NSPECT][S32K], int outHistStartSp)
+int readROOT(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp)
 {
 
 	FILE *inp;
@@ -475,7 +474,7 @@ int readROOT(const char *filename, double outHist[NSPECT][S32K], int outHistStar
 
 //reads a file containing spectrum data into an array
 //returns the number of spectra read (0 if reading fails)
-int readSpectrumDataFile(const char *filename, double outHist[NSPECT][S32K], int outHistStartSp)
+int readSpectrumDataFile(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp)
 {
 	int numSpec = 0;
 
