@@ -87,8 +87,8 @@ GtkComboBoxText *multiplot_mode_combobox;
 //view
 GtkListStore *view_liststore;
 GtkTreeView *view_tree_view;
-GtkTreeViewColumn *view_column1, *view_column2;
-GtkCellRenderer *view_cr1, *view_cr2;
+GtkTreeViewColumn *view_column1;
+GtkCellRenderer *view_cr1;
 //manage
 GtkWidget *manage_box;
 GtkButton *manage_delete_button;
@@ -154,6 +154,7 @@ struct {
   char openedSp; //0=not opened, 1=opened
   unsigned char numSpOpened; //number of spectra in the opened file(s)
   unsigned char numFilesOpened; //number of files containing spectra opened
+  char viewComment[MAXNVIEWS][256]; //view description/comment
   char viewMultiplotMode[MAXNVIEWS]; //multiplot mode for each saved view
   int viewNumMultiplotSp[MAXNVIEWS]; //number of spectra to show for each saved view
   double viewScaleFactor[MAXNVIEWS][NSPECT]; //scaling factors for each spectrum in each saved view

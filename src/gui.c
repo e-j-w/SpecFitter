@@ -108,6 +108,8 @@ void setup_manage_window(){
 
 //setup all of the tree views in the multiplot window
 void setup_multiplot_window(){
+
+  //multiplot tree view
   GtkTreeIter iter;
   gboolean val = FALSE;
   GtkTreeModel *model = gtk_tree_view_get_model(multiplot_tree_view);
@@ -143,6 +145,16 @@ void setup_multiplot_window(){
   }else{
     gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),FALSE);
   }
+
+  //view tree view
+  model = gtk_tree_view_get_model(view_tree_view);
+  gtk_list_store_clear(view_liststore);
+  for(i=0;i<rawdata.numViews;i++){
+    gtk_list_store_append(view_liststore,&iter);
+    gtk_list_store_set(view_liststore, &iter, 0, rawdata.viewComment[i], -1);
+    gtk_list_store_set(view_liststore, &iter, 1, i, -1);
+  }
+
 }
 
 void show_manage_window(const char showMultiplotLink){
@@ -926,15 +938,35 @@ void on_multiplot_make_view_button_clicked(GtkButton *b)
     }else{
       rawdata.viewMultiplotMode[rawdata.numViews]++; //value of 0 means no multiplot
     }
-    
-    printf("Number of spectra selected for plotting: %i.  Selected spectra: ", rawdata.viewNumMultiplotSp[rawdata.numViews]);
-    int i;
-    for(i=0;i<rawdata.viewNumMultiplotSp[rawdata.numViews];i++){
-      printf("%i ",rawdata.viewMultiPlots[rawdata.numViews][i]);
-    }
-    printf(", multiplot mode: %i\n",rawdata.viewMultiplotMode[rawdata.numViews]);
 
+    //setup default view name
+    char viewStr[256];
+    switch (rawdata.viewMultiplotMode[rawdata.numViews])
+    {
+      case 4:
+        //stack view
+        snprintf(viewStr,256,"Stacked view of %i spectra",rawdata.viewNumMultiplotSp[rawdata.numViews]);
+        break;
+      case 3:
+      case 2:
+        //overlay
+        snprintf(viewStr,256,"Overlay view of %i spectra",rawdata.viewNumMultiplotSp[rawdata.numViews]);
+        break;
+      case 1:
+        //summed view
+        snprintf(viewStr,256,"Summed view of %i spectra",rawdata.viewNumMultiplotSp[rawdata.numViews]);
+        break;
+      default:
+        //single spectrum
+        snprintf(viewStr,256,"View of spectrum %i",rawdata.viewMultiPlots[rawdata.numViews][selectedSpCount]);
+        break;
+    }
+
+    memcpy(rawdata.viewComment[rawdata.numViews],viewStr,sizeof(viewStr));
+    rawdata.numViews++;
   }
+
+  setup_multiplot_window(); //redraw the tree view
   
 }
 
@@ -1452,6 +1484,11 @@ void iniitalizeUIElements(){
   multiplot_cr2 = GTK_CELL_RENDERER(gtk_builder_get_object(builder, "multiplot_cr2"));
   multiplot_cr3 = GTK_CELL_RENDERER(gtk_builder_get_object(builder, "multiplot_cr3"));
   multiplot_mode_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "multiplot_mode_combobox"));
+  //view window UI elements
+  view_liststore = GTK_LIST_STORE(gtk_builder_get_object(builder, "view_liststore"));
+  view_tree_view = GTK_TREE_VIEW(gtk_builder_get_object(builder, "view_tree_view"));
+  view_column1 = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder, "view_column1"));
+  view_cr1 = GTK_CELL_RENDERER(gtk_builder_get_object(builder, "view_cr1"));
   //manage spectra window UI elements
   manage_box = GTK_WIDGET(gtk_builder_get_object(builder, "manage_box"));
   manage_delete_button = GTK_BUTTON(gtk_builder_get_object(builder, "manage_delete_button"));
