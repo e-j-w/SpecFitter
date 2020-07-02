@@ -1751,6 +1751,7 @@ Author: Jonathan Williams
                                 <property name="sort_column_id">0</property>
                                 <child>
                                   <object class="GtkCellRendererText" id="view_cr1">
+                                    <property name="height">40</property>
                                     <property name="editable">True</property>
                                   </object>
                                   <attributes>
@@ -2578,7 +2579,6 @@ Weight by fit function - Weights are proportional to the fit function values det
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Save the opened spectra to disk.</property>
             <property name="text" translatable="yes">Back</property>
             <property name="menu_name">main</property>
             <property name="inverted">True</property>
@@ -2587,6 +2587,17 @@ Weight by fit function - Weights are proportional to the fit function values det
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
@@ -2600,7 +2611,7 @@ Weight by fit function - Weights are proportional to the fit function values det
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
         <child>

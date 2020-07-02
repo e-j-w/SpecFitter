@@ -71,20 +71,36 @@ void setSpOpenView(const char spOpened){
   
 }
 
-void on_multiplot_manage_stack_switcher_changed(){
-
+unsigned char getMultiplotStackPage(){
   GtkWidget *stackW = gtk_stack_get_visible_child(multiplot_manage_stack);
   if(strcmp(gtk_widget_get_name(stackW),"page0")==0){
     //printf("Spectra tab open\n");
-    gtk_stack_set_visible_child(multiplot_manage_button_stack,GTK_WIDGET(multiplot_ok_button));
+    return 0;
   }else if(strcmp(gtk_widget_get_name(stackW),"page1")==0){
     //printf("Views tab open\n");
-    gtk_stack_set_visible_child(multiplot_manage_button_stack,GTK_WIDGET(multiplot_ok_button));
+    return 1;
   }else if(strcmp(gtk_widget_get_name(stackW),"page2")==0){
     //printf("Manage Data tab open\n");
-    gtk_stack_set_visible_child(multiplot_manage_button_stack,GTK_WIDGET(manage_delete_button));
+    return 2;
   }else{
     printf("WARINING: multiplot/manage dialog has unknown tab (%s) open.\n",gtk_widget_get_name(stackW));
+    return 10; //nonsense page number
+  }
+}
+
+void on_multiplot_manage_stack_switcher_changed(){
+  unsigned char pageNum = getMultiplotStackPage();
+  switch (pageNum)
+  {
+    case 2:
+      gtk_stack_set_visible_child(multiplot_manage_button_stack,GTK_WIDGET(manage_delete_button));
+      break;
+    case 1:
+    case 0:
+      gtk_stack_set_visible_child(multiplot_manage_button_stack,GTK_WIDGET(multiplot_ok_button));
+      break;
+    default:
+      break;
   }
 }
 
@@ -100,6 +116,12 @@ void setup_manage_window(){
     gtk_list_store_set(manage_liststore, &iter, 0, rawdata.histComment[i], -1);
     gtk_list_store_set(manage_liststore, &iter, 1, 0, -1); //start with delete action unselected
     gtk_list_store_set(manage_liststore, &iter, 2, i, -1);
+  }
+  for(i=0;i<rawdata.numViews;i++){
+    gtk_list_store_append(manage_liststore,&iter);
+    gtk_list_store_set(manage_liststore, &iter, 0, rawdata.viewComment[i], -1);
+    gtk_list_store_set(manage_liststore, &iter, 1, 0, -1); //start with delete action unselected
+    gtk_list_store_set(manage_liststore, &iter, 2, rawdata.numSpOpened+i, -1);
   }
 
   //no spectra are selected initially, delete button therefore disabled
@@ -939,6 +961,9 @@ void on_multiplot_make_view_button_clicked(GtkButton *b)
       rawdata.viewMultiplotMode[rawdata.numViews]++; //value of 0 means no multiplot
     }
 
+    //setup scale factors
+    memcpy(&rawdata.viewScaleFactor[rawdata.numViews],&drawing.scaleFactor,sizeof(drawing.scaleFactor));
+
     //setup default view name
     char viewStr[256];
     switch (rawdata.viewMultiplotMode[rawdata.numViews])
@@ -967,88 +992,112 @@ void on_multiplot_make_view_button_clicked(GtkButton *b)
   }
 
   setup_multiplot_window(); //redraw the tree view
+  setup_manage_window(); //redraw the tree view
   
 }
 
 void on_multiplot_ok_button_clicked(GtkButton *b)
 {
+
   GtkTreeIter iter;
   gboolean readingTreeModel;
   gboolean val = FALSE;
-  int spInd = 0;
-  int selectedSpCount = 0;
-  GtkTreeModel *model = gtk_tree_view_get_model(multiplot_tree_view);
-  readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
-  while (readingTreeModel)
-  {
-    gtk_tree_model_get(model,&iter,1,&val,3,&spInd,-1); //get whether the spectrum is selected and the spectrum index
-    if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
-      if(val==TRUE){
-        drawing.multiPlots[selectedSpCount]=spInd;
-        selectedSpCount++;
+  GtkTreeModel *model;
+  unsigned char pageNum = getMultiplotStackPage();
+  
+  if(pageNum==0){
+    //plot spectrum data
+    int spInd = 0;
+    int selectedSpCount = 0;
+    model = gtk_tree_view_get_model(multiplot_tree_view);
+    readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
+    while (readingTreeModel){
+      gtk_tree_model_get(model,&iter,1,&val,3,&spInd,-1); //get whether the spectrum is selected and the spectrum index
+      if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
+        if(val==TRUE){
+          drawing.multiPlots[selectedSpCount]=spInd;
+          selectedSpCount++;
+        }
       }
+      readingTreeModel = gtk_tree_model_iter_next (model, &iter);
     }
-    readingTreeModel = gtk_tree_model_iter_next (model, &iter);
-  }
-  drawing.numMultiplotSp = selectedSpCount;
-  drawing.multiplotMode = gtk_combo_box_get_active(GTK_COMBO_BOX(multiplot_mode_combobox));
+    drawing.numMultiplotSp = selectedSpCount;
+    drawing.multiplotMode = gtk_combo_box_get_active(GTK_COMBO_BOX(multiplot_mode_combobox));
 
-  if((drawing.numMultiplotSp > MAX_DISP_SP)||((drawing.multiplotMode < 0))){
+    if((drawing.numMultiplotSp > MAX_DISP_SP)||((drawing.multiplotMode < 0))){
 
-    //show an error dialog
-    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
-    GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_manage_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Invalid selection!");
-    if(drawing.multiplotMode < 0)
-      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Please select a plotting mode.");
-    if(drawing.numMultiplotSp > MAX_DISP_SP){
-      char errStr[256];
-      snprintf(errStr,256,"The maximum number of spectra\nthat may be plotted at once is %i.",MAX_DISP_SP);
-      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),errStr);
-    }
+      //show an error dialog
+      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+      GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_manage_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Invalid selection!");
+      if(drawing.multiplotMode < 0)
+        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Please select a plotting mode.");
+      if(drawing.numMultiplotSp > MAX_DISP_SP){
+        char errStr[256];
+        snprintf(errStr,256,"The maximum number of spectra\nthat may be plotted at once is %i.",MAX_DISP_SP);
+        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),errStr);
+      }
 
-    //reset default values, in case the multiplot window is closed
-    drawing.multiplotMode = 0;
-    drawing.multiPlots[0] = 0; 
-    drawing.numMultiplotSp = 1;
-    gtk_spin_button_set_value(spectrum_selector, drawing.multiPlots[0]+1);
-
-    gtk_dialog_run (GTK_DIALOG (message_dialog));
-    gtk_widget_destroy (message_dialog);
-  }else{
-
-    //set drawing mode
-    if(drawing.numMultiplotSp == 1){
+      //reset default values, in case the multiplot window is closed
       drawing.multiplotMode = 0;
-    }else{
-      drawing.multiplotMode++; //value of 0 means no multiplot
-    }
+      drawing.multiPlots[0] = 0; 
+      drawing.numMultiplotSp = 1;
+      gtk_spin_button_set_value(spectrum_selector, drawing.multiPlots[0]+1);
 
-    guiglobals.deferSpSelChange = 1;
-    gtk_spin_button_set_value(spectrum_selector, drawing.multiPlots[0]+1);
-    
-    printf("Number of spectra selected for plotting: %i.  Selected spectra: ", drawing.numMultiplotSp);
-    int i;
-    for(i=0;i<drawing.numMultiplotSp;i++){
-      printf("%i ",drawing.multiPlots[i]);
-    }
-    printf(", multiplot mode: %i\n",drawing.multiplotMode);
-    if(drawing.multiplotMode > 1){
-      //multiple spectra displayed simultaneously, cannot fit
-      gtk_widget_set_sensitive(GTK_WIDGET(fit_button),FALSE);
+      gtk_dialog_run (GTK_DIALOG (message_dialog));
+      gtk_widget_destroy (message_dialog);
     }else{
-      gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
+
+      //set drawing mode
+      if(drawing.numMultiplotSp == 1){
+        drawing.multiplotMode = 0;
+      }else{
+        drawing.multiplotMode++; //value of 0 means no multiplot
+      }
+
+      guiglobals.deferSpSelChange = 1;
+      gtk_spin_button_set_value(spectrum_selector, drawing.multiPlots[0]+1);
+      
+      printf("Number of spectra selected for plotting: %i.  Selected spectra: ", drawing.numMultiplotSp);
+      int i;
+      for(i=0;i<drawing.numMultiplotSp;i++){
+        printf("%i ",drawing.multiPlots[i]);
+      }
+      printf(", multiplot mode: %i\n",drawing.multiplotMode);
+      if(drawing.multiplotMode > 1){
+        //multiple spectra displayed simultaneously, cannot fit
+        gtk_widget_set_sensitive(GTK_WIDGET(fit_button),FALSE);
+      }else{
+        gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
+      }
+      
+      
     }
-    
-    //handle fitting
-    if(drawing.multiplotMode > 1){
-      guiglobals.fittingSp = 0; //clear any fits being displayed
-    }else if(guiglobals.fittingSp == 5){
-      startGausFit(); //refit
+  }else{
+    //show view
+    int viewInd = 0;
+    model = gtk_tree_view_get_model(view_tree_view);
+    readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
+    gtk_tree_selection_get_selected(gtk_tree_view_get_selection(view_tree_view), &model, &iter); //set the iterator to the selected entry
+    gtk_tree_model_get(model,&iter,1,&viewInd,-1); //get the index of the selected view
+
+    if((viewInd>=0)&&(viewInd<rawdata.numViews)){
+      //setup a multiplot view
+      drawing.multiplotMode = rawdata.viewMultiplotMode[viewInd];
+      drawing.numMultiplotSp = rawdata.viewNumMultiplotSp[viewInd];
+      memcpy(&drawing.scaleFactor,&rawdata.viewScaleFactor[viewInd],sizeof(drawing.scaleFactor));
+      memcpy(&drawing.multiPlots,&rawdata.viewMultiPlots[viewInd],sizeof(drawing.multiPlots));
     }
-    
-    gtk_widget_hide(GTK_WIDGET(multiplot_manage_window)); //close the multiplot/manage window
-    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
   }
+
+  //handle fitting
+  if(drawing.multiplotMode > 1){
+    guiglobals.fittingSp = 0; //clear any fits being displayed
+  }else if(guiglobals.fittingSp == 5){
+    startGausFit(); //refit
+  }
+  
+  gtk_widget_hide(GTK_WIDGET(multiplot_manage_window)); //close the multiplot/manage window
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
   
 }
 
@@ -1066,12 +1115,16 @@ void on_manage_name_cell_edited(GtkCellRendererText *cell, gchar *path_string, g
   gtk_tree_model_get_iter_from_string(model, &iter, path_string);
   gtk_tree_model_get(model,&iter,2,&spInd,-1); //get the spectrum index
 
-  //edit the histogram comment
-  if((spInd>=0)&&(spInd<NSPECT)){
-    snprintf(rawdata.histComment[spInd],256,"%s",new_text);
+  //edit the histogram or view comment
+  if(spInd>=0){
+    if(spInd<rawdata.numSpOpened){
+      snprintf(rawdata.histComment[spInd],256,"%s",new_text);
+      gtk_list_store_set(manage_liststore,&iter,0,rawdata.histComment[spInd],-1); //set the boolean value (change checkbox value)
+    }else{
+      snprintf(rawdata.viewComment[spInd-rawdata.numSpOpened],256,"%s",new_text);
+      gtk_list_store_set(manage_liststore,&iter,0,rawdata.viewComment[spInd-rawdata.numSpOpened],-1); //set the boolean value (change checkbox value)
+    }
   }
-
-  gtk_list_store_set(manage_liststore,&iter,0,rawdata.histComment[spInd],-1); //set the boolean value (change checkbox value)
 
   setup_multiplot_window(); //redraw the tree list
 
@@ -1152,29 +1205,45 @@ void on_manage_delete_button_clicked(GtkButton *b)
     gtk_tree_model_get(model,&iter,1,&val,2,&spInd,-1); //get whether the spectrum is selected and the spectrum index
     if(spInd < NSPECT){
       if(val==TRUE){
-        deleteSpectrum(spInd-deletedSpCounter); //remember that indices are changed each time a spectrum is deleted
-        deletedSpCounter++;
+        if(getFirstViewDependingOnSp(spInd-deletedSpCounter)>=0){
+          char messageStr[512];
+          snprintf(messageStr,512,"One or more saved views depends on the data: %s\nDeleting the data will delete the view(s) as well.",rawdata.histComment[spInd-deletedSpCounter]);
+          GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+          GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_manage_window, flags, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO, "Delete data?");
+          gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),messageStr);
+          if (gtk_dialog_run(GTK_DIALOG(message_dialog)) == GTK_RESPONSE_YES){
+            deleteSpectrumOrView(spInd-deletedSpCounter); //remember that indices are changed each time a spectrum is deleted
+            deletedSpCounter++;
+          }
+          gtk_widget_destroy(message_dialog);
+        }else{
+          deleteSpectrumOrView(spInd-deletedSpCounter); //remember that indices are changed each time a spectrum is deleted
+          deletedSpCounter++;
+        }
       }
     }
     readingTreeModel = gtk_tree_model_iter_next(model, &iter);
   }
 
-  //reset to default drawing view
-  drawing.multiplotMode = 0;
-  drawing.multiPlots[0] = 0;
-  gtk_spin_button_set_value(spectrum_selector, drawing.multiPlots[0]+1);
-  guiglobals.fittingSp = 0; //clear any fits being displayed
-    
-  if(rawdata.numSpOpened <= 0){
-    setSpOpenView(0); //no spectra available
-    gtk_widget_hide(GTK_WIDGET(multiplot_manage_window)); //close the window
-  }else{
-    setSpOpenView(1);
-    //redraw the manage window
-    if(gtk_widget_get_visible(GTK_WIDGET(multiplot_manage_stack_switcher))){
-      show_manage_window(1);
+  if(deletedSpCounter>0){
+    //reset to default drawing view
+    drawing.multiplotMode = 0;
+    drawing.multiPlots[0] = 0;
+    drawing.scaleFactor[0] = 1.0;
+    gtk_spin_button_set_value(spectrum_selector, drawing.multiPlots[0]+1);
+    guiglobals.fittingSp = 0; //clear any fits being displayed
+      
+    if(rawdata.numSpOpened <= 0){
+      setSpOpenView(0); //no spectra available
+      gtk_widget_hide(GTK_WIDGET(multiplot_manage_window)); //close the window
     }else{
-      show_manage_window(0);
+      setSpOpenView(1);
+      //redraw the manage window
+      if(gtk_widget_get_visible(GTK_WIDGET(multiplot_manage_stack_switcher))){
+        show_manage_window(1);
+      }else{
+        show_manage_window(0);
+      }
     }
   }
   

@@ -4,45 +4,117 @@
 //mainly to help other parts of the program with drawing, 
 //fitting, and saving displayed data to disk
 
-void deleteSpectrum(const int spInd){
+int getFirstViewDependingOnSp(const int spInd){
+  if((spInd<0)||(spInd>=rawdata.numSpOpened)){
+    return -1;
+  }
+  int i,j;
+  for(i=0;i<rawdata.numViews;i++){
+    for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
+      if(rawdata.viewMultiPlots[i][j] == spInd){
+        return i;
+      }
+    }
+  }
+  return -1;
+}
+
+void deleteSpectrumOrView(const int spInd){
   
   //printf("deleting spectrum %i\n",spInd);
-  if((spInd>=NSPECT)||(spInd<0)){
+  if((spInd>=(rawdata.numSpOpened+rawdata.numViews))||(spInd<0)){
     printf("WARNING: attempted to delete spectrum at invalid index %i\n",spInd);
     return;
   }
 
   int i,j;
 
-  //delete comments
-  for(i=0;i<rawdata.numChComments;i++){
-    if(rawdata.chanCommentSp[i] == spInd){
-      //delete the comment
-      for(j=i;j<(rawdata.numChComments-1);j++){
-        memcpy(&rawdata.chanComment[j],&rawdata.chanComment[j+1],sizeof(rawdata.chanComment[j]));
-        memcpy(&rawdata.chanCommentSp[j],&rawdata.chanCommentSp[j+1],sizeof(rawdata.chanCommentSp[j]));
-        memcpy(&rawdata.chanCommentCh[j],&rawdata.chanCommentCh[j+1],sizeof(rawdata.chanCommentCh[j]));
-        memcpy(&rawdata.chanCommentVal[j],&rawdata.chanCommentVal[j+1],sizeof(rawdata.chanCommentVal[j]));
+  if(spInd<rawdata.numSpOpened){
+    //deleting spectrum data
+
+    //delete comments
+    for(i=0;i<rawdata.numChComments;i++){
+      if(rawdata.chanCommentSp[i] == spInd){
+        //delete the comment
+        for(j=i;j<(rawdata.numChComments-1);j++){
+          memcpy(&rawdata.chanComment[j],&rawdata.chanComment[j+1],sizeof(rawdata.chanComment[j]));
+          memcpy(&rawdata.chanCommentSp[j],&rawdata.chanCommentSp[j+1],sizeof(rawdata.chanCommentSp[j]));
+          memcpy(&rawdata.chanCommentCh[j],&rawdata.chanCommentCh[j+1],sizeof(rawdata.chanCommentCh[j]));
+          memcpy(&rawdata.chanCommentVal[j],&rawdata.chanCommentVal[j+1],sizeof(rawdata.chanCommentVal[j]));
+        }
+        rawdata.numChComments -= 1;
+        i -= 1; //indices have shifted, reheck the current index
+      }else if(rawdata.chanCommentSp[i] > spInd){
+        //change to the new index for the spectrum
+        rawdata.chanCommentSp[i] -= 1;
       }
-      rawdata.numChComments -= 1;
-      i -= 1; //indices have shifted, reheck the current index
-    }else if(rawdata.chanCommentSp[i] > spInd){
-      //change to the new index for the spectrum
-      rawdata.chanCommentSp[i] -= 1;
     }
+
+    //delete views that depend on the data
+    int deletingViews = 1;
+    while(deletingViews){
+      int viewToDel = getFirstViewDependingOnSp(spInd);
+      if(viewToDel >= 0){
+        //delete view
+        for(i=viewToDel;i<(rawdata.numViews-1);i++){
+          memcpy(&rawdata.viewComment[i],&rawdata.viewComment[i+1],sizeof(rawdata.viewComment[i]));
+          memcpy(&rawdata.viewMultiplotMode[i],&rawdata.viewMultiplotMode[i+1],sizeof(rawdata.viewMultiplotMode[i]));
+          memcpy(&rawdata.viewNumMultiplotSp[i],&rawdata.viewNumMultiplotSp[i+1],sizeof(rawdata.viewNumMultiplotSp[i]));
+          memcpy(&rawdata.viewScaleFactor[i],&rawdata.viewScaleFactor[i+1],sizeof(rawdata.viewScaleFactor[i]));
+          memcpy(&rawdata.viewMultiPlots[i],&rawdata.viewMultiPlots[i+1],sizeof(rawdata.viewMultiPlots[i]));
+        }
+        if(rawdata.numViews > 0){
+          rawdata.numViews -= 1;
+        }
+      }else{
+        deletingViews = 0;
+      }
+    }
+
+    //realign view data so that it still points to the proper spectra
+    for(i=0;i<rawdata.numViews;i++){
+      for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
+        if(rawdata.viewMultiPlots[i][j] > spInd){
+          rawdata.viewMultiPlots[i][j] -= 1;
+        }
+      }
+      for(j=spInd;j<(rawdata.numSpOpened-1);j++){
+        rawdata.viewScaleFactor[i][j]=rawdata.viewScaleFactor[i][j+1];
+      }
+    }
+
+    //delete spectrum data
+    for(i=spInd;i<(rawdata.numSpOpened-1);i++){
+      memcpy(&rawdata.hist[i],&rawdata.hist[i+1],sizeof(rawdata.hist[i]));
+      memcpy(&rawdata.histComment[i],&rawdata.histComment[i+1],sizeof(rawdata.histComment[i]));
+    }
+    if(rawdata.numSpOpened > 0){
+      rawdata.numSpOpened -= 1;
+    }
+    if(rawdata.numSpOpened == 0){
+      rawdata.openedSp = 0;
+    }
+
+  }else{
+    //deleting view
+
+    int viewInd = spInd - rawdata.numSpOpened;
+
+    //delete view
+    for(i=viewInd;i<(rawdata.numViews-1);i++){
+      memcpy(&rawdata.viewComment[i],&rawdata.viewComment[i+1],sizeof(rawdata.viewComment[i]));
+      memcpy(&rawdata.viewMultiplotMode[i],&rawdata.viewMultiplotMode[i+1],sizeof(rawdata.viewMultiplotMode[i]));
+      memcpy(&rawdata.viewNumMultiplotSp[i],&rawdata.viewNumMultiplotSp[i+1],sizeof(rawdata.viewNumMultiplotSp[i]));
+      memcpy(&rawdata.viewScaleFactor[i],&rawdata.viewScaleFactor[i+1],sizeof(rawdata.viewScaleFactor[i]));
+      memcpy(&rawdata.viewMultiPlots[i],&rawdata.viewMultiPlots[i+1],sizeof(rawdata.viewMultiPlots[i]));
+    }
+    if(rawdata.numViews > 0){
+      rawdata.numViews -= 1;
+    }
+
   }
 
-  //delete spectrum data
-  for(i=spInd;i<(rawdata.numSpOpened-1);i++){
-    memcpy(&rawdata.hist[i],&rawdata.hist[i+1],sizeof(rawdata.hist[i]));
-    memcpy(&rawdata.histComment[i],&rawdata.histComment[i+1],sizeof(rawdata.histComment[i]));
-  }
-  if(rawdata.numSpOpened > 0){
-    rawdata.numSpOpened -= 1;
-  }
-  if(rawdata.numSpOpened == 0){
-    rawdata.openedSp = 0;
-  }
+  
 
   return;
 }
