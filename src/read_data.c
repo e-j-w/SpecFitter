@@ -74,6 +74,61 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 				}
 			}
 
+			//read views
+			fread(&uintBuf, sizeof(unsigned int), 1, inp);
+			if(outHistStartSp == 0){
+				//no comments exist already
+				rawdata.numViews = uintBuf;
+				for(i=0;i<rawdata.numViews;i++){
+					if(i<MAXNVIEWS){
+						memset(rawdata.viewScaleFactor[i],0,sizeof(rawdata.viewScaleFactor[i]));
+						fread(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,inp);
+						fread(&rawdata.viewMultiplotMode[i],sizeof(char),1,inp);
+						fread(&rawdata.viewNumMultiplotSp[i],sizeof(int),1,inp);
+						for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
+							fread(&rawdata.viewMultiPlots[i][j],sizeof(int),1,inp);
+						}
+						for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
+							if((rawdata.viewMultiPlots[i][j]>=0)&&(rawdata.viewMultiPlots[i][j]<NSPECT)){
+								fread(&rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]],sizeof(double),1,inp);
+							}
+						}
+					}
+				}
+			}else{
+				//appending spectra, comments may already exist
+				for(i=rawdata.numViews;i<rawdata.numViews+uintBuf;i++){
+					if(i<MAXNVIEWS){
+						memset(rawdata.viewScaleFactor[i],0,sizeof(rawdata.viewScaleFactor[i]));
+						fread(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,inp);
+						fread(&rawdata.viewMultiplotMode[i],sizeof(char),1,inp);
+						fread(&rawdata.viewNumMultiplotSp[i],sizeof(int),1,inp);
+						for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
+							fread(&rawdata.viewMultiPlots[i][j],sizeof(int),1,inp);
+						}
+						for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
+							if((rawdata.viewMultiPlots[i][j]>=0)&&(rawdata.viewMultiPlots[i][j]<NSPECT)){
+								fread(&rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]],sizeof(double),1,inp);
+							}
+						}
+						//realign view data
+						for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
+							if((j+outHistStartSp)<NSPECT){
+								rawdata.viewScaleFactor[i][j+outHistStartSp]=rawdata.viewScaleFactor[i][j];
+								rawdata.viewMultiPlots[i][j+outHistStartSp]=rawdata.viewMultiPlots[i][j];
+							}else{
+								printf("WARINING: cannot re-align appended view.\n");
+							}
+						}
+					}
+				}
+				rawdata.numViews += uintBuf;
+				if(rawdata.numViews > MAXNVIEWS){
+					printf("WARNING: over-imported views.  Truncating.\n");
+					rawdata.numViews = MAXNVIEWS;
+				}
+			}
+
 			//printf("num comments: %i\n",rawdata.numChComments);
 			
 			//read spectra
@@ -359,6 +414,58 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 												rawdata.histComment[spID][strcspn(rawdata.histComment[spID], "\r\n")] = 0;//strips newline characters from the string
 											}
 										}						
+									}
+								}else if(strcmp(tok,"VIEW")==0){
+									if(rawdata.numViews < MAXNVIEWS){
+										tok = strtok(NULL,""); //get the rest of the string
+										if(tok!=NULL){
+											strncpy(rawdata.viewComment[rawdata.numViews],tok,256);
+											rawdata.viewComment[rawdata.numViews][strcspn(rawdata.viewComment[rawdata.numViews], "\r\n")] = 0;//strips newline characters from the string
+											if(fgets(str,256,inp)!=NULL){ //get an entire line
+												tok = strtok(str," ");
+												if(tok!=NULL){
+													if(strcmp(tok,"VIEWPAR")==0){
+														tok = strtok(NULL," ");
+														if(tok!=NULL){
+															rawdata.viewMultiplotMode[rawdata.numViews] = (char)atoi(tok);
+															tok = strtok(NULL," ");
+															if(tok!=NULL){
+																rawdata.viewNumMultiplotSp[rawdata.numViews] = atoi(tok);
+																if(fgets(str,256,inp)!=NULL){ //get an entire line
+																	tok = strtok(str," ");
+																	if(tok!=NULL){
+																		if(strcmp(tok,"VIEWSP")==0){
+																			for(i=0;i<rawdata.viewNumMultiplotSp[rawdata.numViews];i++){
+																				tok = strtok(NULL," ");
+																				if(tok!=NULL){
+																					rawdata.viewMultiPlots[rawdata.numViews][i] = atoi(tok);
+																				}
+																			}
+																			if(fgets(str,256,inp)!=NULL){ //get an entire line
+																				tok = strtok(str," ");
+																				if(tok!=NULL){
+																					if(strcmp(tok,"VIEWSCALE")==0){
+																						for(i=0;i<rawdata.viewNumMultiplotSp[rawdata.numViews];i++){
+																							if((rawdata.viewMultiPlots[rawdata.numViews][i]>=0)&&(rawdata.viewMultiPlots[rawdata.numViews][i]<NSPECT)){
+																								tok = strtok(NULL," ");
+																								if(tok!=NULL){
+																									rawdata.viewScaleFactor[rawdata.numViews][rawdata.viewMultiPlots[rawdata.numViews][i]] = atof(tok);
+																								}
+																							}
+																						}
+																						rawdata.numViews += 1;
+																					}
+																				}
+																			}
+																		}
+																	}
+																}
+															}
+														}
+													}
+												}
+											}
+										}
 									}
 								}
 							}

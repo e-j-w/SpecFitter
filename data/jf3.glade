@@ -1752,7 +1752,6 @@ Author: Jonathan Williams
                                 <child>
                                   <object class="GtkCellRendererText" id="view_cr1">
                                     <property name="height">40</property>
-                                    <property name="editable">True</property>
                                   </object>
                                   <attributes>
                                     <attribute name="text">0</attribute>
@@ -1955,8 +1954,10 @@ Author: Jonathan Williams
             </child>
             <child>
               <object class="GtkStackSwitcher" id="multiplot_manage_stack_switcher">
+                <property name="height_request">20</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="valign">center</property>
                 <property name="stack">multiplot_manage_stack</property>
               </object>
               <packing>

@@ -230,6 +230,7 @@ void openSingleFile(char *filename, int append){
   if(append!=1){
     rawdata.numSpOpened=0;
     rawdata.numChComments=0;
+    rawdata.numViews=0;
   }
   int numSp = readSpectrumDataFile(filename,rawdata.hist,rawdata.numSpOpened);
   if(numSp > 0){ //see read_data.c
@@ -309,6 +310,7 @@ void on_open_button_clicked(GtkButton *b)
   {
     rawdata.numSpOpened = 0; //reset the open spectra
     rawdata.numChComments = 0; //reset the number of comments
+    rawdata.numViews = 0; //reset the number of views
     char *filename = NULL;
     GSList *file_list = gtk_file_chooser_get_filenames(file_open_dialog);
     for(i=0;i<g_slist_length(file_list);i++){

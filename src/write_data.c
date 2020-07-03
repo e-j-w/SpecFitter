@@ -29,6 +29,7 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
 	for(i=0;i<rawdata.numSpOpened;i++){
 		fwrite(&rawdata.histComment[i],sizeof(rawdata.histComment[i]),1,out);
 	}
+	//write comments
 	uintBuf = rawdata.numChComments; //number of comments to write
 	fwrite(&uintBuf,sizeof(unsigned int),1,out);
 	for(i=0;i<rawdata.numChComments;i++){
@@ -36,6 +37,20 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
 		fwrite(&rawdata.chanCommentCh[i],sizeof(rawdata.chanCommentCh[i]),1,out);
 		fwrite(&rawdata.chanCommentVal[i],sizeof(rawdata.chanCommentVal[i]),1,out);
 		fwrite(&rawdata.chanComment[i],sizeof(rawdata.chanComment[i]),1,out);
+	}
+	//write views
+	uintBuf = rawdata.numViews; //number of views to write
+	fwrite(&uintBuf,sizeof(unsigned int),1,out);
+	for(i=0;i<rawdata.numViews;i++){
+		fwrite(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,out);
+		fwrite(&rawdata.viewMultiplotMode[i],sizeof(char),1,out);
+		fwrite(&rawdata.viewNumMultiplotSp[i],sizeof(int),1,out);
+		for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
+			fwrite(&rawdata.viewMultiPlots[i][j],sizeof(int),1,out);
+		}
+		for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
+			fwrite(&rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]],sizeof(double),1,out);
+		}
 	}
 
 	float lastBin = 0.;
@@ -324,6 +339,22 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
 			//write histogram titles
 			for(i=0;i<rawdata.numSpOpened;i++){
 				fprintf(out,"TITLE %i %s\n",i+1,rawdata.histComment[i]);
+			}
+
+			//write views
+			for(i=0;i<rawdata.numViews;i++){
+				fprintf(out,"VIEW %s\nVIEWPAR %i %i\n",rawdata.viewComment[i],rawdata.viewMultiplotMode[i],rawdata.viewNumMultiplotSp[i]);
+				fprintf(out,"VIEWSP ");
+				for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
+					fprintf(out," %i", rawdata.viewMultiPlots[i][j]);
+				}
+				fprintf(out,"\nVIEWSCALE ");
+				for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
+					if((rawdata.viewMultiPlots[i][j]>=0)&&(rawdata.viewMultiPlots[i][j]<NSPECT)){
+						fprintf(out," %0.3f", rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]]);
+					}
+				}
+				fprintf(out,"\n");
 			}
 
 			break;

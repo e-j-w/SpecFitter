@@ -53,9 +53,10 @@ Conversion codes for some of the above data formats are available in the [FileCo
 
 ### Data management
 
-* Rename or delete spectra.
+* Append, rename, or delete spectra to/from the opened session.
+* Store custom views of multiple spectra using any of the available plotting modes.
 * Double click anywhere on a plot to write/edit a comment there.
-* The full session including comments are saved when using the **.jf3** or **.txt** file formats.
+* The full session including comments and custom views can be saved to disk using the **.jf3** (compressed) or **.txt** (ACSII) file formats.
 
 
 ## Getting started
