@@ -1011,19 +1011,27 @@ Author: Jonathan Williams
               </packing>
             </child>
             <child>
-              <object class="GtkCheckButton" id="export_rebin_checkbutton">
-                <property name="label" translatable="yes"> Apply rebin and scaling factors to exported data</property>
+              <object class="GtkRevealer" id="export_options_revealer">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="tooltip_text" translatable="yes">If checked, the rebin and scaling factors set in the display menu will be applied to exported spectra (ie. the spectra will be exported as drawn, rather than as originally imported).</property>
-                <property name="active">True</property>
-                <property name="draw_indicator">True</property>
+                <property name="can_focus">False</property>
+                <property name="transition_type">slide-up</property>
+                <property name="reveal_child">True</property>
+                <child>
+                  <object class="GtkCheckButton" id="export_rebin_checkbutton">
+                    <property name="label" translatable="yes"> Apply rebin and scaling factors to exported data</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">If checked, the rebin and scaling factors set in the display menu will be applied to exported spectra (ie. the spectra will be exported as drawn, rather than as originally imported).</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">1</property>
+                <property name="position">2</property>
               </packing>
             </child>
             <child>
@@ -1795,7 +1803,7 @@ Author: Jonathan Williams
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="valign">end</property>
-                        <property name="label" translatable="yes">No Views Created Yet</property>
+                        <property name="label" translatable="yes">No Custom Views Created</property>
                         <attributes>
                           <attribute name="weight" value="bold"/>
                           <attribute name="size" value="19456"/>

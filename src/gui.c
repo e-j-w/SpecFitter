@@ -125,7 +125,6 @@ void on_multiplot_manage_stack_switcher_changed(){
   }
 }
 
-
 //setup the tree view in the manage window
 void setup_manage_window(){
   GtkTreeIter iter;
@@ -185,8 +184,10 @@ void setup_multiplot_window(){
   
   if(selectedSpCount > 1){
     gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),TRUE);
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_make_view_button),TRUE);
   }else{
     gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),FALSE);
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_make_view_button),FALSE);
   }
 
   //view tree view
@@ -608,16 +609,16 @@ void on_save_text_button_clicked(GtkButton *b)
   gtk_label_set_text(export_description_label,"Export to .txt format:");
   gtk_widget_hide(GTK_WIDGET(export_note_label));
   gtk_combo_box_text_remove_all(export_mode_combobox);
-  gtk_combo_box_text_insert(export_mode_combobox,0,NULL,"All spectra (multiple columns)");
+  gtk_combo_box_text_insert(export_mode_combobox,0,NULL,"Full session (single file)");
   for(i=0;i<rawdata.numSpOpened;i++){
     gtk_combo_box_text_insert(export_mode_combobox,i+1,NULL,rawdata.histComment[i]);
   }
   gtk_combo_box_set_active(GTK_COMBO_BOX(export_mode_combobox),0); //set the default entry
+  gtk_revealer_set_reveal_child(export_options_revealer, FALSE);
   gtk_window_present(export_options_window); //show the window
 }
 
-void on_save_radware_button_clicked(GtkButton *b)
-{
+void on_save_radware_button_clicked(GtkButton *b){
   int i;
   guiglobals.exportFileType = 1; //exporting to radware format
   gtk_label_set_text(export_description_label,"Export to .spe format:");
@@ -632,11 +633,28 @@ void on_save_radware_button_clicked(GtkButton *b)
     gtk_combo_box_text_insert(export_mode_combobox,i+1,NULL,rawdata.histComment[i]);
   }
   gtk_combo_box_set_active(GTK_COMBO_BOX(export_mode_combobox),0); //set the default entry
+  gtk_revealer_set_reveal_child(export_options_revealer, TRUE);
   gtk_window_present(export_options_window); //show the window
 }
 
-void on_export_save_button_clicked(GtkButton *b)
-{
+void on_export_mode_combobox_changed (GtkComboBox *widget, gpointer user_data){
+  int exportMode = gtk_combo_box_get_active(GTK_COMBO_BOX(export_mode_combobox));
+  switch (exportMode)
+  {
+    case 0:
+      if(guiglobals.exportFileType == 0){
+        gtk_revealer_set_reveal_child(export_options_revealer, FALSE);
+      }else{
+        gtk_revealer_set_reveal_child(export_options_revealer, TRUE);
+      }
+      break;
+    default:
+      gtk_revealer_set_reveal_child(export_options_revealer, TRUE);
+      break;
+  }
+}
+
+void on_export_save_button_clicked(GtkButton *b){
   //get export settings
   int exportMode = gtk_combo_box_get_active(GTK_COMBO_BOX(export_mode_combobox));
   int rebin = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_rebin_checkbutton));
@@ -914,8 +932,10 @@ void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
   }
   if(selectedSpCount > 1){
     gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),TRUE);
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_make_view_button),TRUE);
   }else{
     gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),FALSE);
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_make_view_button),FALSE);
   }
   if(selectedSpCount < 1){
     gtk_widget_set_sensitive(GTK_WIDGET(multiplot_ok_button),FALSE);
@@ -1637,6 +1657,7 @@ void iniitalizeUIElements(){
   export_description_label = GTK_LABEL(gtk_builder_get_object(builder, "export_description_label"));
   export_note_label = GTK_LABEL(gtk_builder_get_object(builder, "export_note_label"));
   export_mode_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "export_mode_combobox"));
+  export_options_revealer = GTK_REVEALER(gtk_builder_get_object(builder, "export_options_revealer"));
   export_rebin_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "export_rebin_checkbutton"));
   export_options_save_button = GTK_BUTTON(gtk_builder_get_object(builder, "export_options_save_button"));
 
@@ -1671,87 +1692,88 @@ void iniitalizeUIElements(){
   contract_scale = GTK_SCALE(gtk_builder_get_object(builder, "contract_scale"));
 
   //connect signals
-  g_signal_connect (G_OBJECT (spectrum_drawing_area), "draw", G_CALLBACK (drawSpectrumArea), NULL);
-  g_signal_connect (G_OBJECT (spectrum_drawing_area), "scroll-event", G_CALLBACK (on_spectrum_scroll), NULL);
-  g_signal_connect (G_OBJECT (spectrum_drawing_area), "motion-notify-event", G_CALLBACK (on_spectrum_cursor_motion), NULL);
-  g_signal_connect (G_OBJECT (spectrum_drawing_area), "button-press-event", G_CALLBACK (on_spectrum_click), NULL);
-  g_signal_connect (G_OBJECT (open_button), "clicked", G_CALLBACK (on_open_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (append_button), "clicked", G_CALLBACK (on_append_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (calibrate_button), "clicked", G_CALLBACK (on_calibrate_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (manage_spectra_button), "clicked", G_CALLBACK (on_manage_spectra_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (save_button), "clicked", G_CALLBACK (on_save_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (save_button_radware), "clicked", G_CALLBACK (on_save_radware_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (save_button_text), "clicked", G_CALLBACK (on_save_text_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (help_button), "clicked", G_CALLBACK (on_help_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (multiplot_button), "clicked", G_CALLBACK (on_multiplot_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (sum_all_button), "clicked", G_CALLBACK (on_sum_all_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (fit_button), "clicked", G_CALLBACK (on_fit_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (fit_fit_button), "clicked", G_CALLBACK (on_fit_fit_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (fit_cancel_button), "clicked", G_CALLBACK (on_fit_cancel_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (fit_preferences_button), "clicked", G_CALLBACK (on_fit_preferences_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (display_button), "clicked", G_CALLBACK (on_display_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (calibrate_ok_button), "clicked", G_CALLBACK (on_calibrate_ok_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (comment_ok_button), "clicked", G_CALLBACK (on_comment_ok_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (remove_comment_button), "clicked", G_CALLBACK (on_remove_comment_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (comment_entry), "changed", G_CALLBACK (on_comment_entry_changed), NULL);
-  g_signal_connect (G_OBJECT (remove_calibration_button), "clicked", G_CALLBACK (on_remove_calibration_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (spectrum_selector), "value-changed", G_CALLBACK (on_spectrum_selector_changed), NULL);
-  g_signal_connect (G_OBJECT (autoscale_button), "toggled", G_CALLBACK (on_toggle_autoscale), NULL);
-  g_signal_connect (G_OBJECT (logscale_button), "toggled", G_CALLBACK (on_toggle_logscale), NULL);
-  g_signal_connect (G_OBJECT (cursor_draw_button), "toggled", G_CALLBACK (on_toggle_cursor), NULL);
-  g_signal_connect (G_OBJECT (discard_empty_checkbutton), "toggled", G_CALLBACK (on_toggle_discard_empty), NULL);
-  g_signal_connect (G_OBJECT (export_options_save_button), "clicked", G_CALLBACK (on_export_save_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (bin_errors_checkbutton), "toggled", G_CALLBACK (on_toggle_bin_errors), NULL);
-  g_signal_connect (G_OBJECT (round_errors_checkbutton), "toggled", G_CALLBACK (on_toggle_round_errors), NULL);
-  g_signal_connect (G_OBJECT (dark_theme_checkbutton), "toggled", G_CALLBACK (on_toggle_dark_theme), NULL);
-  g_signal_connect (G_OBJECT (spectrum_label_checkbutton), "toggled", G_CALLBACK (on_toggle_spectrum_label), NULL);
-  g_signal_connect (G_OBJECT (spectrum_comment_checkbutton), "toggled", G_CALLBACK (on_toggle_spectrum_comment), NULL);
-  g_signal_connect (G_OBJECT (relative_widths_checkbutton), "toggled", G_CALLBACK (on_toggle_relative_widths), NULL);
-  g_signal_connect (G_OBJECT (popup_results_checkbutton), "toggled", G_CALLBACK (on_toggle_popup_results), NULL);
-  g_signal_connect (G_OBJECT (animation_checkbutton), "toggled", G_CALLBACK (on_toggle_animation), NULL);
-  g_signal_connect (G_OBJECT (autozoom_checkbutton), "toggled", G_CALLBACK (on_toggle_autozoom), NULL);
-  g_signal_connect (G_OBJECT (preferences_apply_button), "clicked", G_CALLBACK (on_preferences_apply_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (preferences_button), "clicked", G_CALLBACK (on_preferences_button_clicked), NULL);
-  gtk_widget_set_events(spectrum_drawing_area, gtk_widget_get_events (spectrum_drawing_area) | GDK_SCROLL_MASK | GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK); //allow mouse scrolling over the drawing area
-  g_signal_connect (G_OBJECT (cal_entry_const), "preedit-changed", G_CALLBACK (on_cal_par_activate), NULL);
-  g_signal_connect (G_OBJECT (cal_entry_lin), "preedit-changed", G_CALLBACK (on_cal_par_activate), NULL);
-  g_signal_connect (G_OBJECT (cal_entry_quad), "preedit-changed", G_CALLBACK (on_cal_par_activate), NULL);
-  g_signal_connect (G_OBJECT (zoom_scale), "value-changed", G_CALLBACK (on_zoom_scale_changed), NULL);
-  g_signal_connect (G_OBJECT (contract_scale), "value-changed", G_CALLBACK (on_contract_scale_changed), NULL);
-  g_signal_connect (G_OBJECT (shortcuts_button), "clicked", G_CALLBACK (on_shortcuts_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (about_button), "clicked", G_CALLBACK (on_about_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (multiplot_manage_stack_switcher), "button-release-event", G_CALLBACK (on_multiplot_manage_stack_switcher_changed), NULL);
-  g_signal_connect (G_OBJECT (multiplot_make_view_button), "clicked", G_CALLBACK (on_multiplot_make_view_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (multiplot_ok_button), "clicked", G_CALLBACK (on_multiplot_ok_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (multiplot_cr2), "toggled", G_CALLBACK (on_multiplot_cell_toggled), NULL);
-  g_signal_connect (G_OBJECT (multiplot_cr3), "edited", G_CALLBACK (on_multiplot_scaling_edited), NULL);
-  g_signal_connect (G_OBJECT (view_tree_view), "row-activated", G_CALLBACK (on_multiplot_ok_button_clicked), NULL); //double click action - show view on double click
-  g_signal_connect (G_OBJECT (gtk_tree_view_get_selection(view_tree_view)), "changed", G_CALLBACK (on_view_tree_selection_changed), NULL);
-  g_signal_connect (G_OBJECT (manage_delete_button), "clicked", G_CALLBACK (on_manage_delete_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (manage_cr1), "edited", G_CALLBACK (on_manage_name_cell_edited), NULL);
-  g_signal_connect (G_OBJECT (manage_cr2), "toggled", G_CALLBACK (on_manage_cell_toggled), NULL);
-  g_signal_connect (G_OBJECT (calibrate_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect (G_OBJECT (comment_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect (G_OBJECT (multiplot_manage_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect (G_OBJECT (export_options_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect (G_OBJECT (preferences_window), "delete-event", G_CALLBACK (on_preferences_cancel_button_clicked), NULL);
-  g_signal_connect (G_OBJECT (preferences_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect (G_OBJECT (shortcuts_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect (G_OBJECT (help_window), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect (G_OBJECT (about_dialog), "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(spectrum_drawing_area), "draw", G_CALLBACK(drawSpectrumArea), NULL);
+  g_signal_connect(G_OBJECT(spectrum_drawing_area), "scroll-event", G_CALLBACK(on_spectrum_scroll), NULL);
+  g_signal_connect(G_OBJECT(spectrum_drawing_area), "motion-notify-event", G_CALLBACK(on_spectrum_cursor_motion), NULL);
+  g_signal_connect(G_OBJECT(spectrum_drawing_area), "button-press-event", G_CALLBACK(on_spectrum_click), NULL);
+  g_signal_connect(G_OBJECT(open_button), "clicked", G_CALLBACK(on_open_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(append_button), "clicked", G_CALLBACK(on_append_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(calibrate_button), "clicked", G_CALLBACK(on_calibrate_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(manage_spectra_button), "clicked", G_CALLBACK(on_manage_spectra_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(save_button), "clicked", G_CALLBACK(on_save_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(save_button_radware), "clicked", G_CALLBACK(on_save_radware_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(save_button_text), "clicked", G_CALLBACK(on_save_text_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(help_button), "clicked", G_CALLBACK(on_help_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(multiplot_button), "clicked", G_CALLBACK(on_multiplot_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(sum_all_button), "clicked", G_CALLBACK(on_sum_all_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(fit_button), "clicked", G_CALLBACK(on_fit_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(fit_fit_button), "clicked", G_CALLBACK(on_fit_fit_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(fit_cancel_button), "clicked", G_CALLBACK(on_fit_cancel_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(fit_preferences_button), "clicked", G_CALLBACK(on_fit_preferences_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(display_button), "clicked", G_CALLBACK(on_display_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(calibrate_ok_button), "clicked", G_CALLBACK(on_calibrate_ok_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(comment_ok_button), "clicked", G_CALLBACK(on_comment_ok_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(remove_comment_button), "clicked", G_CALLBACK(on_remove_comment_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(comment_entry), "changed", G_CALLBACK(on_comment_entry_changed), NULL);
+  g_signal_connect(G_OBJECT(remove_calibration_button), "clicked", G_CALLBACK(on_remove_calibration_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(spectrum_selector), "value-changed", G_CALLBACK(on_spectrum_selector_changed), NULL);
+  g_signal_connect(G_OBJECT(autoscale_button), "toggled", G_CALLBACK(on_toggle_autoscale), NULL);
+  g_signal_connect(G_OBJECT(logscale_button), "toggled", G_CALLBACK(on_toggle_logscale), NULL);
+  g_signal_connect(G_OBJECT(cursor_draw_button), "toggled", G_CALLBACK(on_toggle_cursor), NULL);
+  g_signal_connect(G_OBJECT(discard_empty_checkbutton), "toggled", G_CALLBACK(on_toggle_discard_empty), NULL);
+  g_signal_connect(G_OBJECT(export_options_save_button), "clicked", G_CALLBACK(on_export_save_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(bin_errors_checkbutton), "toggled", G_CALLBACK(on_toggle_bin_errors), NULL);
+  g_signal_connect(G_OBJECT(round_errors_checkbutton), "toggled", G_CALLBACK(on_toggle_round_errors), NULL);
+  g_signal_connect(G_OBJECT(dark_theme_checkbutton), "toggled", G_CALLBACK(on_toggle_dark_theme), NULL);
+  g_signal_connect(G_OBJECT(spectrum_label_checkbutton), "toggled", G_CALLBACK(on_toggle_spectrum_label), NULL);
+  g_signal_connect(G_OBJECT(spectrum_comment_checkbutton), "toggled", G_CALLBACK(on_toggle_spectrum_comment), NULL);
+  g_signal_connect(G_OBJECT(relative_widths_checkbutton), "toggled", G_CALLBACK(on_toggle_relative_widths), NULL);
+  g_signal_connect(G_OBJECT(popup_results_checkbutton), "toggled", G_CALLBACK(on_toggle_popup_results), NULL);
+  g_signal_connect(G_OBJECT(animation_checkbutton), "toggled", G_CALLBACK(on_toggle_animation), NULL);
+  g_signal_connect(G_OBJECT(autozoom_checkbutton), "toggled", G_CALLBACK(on_toggle_autozoom), NULL);
+  g_signal_connect(G_OBJECT(preferences_apply_button), "clicked", G_CALLBACK(on_preferences_apply_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(preferences_button), "clicked", G_CALLBACK(on_preferences_button_clicked), NULL);
+  gtk_widget_set_events(spectrum_drawing_area, gtk_widget_get_events(spectrum_drawing_area) | GDK_SCROLL_MASK | GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK); //allow mouse scrolling over the drawing area
+  g_signal_connect(G_OBJECT(cal_entry_const), "preedit-changed", G_CALLBACK(on_cal_par_activate), NULL);
+  g_signal_connect(G_OBJECT(cal_entry_lin), "preedit-changed", G_CALLBACK(on_cal_par_activate), NULL);
+  g_signal_connect(G_OBJECT(cal_entry_quad), "preedit-changed", G_CALLBACK(on_cal_par_activate), NULL);
+  g_signal_connect(G_OBJECT(zoom_scale), "value-changed", G_CALLBACK(on_zoom_scale_changed), NULL);
+  g_signal_connect(G_OBJECT(contract_scale), "value-changed", G_CALLBACK(on_contract_scale_changed), NULL);
+  g_signal_connect(G_OBJECT(shortcuts_button), "clicked", G_CALLBACK(on_shortcuts_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(about_button), "clicked", G_CALLBACK(on_about_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(multiplot_manage_stack_switcher), "button-release-event", G_CALLBACK(on_multiplot_manage_stack_switcher_changed), NULL);
+  g_signal_connect(G_OBJECT(multiplot_make_view_button), "clicked", G_CALLBACK(on_multiplot_make_view_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(multiplot_ok_button), "clicked", G_CALLBACK(on_multiplot_ok_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(multiplot_cr2), "toggled", G_CALLBACK(on_multiplot_cell_toggled), NULL);
+  g_signal_connect(G_OBJECT(multiplot_cr3), "edited", G_CALLBACK(on_multiplot_scaling_edited), NULL);
+  g_signal_connect(G_OBJECT(view_tree_view), "row-activated", G_CALLBACK(on_multiplot_ok_button_clicked), NULL); //double click action - show view on double click
+  g_signal_connect(G_OBJECT(gtk_tree_view_get_selection(view_tree_view)), "changed", G_CALLBACK(on_view_tree_selection_changed), NULL);
+  g_signal_connect(G_OBJECT(manage_delete_button), "clicked", G_CALLBACK(on_manage_delete_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(manage_cr1), "edited", G_CALLBACK(on_manage_name_cell_edited), NULL);
+  g_signal_connect(G_OBJECT(manage_cr2), "toggled", G_CALLBACK(on_manage_cell_toggled), NULL);
+  g_signal_connect(G_OBJECT(export_mode_combobox), "changed", G_CALLBACK(on_export_mode_combobox_changed), NULL);
+  g_signal_connect(G_OBJECT(calibrate_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(comment_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(multiplot_manage_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(export_options_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(preferences_window), "delete-event", G_CALLBACK(on_preferences_cancel_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(preferences_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(shortcuts_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(help_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(about_dialog), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
 
   //setup keyboard shortcuts
-  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_f, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_fit_button_clicked), NULL, 0));
-  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_c, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_calibrate_button_clicked), NULL, 0));
-  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_p, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(show_multiplot_window), NULL, 0));
-  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_v, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(show_view_window), NULL, 0));
-  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_m, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_manage_spectra_button_clicked), NULL, 0));
-  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_l, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(toggle_logscale), NULL, 0));
-  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_z, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(toggle_cursor), NULL, 0));
-  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_o, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_open_button_clicked), NULL, 0));
-  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_a, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_append_button_clicked), NULL, 0));
-  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_s, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_save_button_clicked), NULL, 0));
-  gtk_accel_group_connect (comment_window_accelgroup, GDK_KEY_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_comment_ok_button_clicked), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_f, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_fit_button_clicked), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_c, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_calibrate_button_clicked), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_p, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(show_multiplot_window), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_v, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(show_view_window), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_m, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_manage_spectra_button_clicked), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_l, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(toggle_logscale), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_z, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(toggle_cursor), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_o, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_open_button_clicked), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_a, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_append_button_clicked), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_s, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_save_button_clicked), NULL, 0));
+  gtk_accel_group_connect(comment_window_accelgroup, GDK_KEY_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_comment_ok_button_clicked), NULL, 0));
 
   //set attributes
   gtk_tree_view_column_add_attribute(multiplot_column2,multiplot_cr2, "active",1);

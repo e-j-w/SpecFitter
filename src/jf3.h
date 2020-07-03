@@ -101,6 +101,7 @@ GtkCellRenderer *manage_cr1, *manage_cr2;
 GtkWindow *export_options_window;
 GtkLabel *export_description_label, *export_note_label;
 GtkComboBoxText *export_mode_combobox;
+GtkRevealer *export_options_revealer;
 GtkCheckButton *export_rebin_checkbutton;
 GtkButton *export_options_save_button;
 //preferences dialog

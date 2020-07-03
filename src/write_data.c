@@ -317,23 +317,13 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
 				}
 			}
 
-			//write histogram
-			if(rebin){
-				for(j=0;j<maxArraySize;j+=drawing.contractFactor){
-					for(i=0;i<rawdata.numSpOpened;i++){
-						val = getSpBinValRaw(i,j,drawing.scaleFactor[i],drawing.contractFactor);
-						fprintf(out,"%f ",val);
-					}
-					fprintf(out,"\n");
+			//write histogram (not applying rebin or scale factors since the whole session with custom views is saved)
+			for(j=0;j<maxArraySize;j++){
+				for(i=0;i<rawdata.numSpOpened;i++){
+					val = getSpBinValRaw(i,j,drawing.scaleFactor[i],1);
+					fprintf(out,"%f ",val);
 				}
-			}else{
-				for(j=0;j<maxArraySize;j++){
-					for(i=0;i<rawdata.numSpOpened;i++){
-						val = getSpBinValRaw(i,j,drawing.scaleFactor[i],1);
-						fprintf(out,"%f ",val);
-					}
-					fprintf(out,"\n");
-				}
+				fprintf(out,"\n");
 			}
 
 			//write histogram titles
