@@ -22,9 +22,9 @@ A spectrum/histogram viewer and fitter app, with functionality inspired by the `
 
 #### Read-only support
 
-* **.mca** - An .mca file is simply a 2D array of integers, with the first index denoting a spectrum number (array length up to 100) and the second index denoting a bin number (array length fixed to 32768 ie. 2<sup>15</sup>).
-* **.fmca** - An .fmca file has the same format as .mca except it uses floats rather than integers.
 * **.C** (ROOT macro) - [ROOT](https://root.cern.ch/) histogram macro files (.C files generated using the File/Save option in a ROOT TBrowser).  Supports TH1D, TH1F, and TH1I histogram types.
+* **.mca** - A 2D array of integers, with the first index denoting a spectrum number (array length up to 100) and the second index denoting a bin number (array length fixed to 32768 ie. 2<sup>15</sup>).
+* **.fmca** - The same format as .mca except using floats rather than integers.
 
 
 #### Format support notes

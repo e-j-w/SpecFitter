@@ -88,6 +88,15 @@ unsigned char getMultiplotStackPage(){
   }
 }
 
+void on_view_tree_selection_changed(GtkTreeSelection *treeselection){
+  GtkTreeModel *model = gtk_tree_view_get_model(view_tree_view);
+  if(gtk_tree_selection_get_selected(treeselection, &model, NULL)==TRUE){
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_ok_button),TRUE);
+  }else{
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_ok_button),FALSE);
+  }
+}
+
 void on_multiplot_manage_stack_switcher_changed(){
   unsigned char pageNum = getMultiplotStackPage();
   switch (pageNum)
@@ -96,8 +105,20 @@ void on_multiplot_manage_stack_switcher_changed(){
       gtk_stack_set_visible_child(multiplot_manage_button_stack,GTK_WIDGET(manage_delete_button));
       break;
     case 1:
+      if(rawdata.numViews == 0){
+        gtk_widget_hide(GTK_WIDGET(view_list_box));
+        gtk_widget_show(GTK_WIDGET(no_view_box));
+        gtk_widget_set_sensitive(GTK_WIDGET(multiplot_ok_button),FALSE);
+      }else{
+        gtk_widget_show(GTK_WIDGET(view_list_box));
+        gtk_widget_hide(GTK_WIDGET(no_view_box));
+        on_view_tree_selection_changed(gtk_tree_view_get_selection(view_tree_view)); //decide whether to enable the plot button or not
+      }
+      gtk_stack_set_visible_child(multiplot_manage_button_stack,GTK_WIDGET(multiplot_ok_button));
+      break;
     case 0:
       gtk_stack_set_visible_child(multiplot_manage_button_stack,GTK_WIDGET(multiplot_ok_button));
+      gtk_widget_set_sensitive(GTK_WIDGET(multiplot_ok_button),TRUE);
       break;
     default:
       break;
@@ -176,6 +197,7 @@ void setup_multiplot_window(){
     gtk_list_store_set(view_liststore, &iter, 0, rawdata.viewComment[i], -1);
     gtk_list_store_set(view_liststore, &iter, 1, i, -1);
   }
+  
 
 }
 
@@ -221,6 +243,37 @@ void show_multiplot_window(){
   gtk_stack_set_visible_child(multiplot_manage_button_stack,GTK_WIDGET(multiplot_ok_button));
   gtk_window_present(multiplot_manage_window); //show the window
 }
+
+void show_view_window(){
+
+  //handle case where this is called by shortcut, and spectra are not open
+  if(rawdata.openedSp == 0){
+    return;
+  }
+
+  setup_multiplot_window();
+  setup_manage_window();
+
+  if(rawdata.numViews == 0){
+    gtk_widget_hide(GTK_WIDGET(view_list_box));
+    gtk_widget_show(GTK_WIDGET(no_view_box));
+  }else{
+    gtk_widget_show(GTK_WIDGET(view_list_box));
+    gtk_widget_hide(GTK_WIDGET(no_view_box));
+  }
+  
+  on_view_tree_selection_changed(gtk_tree_view_get_selection(view_tree_view)); //decide whether to enable the plot button or not
+  
+  gtk_widget_show(GTK_WIDGET(multiplot_manage_stack_switcher));
+
+  gtk_window_set_title(multiplot_manage_window, "Advanced Plotting");
+  gtk_stack_set_visible_child(multiplot_manage_stack,GTK_WIDGET(view_box));
+  gtk_stack_set_visible_child(multiplot_manage_button_stack,GTK_WIDGET(multiplot_ok_button));
+  gtk_window_present(multiplot_manage_window); //show the window
+}
+
+
+
 
 //function for opening a single file without UI (ie. from the command line)
 //if append=1, append this file to already opened files
@@ -1079,16 +1132,18 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
     int viewInd = 0;
     model = gtk_tree_view_get_model(view_tree_view);
     readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
-    gtk_tree_selection_get_selected(gtk_tree_view_get_selection(view_tree_view), &model, &iter); //set the iterator to the selected entry
-    gtk_tree_model_get(model,&iter,1,&viewInd,-1); //get the index of the selected view
+    if(gtk_tree_selection_get_selected(gtk_tree_view_get_selection(view_tree_view), &model, &iter)==TRUE){ //set the iterator to the selected entry
+       gtk_tree_model_get(model,&iter,1,&viewInd,-1); //get the index of the selected view
 
-    if((viewInd>=0)&&(viewInd<rawdata.numViews)){
-      //setup a multiplot view
-      drawing.multiplotMode = rawdata.viewMultiplotMode[viewInd];
-      drawing.numMultiplotSp = rawdata.viewNumMultiplotSp[viewInd];
-      memcpy(&drawing.scaleFactor,&rawdata.viewScaleFactor[viewInd],sizeof(drawing.scaleFactor));
-      memcpy(&drawing.multiPlots,&rawdata.viewMultiPlots[viewInd],sizeof(drawing.multiPlots));
-    }
+      if((viewInd>=0)&&(viewInd<rawdata.numViews)){
+        //setup a multiplot view
+        drawing.multiplotMode = rawdata.viewMultiplotMode[viewInd];
+        drawing.numMultiplotSp = rawdata.viewNumMultiplotSp[viewInd];
+        memcpy(&drawing.scaleFactor,&rawdata.viewScaleFactor[viewInd],sizeof(drawing.scaleFactor));
+        memcpy(&drawing.multiPlots,&rawdata.viewMultiPlots[viewInd],sizeof(drawing.multiPlots));
+      }
+    } 
+   
   }
 
   //handle fitting
@@ -1102,6 +1157,7 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
   
 }
+
 
 void on_manage_spectra_button_clicked(GtkButton *b)
 {
@@ -1556,6 +1612,9 @@ void iniitalizeUIElements(){
   multiplot_cr3 = GTK_CELL_RENDERER(gtk_builder_get_object(builder, "multiplot_cr3"));
   multiplot_mode_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "multiplot_mode_combobox"));
   //view window UI elements
+  view_box = GTK_WIDGET(gtk_builder_get_object(builder, "view_box"));
+  view_list_box = GTK_WIDGET(gtk_builder_get_object(builder, "view_list_box"));
+  no_view_box = GTK_WIDGET(gtk_builder_get_object(builder, "no_view_box"));
   view_liststore = GTK_LIST_STORE(gtk_builder_get_object(builder, "view_liststore"));
   view_tree_view = GTK_TREE_VIEW(gtk_builder_get_object(builder, "view_tree_view"));
   view_column1 = GTK_TREE_VIEW_COLUMN(gtk_builder_get_object(builder, "view_column1"));
@@ -1666,6 +1725,8 @@ void iniitalizeUIElements(){
   g_signal_connect (G_OBJECT (multiplot_ok_button), "clicked", G_CALLBACK (on_multiplot_ok_button_clicked), NULL);
   g_signal_connect (G_OBJECT (multiplot_cr2), "toggled", G_CALLBACK (on_multiplot_cell_toggled), NULL);
   g_signal_connect (G_OBJECT (multiplot_cr3), "edited", G_CALLBACK (on_multiplot_scaling_edited), NULL);
+  g_signal_connect (G_OBJECT (view_tree_view), "row-activated", G_CALLBACK (on_multiplot_ok_button_clicked), NULL); //double click action - show view on double click
+  g_signal_connect (G_OBJECT (gtk_tree_view_get_selection(view_tree_view)), "changed", G_CALLBACK (on_view_tree_selection_changed), NULL);
   g_signal_connect (G_OBJECT (manage_delete_button), "clicked", G_CALLBACK (on_manage_delete_button_clicked), NULL);
   g_signal_connect (G_OBJECT (manage_cr1), "edited", G_CALLBACK (on_manage_name_cell_edited), NULL);
   g_signal_connect (G_OBJECT (manage_cr2), "toggled", G_CALLBACK (on_manage_cell_toggled), NULL);
@@ -1683,6 +1744,7 @@ void iniitalizeUIElements(){
   gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_f, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_fit_button_clicked), NULL, 0));
   gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_c, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_calibrate_button_clicked), NULL, 0));
   gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_p, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(show_multiplot_window), NULL, 0));
+  gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_v, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(show_view_window), NULL, 0));
   gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_m, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_manage_spectra_button_clicked), NULL, 0));
   gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_l, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(toggle_logscale), NULL, 0));
   gtk_accel_group_connect (main_window_accelgroup, GDK_KEY_z, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(toggle_cursor), NULL, 0));

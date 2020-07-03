@@ -85,6 +85,7 @@ GtkTreeViewColumn *multiplot_column1, *multiplot_column2;
 GtkCellRenderer *multiplot_cr1, *multiplot_cr2, *multiplot_cr3;
 GtkComboBoxText *multiplot_mode_combobox;
 //view
+GtkWidget *view_box, *view_list_box, *no_view_box;
 GtkListStore *view_liststore;
 GtkTreeView *view_tree_view;
 GtkTreeViewColumn *view_column1;
