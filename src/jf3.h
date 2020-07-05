@@ -37,7 +37,7 @@ GtkButton *fit_button, *display_button;
 GtkPopover *display_popover;
 GtkButton *calibrate_button;
 GtkButton *manage_spectra_button;
-GtkButton *to_save_menu_button, *save_button, *save_button_radware, *save_button_text;
+GtkButton *to_save_menu_button, *save_button, *save_button_radware, *save_button_text, *save_button_png;
 GtkButton *help_button;
 GtkLabel *bottom_info_text;
 GtkFileChooser *file_open_dialog, *file_save_dialog;
@@ -104,6 +104,12 @@ GtkComboBoxText *export_mode_combobox;
 GtkRevealer *export_options_revealer;
 GtkCheckButton *export_rebin_checkbutton;
 GtkButton *export_options_save_button;
+//export image dialog
+GtkWindow *export_image_window;
+GtkSpinButton *export_h_res_spinbutton, *export_v_res_spinbutton;
+GtkCheckButton *export_image_label_checkbutton, *export_image_fit_checkbutton;
+GtkComboBoxText *export_axissize_combobox;
+GtkButton *export_image_save_button;
 //preferences dialog
 GtkModelButton *preferences_button;
 GtkWindow *preferences_window;

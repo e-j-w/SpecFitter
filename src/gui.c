@@ -328,7 +328,7 @@ void openSingleFile(char *filename, int append){
         snprintf(errMsg,256,"You are trying to open too many files at once.  Maximum number of individual spectra which may be imported is %i.",NSPECT);
         break;
       default:
-        snprintf(errMsg,256,"Data in file %s is incorrectly formatted.",filename);
+        snprintf(errMsg,256,"Data does not exist in file %s or is incorrectly formatted.",filename);
         break;
     }
     printf("ERROR: %s\n",errMsg);
@@ -420,7 +420,7 @@ void on_open_button_clicked(GtkButton *b)
           snprintf(errMsg,256,"You are trying to open too many files at once.  Maximum number of individual spectra which may be imported is %i.",NSPECT);
           break;
         default:
-          snprintf(errMsg,256,"Data in file %s is incorrectly formatted.",filename);
+          snprintf(errMsg,256,"Data does not exist in file %s or is incorrectly formatted.",filename);
           break;
       }
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),errMsg);
@@ -522,7 +522,7 @@ void on_append_button_clicked(GtkButton *b)
           snprintf(errMsg,256,"You are trying to open too many files at once.  Maximum number of individual spectra which may be imported is %i.",NSPECT);
           break;
         default:
-          snprintf(errMsg,256,"Data in file %s is incorrectly formatted.",filename);
+          snprintf(errMsg,256,"Data does not exist in file %s or is incorrectly formatted.",filename);
           break;
       }
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),errMsg);
@@ -719,6 +719,11 @@ void on_export_save_button_clicked(GtkButton *b){
   }
 
   gtk_widget_hide(GTK_WIDGET(export_options_window)); //hide the window
+}
+
+void on_save_png_button_clicked(GtkButton *b)
+{
+  gtk_window_present(export_image_window); //show the window
 }
 
 
@@ -1556,6 +1561,8 @@ void iniitalizeUIElements(){
   gtk_window_set_transient_for(multiplot_manage_window, window); //center multiplot/manage window on main window
   export_options_window = GTK_WINDOW(gtk_builder_get_object(builder, "export_options_window"));
   gtk_window_set_transient_for(export_options_window, window); //center export options window on main window
+  export_image_window = GTK_WINDOW(gtk_builder_get_object(builder, "export_image_window"));
+  gtk_window_set_transient_for(export_image_window, window); //center export options window on main window
   preferences_window = GTK_WINDOW(gtk_builder_get_object(builder, "preferences_window"));
   gtk_window_set_transient_for(preferences_window, window); //center preferences window on main window
   shortcuts_window = GTK_SHORTCUTS_WINDOW(gtk_builder_get_object(builder, "shortcuts_window"));
@@ -1585,6 +1592,7 @@ void iniitalizeUIElements(){
   save_button = GTK_BUTTON(gtk_builder_get_object(builder, "save_button"));
   save_button_radware = GTK_BUTTON(gtk_builder_get_object(builder, "save_button_radware"));
   save_button_text = GTK_BUTTON(gtk_builder_get_object(builder, "save_button_text"));
+  save_button_png = GTK_BUTTON(gtk_builder_get_object(builder, "save_button_png"));
   help_button = GTK_BUTTON(gtk_builder_get_object(builder, "help_button"));
   display_button = GTK_BUTTON(gtk_builder_get_object(builder, "display_button"));
   display_button_icon = GTK_IMAGE(gtk_builder_get_object(builder, "display_button_icon"));
@@ -1661,6 +1669,14 @@ void iniitalizeUIElements(){
   export_rebin_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "export_rebin_checkbutton"));
   export_options_save_button = GTK_BUTTON(gtk_builder_get_object(builder, "export_options_save_button"));
 
+  //export image window UI elements
+  export_h_res_spinbutton = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "export_h_res_spinbutton"));
+  export_v_res_spinbutton = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "export_v_res_spinbutton"));
+  export_image_label_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "export_image_label_checkbutton"));
+  export_image_fit_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "export_image_fit_checkbutton"));
+  export_axissize_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "export_axissize_combobox"));
+  export_image_save_button = GTK_BUTTON(gtk_builder_get_object(builder, "export_image_save_button"));
+
   //preferences window UI elements
   preferences_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "preferences_button"));
   preferences_notebook = GTK_NOTEBOOK(gtk_builder_get_object(builder, "preferences_notebook"));
@@ -1703,6 +1719,7 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(save_button), "clicked", G_CALLBACK(on_save_button_clicked), NULL);
   g_signal_connect(G_OBJECT(save_button_radware), "clicked", G_CALLBACK(on_save_radware_button_clicked), NULL);
   g_signal_connect(G_OBJECT(save_button_text), "clicked", G_CALLBACK(on_save_text_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(save_button_png), "clicked", G_CALLBACK(on_save_png_button_clicked), NULL);
   g_signal_connect(G_OBJECT(help_button), "clicked", G_CALLBACK(on_help_button_clicked), NULL);
   g_signal_connect(G_OBJECT(multiplot_button), "clicked", G_CALLBACK(on_multiplot_button_clicked), NULL);
   g_signal_connect(G_OBJECT(sum_all_button), "clicked", G_CALLBACK(on_sum_all_button_clicked), NULL);
@@ -1756,6 +1773,7 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(comment_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect(G_OBJECT(multiplot_manage_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect(G_OBJECT(export_options_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(export_image_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect(G_OBJECT(preferences_window), "delete-event", G_CALLBACK(on_preferences_cancel_button_clicked), NULL);
   g_signal_connect(G_OBJECT(preferences_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect(G_OBJECT(shortcuts_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
@@ -1773,6 +1791,7 @@ void iniitalizeUIElements(){
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_o, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_open_button_clicked), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_a, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_append_button_clicked), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_s, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_save_button_clicked), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_q, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(gtk_main_quit), NULL, 0));
   gtk_accel_group_connect(comment_window_accelgroup, GDK_KEY_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_comment_ok_button_clicked), NULL, 0));
 
   //set attributes
@@ -1838,6 +1857,8 @@ void iniitalizeUIElements(){
   gtk_label_set_text(bottom_info_text,"");
   
   setSpOpenView(0); //'gray out' widgets that can't be used yet
+
+  gtk_widget_hide(GTK_WIDGET(save_button_png)); //unimplemented
 
   //setup UI element appearance at startup
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autoscale_button), drawing.autoScale);
