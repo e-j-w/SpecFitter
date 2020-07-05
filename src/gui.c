@@ -1055,7 +1055,7 @@ void on_multiplot_make_view_button_clicked(GtkButton *b)
     //show an error dialog
     GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
     GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_manage_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot create view!");
-    gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Too many views have been created.  Delete one first before creating a new one.");
+    gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Too many views have been created.  Remove one first before creating a new one.");
     gtk_dialog_run (GTK_DIALOG (message_dialog));
     gtk_widget_destroy (message_dialog);
     return;
@@ -1356,7 +1356,7 @@ void on_manage_delete_button_clicked(GtkButton *b)
       if(val==TRUE){
         if(getFirstViewDependingOnSp(spInd-deletedSpCounter)>=0){
           char messageStr[512];
-          snprintf(messageStr,512,"One or more saved views depends on the data: %s\nDeleting the data will delete the view(s) as well.",rawdata.histComment[spInd-deletedSpCounter]);
+          snprintf(messageStr,512,"One or more saved views depends on the data: %s\nRemoving the data will remove the view(s) as well.",rawdata.histComment[spInd-deletedSpCounter]);
           GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
           GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_manage_window, flags, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO, "Delete data?");
           gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),messageStr);

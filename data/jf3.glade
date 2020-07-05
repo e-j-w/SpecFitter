@@ -1485,7 +1485,7 @@ and binning factors will be preserved.</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Additional spectra/histograms can be appended using the</property>
+                <property name="label" translatable="yes">Additional spectra/histograms can be appended to the session using the</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -2110,7 +2110,7 @@ They will then appear on this panel.</property>
               </object>
               <packing>
                 <property name="name">page1</property>
-                <property name="title" translatable="yes">Views</property>
+                <property name="title" translatable="yes">Custom Views</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -2126,7 +2126,7 @@ They will then appear on this panel.</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="halign">start</property>
-                    <property name="label" translatable="yes">Rename or delete spectra and/or custom views:</property>
+                    <property name="label" translatable="yes">Rename or remove spectra/views from this session:</property>
                     <attributes>
                       <attribute name="weight" value="bold"/>
                     </attributes>
@@ -2166,7 +2166,7 @@ They will then appear on this panel.</property>
                             <child>
                               <object class="GtkTreeViewColumn" id="manage_column1">
                                 <property name="spacing">6</property>
-                                <property name="title" translatable="yes">Spectrum/View Name (double click name to edit)</property>
+                                <property name="title" translatable="yes">Spectrum or View Name (double click name to edit)</property>
                                 <property name="expand">True</property>
                                 <property name="clickable">True</property>
                                 <property name="sort_indicator">True</property>
@@ -2184,10 +2184,9 @@ They will then appear on this panel.</property>
                             <child>
                               <object class="GtkTreeViewColumn" id="manage_column2">
                                 <property name="spacing">6</property>
-                                <property name="sizing">fixed</property>
-                                <property name="fixed_width">80</property>
-                                <property name="max_width">80</property>
-                                <property name="title" translatable="yes">Delete?</property>
+                                <property name="sizing">autosize</property>
+                                <property name="max_width">200</property>
+                                <property name="title" translatable="yes">Remove?</property>
                                 <property name="alignment">0.5</property>
                                 <child>
                                   <object class="GtkCellRendererToggle" id="manage_cr2">
@@ -2212,7 +2211,7 @@ They will then appear on this panel.</property>
               </object>
               <packing>
                 <property name="name">page2</property>
-                <property name="title" translatable="yes">Rename/Delete</property>
+                <property name="title" translatable="yes">Rename/Remove</property>
                 <property name="position">2</property>
               </packing>
             </child>
@@ -2265,12 +2264,12 @@ They will then appear on this panel.</property>
                 </child>
                 <child>
                   <object class="GtkButton" id="manage_delete_button">
-                    <property name="label" translatable="yes">Delete selected</property>
+                    <property name="label" translatable="yes">Remove selected</property>
                     <property name="height_request">40</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="tooltip_text" translatable="yes">Delete the selected spectra.</property>
+                    <property name="tooltip_text" translatable="yes">Remove the selected spectra/views from the current session.</property>
                     <style>
                       <class name="destructive-action"/>
                     </style>
