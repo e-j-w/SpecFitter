@@ -6,6 +6,7 @@ jf3-resources.c
 *.fmca
 *.spe
 *.jf3
+*.png
 *.out
 *.o
 *.compiled

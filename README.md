@@ -26,14 +26,13 @@ A spectrum/histogram viewer and fitter app, with functionality inspired by the `
 * **.mca** - A 2D array of integers, with the first index denoting a spectrum number (array length up to 100) and the second index denoting a bin number (array length fixed to 32768 ie. 2<sup>15</sup>).
 * **.fmca** - The same format as .mca except using floats rather than integers.
 
-
 #### Format support notes
 
 Some sample files that the program can open are available [here](https://mega.nz/#!yUtRBAYR!ATst0ngazksR-g-P-Qdsw2rd4lpHJXBpd6nJq6pW77I) (.zip archive).
 
 Conversion codes for some of the above data formats are available in the [FileConvTools](https://github.com/e-j-w/FileConvTools) repository.
 
-### Spectrum display options
+### Data display options
 
 * Import spectra from multiple files and plot multiple spectra simultaneously:
     * Sum spectra together.
@@ -57,7 +56,7 @@ Conversion codes for some of the above data formats are available in the [FileCo
 * Store custom views of multiple spectra using any of the available plotting modes.
 * Double click anywhere on a plot to write/edit a comment there.
 * The full session including comments and custom views can be saved to disk using the **.jf3** (compressed) or **.txt** (ACSII) file formats.
-
+* Export image files (.png format) at arbitrary resolution for use in presentations and publications.
 
 ## Getting started
 

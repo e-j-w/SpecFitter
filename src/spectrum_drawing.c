@@ -1,7 +1,7 @@
 /* J. Williams, 2020 */
 
 //This file contains routines for drawing spectra using Cairo.
-//The main routine is drawSpectrumArea (near the bottom), helper 
+//The main routine is drawSpectrum (near the bottom), helper 
 //subroutines are above it.
 
 //set the default text color, depending on the
@@ -988,7 +988,10 @@ int getPlotRangeXUnits(){
 
 
 //draw a spectrum
-void drawSpectrum(cairo_t *cr, const float width, const float height){
+//drawLabels: 0=don't draw, 1=draw
+//showFit: 0=don't show, 1=show without highlighted peaks, 2=show with highlighted peaks
+//drawComments: 0=don't draw, 1=draw
+void drawSpectrum(cairo_t *cr, const float width, const float height, const char drawLabels, const char showFit, const char drawComments){
 
 	if(!rawdata.openedSp){
 		return;
@@ -1012,7 +1015,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height){
   double plotFontSize = 13.5;
 
   //draw label(s) for the plot
-  if(guiglobals.drawSpLabels){
+  if(drawLabels){
     setTextColor(cr);
     drawPlotLabel(cr, width, height, plotFontSize); //draw plot label(s)
     cairo_stroke(cr);
@@ -1213,7 +1216,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height){
   }
 
   //draw fit
-  if(guiglobals.fittingSp == 5){
+  if((guiglobals.fittingSp == 5)&&(showFit>0)){
     if((drawing.lowerLimit < fitpar.fitEndCh)&&(drawing.upperLimit > fitpar.fitStartCh)){
       cairo_set_line_width(cr, 3.0);
       cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
@@ -1256,7 +1259,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height){
         cairo_stroke(cr);
       }
       //draw highlighed peak
-      if((drawing.highlightedPeak >= 0)&&(drawing.highlightedPeak <= fitpar.numFitPeaks)){
+      if((drawing.highlightedPeak >= 0)&&(drawing.highlightedPeak <= fitpar.numFitPeaks)&&(showFit>1)){
         cairo_set_line_width(cr, 10.0);
         for(fitDrawX=(fitpar.fitParVal[7+(3*drawing.highlightedPeak)] - 3.*fitpar.fitParVal[8+(3*drawing.highlightedPeak)]);  fitDrawX<=(fitpar.fitParVal[7+(3*drawing.highlightedPeak)] + 3.*fitpar.fitParVal[8+(3*drawing.highlightedPeak)]); fitDrawX+= 0.2){
           nextFitDrawX = fitDrawX + 0.2;
@@ -1464,7 +1467,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height){
   cairo_restore(cr); //recall the unrotated context
 
   //draw fit cursors and indicators
-  if(guiglobals.fittingSp > 0){
+  if((guiglobals.fittingSp > 0)&&(showFit>0)){
 
     //draw cursors at fit limits if needed
     if(fitpar.fitStartCh >= 0){
@@ -1515,7 +1518,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height){
   }
 
   //draw comment indicators
-  if(guiglobals.drawSpComments){
+  if(drawComments){
     switch (drawing.multiplotMode)
     {
       case 0:
@@ -1589,5 +1592,5 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data){
   // Determine GtkDrawingArea dimensions
   gdk_window_get_geometry(wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
 
-  drawSpectrum(cr, (float)dasize.width, (float)dasize.height);
+  drawSpectrum(cr, (float)dasize.width, (float)dasize.height, guiglobals.drawSpLabels, 2, guiglobals.drawSpComments);
 }

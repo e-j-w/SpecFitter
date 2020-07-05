@@ -726,6 +726,70 @@ void on_save_png_button_clicked(GtkButton *b)
   gtk_window_present(export_image_window); //show the window
 }
 
+void on_export_image_button_clicked(GtkButton *b){
+  
+  //get image file settings
+  //int axisScale = gtk_combo_box_get_active(GTK_COMBO_BOX(export_axissize_combobox));
+  int showFit = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_fit_checkbutton));
+  int showLabels = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_label_checkbutton));
+  int hres = gtk_spin_button_get_value_as_int(export_h_res_spinbutton);
+  int vres = gtk_spin_button_get_value_as_int(export_v_res_spinbutton);
+
+  file_save_dialog = GTK_FILE_CHOOSER(gtk_file_chooser_dialog_new ("Save Image File", window, GTK_FILE_CHOOSER_ACTION_SAVE, "Cancel", GTK_RESPONSE_CANCEL, "Save", GTK_RESPONSE_ACCEPT, NULL));
+  gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
+
+  int saveErr = 0; //to track if there are any errors when opening spectra
+  if (gtk_dialog_run(GTK_DIALOG(file_save_dialog)) == GTK_RESPONSE_ACCEPT)
+  {
+    
+    char *fn = NULL;
+    char *tok, fileName[256];
+    fn = gtk_file_chooser_get_filename(file_save_dialog);
+    tok = strtok (fn,".");
+    snprintf(fileName,256,"%s.png",tok);
+
+    //create cairo surface and context for drawing onto
+    cairo_surface_t *imgSurf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, hres, vres);
+    cairo_t *cr = cairo_create(imgSurf);
+    //draw the spectrum
+    drawSpectrum(cr, hres, vres, showLabels, showFit, 0);
+    //save the image file
+    if(cairo_surface_write_to_png(imgSurf, fileName)!=CAIRO_STATUS_SUCCESS){
+      saveErr=1;
+    }
+
+    gtk_widget_destroy(GTK_WIDGET(file_save_dialog));
+
+    if(saveErr>0){
+      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+      GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error saving image file!");
+      char errMsg[256];
+      switch (saveErr)
+      {
+        case 1:
+          snprintf(errMsg,256,"Error writing to file.");
+          break;
+        default:
+          snprintf(errMsg,256,"Unknown error exporting spectrum data.");
+          break;
+      }
+      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),errMsg);
+      gtk_dialog_run (GTK_DIALOG (message_dialog));
+      gtk_widget_destroy (message_dialog);
+    }else{
+      //update the status bar
+      char saveMsg[256];
+      snprintf(saveMsg,256,"Successfully saved image.");
+      gtk_label_set_text(bottom_info_text,saveMsg);
+    }
+    g_free(fn);
+  }else{
+    gtk_widget_destroy(GTK_WIDGET(file_save_dialog));
+  }
+
+  gtk_widget_hide(GTK_WIDGET(export_image_window)); //hide the window
+}
+
 
 void on_display_button_clicked(GtkButton *b)
 {
@@ -1739,6 +1803,7 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(cursor_draw_button), "toggled", G_CALLBACK(on_toggle_cursor), NULL);
   g_signal_connect(G_OBJECT(discard_empty_checkbutton), "toggled", G_CALLBACK(on_toggle_discard_empty), NULL);
   g_signal_connect(G_OBJECT(export_options_save_button), "clicked", G_CALLBACK(on_export_save_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(export_image_save_button), "clicked", G_CALLBACK(on_export_image_button_clicked), NULL);
   g_signal_connect(G_OBJECT(bin_errors_checkbutton), "toggled", G_CALLBACK(on_toggle_bin_errors), NULL);
   g_signal_connect(G_OBJECT(round_errors_checkbutton), "toggled", G_CALLBACK(on_toggle_round_errors), NULL);
   g_signal_connect(G_OBJECT(dark_theme_checkbutton), "toggled", G_CALLBACK(on_toggle_dark_theme), NULL);
@@ -1857,8 +1922,6 @@ void iniitalizeUIElements(){
   gtk_label_set_text(bottom_info_text,"");
   
   setSpOpenView(0); //'gray out' widgets that can't be used yet
-
-  gtk_widget_hide(GTK_WIDGET(save_button_png)); //unimplemented
 
   //setup UI element appearance at startup
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autoscale_button), drawing.autoScale);

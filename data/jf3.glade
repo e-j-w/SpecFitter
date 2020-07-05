@@ -55,11 +55,13 @@ Author: Jonathan Williams
   <object class="GtkEntryCompletion" id="entrycompletion1"/>
   <object class="GtkEntryCompletion" id="entrycompletion2"/>
   <object class="GtkAdjustment" id="export_image_h_res_adjustment">
+    <property name="lower">100</property>
     <property name="upper">10000</property>
     <property name="step_increment">1</property>
     <property name="page_increment">100</property>
   </object>
   <object class="GtkAdjustment" id="export_image_v_res_adjustment">
+    <property name="lower">100</property>
     <property name="upper">10000</property>
     <property name="step_increment">1</property>
     <property name="page_increment">100</property>
@@ -225,7 +227,6 @@ will be preserved.</property>
             </child>
             <child>
               <object class="GtkBox">
-                <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">Set the size of axis and tick labels.  Larger sizes may be more legible when printed.</property>
                 <property name="spacing">10</property>
