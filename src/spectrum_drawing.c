@@ -16,14 +16,14 @@ void setTextColor(cairo_t *cr){
 
 //converts cursor position units to channel units on the displayed spectrum
 //return value is float to allow sub-channel prescision, cast it to int if needed
-float getCursorChannel(const float cursorx, const float cursory){
+float getCursorChannel(const float cursorx, const float cursory, const float xorigin, const float yorigin){
   GdkRectangle dasize;  // GtkDrawingArea size
   GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
   // Determine GtkDrawingArea dimensions
   gdk_window_get_geometry (gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
-  if((cursorx > 80.0)&&(cursory < (dasize.height - 40.0))){
+  if((cursorx > xorigin)&&(cursory < (dasize.height - yorigin))){
     
-    float cursorChan = drawing.lowerLimit + (((cursorx)-80.0)/(dasize.width-80.0))*(drawing.upperLimit - drawing.lowerLimit);
+    float cursorChan = drawing.lowerLimit + (((cursorx)-xorigin)/(dasize.width-xorigin))*(drawing.upperLimit - drawing.lowerLimit);
     return cursorChan;
     //return cursorChan - fmod(cursorChan,drawing.contractFactor);
   }
@@ -32,12 +32,12 @@ float getCursorChannel(const float cursorx, const float cursory){
 
 //converts cursor position units to y-value on the displayed spectrum
 //this is the value on the displayed y-axis, at the cursor postion
-float getCursorYVal(const float cursorx, const float cursory){
+float getCursorYVal(const float cursorx, const float cursory, const float xorigin, const float yorigin){
   GdkRectangle dasize;  // GtkDrawingArea size
   GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
   // Determine GtkDrawingArea dimensions
   gdk_window_get_geometry (gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
-  if((cursorx > 80.0)&&(cursory < (dasize.height - 40.0))){
+  if((cursorx > xorigin)&&(cursory < (dasize.height - yorigin))){
     float cursorVal;
     switch (drawing.multiplotMode)
     {
@@ -46,12 +46,12 @@ float getCursorYVal(const float cursorx, const float cursory){
         //single plot mode
         if(drawing.logScale){
           if(drawing.scaleLevelMin[0] > 0){
-            cursorVal = pow(10.0,(dasize.height-40.0 - cursory)*log10(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/(dasize.height-40.0)) + drawing.scaleLevelMin[0];
+            cursorVal = pow(10.0,(dasize.height-yorigin - cursory)*log10(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/(dasize.height-yorigin)) + drawing.scaleLevelMin[0];
           }else{
-            cursorVal = pow(10.0,(dasize.height-40.0 - cursory)*log10(drawing.scaleLevelMax[0])/(dasize.height-40.0));
+            cursorVal = pow(10.0,(dasize.height-yorigin - cursory)*log10(drawing.scaleLevelMax[0])/(dasize.height-yorigin));
           }
         }else{
-          cursorVal = drawing.scaleLevelMax[0] - ((cursory)/(dasize.height-40.0))*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0]);
+          cursorVal = drawing.scaleLevelMax[0] - ((cursory)/(dasize.height-yorigin))*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0]);
           //printf("cursorVal: %f, scaleLevelMin: %f, scaleLevelMax: %f\n",cursorVal,drawing.scaleLevelMin[0],drawing.scaleLevelMax[0]);
         }
         break;
@@ -69,15 +69,15 @@ float getCursorYVal(const float cursorx, const float cursory){
 //get the index of the comment at which the cursor is over
 //return -1 if no comment is at the cursor position
 //some shameless magic numbers used to map channel and y-values to comment indicator size
-int getCommentAtCursor(const float cursorx, const float cursory){
+int getCommentAtCursor(const float cursorx, const float cursory, const float xorigin, const float yorigin){
   int i;
   GdkRectangle dasize;  // GtkDrawingArea size
   GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
   // Determine GtkDrawingArea dimensions
   gdk_window_get_geometry (gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
-  if((cursorx > 80.0)&&(cursory < (dasize.height - 40.0))){
-    float cursorCh = getCursorChannel(cursorx,cursory);
-    float cursorYVal = getCursorYVal(cursorx,cursory);
+  if((cursorx > xorigin)&&(cursory < (dasize.height - yorigin))){
+    float cursorCh = getCursorChannel(cursorx, cursory, xorigin, yorigin);
+    float cursorYVal = getCursorYVal(cursorx, cursory, xorigin, yorigin);
     switch (drawing.multiplotMode)
     {
       case 0:
@@ -327,7 +327,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
   
   if ((event->type == GDK_BUTTON_PRESS) && (event->button == 3)){
     //right mouse button being pressed
-    float cursorChan = getCursorChannel(event->x, event->y);
+    float cursorChan = getCursorChannel(event->x, event->y, 80.0, 40.0);
     switch(guiglobals.fittingSp){
       case 5:
         //fit being displayed, clear it on right click
@@ -381,8 +381,8 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
     //double click
     if(rawdata.openedSp){
       float cursorChan, cursorYVal;
-      cursorChan = getCursorChannel(event->x, event->y);
-      cursorYVal = getCursorYVal(event->x, event->y);
+      cursorChan = getCursorChannel(event->x, event->y, 80.0, 40.0);
+      cursorYVal = getCursorYVal(event->x, event->y, 80.0, 40.0);
       if(cursorChan >= 0){
         //user has double clicked on the displayed spectrum
         switch (drawing.multiplotMode)
@@ -395,7 +395,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
             //single plot being displayed
             //open a dialog for the user to write a comment
             //printf("Double click on channel %f, value %f\n",cursorChan,cursorYVal);
-            guiglobals.commentEditInd = getCommentAtCursor(event->x, event->y);
+            guiglobals.commentEditInd = getCommentAtCursor(event->x, event->y, 80.0, 40.0);
             if((guiglobals.commentEditInd >= 0)&&(guiglobals.commentEditInd < NCHCOM)){
               gtk_widget_set_sensitive(GTK_WIDGET(remove_comment_button),TRUE);
               gtk_entry_set_text(comment_entry, rawdata.chanComment[guiglobals.commentEditInd]);
@@ -438,7 +438,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
 		return;
 	}
 
-  int cursorChan = (int)getCursorChannel(event->x, event->y);
+  int cursorChan = (int)getCursorChannel(event->x, event->y, 80.0, 40.0);
   int cursorChanRounded = cursorChan - (cursorChan % drawing.contractFactor); //channel at the start of the bin (if rebinned)
 
   //printf("Cursor pos: %f %f\n",event->x,event->y);
@@ -474,7 +474,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
 
   if(cursorChan >= 0){
 
-    int commentToHighlight = getCommentAtCursor(event->x, event->y);
+    int commentToHighlight = getCommentAtCursor(event->x, event->y, 80.0, 40.0);
     if(commentToHighlight != drawing.highlightedComment){
       //highlight the comment
       drawing.highlightedComment = commentToHighlight;
@@ -620,48 +620,48 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
 }
 
 //get the bin position in the histogram plot
-float getXPos(const int bin, const float width){
+float getXPos(const int bin, const float width, const float xorigin){
   int binc=bin;
   if(bin < 0)
     binc=0;
   else if(bin > (drawing.upperLimit - drawing.lowerLimit))
     binc=drawing.upperLimit - drawing.lowerLimit;
   //printf("bin: %i\n",bin);
-  return 80.0 + (binc*(width-80.0)/(drawing.upperLimit-drawing.lowerLimit));
+  return xorigin + (binc*(width-xorigin)/(drawing.upperLimit-drawing.lowerLimit));
 }
 
 //get the screen position of a channel (or fractional channel)
 //returns -1 if offscreen
 //if halfBinOffset=1, will offset by half a bin (for drawing fits)
-float getXPosFromCh(const float chVal, const float width, const unsigned char halfBinOffset){
+float getXPosFromCh(const float chVal, const float width, const unsigned char halfBinOffset, const float xorigin){
   if((chVal < drawing.lowerLimit)||(chVal > drawing.upperLimit)){
     return -1;
   }
   float bin = chVal - drawing.lowerLimit;
   if(halfBinOffset)
     bin += (drawing.contractFactor/2.);
-  return 80.0 + (bin*(width-80.0)/(drawing.upperLimit-drawing.lowerLimit));
+  return xorigin + (bin*(width-xorigin)/(drawing.upperLimit-drawing.lowerLimit));
 }
 
 //get the y-coordinate for drawing a specific bin value
-float getYPos(const float val, const int multiplotSpNum, const float height){
+float getYPos(const float val, const int multiplotSpNum, const float height, const float yorigin){
   float pos, minVal;
   switch(drawing.multiplotMode){
     case 4:
       //stacked
-      minVal = pos = 40.0 + (height-40.0)*(multiplotSpNum/(drawing.numMultiplotSp*1.0));
+      minVal = pos = yorigin + (height-yorigin)*(multiplotSpNum/(drawing.numMultiplotSp*1.0));
       if(drawing.logScale){
         if((val > 0)&&(drawing.scaleLevelMax[multiplotSpNum] > 0)){
           if(drawing.scaleLevelMin[multiplotSpNum] > 0){
-            pos = 40.0 + (height-40.0)*((multiplotSpNum/(drawing.numMultiplotSp*1.0)) + (1.0/(drawing.numMultiplotSp*1.0))*(log10(val - drawing.scaleLevelMin[multiplotSpNum])/log10(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])));
+            pos = yorigin + (height-yorigin)*((multiplotSpNum/(drawing.numMultiplotSp*1.0)) + (1.0/(drawing.numMultiplotSp*1.0))*(log10(val - drawing.scaleLevelMin[multiplotSpNum])/log10(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])));
           }else{
-            pos = 40.0 + (height-40.0)*((multiplotSpNum/(drawing.numMultiplotSp*1.0)) + (1.0/(drawing.numMultiplotSp*1.0))*(log10(val)/log10(drawing.scaleLevelMax[multiplotSpNum])));
+            pos = yorigin + (height-yorigin)*((multiplotSpNum/(drawing.numMultiplotSp*1.0)) + (1.0/(drawing.numMultiplotSp*1.0))*(log10(val)/log10(drawing.scaleLevelMax[multiplotSpNum])));
           }
         }else{
           pos = minVal;
         }
       }else{
-        pos = 40.0 + (height-40.0)*((multiplotSpNum/(drawing.numMultiplotSp*1.0)) + (1.0/(drawing.numMultiplotSp*1.0))*((val - drawing.scaleLevelMin[multiplotSpNum])/(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])));
+        pos = yorigin + (height-yorigin)*((multiplotSpNum/(drawing.numMultiplotSp*1.0)) + (1.0/(drawing.numMultiplotSp*1.0))*((val - drawing.scaleLevelMin[multiplotSpNum])/(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])));
       }
       //clip value to bottom edge of plot
       if((pos < minVal)||(pos!=pos))
@@ -673,23 +673,22 @@ float getYPos(const float val, const int multiplotSpNum, const float height){
     case 0:
     default:
       //single plot
-      minVal = 40.0;
       if(drawing.logScale){
         if((val > 0)&&(drawing.scaleLevelMax[multiplotSpNum] > 0)){
           if(drawing.scaleLevelMin[multiplotSpNum] > 0){
-            pos = 40.0 + (height-40.0)*(log10(val - drawing.scaleLevelMin[multiplotSpNum])/log10(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]));
+            pos = yorigin + (height-yorigin)*(log10(val - drawing.scaleLevelMin[multiplotSpNum])/log10(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]));
           }else{
-            pos = 40.0 + (height-40.0)*(log10(val)/log10(drawing.scaleLevelMax[multiplotSpNum]));
+            pos = yorigin + (height-yorigin)*(log10(val)/log10(drawing.scaleLevelMax[multiplotSpNum]));
           } 
         }else{
-          pos = 40.0;
+          pos = yorigin;
         }
       }else{
-        pos = 40.0 + (height-40.0)*((val - drawing.scaleLevelMin[multiplotSpNum])/(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]));
+        pos = yorigin + (height-yorigin)*((val - drawing.scaleLevelMin[multiplotSpNum])/(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]));
       }
       //clip value to bottom edge of plot
-      if((pos < minVal)||(pos!=pos))
-        pos = minVal;
+      if((pos < yorigin)||(pos!=pos))
+        pos = yorigin;
       break;
   }
   //printf("pos: %f\n",pos);
@@ -697,7 +696,7 @@ float getYPos(const float val, const int multiplotSpNum, const float height){
 }
 
 //axis tick drawing
-float getAxisXPos(const int axisVal, const float width){
+float getAxisXPos(const int axisVal, const float width, const float xorigin){
   int cal_lowerLimit = drawing.lowerLimit;
   int cal_upperLimit = drawing.upperLimit;
   if(calpar.calMode==1){
@@ -708,14 +707,14 @@ float getAxisXPos(const int axisVal, const float width){
   if((axisVal < cal_lowerLimit)||(axisVal >= cal_upperLimit))
     return -1; //value is off the visible axis
   
-  return 80.0 + (width-80.0)*(axisVal - cal_lowerLimit)/(cal_upperLimit - cal_lowerLimit);
+  return xorigin + (width-xorigin)*(axisVal - cal_lowerLimit)/(cal_upperLimit - cal_lowerLimit);
 }
-void drawXAxisTick(const int axisVal, cairo_t *cr, const float width, const float height, const double baseFontSize){
-  int axisPos = getAxisXPos(axisVal,width);
+void drawXAxisTick(const int axisVal, cairo_t *cr, const float width, const float height, const double baseFontSize, const float xorigin, const float yorigin){
+  int axisPos = getAxisXPos(axisVal,width,xorigin);
   if(axisPos >= 0){
     //axis position is valid
-    cairo_move_to (cr, axisPos, -40.0);
-    cairo_line_to (cr, axisPos, -35.0);
+    cairo_move_to (cr, axisPos, -yorigin);
+    cairo_line_to (cr, axisPos, -yorigin*0.875);
     char tickLabel[20];
     sprintf(tickLabel,"%i",axisVal); //set string for label
     cairo_text_extents_t extents; //get dimensions needed to center text labels
@@ -725,7 +724,7 @@ void drawXAxisTick(const int axisVal, cairo_t *cr, const float width, const floa
     cairo_show_text(cr, tickLabel);
   }
 }
-float getAxisYPos(const float axisVal, const int multiplotSpNum, const float height){
+float getAxisYPos(const float axisVal, const int multiplotSpNum, const float height, const float yorigin){
   float posVal;
   switch(drawing.multiplotMode){
     case 4:
@@ -733,15 +732,15 @@ float getAxisYPos(const float axisVal, const int multiplotSpNum, const float hei
       if(drawing.logScale){
         if((axisVal > 0)&&(drawing.scaleLevelMax[multiplotSpNum] > 0)){
           if(drawing.scaleLevelMin[multiplotSpNum] > 0){
-            posVal = (1.0/drawing.numMultiplotSp)*(40.0-height)*log10(axisVal - drawing.scaleLevelMin[multiplotSpNum])/log10(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]) + (40.0-height)*(multiplotSpNum/(drawing.numMultiplotSp*1.0)) - 40.0;
+            posVal = (1.0/drawing.numMultiplotSp)*(yorigin-height)*log10(axisVal - drawing.scaleLevelMin[multiplotSpNum])/log10(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]) + (yorigin-height)*(multiplotSpNum/(drawing.numMultiplotSp*1.0)) - yorigin;
           }else{
-            posVal = (1.0/drawing.numMultiplotSp)*(40.0-height)*log10(axisVal)/log10(drawing.scaleLevelMax[multiplotSpNum]) + (40.0-height)*(multiplotSpNum/(drawing.numMultiplotSp*1.0)) - 40.0;
+            posVal = (1.0/drawing.numMultiplotSp)*(yorigin-height)*log10(axisVal)/log10(drawing.scaleLevelMax[multiplotSpNum]) + (yorigin-height)*(multiplotSpNum/(drawing.numMultiplotSp*1.0)) - yorigin;
           }
         }else{
-          posVal = (40.0-height)*(multiplotSpNum/(drawing.numMultiplotSp*1.0)) - 40.0;
+          posVal = (yorigin-height)*(multiplotSpNum/(drawing.numMultiplotSp*1.0)) - yorigin;
         }
       }else{
-        posVal = (1.0/drawing.numMultiplotSp)*(40.0-height)*(axisVal - drawing.scaleLevelMin[multiplotSpNum])/(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]) + (40.0-height)*(multiplotSpNum/(drawing.numMultiplotSp*1.0)) - 40.0;
+        posVal = (1.0/drawing.numMultiplotSp)*(yorigin-height)*(axisVal - drawing.scaleLevelMin[multiplotSpNum])/(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]) + (yorigin-height)*(multiplotSpNum/(drawing.numMultiplotSp*1.0)) - yorigin;
       }
       break;
     case 3:
@@ -752,15 +751,15 @@ float getAxisYPos(const float axisVal, const int multiplotSpNum, const float hei
       if(drawing.logScale){
         if((axisVal > 0)&&(drawing.scaleLevelMax[multiplotSpNum] > 0)){
           if(drawing.scaleLevelMin[multiplotSpNum] > 0){
-            posVal = (40.0-height)*log10(axisVal - drawing.scaleLevelMin[multiplotSpNum])/log10(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]) - 40.0;
+            posVal = (yorigin-height)*log10(axisVal - drawing.scaleLevelMin[multiplotSpNum])/log10(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]) - yorigin;
           }else{
-            posVal = (40.0-height)*log10(axisVal)/log10(drawing.scaleLevelMax[multiplotSpNum]) - 40.0;
+            posVal = (yorigin-height)*log10(axisVal)/log10(drawing.scaleLevelMax[multiplotSpNum]) - yorigin;
           }    
         }else{
-          posVal = -40.0;
+          posVal = -yorigin;
         }
       }else{
-        posVal = (40.0-height)*(axisVal - drawing.scaleLevelMin[multiplotSpNum])/(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]) - 40.0;
+        posVal = (yorigin-height)*(axisVal - drawing.scaleLevelMin[multiplotSpNum])/(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]) - yorigin;
       }
       break;
   }
@@ -768,7 +767,7 @@ float getAxisYPos(const float axisVal, const int multiplotSpNum, const float hei
   //printf("height: %f, multiplotsp: %i, axisval: %f, posval: %f\n",height,multiplotSpNum,axisVal,posVal);
   return posVal;
 }
-void drawYAxisTick(const float axisVal, const int multiplotSpNum, cairo_t *cr, const float width, const float height, const double baseFontSize){
+void drawYAxisTick(const float axisVal, const int multiplotSpNum, cairo_t *cr, const float width, const float height, const double baseFontSize, const float xorigin, const float yorigin){
   if((axisVal < drawing.scaleLevelMin[multiplotSpNum])||(axisVal >= drawing.scaleLevelMax[multiplotSpNum])){
     //printf("axisval:%f,scalemin:%f,scalemax:%f\n",axisVal,drawing.scaleLevelMin[multiplotSpNum],drawing.scaleLevelMax[multiplotSpNum]);
     return; //invalid axis value,
@@ -808,23 +807,23 @@ void drawYAxisTick(const float axisVal, const int multiplotSpNum, cairo_t *cr, c
     
   }
   
-  float axisPos = getAxisYPos(axisVal,multiplotSpNum,height);
+  float axisPos = getAxisYPos(axisVal,multiplotSpNum,height,yorigin);
   if((axisPos <= 0) && (axisPos > (height)*-0.98)) {
     //axis position is valid (ie. on the plot, and not too close to the top of the plot so that it won't be cut off)
-    cairo_move_to (cr, 85.0, axisPos);
-    cairo_line_to (cr, 75.0, axisPos);
+    cairo_move_to (cr, xorigin*1.06, axisPos);
+    cairo_line_to (cr, xorigin*0.94, axisPos);
     char tickLabel[20];
     getFormattedYAxisVal(axisVal, drawing.scaleLevelMin[multiplotSpNum], drawing.scaleLevelMax[multiplotSpNum], tickLabel, 20);
     
     cairo_text_extents_t extents; //get dimensions needed to center text labels
     cairo_text_extents(cr, tickLabel, &extents);
     cairo_set_font_size(cr, baseFontSize);
-    cairo_move_to(cr, 70.0 - extents.width, axisPos + extents.height/2.);
+    cairo_move_to(cr, xorigin*0.875 - extents.width, axisPos + extents.height/2.);
     cairo_show_text(cr, tickLabel);
   }
 }
 
-void drawPlotLabel(cairo_t *cr, const float width, const float height, const double baseFontSize){
+void drawPlotLabel(cairo_t *cr, const float width, const float height, const double baseFontSize, const float yorigin){
   char plotLabel[256];
   int i;
   cairo_text_extents_t extents; //get dimensions needed to justify text labels
@@ -834,8 +833,8 @@ void drawPlotLabel(cairo_t *cr, const float width, const float height, const dou
     case 4:
       //stacked spectra
       labelYOffset = height/(3.*drawing.numMultiplotSp);
-      if(labelYOffset > 40.0){
-        labelYOffset = 40.0;
+      if(labelYOffset > yorigin){
+        labelYOffset = yorigin;
       }
       for(i=0;i<drawing.numMultiplotSp;i++){
         cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
@@ -845,7 +844,7 @@ void drawPlotLabel(cairo_t *cr, const float width, const float height, const dou
           snprintf(plotLabel,256,"%s (scaled by %.2f)",rawdata.histComment[drawing.multiPlots[i]],drawing.scaleFactor[drawing.multiPlots[i]]);
         }
         cairo_text_extents(cr, plotLabel, &extents);
-        cairo_move_to(cr, (width)*0.95 - extents.width, (height-40.0)*((drawing.numMultiplotSp-i-1)/(drawing.numMultiplotSp*1.0)) + labelYOffset);
+        cairo_move_to(cr, (width)*0.95 - extents.width, (height-yorigin)*((drawing.numMultiplotSp-i-1)/(drawing.numMultiplotSp*1.0)) + labelYOffset);
         cairo_show_text(cr, plotLabel);
       }
       break;
@@ -860,7 +859,7 @@ void drawPlotLabel(cairo_t *cr, const float width, const float height, const dou
           snprintf(plotLabel,256,"%s (scaled by %.2f)",rawdata.histComment[drawing.multiPlots[i]],drawing.scaleFactor[drawing.multiPlots[i]]);
         }
         cairo_text_extents(cr, plotLabel, &extents);
-        cairo_move_to(cr, (width)*0.95 - extents.width, 40.0 + 18.0*i);
+        cairo_move_to(cr, (width)*0.95 - extents.width, yorigin + 18.0*i);
         cairo_show_text(cr, plotLabel);
       }
       break;
@@ -869,7 +868,7 @@ void drawPlotLabel(cairo_t *cr, const float width, const float height, const dou
       setTextColor(cr);
       strcpy(plotLabel, "Sum of:");
       cairo_text_extents(cr, plotLabel, &extents);
-      cairo_move_to(cr, (width)*0.95 - extents.width, 40.0);
+      cairo_move_to(cr, (width)*0.95 - extents.width, yorigin);
       cairo_show_text(cr, plotLabel);
       for(i=0;i<drawing.numMultiplotSp;i++){
         if(drawing.scaleFactor[drawing.multiPlots[i]] == 1.0){
@@ -878,7 +877,7 @@ void drawPlotLabel(cairo_t *cr, const float width, const float height, const dou
           snprintf(plotLabel,256,"%s (scaled by %.2f)",rawdata.histComment[drawing.multiPlots[i]],drawing.scaleFactor[drawing.multiPlots[i]]);
         }
         cairo_text_extents(cr, plotLabel, &extents);
-        cairo_move_to(cr, (width)*0.95 - extents.width, 40.0 + 18.0*(i+1));
+        cairo_move_to(cr, (width)*0.95 - extents.width, yorigin + 18.0*(i+1));
         cairo_show_text(cr, plotLabel);
       }
       break;
@@ -891,7 +890,7 @@ void drawPlotLabel(cairo_t *cr, const float width, const float height, const dou
         snprintf(plotLabel,256,"%s (scaled by %.2f)",rawdata.histComment[drawing.multiPlots[0]],drawing.scaleFactor[drawing.multiPlots[0]]);
       }
       cairo_text_extents(cr, plotLabel, &extents);
-      cairo_move_to(cr, (width)*0.95 - extents.width, 40.0);
+      cairo_move_to(cr, (width)*0.95 - extents.width, yorigin);
       cairo_show_text(cr, plotLabel);
       break;
     default:
@@ -991,7 +990,7 @@ int getPlotRangeXUnits(){
 //drawLabels: 0=don't draw, 1=draw
 //showFit: 0=don't show, 1=show without highlighted peaks, 2=show with highlighted peaks
 //drawComments: 0=don't draw, 1=draw
-void drawSpectrum(cairo_t *cr, const float width, const float height, const char drawLabels, const char showFit, const char drawComments){
+void drawSpectrum(cairo_t *cr, const float width, const float height, const float scaleFactor, const char drawLabels, const char showFit, const char drawComments){
 
 	if(!rawdata.openedSp){
 		return;
@@ -1004,20 +1003,24 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
 	}
 
   int i,j,k;
+
+  //set the origin of the coordinate system in pixels
+  float xorigin = 80.0*scaleFactor;
+  float yorigin = 40.0*scaleFactor;
 	
   // Draw the background colour
   //cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
   //cairo_paint(cr);
 
   //printf("width: %f, height: %f\n",width,height);
-  cairo_set_line_width(cr, 2.0);
+  cairo_set_line_width(cr, 2.0*scaleFactor);
 
   double plotFontSize = 13.5;
 
   //draw label(s) for the plot
   if(drawLabels){
     setTextColor(cr);
-    drawPlotLabel(cr, width, height, plotFontSize); //draw plot label(s)
+    drawPlotLabel(cr, width, height, plotFontSize, yorigin); //draw plot label(s)
     cairo_stroke(cr);
   }
 
@@ -1129,9 +1132,9 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
               if(getDispSpBinVal(i, j+k) > drawing.scaleLevelMax[i]*0.8){
                 currentVal = getDispSpBinVal(i, j);
                 nextVal = getDispSpBinVal(i, j+k);
-                cairo_move_to (cr, getXPos(j,width), getYPos(currentVal,i,height));
-                cairo_line_to (cr, getXPos(j+k,width), getYPos(currentVal,i,height));
-                cairo_line_to (cr, getXPos(j+k,width), getYPos(nextVal,i,height));
+                cairo_move_to (cr, getXPos(j,width,xorigin), getYPos(currentVal,i,height,yorigin));
+                cairo_line_to (cr, getXPos(j+k,width,xorigin), getYPos(currentVal,i,height,yorigin));
+                cairo_line_to (cr, getXPos(j+k,width,xorigin), getYPos(nextVal,i,height,yorigin));
                 break;
               }
             }
@@ -1139,9 +1142,9 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
 
           currentVal = getDispSpBinVal(i, j);
           nextVal = getDispSpBinVal(i, j+binSkipFactor);
-          cairo_move_to (cr, getXPos(j,width), getYPos(currentVal,i,height));
-          cairo_line_to (cr, getXPos(j+binSkipFactor,width), getYPos(currentVal,i,height));
-          cairo_line_to (cr, getXPos(j+binSkipFactor,width), getYPos(nextVal,i,height));
+          cairo_move_to (cr, getXPos(j,width,xorigin), getYPos(currentVal,i,height,yorigin));
+          cairo_line_to (cr, getXPos(j+binSkipFactor,width,xorigin), getYPos(currentVal,i,height,yorigin));
+          cairo_line_to (cr, getXPos(j+binSkipFactor,width,xorigin), getYPos(nextVal,i,height,yorigin));
         }
         //choose color
         cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
@@ -1161,9 +1164,9 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
               if(getDispSpBinVal(i, j+k) > drawing.scaleLevelMax[0]*0.8){
                 currentVal = getDispSpBinVal(i, j);
                 nextVal = getDispSpBinVal(i, j+k);
-                cairo_move_to (cr, getXPos(j,width), getYPos(currentVal,0,height));
-                cairo_line_to (cr, getXPos(j+k,width), getYPos(currentVal,0,height));
-                cairo_line_to (cr, getXPos(j+k,width), getYPos(nextVal,0,height));
+                cairo_move_to (cr, getXPos(j,width,xorigin), getYPos(currentVal,0,height,yorigin));
+                cairo_line_to (cr, getXPos(j+k,width,xorigin), getYPos(currentVal,0,height,yorigin));
+                cairo_line_to (cr, getXPos(j+k,width,xorigin), getYPos(nextVal,0,height,yorigin));
                 break;
               }
             }
@@ -1171,9 +1174,9 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
 
           currentVal = getDispSpBinVal(i, j);
           nextVal = getDispSpBinVal(i, j+binSkipFactor);
-          cairo_move_to (cr, getXPos(j,width), getYPos(currentVal,0,height));
-          cairo_line_to (cr, getXPos(j+binSkipFactor,width), getYPos(currentVal,0,height));
-          cairo_line_to (cr, getXPos(j+binSkipFactor,width), getYPos(nextVal,0,height));
+          cairo_move_to (cr, getXPos(j,width,xorigin), getYPos(currentVal,0,height,yorigin));
+          cairo_line_to (cr, getXPos(j+binSkipFactor,width,xorigin), getYPos(currentVal,0,height,yorigin));
+          cairo_line_to (cr, getXPos(j+binSkipFactor,width,xorigin), getYPos(nextVal,0,height,yorigin));
         }
         //choose color
         cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
@@ -1193,9 +1196,9 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
             if(getDispSpBinVal(0, i+k) > drawing.scaleLevelMax[0]*0.8){
               currentVal = getDispSpBinVal(0, i);
               nextVal = getDispSpBinVal(0, i+k);
-              cairo_move_to (cr, getXPos(i,width), getYPos(currentVal,0,height));
-              cairo_line_to (cr, getXPos(i+k,width), getYPos(currentVal,0,height));
-              cairo_line_to (cr, getXPos(i+k,width), getYPos(nextVal,0,height));
+              cairo_move_to (cr, getXPos(i,width,xorigin), getYPos(currentVal,0,height,yorigin));
+              cairo_line_to (cr, getXPos(i+k,width,xorigin), getYPos(currentVal,0,height,yorigin));
+              cairo_line_to (cr, getXPos(i+k,width,xorigin), getYPos(nextVal,0,height,yorigin));
               break;
             }
           }
@@ -1204,9 +1207,9 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
         currentVal = getDispSpBinVal(0, i);
         nextVal = getDispSpBinVal(0, i+binSkipFactor);
         //printf("Here! x=%f,y=%f,yorig=%f xclip=%f %f\n",getXPos(i,width), rawdata.hist[drawing.multiPlots[0]][drawing.lowerLimit+i],rawdata.hist[drawing.multiPlots[0]][drawing.lowerLimit+i],0,width);
-        cairo_move_to (cr, getXPos(i,width), getYPos(currentVal,0,height));
-        cairo_line_to (cr, getXPos(i+binSkipFactor,width), getYPos(currentVal,0,height));
-        cairo_line_to (cr, getXPos(i+binSkipFactor,width), getYPos(nextVal,0,height));
+        cairo_move_to (cr, getXPos(i,width,xorigin), getYPos(currentVal,0,height,yorigin));
+        cairo_line_to (cr, getXPos(i+binSkipFactor,width,xorigin), getYPos(currentVal,0,height,yorigin));
+        cairo_line_to (cr, getXPos(i+binSkipFactor,width,xorigin), getYPos(nextVal,0,height,yorigin));
       }
       cairo_set_source_rgb (cr, drawing.spColors[0], drawing.spColors[1], drawing.spColors[2]);
       cairo_stroke(cr);
@@ -1225,22 +1228,22 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
       for(i=0;i<fitpar.numFitPeaks;i++){
         for(fitDrawX=fitpar.fitStartCh; fitDrawX<=fitpar.fitEndCh; fitDrawX+= 0.5){
           nextFitDrawX = fitDrawX + 0.5;
-          xpos = getXPosFromCh(fitDrawX,width,1);
-          nextXpos = getXPosFromCh(nextFitDrawX,width,1);
+          xpos = getXPosFromCh(fitDrawX,width,1,xorigin);
+          nextXpos = getXPosFromCh(nextFitDrawX,width,1,xorigin);
           if((xpos > 0)&&(nextXpos > 0)){
-            cairo_move_to (cr, xpos, getYPos(evalFitOnePeak(fitDrawX,i),0,height));
-            cairo_line_to (cr, nextXpos, getYPos(evalFitOnePeak(nextFitDrawX,i),0,height));
+            cairo_move_to (cr, xpos, getYPos(evalFitOnePeak(fitDrawX,i),0,height,yorigin));
+            cairo_line_to (cr, nextXpos, getYPos(evalFitOnePeak(nextFitDrawX,i),0,height,yorigin));
           }
         }
       }
       //draw background
       for(fitDrawX=fitpar.fitStartCh; fitDrawX<=fitpar.fitEndCh; fitDrawX+= 0.5){
         nextFitDrawX = fitDrawX + 0.5;
-        xpos = getXPosFromCh(fitDrawX,width,1);
-        nextXpos = getXPosFromCh(nextFitDrawX,width,1);
+        xpos = getXPosFromCh(fitDrawX,width,1,xorigin);
+        nextXpos = getXPosFromCh(nextFitDrawX,width,1,xorigin);
         if((xpos > 0)&&(nextXpos > 0)){
-          cairo_move_to (cr, xpos, getYPos(evalFitBG(fitDrawX),0,height));
-          cairo_line_to (cr, nextXpos, getYPos(evalFitBG(nextFitDrawX),0,height));
+          cairo_move_to (cr, xpos, getYPos(evalFitBG(fitDrawX),0,height,yorigin));
+          cairo_line_to (cr, nextXpos, getYPos(evalFitBG(nextFitDrawX),0,height,yorigin));
         }
       }
       cairo_stroke(cr);
@@ -1249,11 +1252,11 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
         cairo_set_line_width(cr, 2.0);
         for(fitDrawX=fitpar.fitStartCh; fitDrawX<=fitpar.fitEndCh; fitDrawX+= 0.5){
           nextFitDrawX = fitDrawX + 0.5;
-          xpos = getXPosFromCh(fitDrawX,width,1);
-          nextXpos = getXPosFromCh(nextFitDrawX,width,1);
+          xpos = getXPosFromCh(fitDrawX,width,1,xorigin);
+          nextXpos = getXPosFromCh(nextFitDrawX,width,1,xorigin);
           if((xpos > 0)&&(nextXpos > 0)){
-            cairo_move_to (cr, xpos, getYPos(evalFit(fitDrawX),0,height));
-            cairo_line_to (cr, nextXpos, getYPos(evalFit(nextFitDrawX),0,height));
+            cairo_move_to (cr, xpos, getYPos(evalFit(fitDrawX),0,height,yorigin));
+            cairo_line_to (cr, nextXpos, getYPos(evalFit(nextFitDrawX),0,height,yorigin));
           }
         }
         cairo_stroke(cr);
@@ -1263,11 +1266,11 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
         cairo_set_line_width(cr, 10.0);
         for(fitDrawX=(fitpar.fitParVal[7+(3*drawing.highlightedPeak)] - 3.*fitpar.fitParVal[8+(3*drawing.highlightedPeak)]);  fitDrawX<=(fitpar.fitParVal[7+(3*drawing.highlightedPeak)] + 3.*fitpar.fitParVal[8+(3*drawing.highlightedPeak)]); fitDrawX+= 0.2){
           nextFitDrawX = fitDrawX + 0.2;
-          xpos = getXPosFromCh(fitDrawX,width,1);
-          nextXpos = getXPosFromCh(nextFitDrawX,width,1);
+          xpos = getXPosFromCh(fitDrawX,width,1,xorigin);
+          nextXpos = getXPosFromCh(nextFitDrawX,width,1,xorigin);
           if((xpos > 0)&&(nextXpos > 0)){
-            cairo_move_to (cr, xpos, getYPos(evalFitOnePeak(fitDrawX,drawing.highlightedPeak),0,height));
-            cairo_line_to (cr, nextXpos, getYPos(evalFitOnePeak(nextFitDrawX,drawing.highlightedPeak),0,height));
+            cairo_move_to (cr, xpos, getYPos(evalFitOnePeak(fitDrawX,drawing.highlightedPeak),0,height,yorigin));
+            cairo_line_to (cr, nextXpos, getYPos(evalFitOnePeak(nextFitDrawX,drawing.highlightedPeak),0,height,yorigin));
           }
         }
         cairo_stroke(cr);
@@ -1279,14 +1282,14 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
   // draw axis lines
   cairo_set_line_width(cr, 1.0);
   setTextColor(cr);
-  cairo_move_to (cr, 80.0, 40.0);
-  cairo_line_to (cr, 80.0, height);
+  cairo_move_to (cr, xorigin, yorigin);
+  cairo_line_to (cr, xorigin, height);
   switch(drawing.multiplotMode){
     case 4:
       //stacked
       for(i=0;i<drawing.numMultiplotSp;i++){
-        cairo_move_to (cr, 80.0, 40.0 + (height-40.0)*i/(drawing.numMultiplotSp*1.0));
-        cairo_line_to (cr, width, 40.0 + (height-40.0)*i/(drawing.numMultiplotSp*1.0));
+        cairo_move_to (cr, xorigin, yorigin + (height-yorigin)*i/(drawing.numMultiplotSp*1.0));
+        cairo_line_to (cr, width, yorigin + (height-yorigin)*i/(drawing.numMultiplotSp*1.0));
       }
       break;
     case 3:
@@ -1295,8 +1298,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
     case 0:
     default:
       //single plot
-      cairo_move_to (cr, 80.0, 40.0);
-      cairo_line_to (cr, width, 40.0);
+      cairo_move_to (cr, xorigin, yorigin);
+      cairo_line_to (cr, width, yorigin);
       break;
   }
   cairo_stroke(cr);
@@ -1308,7 +1311,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
   //draw x axis ticks
   float tickDist = getDistBetweenXAxisTicks(getPlotRangeXUnits());
   for(i=0;i<S32K;i+=tickDist){
-    drawXAxisTick(i, cr, width, height, plotFontSize);
+    drawXAxisTick(i, cr, width, height, plotFontSize, xorigin, yorigin);
   }
   cairo_stroke(cr);
   
@@ -1318,7 +1321,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
   switch(drawing.multiplotMode){
     case 4:
       //stacked
-      numTickPerSp = (height)/(40.0*drawing.numMultiplotSp);
+      numTickPerSp = (height)/(yorigin*drawing.numMultiplotSp);
       if(numTickPerSp < 2)
         numTickPerSp = 2;
       if(drawing.logScale){
@@ -1331,7 +1334,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
             //logarithmic scale ticks in base-10
             float tickVal = pow(10.0,getNSigf(drawing.scaleLevelMax[i],10.0));
             while(numTickUsed < numTickPerSp){
-              drawYAxisTick(tickVal, i, cr, width, height, plotFontSize);
+              drawYAxisTick(tickVal, i, cr, width, height, plotFontSize, xorigin, yorigin);
               tickVal /= 10.;
               numTickUsed++;
             }
@@ -1339,7 +1342,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
             //logarithmic scale ticks in base-2
             float tickVal = pow(2.0,getNSigf(drawing.scaleLevelMax[i],2.0));
             while(numTickUsed < numTickPerSp){
-              drawYAxisTick(tickVal, i, cr, width, height, plotFontSize);
+              drawYAxisTick(tickVal, i, cr, width, height, plotFontSize, xorigin, yorigin);
               tickVal /= 2.;
               numTickUsed++;
             }
@@ -1350,20 +1353,20 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
           yTickDist = getDistBetweenYAxisTicks(drawing.scaleLevelMax[i] - drawing.scaleLevelMin[i],numTickPerSp);
           cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
           for(yTick=0.;yTick<drawing.scaleLevelMax[i];yTick+=yTickDist){
-            drawYAxisTick(yTick, i, cr, width, height, plotFontSize);
+            drawYAxisTick(yTick, i, cr, width, height, plotFontSize, xorigin, yorigin);
           }
           for(yTick=0.;yTick>drawing.scaleLevelMin[i];yTick-=yTickDist){
             if(yTick != 0)
-              drawYAxisTick(yTick, i, cr, width, height, plotFontSize);
+              drawYAxisTick(yTick, i, cr, width, height, plotFontSize, xorigin, yorigin);
           }
-          //drawYAxisTick(0.0, i, cr, width, height, plotFontSize); //always draw the zero label on the y axis
+          //drawYAxisTick(0.0, i, cr, width, height, plotFontSize, xorigin, yorigin); //always draw the zero label on the y axis
           cairo_stroke(cr);
           //draw the zero line if applicable
           if((drawing.scaleLevelMin[i] < 0.0) && (drawing.scaleLevelMax[i] > 0.0)){
             cairo_set_line_width(cr, 1.0);
             cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
-            cairo_move_to (cr, 80.0, getAxisYPos(0.0,i,height));
-            cairo_line_to (cr, width, getAxisYPos(0.0,i,height));
+            cairo_move_to (cr, xorigin, getAxisYPos(0.0,i,height,yorigin));
+            cairo_line_to (cr, width, getAxisYPos(0.0,i,height,yorigin));
             cairo_stroke(cr);
           }
         }
@@ -1375,8 +1378,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
       for(i=0;i<drawing.numMultiplotSp;i++){
         float labelOffset = 0.4*(i+1)/(drawing.numMultiplotSp*1.);
         cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
-        drawYAxisTick(drawing.scaleLevelMax[i]*(0.3 + labelOffset), i, cr, width, height, plotFontSize); //draw one axis tick near the middle of the axis, per spectrum
-        drawYAxisTick(0.0, i, cr, width, height, plotFontSize); //always draw the zero label on the y axis
+        drawYAxisTick(drawing.scaleLevelMax[i]*(0.3 + labelOffset), i, cr, width, height, plotFontSize, xorigin, yorigin); //draw one axis tick near the middle of the axis, per spectrum
+        drawYAxisTick(0.0, i, cr, width, height, plotFontSize, xorigin, yorigin); //always draw the zero label on the y axis
       }
       break;
     case 2:
@@ -1384,7 +1387,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
     case 0:
       //modes with a single scale
       setTextColor(cr);
-      numTickPerSp = height/40.0 + 1;
+      numTickPerSp = height/yorigin + 1;
       if(drawing.logScale){
         //numTickPerSp *= 2;
         int nsigf10 = 0;
@@ -1398,7 +1401,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
           //logarithmic scale ticks in base-10
           float tickVal = pow(10.0,getNSigf(drawing.scaleLevelMax[0],10.0));
           while(numTickUsed < numTickPerSp){
-            drawYAxisTick(tickVal, 0, cr, width, height, plotFontSize);
+            drawYAxisTick(tickVal, 0, cr, width, height, plotFontSize, xorigin, yorigin);
             tickVal /= 10.;
             numTickUsed++;
           }
@@ -1406,7 +1409,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
           //logarithmic scale ticks in base-2
           float tickVal = pow(2.0,getNSigf(drawing.scaleLevelMax[0],2.0));
           while(numTickUsed < numTickPerSp){
-            drawYAxisTick(tickVal, 0, cr, width, height, plotFontSize);
+            drawYAxisTick(tickVal, 0, cr, width, height, plotFontSize, xorigin, yorigin);
             tickVal /= 2.;
             numTickUsed++;
           }
@@ -1414,21 +1417,21 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
       }else{
         yTickDist = getDistBetweenYAxisTicks(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0],numTickPerSp);
         for(yTick=0.;yTick<drawing.scaleLevelMax[0];yTick+=yTickDist){
-          drawYAxisTick(yTick, 0, cr, width, height, plotFontSize);
+          drawYAxisTick(yTick, 0, cr, width, height, plotFontSize, xorigin, yorigin);
         }
         for(yTick=0.;yTick>drawing.scaleLevelMin[0];yTick-=yTickDist){
           if(yTick != 0)
-            drawYAxisTick(yTick, 0, cr, width, height, plotFontSize);
+            drawYAxisTick(yTick, 0, cr, width, height, plotFontSize, xorigin, yorigin);
         }
         //printf("min: %f, max: %f, yTickDist: %f, numTickPerSp: %i\n",drawing.scaleLevelMin[0],drawing.scaleLevelMax[0],yTickDist,numTickPerSp);
-        //drawYAxisTick(0.0, 0, cr, width, height, plotFontSize); //always draw the zero label on the y axis
+        //drawYAxisTick(0.0, 0, cr, width, height, plotFontSize, xorigin, yorigin); //always draw the zero label on the y axis
         cairo_stroke(cr);
         //draw the zero line if applicable
         if((drawing.scaleLevelMin[0] < 0.0) && (drawing.scaleLevelMax[0] > 0.0)){
           cairo_set_line_width(cr, 1.0);
           cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
-          cairo_move_to (cr, 80.0, getAxisYPos(0.0,0,height));
-          cairo_line_to (cr, width, getAxisYPos(0.0,0,height));
+          cairo_move_to (cr, xorigin, getAxisYPos(0.0,0,height,yorigin));
+          cairo_line_to (cr, width, getAxisYPos(0.0,0,height,yorigin));
           cairo_stroke(cr);
         }
       }
@@ -1471,21 +1474,21 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
 
     //draw cursors at fit limits if needed
     if(fitpar.fitStartCh >= 0){
-      float cursorPos = getXPosFromCh(fitpar.fitStartCh, width, 0);
+      float cursorPos = getXPosFromCh(fitpar.fitStartCh, width, 0, xorigin);
       if(cursorPos>=0){
         cairo_set_line_width(cr, 2.0);
         cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
-        cairo_move_to(cr, cursorPos, -40.0);
+        cairo_move_to(cr, cursorPos, -yorigin);
         cairo_line_to(cr, cursorPos, -height);
         cairo_stroke(cr);
       }
     }
     if(fitpar.fitEndCh >= 0){
-      float cursorPos = getXPosFromCh(fitpar.fitEndCh, width, 0);
+      float cursorPos = getXPosFromCh(fitpar.fitEndCh, width, 0, xorigin);
       if(cursorPos>=0){
         cairo_set_line_width(cr, 2.0);
         cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
-        cairo_move_to(cr, cursorPos, -40.0);
+        cairo_move_to(cr, cursorPos, -yorigin);
         cairo_line_to(cr, cursorPos, -height);
         cairo_stroke(cr);
       }
@@ -1498,7 +1501,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
       cairo_set_line_width(cr, 2.0);
       for(i=0;i<fitpar.numFitPeaks;i++){
         if((fitpar.fitPeakInitGuess[i] > drawing.lowerLimit)&&(fitpar.fitPeakInitGuess[i] < drawing.upperLimit)){
-          cairo_arc(cr,getXPosFromCh(fitpar.fitPeakInitGuess[i],width,1),(-0.002*(height)*30.0)-getYPos(getDispSpBinVal(0,fitpar.fitPeakInitGuess[i]-drawing.lowerLimit),0,height),5.,0.,2*G_PI);
+          cairo_arc(cr,getXPosFromCh(fitpar.fitPeakInitGuess[i],width,1,xorigin),(-0.002*(height)*30.0)-getYPos(getDispSpBinVal(0,fitpar.fitPeakInitGuess[i]-drawing.lowerLimit),0,height,yorigin),5.,0.,2*G_PI);
         }
         cairo_stroke_preserve(cr);
         cairo_fill(cr);
@@ -1509,7 +1512,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
       cairo_set_line_width(cr, 2.0);
       for(i=0;i<fitpar.numFitPeaks;i++){
         if((fitpar.fitParVal[7+(3*i)] > drawing.lowerLimit)&&(fitpar.fitParVal[7+(3*i)] < drawing.upperLimit)){
-          cairo_arc(cr,getXPosFromCh(fitpar.fitParVal[7+(3*i)],width,1),(-0.002*(height)*30.0)-getYPos(evalFit(fitpar.fitParVal[7+(3*i)]),0,height),5.,0.,2*G_PI);
+          cairo_arc(cr,getXPosFromCh(fitpar.fitParVal[7+(3*i)],width,1,xorigin),(-0.002*(height)*30.0)-getYPos(evalFit(fitpar.fitParVal[7+(3*i)]),0,height,yorigin),5.,0.,2*G_PI);
         }
         cairo_stroke_preserve(cr);
         cairo_fill(cr);
@@ -1537,8 +1540,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
                       }else{
                         cairo_set_line_width(cr, 4.0);
                       }
-                      float xc = getXPosFromCh(rawdata.chanCommentCh[i],width,1);
-                      float yc = -1.0*getYPos(rawdata.chanCommentVal[i],0,height);
+                      float xc = getXPosFromCh(rawdata.chanCommentCh[i],width,1,xorigin);
+                      float yc = -1.0*getYPos(rawdata.chanCommentVal[i],0,height,yorigin);
                       float radius = 14.0;
                       cairo_arc(cr,xc,yc,radius,0.,2*G_PI);
                       cairo_set_font_size(cr, plotFontSize*1.5);
@@ -1567,7 +1570,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const char
      cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
     cairo_set_line_width(cr, 1.0);
     setTextColor(cr);
-    cairo_move_to(cr, guiglobals.cursorPosX, -40.0);
+    cairo_move_to(cr, guiglobals.cursorPosX, -yorigin);
     cairo_line_to(cr, guiglobals.cursorPosX, -height);
     cairo_stroke(cr);
   }
@@ -1592,5 +1595,5 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data){
   // Determine GtkDrawingArea dimensions
   gdk_window_get_geometry(wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
 
-  drawSpectrum(cr, (float)dasize.width, (float)dasize.height, guiglobals.drawSpLabels, 2, guiglobals.drawSpComments);
+  drawSpectrum(cr, (float)dasize.width, (float)dasize.height, 1.0, guiglobals.drawSpLabels, 2, guiglobals.drawSpComments);
 }

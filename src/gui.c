@@ -752,7 +752,7 @@ void on_export_image_button_clicked(GtkButton *b){
     cairo_surface_t *imgSurf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, hres, vres);
     cairo_t *cr = cairo_create(imgSurf);
     //draw the spectrum
-    drawSpectrum(cr, hres, vres, showLabels, showFit, 0);
+    drawSpectrum(cr, (float)hres, (float)vres, 1.0, showLabels, showFit, 0);
     //save the image file
     if(cairo_surface_write_to_png(imgSurf, fileName)!=CAIRO_STATUS_SUCCESS){
       saveErr=1;
