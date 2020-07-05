@@ -758,6 +758,8 @@ void on_export_image_button_clicked(GtkButton *b){
       saveErr=1;
     }
 
+    cairo_destroy(cr);
+    cairo_surface_destroy(imgSurf);
     gtk_widget_destroy(GTK_WIDGET(file_save_dialog));
 
     if(saveErr>0){
