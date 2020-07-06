@@ -273,9 +273,6 @@ void show_view_window(){
   gtk_window_present(multiplot_manage_window); //show the window
 }
 
-
-
-
 //function for opening a single file without UI (ie. from the command line)
 //if append=1, append this file to already opened files
 void openSingleFile(char *filename, int append){
@@ -346,8 +343,9 @@ void openSingleFile(char *filename, int append){
 void on_open_button_clicked(GtkButton *b)
 {
   int i,j;
-  
-  file_open_dialog = GTK_FILE_CHOOSER(gtk_file_chooser_dialog_new("Open Spectrum File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, NULL));
+
+  GtkFileChooserNative *native = gtk_file_chooser_native_new ("Open Spectrum File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
+  file_open_dialog = GTK_FILE_CHOOSER(native);
   gtk_file_chooser_set_select_multiple(file_open_dialog, TRUE);
   file_filter = gtk_file_filter_new();
   gtk_file_filter_set_name(file_filter,"Spectrum Data (.jf3, .txt, .mca, .fmca, .spe, .C)");
@@ -360,8 +358,8 @@ void on_open_button_clicked(GtkButton *b)
   gtk_file_chooser_add_filter(file_open_dialog,file_filter);
 
   int openErr = 0; //to track if there are any errors when opening spectra
-  if (gtk_dialog_run(GTK_DIALOG(file_open_dialog)) == GTK_RESPONSE_ACCEPT)
-  {
+  if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
+
     rawdata.numSpOpened = 0; //reset the open spectra
     rawdata.numChComments = 0; //reset the number of comments
     rawdata.numViews = 0; //reset the number of views
@@ -405,8 +403,6 @@ void on_open_button_clicked(GtkButton *b)
       }
     }
 
-    gtk_widget_destroy(GTK_WIDGET(file_open_dialog));
-
     if(openErr>0){
       GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
       GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error opening spectrum data!");
@@ -439,8 +435,6 @@ void on_open_button_clicked(GtkButton *b)
     }
     g_slist_free(file_list);
     g_free(filename);
-  }else{
-    gtk_widget_destroy(GTK_WIDGET(file_open_dialog));
   }
   
   //autozoom if needed
@@ -448,7 +442,8 @@ void on_open_button_clicked(GtkButton *b)
     autoZoom();
     gtk_range_set_value(GTK_RANGE(zoom_scale),log2(drawing.zoomLevel));
   }
-  
+
+  g_object_unref(native);
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
   
 }
@@ -464,7 +459,8 @@ void on_append_button_clicked(GtkButton *b)
 
   int i,j;
   
-  file_open_dialog = GTK_FILE_CHOOSER(gtk_file_chooser_dialog_new ("Add More Spectrum File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, NULL));
+  GtkFileChooserNative *native = gtk_file_chooser_native_new ("Add More Spectrum File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
+  file_open_dialog = GTK_FILE_CHOOSER(native);
   gtk_file_chooser_set_select_multiple(file_open_dialog, TRUE);
   file_filter = gtk_file_filter_new();
   gtk_file_filter_set_name(file_filter,"Spectrum Data (.jf3, .txt, .mca, .fmca, .spe, .C)");
@@ -477,8 +473,8 @@ void on_append_button_clicked(GtkButton *b)
   gtk_file_chooser_add_filter(file_open_dialog,file_filter);
 
   int openErr = 0; //to track if there are any errors when opening spectra
-  if (gtk_dialog_run(GTK_DIALOG(file_open_dialog)) == GTK_RESPONSE_ACCEPT)
-  {
+  if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
+
     char *filename = NULL;
     GSList *file_list = gtk_file_chooser_get_filenames(file_open_dialog);
     for(i=0;i<g_slist_length(file_list);i++){
@@ -506,8 +502,6 @@ void on_append_button_clicked(GtkButton *b)
         break;
       }
     }
-
-    gtk_widget_destroy(GTK_WIDGET(file_open_dialog));
 
     if(openErr>0){
       GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
@@ -541,9 +535,9 @@ void on_append_button_clicked(GtkButton *b)
     }
     g_slist_free(file_list);
     g_free(filename);
-  }else{
-    gtk_widget_destroy(GTK_WIDGET(file_open_dialog));
   }
+
+  g_object_unref(native);
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
   
 }
@@ -555,16 +549,18 @@ void on_save_button_clicked(GtkButton *b)
     return;
   }
 
-  file_save_dialog = GTK_FILE_CHOOSER(gtk_file_chooser_dialog_new ("Save Spectrum Data", window, GTK_FILE_CHOOSER_ACTION_SAVE, "Cancel", GTK_RESPONSE_CANCEL, "Save", GTK_RESPONSE_ACCEPT, NULL));
+  GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Spectrum Data", window, GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
+  file_save_dialog = GTK_FILE_CHOOSER(native);
   gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
+  gtk_file_chooser_set_do_overwrite_confirmation(file_save_dialog, TRUE);
   file_filter = gtk_file_filter_new();
   gtk_file_filter_set_name(file_filter,"jf3 sessions (.jf3)");
   gtk_file_filter_add_pattern(file_filter,"*.jf3");
   gtk_file_chooser_add_filter(file_save_dialog,file_filter);
 
   int saveErr = 0; //to track if there are any errors when opening spectra
-  if (gtk_dialog_run(GTK_DIALOG(file_save_dialog)) == GTK_RESPONSE_ACCEPT)
-  {
+  if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
+
     char *fn = NULL;
     char *tok, fileName[256];
     fn = gtk_file_chooser_get_filename(file_save_dialog);
@@ -574,8 +570,6 @@ void on_save_button_clicked(GtkButton *b)
     strncat(fileName,".jf3",255);
     //write file
     saveErr = writeJF3(fileName, rawdata.hist);
-
-    gtk_widget_destroy(GTK_WIDGET(file_save_dialog));
 
     if(saveErr>0){
       GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
@@ -600,10 +594,9 @@ void on_save_button_clicked(GtkButton *b)
       gtk_label_set_text(bottom_info_text,saveMsg);
     }
     g_free(fn);
-  }else{
-    gtk_widget_destroy(GTK_WIDGET(file_save_dialog));
   }
-  
+
+  g_object_unref(native);
 }
 
 void on_save_text_button_clicked(GtkButton *b)
@@ -663,8 +656,10 @@ void on_export_save_button_clicked(GtkButton *b){
   int exportMode = gtk_combo_box_get_active(GTK_COMBO_BOX(export_mode_combobox));
   int rebin = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_rebin_checkbutton));
 
-  file_save_dialog = GTK_FILE_CHOOSER(gtk_file_chooser_dialog_new ("Export Spectrum Data", window, GTK_FILE_CHOOSER_ACTION_SAVE, "Cancel", GTK_RESPONSE_CANCEL, "Export", GTK_RESPONSE_ACCEPT, NULL));
+  GtkFileChooserNative *native = gtk_file_chooser_native_new ("Export Spectrum Data", window, GTK_FILE_CHOOSER_ACTION_SAVE, "_Export", "_Cancel");
+  file_save_dialog = GTK_FILE_CHOOSER(native);
   gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
+  gtk_file_chooser_set_do_overwrite_confirmation(file_save_dialog, TRUE);
   file_filter = gtk_file_filter_new();
 
   switch(guiglobals.exportFileType){
@@ -684,8 +679,7 @@ void on_export_save_button_clicked(GtkButton *b){
   }
 
   int saveErr = 0; //to track if there are any errors when opening spectra
-  if (gtk_dialog_run(GTK_DIALOG(file_save_dialog)) == GTK_RESPONSE_ACCEPT)
-  {
+  if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
     
     char *fn = NULL;
     char *tok, fileName[256];
@@ -705,8 +699,6 @@ void on_export_save_button_clicked(GtkButton *b){
         saveErr = exportTXT(fileName, exportMode, rebin);
         break;
     }
-
-    gtk_widget_destroy(GTK_WIDGET(file_save_dialog));
 
     if(saveErr>0){
       GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
@@ -734,10 +726,9 @@ void on_export_save_button_clicked(GtkButton *b){
       gtk_label_set_text(bottom_info_text,saveMsg);
     }
     g_free(fn);
-  }else{
-    gtk_widget_destroy(GTK_WIDGET(file_save_dialog));
   }
 
+  g_object_unref(native);
   gtk_widget_hide(GTK_WIDGET(export_options_window)); //hide the window
 }
 
@@ -755,8 +746,10 @@ void on_export_image_button_clicked(GtkButton *b){
   int hres = gtk_spin_button_get_value_as_int(export_h_res_spinbutton);
   int vres = gtk_spin_button_get_value_as_int(export_v_res_spinbutton);
 
-  file_save_dialog = GTK_FILE_CHOOSER(gtk_file_chooser_dialog_new ("Save Image File", window, GTK_FILE_CHOOSER_ACTION_SAVE, "Cancel", GTK_RESPONSE_CANCEL, "Save", GTK_RESPONSE_ACCEPT, NULL));
+  GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Image File", window, GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
+  file_save_dialog = GTK_FILE_CHOOSER(native);
   gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
+  gtk_file_chooser_set_do_overwrite_confirmation(file_save_dialog, TRUE);
   file_filter = gtk_file_filter_new();
   gtk_file_filter_set_name(file_filter,"Image files (.png)");
   gtk_file_filter_add_pattern(file_filter,"*.png");
@@ -765,8 +758,7 @@ void on_export_image_button_clicked(GtkButton *b){
   float scaleFactor = (1.0 + inpAxisScale)*sqrt((hres*vres)/1000000.0);
 
   int saveErr = 0; //to track if there are any errors when opening spectra
-  if (gtk_dialog_run(GTK_DIALOG(file_save_dialog)) == GTK_RESPONSE_ACCEPT)
-  {
+  if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
     
     char *fn = NULL;
     char *tok, fileName[256];
@@ -786,7 +778,6 @@ void on_export_image_button_clicked(GtkButton *b){
 
     cairo_destroy(cr);
     cairo_surface_destroy(imgSurf);
-    gtk_widget_destroy(GTK_WIDGET(file_save_dialog));
 
     if(saveErr>0){
       GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
@@ -811,10 +802,9 @@ void on_export_image_button_clicked(GtkButton *b){
       gtk_label_set_text(bottom_info_text,saveMsg);
     }
     g_free(fn);
-  }else{
-    gtk_widget_destroy(GTK_WIDGET(file_save_dialog));
   }
 
+  g_object_unref(native);
   gtk_widget_hide(GTK_WIDGET(export_image_window)); //hide the window
 }
 

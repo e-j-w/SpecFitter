@@ -1,6 +1,6 @@
 # **jf3**
 
-**A simple spectrum viewer in GTK3**
+**A spectrum viewer and analyzer in GTK3**
 
 ## Description
 
