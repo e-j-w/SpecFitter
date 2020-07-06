@@ -557,6 +557,10 @@ void on_save_button_clicked(GtkButton *b)
 
   file_save_dialog = GTK_FILE_CHOOSER(gtk_file_chooser_dialog_new ("Save Spectrum Data", window, GTK_FILE_CHOOSER_ACTION_SAVE, "Cancel", GTK_RESPONSE_CANCEL, "Save", GTK_RESPONSE_ACCEPT, NULL));
   gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
+  file_filter = gtk_file_filter_new();
+  gtk_file_filter_set_name(file_filter,"jf3 sessions (.jf3)");
+  gtk_file_filter_add_pattern(file_filter,"*.jf3");
+  gtk_file_chooser_add_filter(file_save_dialog,file_filter);
 
   int saveErr = 0; //to track if there are any errors when opening spectra
   if (gtk_dialog_run(GTK_DIALOG(file_save_dialog)) == GTK_RESPONSE_ACCEPT)
@@ -661,6 +665,23 @@ void on_export_save_button_clicked(GtkButton *b){
 
   file_save_dialog = GTK_FILE_CHOOSER(gtk_file_chooser_dialog_new ("Export Spectrum Data", window, GTK_FILE_CHOOSER_ACTION_SAVE, "Cancel", GTK_RESPONSE_CANCEL, "Export", GTK_RESPONSE_ACCEPT, NULL));
   gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
+  file_filter = gtk_file_filter_new();
+
+  switch(guiglobals.exportFileType){
+    case 1:
+      //radware
+      gtk_file_filter_set_name(file_filter,"RadWare files (.spe)");
+      gtk_file_filter_add_pattern(file_filter,"*.spe");
+      gtk_file_chooser_add_filter(file_save_dialog,file_filter);
+      break;
+    case 0:
+    default:
+      //text
+      gtk_file_filter_set_name(file_filter,"ASCII files (.txt)");
+      gtk_file_filter_add_pattern(file_filter,"*.txt");
+      gtk_file_chooser_add_filter(file_save_dialog,file_filter);
+      break;
+  }
 
   int saveErr = 0; //to track if there are any errors when opening spectra
   if (gtk_dialog_run(GTK_DIALOG(file_save_dialog)) == GTK_RESPONSE_ACCEPT)
@@ -673,8 +694,7 @@ void on_export_save_button_clicked(GtkButton *b){
     strncpy(fileName,tok,255);
 
     //write file
-    switch (guiglobals.exportFileType)
-    {
+    switch(guiglobals.exportFileType){
       case 1:
         //radware
         saveErr = exportSPE(fileName, exportMode, rebin);
@@ -729,7 +749,7 @@ void on_save_png_button_clicked(GtkButton *b)
 void on_export_image_button_clicked(GtkButton *b){
   
   //get image file settings
-  //int axisScale = gtk_combo_box_get_active(GTK_COMBO_BOX(export_axissize_combobox));
+  int inpAxisScale = gtk_combo_box_get_active(GTK_COMBO_BOX(export_axissize_combobox));
   int showFit = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_fit_checkbutton));
   int showLabels = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_label_checkbutton));
   int hres = gtk_spin_button_get_value_as_int(export_h_res_spinbutton);
@@ -737,6 +757,12 @@ void on_export_image_button_clicked(GtkButton *b){
 
   file_save_dialog = GTK_FILE_CHOOSER(gtk_file_chooser_dialog_new ("Save Image File", window, GTK_FILE_CHOOSER_ACTION_SAVE, "Cancel", GTK_RESPONSE_CANCEL, "Save", GTK_RESPONSE_ACCEPT, NULL));
   gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
+  file_filter = gtk_file_filter_new();
+  gtk_file_filter_set_name(file_filter,"Image files (.png)");
+  gtk_file_filter_add_pattern(file_filter,"*.png");
+  gtk_file_chooser_add_filter(file_save_dialog,file_filter);
+
+  float scaleFactor = (1.0 + inpAxisScale)*sqrt((hres*vres)/1000000.0);
 
   int saveErr = 0; //to track if there are any errors when opening spectra
   if (gtk_dialog_run(GTK_DIALOG(file_save_dialog)) == GTK_RESPONSE_ACCEPT)
@@ -751,8 +777,8 @@ void on_export_image_button_clicked(GtkButton *b){
     //create cairo surface and context for drawing onto
     cairo_surface_t *imgSurf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, hres, vres);
     cairo_t *cr = cairo_create(imgSurf);
-    //draw the spectrum
-    drawSpectrum(cr, (float)hres, (float)vres, 1.0, showLabels, showFit, 0);
+    //draw the spectrum (don't interpolate between bins)
+    drawSpectrum(cr, (float)hres, (float)vres, scaleFactor, showLabels, showFit, 0, 0);
     //save the image file
     if(cairo_surface_write_to_png(imgSurf, fileName)!=CAIRO_STATUS_SUCCESS){
       saveErr=1;

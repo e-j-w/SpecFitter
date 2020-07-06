@@ -201,6 +201,7 @@ and binning factors will be preserved.</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
                 <property name="tooltip_text" translatable="yes">If checked, the exported image will include name labels for individual histograms.</property>
+                <property name="active">True</property>
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
@@ -216,6 +217,7 @@ and binning factors will be preserved.</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
                 <property name="tooltip_text" translatable="yes">If checked, the exported image will contain any peak fits which are currently displayed.</property>
+                <property name="active">True</property>
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
@@ -226,6 +228,7 @@ and binning factors will be preserved.</property>
             </child>
             <child>
               <object class="GtkBox">
+                <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">Set the size of axis and tick labels.  Larger sizes may be more legible when printed.</property>
                 <property name="spacing">10</property>
@@ -291,7 +294,7 @@ and binning factors will be preserved.</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkButton" id="export_image_save_button">
-                <property name="label">Export</property>
+                <property name="label">Export Image</property>
                 <property name="width_request">100</property>
                 <property name="height_request">40</property>
                 <property name="visible">True</property>
