@@ -49,6 +49,7 @@ GtkImage *no_sp_image;
 //display menu
 GtkSpinButton *spectrum_selector;
 GtkCheckButton *autoscale_button, *logscale_button, *cursor_draw_button;
+GtkLabel *display_spectrumname_label;
 GtkScale *contract_scale, *zoom_scale; //*pan_scale;
 GtkAdjustment *spectrum_selector_adjustment, *contract_adjustment;
 GtkButton *sum_all_button;

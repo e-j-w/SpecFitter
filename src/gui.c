@@ -71,6 +71,58 @@ void setSpOpenView(const char spOpened){
   
 }
 
+void getViewStr(char *viewStr, const unsigned int strSize, const int viewNum){
+  if(viewNum == -1){
+    //generating string for temporary view
+    switch (drawing.multiplotMode)
+    {
+      case 4:
+        //stack view
+        snprintf(viewStr,strSize,"Stacked view of %i spectra",drawing.numMultiplotSp);
+        break;
+      case 3:
+      case 2:
+        //overlay
+        snprintf(viewStr,strSize,"Overlay view of %i spectra",drawing.numMultiplotSp);
+        break;
+      case 1:
+        //summed view
+        snprintf(viewStr,strSize,"Summed view of %i spectra",drawing.numMultiplotSp);
+        break;
+      default:
+        //single spectrum
+        snprintf(viewStr,strSize,"View of spectrum %i",drawing.multiPlots[0]);
+        break;
+    }
+  }else if((viewNum < rawdata.numViews+1)&&(viewNum<MAXNVIEWS)){ //+1 in this condition needed to allow generating new view names
+    //generating string for saved custom view
+    switch (rawdata.viewMultiplotMode[viewNum])
+    {
+      case 4:
+        //stack view
+        snprintf(viewStr,strSize,"Stacked view of %i spectra",rawdata.viewNumMultiplotSp[viewNum]);
+        break;
+      case 3:
+      case 2:
+        //overlay
+        snprintf(viewStr,strSize,"Overlay view of %i spectra",rawdata.viewNumMultiplotSp[viewNum]);
+        break;
+      case 1:
+        //summed view
+        snprintf(viewStr,strSize,"Summed view of %i spectra",rawdata.viewNumMultiplotSp[viewNum]);
+        break;
+      default:
+        //single spectrum
+        snprintf(viewStr,strSize,"View of spectrum %i",rawdata.viewMultiPlots[viewNum][0]);
+        break;
+    }
+  }else{
+    printf("WARNING: getViewStr incorrect view index (%i).\n",viewNum);
+    return;
+  }
+  
+}
+
 unsigned char getMultiplotStackPage(){
   GtkWidget *stackW = gtk_stack_get_visible_child(multiplot_manage_stack);
   if(strcmp(gtk_widget_get_name(stackW),"page0")==0){
@@ -300,7 +352,7 @@ void openSingleFile(char *filename, int append){
       setSpOpenView(1);
       //set the range of selectable spectra values
       gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);
-      gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened);
+      gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened+rawdata.numViews);
       gtk_spin_button_set_value(spectrum_selector, sel+1);
     }else{
       //no spectra with any data in the selected file
@@ -385,7 +437,7 @@ void on_open_button_clicked(GtkButton *b)
           setSpOpenView(1);
           //set the range of selectable spectra values
           gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);
-          gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened);
+          gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened+rawdata.numViews);
           gtk_spin_button_set_value(spectrum_selector, sel+1);
         }else{
           //no spectra with any data in the selected file
@@ -491,7 +543,7 @@ void on_append_button_clicked(GtkButton *b)
         if(rawdata.numSpOpened > 1){
           gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
         }
-        gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened);
+        gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened+rawdata.numViews);
       }else if (numSp == -1){
         //too many files opened
         openErr = 3;
@@ -1128,30 +1180,21 @@ void on_multiplot_make_view_button_clicked(GtkButton *b)
 
     //setup default view name
     char viewStr[256];
-    switch (rawdata.viewMultiplotMode[rawdata.numViews])
-    {
-      case 4:
-        //stack view
-        snprintf(viewStr,256,"Stacked view of %i spectra",rawdata.viewNumMultiplotSp[rawdata.numViews]);
-        break;
-      case 3:
-      case 2:
-        //overlay
-        snprintf(viewStr,256,"Overlay view of %i spectra",rawdata.viewNumMultiplotSp[rawdata.numViews]);
-        break;
-      case 1:
-        //summed view
-        snprintf(viewStr,256,"Summed view of %i spectra",rawdata.viewNumMultiplotSp[rawdata.numViews]);
-        break;
-      default:
-        //single spectrum
-        snprintf(viewStr,256,"View of spectrum %i",rawdata.viewMultiPlots[rawdata.numViews][selectedSpCount]);
-        break;
-    }
+    getViewStr(viewStr,256,rawdata.numViews);
 
     memcpy(rawdata.viewComment[rawdata.numViews],viewStr,sizeof(viewStr));
     rawdata.numViews++;
+
+    //switch to display the custom views
+    gtk_widget_show(GTK_WIDGET(view_list_box));
+    gtk_widget_hide(GTK_WIDGET(no_view_box));
+    on_view_tree_selection_changed(gtk_tree_view_get_selection(view_tree_view)); //decide whether to enable the plot button or not
+    gtk_stack_set_visible_child(multiplot_manage_button_stack,GTK_WIDGET(multiplot_ok_button));
+    gtk_stack_set_visible_child(multiplot_manage_stack,GTK_WIDGET(view_box));
+    
   }
+
+  gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened+rawdata.numViews);
 
   setup_multiplot_window(); //redraw the tree view
   setup_manage_window(); //redraw the tree view
@@ -1217,7 +1260,12 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
       }
 
       guiglobals.deferSpSelChange = 1;
-      gtk_spin_button_set_value(spectrum_selector, drawing.multiPlots[0]+1);
+      gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened+rawdata.numViews+1);
+      gtk_spin_button_set_value(spectrum_selector, rawdata.numSpOpened+rawdata.numViews+1);
+
+      char viewStr[256];
+      getViewStr(viewStr,256,-1);
+      gtk_label_set_text(display_spectrumname_label,viewStr);
       
       printf("Number of spectra selected for plotting: %i.  Selected spectra: ", drawing.numMultiplotSp);
       int i;
@@ -1248,6 +1296,7 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
         drawing.numMultiplotSp = rawdata.viewNumMultiplotSp[viewInd];
         memcpy(&drawing.scaleFactor,&rawdata.viewScaleFactor[viewInd],sizeof(drawing.scaleFactor));
         memcpy(&drawing.multiPlots,&rawdata.viewMultiPlots[viewInd],sizeof(drawing.multiPlots));
+        gtk_spin_button_set_value(spectrum_selector, rawdata.numSpOpened+viewInd+1);
       }
     } 
    
@@ -1429,6 +1478,14 @@ void on_sum_all_button_clicked(GtkButton *b)
     drawing.multiPlots[i] = i;
   }
 
+  guiglobals.deferSpSelChange = 1;
+  gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened+rawdata.numViews+1);
+  gtk_spin_button_set_value(spectrum_selector, rawdata.numSpOpened+rawdata.numViews+1);
+
+  char viewStr[256];
+  getViewStr(viewStr,256,-1);
+  gtk_label_set_text(display_spectrumname_label,viewStr);
+
   //clear fit if necessary
   if(guiglobals.fittingSp == 5){
     guiglobals.fittingSp = 0;
@@ -1444,18 +1501,54 @@ void on_sum_all_button_clicked(GtkButton *b)
 void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data)
 {
   if(!guiglobals.deferSpSelChange){
-    drawing.multiPlots[0] = gtk_spin_button_get_value_as_int(spin_button) - 1;
-    drawing.multiplotMode = 0;//unset multiplot, if it is being used
-    drawing.numMultiplotSp = 1;//unset multiplot
-    
+
+    int spNum = gtk_spin_button_get_value_as_int(spin_button) - 1;
+    if(spNum >= 0){
+      //handle drawing individual spectra
+      if(spNum < rawdata.numSpOpened){
+        drawing.multiPlots[0] = spNum;
+        drawing.multiplotMode = 0;//unset multiplot, if it is being used
+        drawing.numMultiplotSp = 1;//unset multiplot
+        
+        gtk_label_set_text(display_spectrumname_label,rawdata.histComment[spNum]);
+
+        gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE); //no multiplot, therefore can fit
+      }else if(spNum < (rawdata.numSpOpened+rawdata.numViews)){
+        //handle drawing views
+        int viewNum = spNum - rawdata.numSpOpened;
+        drawing.numMultiplotSp = rawdata.viewNumMultiplotSp[viewNum];
+        drawing.multiplotMode = rawdata.viewMultiplotMode[viewNum];
+        memcpy(&drawing.scaleFactor,&rawdata.viewScaleFactor[viewNum],sizeof(drawing.scaleFactor));
+        memcpy(&drawing.multiPlots,&rawdata.viewMultiPlots[viewNum],sizeof(drawing.multiPlots));
+
+        gtk_label_set_text(display_spectrumname_label,rawdata.viewComment[viewNum]);
+
+        switch(drawing.multiplotMode)
+        {
+          case 4:
+          case 3:
+          case 2:
+            gtk_widget_set_sensitive(GTK_WIDGET(fit_button),FALSE);
+            break;
+          case 1:
+          case 0:
+            gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
+          default:
+            break;
+        }
+      }
+    }
+
+    //enforce the proper number of views (clear any temporary views)
+    gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened+rawdata.numViews);
+
     //clear fit if necessary
     if(guiglobals.fittingSp == 5){
       guiglobals.fittingSp = 0;
       //update widgets
       update_gui_fit_state();
     }
-
-    gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE); //no multiplot, therefore can fit
+    
     //printf("Set selected spectrum to %i\n",dispSp);
     gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
   }else{
@@ -1784,6 +1877,7 @@ void iniitalizeUIElements(){
   sum_all_button = GTK_BUTTON(gtk_builder_get_object(builder, "sum_all_button"));
   spectrum_selector = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spectrumselector"));
   spectrum_selector_adjustment = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "spectrum_selector_adjustment"));
+  display_spectrumname_label = GTK_LABEL(gtk_builder_get_object(builder, "display_spectrumname_label"));
   autoscale_button = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "autoscalebutton"));
   logscale_button = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "logscalebutton"));
   cursor_draw_button = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "cursordrawbutton"));
