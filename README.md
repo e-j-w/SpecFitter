@@ -62,7 +62,7 @@ Conversion codes for some of the above data formats are available in the [FileCo
 
 ### Compatibility
 
-The build process has been tested on CentOS 7, Ubuntu 20.04, and Arch Linux (as of July 2020) under the GNOME desktop environment.  It should work on any Linux distro that satisfies the build dependencies below.  It may be possible to build this on other platforms where GTK is [available](https://www.gtk.org/docs/installations/), but that hasn't been tested.
+The build process has been tested on CentOS 7, Ubuntu 20.04, and Arch Linux (as of July 2020) under the GNOME desktop environment.  It should work on any Linux distro that satisfies the listed build dependencies.  It may be possible to build this on other platforms where GTK is [available](https://www.gtk.org/docs/installations/), but that hasn't been tested.
 
 ### Build dependencies
 
@@ -74,7 +74,7 @@ The build process has been tested on CentOS 7, Ubuntu 20.04, and Arch Linux (as 
 In CentOS 7:
 
 ```
-sudo yum install gtk3-devel
+sudo yum install gcc gtk3-devel
 ```
 
 In Ubuntu:

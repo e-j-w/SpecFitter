@@ -19,24 +19,22 @@ lin_eq_solver: src/lin_eq_solver/lin_eq_solver.c src/lin_eq_solver/lin_eq_solver
 install:
 	@echo "Will install to /usr/bin."
 	@echo "Run 'make uninstall' to undo installation."
-	@if [[ $EUID -ne 0 ]]; then \
+	@if ! [ "$(shell id -u)" = 0 ]; then \
 		echo "This must be run with administrator privileges (eg. with 'sudo')."; \
 	else \
-		read -p "Press any key to continue..." ; \
 		cp jf3 /usr/bin ; \
 		cp data/jf3-application-icon.svg /usr/share/icons/hicolor/scalable/apps ; \
 		cp data/jf3.desktop /usr/share/applications ; \
 		update-desktop-database /usr/share/applications; \
 		echo "Done!" ; \
 	fi
-	
-	
+
+
 uninstall:
 	@echo "Will undo changes made from running 'make install'."
-	@if [[ $EUID -ne 0 ]]; then \
+	@if ! [ "$(shell id -u)" = 0 ]; then \
 		echo "This must be run with administrator privileges (eg. with 'sudo')."; \
 	else \
-		read -p "Press any key to continue..." ; \
 		rm /usr/bin/jf3 ; \
 		rm /usr/share/icons/hicolor/scalable/apps/jf3-application-icon.svg ; \
 		rm /usr/share/applications/jf3.desktop ; \

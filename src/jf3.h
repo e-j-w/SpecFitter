@@ -1,8 +1,5 @@
 /* J. Williams, 2020 */
 
-#ifndef SV_H
-#define SV_H
-
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
@@ -23,7 +20,7 @@
 #define MAX_DISP_SP   12 //maximum number of spectra which may be displayed at once
 #define MAX_FIT_PK    10 //maximum number of peaks which may be fit at once
 
-//spectrum data file specs (be careful if changing these, can break compatibility)
+/* Data file specs (be careful if changing these, can break compatibility) */
 #define S32K      32768 //maximum number of channels per spectrum in .mca and .fmca (changing breaks file compatibility)
 #define NSPECT    100   //maximum number of spectra which may be opened at once (for compatibility should be 255 or less)
 #define MAXNVIEWS 100   //maximum number of views which can be saved by the user
@@ -129,7 +126,6 @@ GtkWindow *help_window;
 GtkImage *display_button_icon1, *display_button_icon2;
 //builder
 GtkBuilder *builder;
-
 //custom icons
 GdkPixbuf *appIcon, *spIconPixbuf, *spIconPixbufDark;
 
@@ -217,6 +213,4 @@ struct {
   double relWidths[MAX_FIT_PK]; //relative width factors
   char errFound; //whether or not paramter errors have been found
 } fitpar;
-
-#endif
 
