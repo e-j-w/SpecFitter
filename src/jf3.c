@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     //set headerbar info for opened files
     if(argc>2){
       char headerBarSub[256];
-      rawdata.numFilesOpened = argc-1;
+      rawdata.numFilesOpened = (unsigned char)argc - 1;
       snprintf(headerBarSub,256,"%i files loaded",rawdata.numFilesOpened);
       gtk_header_bar_set_subtitle(header_bar,headerBarSub);
     }else{

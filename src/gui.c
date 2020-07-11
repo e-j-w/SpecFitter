@@ -28,6 +28,7 @@ void setupUITheme(){
     gtk_image_set_from_pixbuf(display_button_icon1, spIconPixbufDark);
     gtk_image_set_from_pixbuf(display_button_icon2, spIconPixbufDark);
     gtk_image_set_from_pixbuf(no_sp_image, spIconPixbufDark);
+    
   }else{
     gtk_image_set_from_pixbuf(display_button_icon, spIconPixbuf);
     gtk_image_set_from_pixbuf(display_button_icon1, spIconPixbuf);
@@ -343,7 +344,7 @@ void openSingleFile(char *filename, int append){
       //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
       drawing.scaleFactor[i] = 1.00;
     }
-    rawdata.numSpOpened += numSp;
+    rawdata.numSpOpened += (unsigned char)numSp;
     //select the first non-empty spectrum by default
     int sel = getFirstNonemptySpectrum(rawdata.numSpOpened);
     if(sel >=0){
@@ -394,7 +395,7 @@ void openSingleFile(char *filename, int append){
 
 void on_open_button_clicked(GtkButton *b)
 {
-  int i,j;
+  unsigned int i,j;
 
   GtkFileChooserNative *native = gtk_file_chooser_native_new ("Open Spectrum File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
   file_open_dialog = GTK_FILE_CHOOSER(native);
@@ -427,7 +428,7 @@ void on_open_button_clicked(GtkButton *b)
           //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
           drawing.scaleFactor[j] = 1.00;
         }
-        rawdata.numSpOpened += numSp;
+        rawdata.numSpOpened += (unsigned char)numSp;
         //select the first non-empty spectrum by default
         int sel = getFirstNonemptySpectrum(rawdata.numSpOpened);
         if(sel >=0){
@@ -475,7 +476,7 @@ void on_open_button_clicked(GtkButton *b)
       gtk_dialog_run (GTK_DIALOG (message_dialog));
       gtk_widget_destroy (message_dialog);
     }else{
-      rawdata.numFilesOpened = g_slist_length(file_list);
+      rawdata.numFilesOpened = (unsigned char)g_slist_length(file_list);
       //set the title of the opened spectrum in the header bar
       if(rawdata.numFilesOpened > 1){
         char headerBarSub[256];
@@ -509,7 +510,7 @@ void on_append_button_clicked(GtkButton *b)
     return;
   }
 
-  int i,j;
+  unsigned int i,j;
   
   GtkFileChooserNative *native = gtk_file_chooser_native_new ("Add More Spectrum File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
   file_open_dialog = GTK_FILE_CHOOSER(native);
@@ -539,7 +540,7 @@ void on_append_button_clicked(GtkButton *b)
           //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
           drawing.scaleFactor[j] = 1.00;
         }
-        rawdata.numSpOpened += numSp;
+        rawdata.numSpOpened += (unsigned char)numSp;
         if(rawdata.numSpOpened > 1){
           gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
         }
@@ -575,7 +576,7 @@ void on_append_button_clicked(GtkButton *b)
       gtk_dialog_run (GTK_DIALOG (message_dialog));
       gtk_widget_destroy (message_dialog);
     }else{
-      rawdata.numFilesOpened += g_slist_length(file_list);
+      rawdata.numFilesOpened += (unsigned char)g_slist_length(file_list);
       //set the title of the opened spectrum in the header bar
       if(rawdata.numFilesOpened > 1){
         char headerBarSub[256];
@@ -793,8 +794,8 @@ void on_export_image_button_clicked(GtkButton *b){
   
   //get image file settings
   int inpAxisScale = gtk_combo_box_get_active(GTK_COMBO_BOX(export_axissize_combobox));
-  int showFit = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_fit_checkbutton));
-  int showLabels = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_label_checkbutton));
+  unsigned char showFit = (unsigned char)gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_fit_checkbutton));
+  unsigned char showLabels = (unsigned char)gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_label_checkbutton));
   int hres = gtk_spin_button_get_value_as_int(export_h_res_spinbutton);
   int vres = gtk_spin_button_get_value_as_int(export_v_res_spinbutton);
 
@@ -807,7 +808,7 @@ void on_export_image_button_clicked(GtkButton *b){
   gtk_file_filter_add_pattern(file_filter,"*.png");
   gtk_file_chooser_add_filter(file_save_dialog,file_filter);
 
-  float scaleFactor = (1.0 + inpAxisScale)*sqrt((hres*vres)/1000000.0);
+  float scaleFactor = (float)((1.0 + inpAxisScale)*sqrt((hres*vres)/1000000.0));
 
   int saveErr = 0; //to track if there are any errors when opening spectra
   if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
@@ -874,7 +875,7 @@ void on_display_button_clicked(GtkButton *b)
 }
 
 void on_zoom_scale_changed(GtkRange *range, gpointer user_data){
-  drawing.zoomLevel = pow(2,gtk_range_get_value(range)); //modify the zoom level
+  drawing.zoomLevel = (float)pow(2,gtk_range_get_value(range)); //modify the zoom level
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
 }
 void on_contract_scale_changed(GtkRange *range, gpointer user_data){
@@ -1021,7 +1022,7 @@ void on_remove_comment_button_clicked(GtkButton *b)
 
 
 void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
-  int i;
+  unsigned int i;
   GtkTreeIter iter;
   gboolean toggleVal = FALSE;
   gboolean val = FALSE;
@@ -1038,7 +1039,7 @@ void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
 
   GList *rowList = gtk_tree_selection_get_selected_rows(gtk_tree_view_get_selection(multiplot_tree_view),&model);
   //printf("List length: %i, toggleVal: %i\n",g_list_length(rowList),toggleVal);
-  int llength = g_list_length(rowList);
+  unsigned int llength = g_list_length(rowList);
   if(llength > 1){
     for(i = 0; i < g_list_length(rowList); i++){
       gtk_tree_model_get_iter(model,&iter,g_list_nth_data(rowList, i));
@@ -1149,7 +1150,7 @@ void on_multiplot_make_view_button_clicked(GtkButton *b)
   }
 
   rawdata.viewNumMultiplotSp[rawdata.numViews] = selectedSpCount;
-  rawdata.viewMultiplotMode[rawdata.numViews] = gtk_combo_box_get_active(GTK_COMBO_BOX(multiplot_mode_combobox));
+  rawdata.viewMultiplotMode[rawdata.numViews] = (unsigned char)gtk_combo_box_get_active(GTK_COMBO_BOX(multiplot_mode_combobox));
 
 
   if((rawdata.viewNumMultiplotSp[rawdata.numViews] > MAX_DISP_SP)||((rawdata.viewMultiplotMode[rawdata.numViews] < 0))){
@@ -1191,7 +1192,7 @@ void on_multiplot_make_view_button_clicked(GtkButton *b)
     on_view_tree_selection_changed(gtk_tree_view_get_selection(view_tree_view)); //decide whether to enable the plot button or not
     gtk_stack_set_visible_child(multiplot_manage_button_stack,GTK_WIDGET(multiplot_ok_button));
     gtk_stack_set_visible_child(multiplot_manage_stack,GTK_WIDGET(view_box));
-    
+
   }
 
   gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened+rawdata.numViews);
@@ -1227,7 +1228,7 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
       readingTreeModel = gtk_tree_model_iter_next (model, &iter);
     }
     drawing.numMultiplotSp = selectedSpCount;
-    drawing.multiplotMode = gtk_combo_box_get_active(GTK_COMBO_BOX(multiplot_mode_combobox));
+    drawing.multiplotMode = (unsigned char)gtk_combo_box_get_active(GTK_COMBO_BOX(multiplot_mode_combobox));
 
     if((drawing.numMultiplotSp > MAX_DISP_SP)||((drawing.multiplotMode < 0))){
 
@@ -1348,7 +1349,7 @@ void on_manage_name_cell_edited(GtkCellRendererText *cell, gchar *path_string, g
 }
 
 void on_manage_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
-  int i;
+  unsigned int i;
   GtkTreeIter iter;
   gboolean toggleVal = FALSE;
   gboolean val = FALSE;
@@ -1365,7 +1366,7 @@ void on_manage_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
 
   GList *rowList = gtk_tree_selection_get_selected_rows(gtk_tree_view_get_selection(manage_tree_view),&model);
   //printf("List length: %i, toggleVal: %i\n",g_list_length(rowList),toggleVal);
-  int llength = g_list_length(rowList);
+  unsigned int llength = g_list_length(rowList);
   if(llength > 1){
     for(i = 0; i < g_list_length(rowList); i++){
       gtk_tree_model_get_iter(model,&iter,g_list_nth_data(rowList, i));
@@ -1687,7 +1688,7 @@ void on_preferences_button_clicked(GtkButton *b)
 
 void on_preferences_apply_button_clicked(GtkButton *b)
 {
-  fitpar.weightMode = gtk_combo_box_get_active(GTK_COMBO_BOX(weight_mode_combobox));
+  fitpar.weightMode = (unsigned char)gtk_combo_box_get_active(GTK_COMBO_BOX(weight_mode_combobox));
   updateConfigFile();
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
   gtk_widget_hide(GTK_WIDGET(preferences_window)); //close the preferences window
@@ -1996,18 +1997,18 @@ void iniitalizeUIElements(){
   drawing.numMultiplotSp = 1;
   drawing.highlightedPeak = -1;
   drawing.highlightedComment = -1;
-  drawing.spColors[0] = 220/255.; drawing.spColors[1] = 50/255.; drawing.spColors[2] = 47/255.;      //RGB values for color 1 (solarized red)
-  drawing.spColors[3] = 38/255.; drawing.spColors[4] = 139/255.; drawing.spColors[5] = 210/255.;     //RGB values for color 2 (solarized blue)
-  drawing.spColors[6] = 0.0; drawing.spColors[7] = 0.8; drawing.spColors[8] = 0.0;                   //RGB values for color 3
-  drawing.spColors[9] = 0.8; drawing.spColors[10] = 0.0; drawing.spColors[11] = 0.8;                 //RGB values for color 4
-  drawing.spColors[12] = 0.7; drawing.spColors[13] = 0.4; drawing.spColors[14] = 0.0;                //RGB values for color 5
-  drawing.spColors[15] = 42/255.; drawing.spColors[16] = 161/255.; drawing.spColors[17] = 152/255.;  //RGB values for color 6 (solarized cyan)
-  drawing.spColors[18] = 203/255.; drawing.spColors[19] = 75/255.; drawing.spColors[20] = 22/255.;   //RGB values for color 7 (solarized orange)
-  drawing.spColors[21] = 133/255.; drawing.spColors[22] = 153/255.; drawing.spColors[23] = 0.0;      //RGB values for color 8 (solarized green)
-  drawing.spColors[24] = 211/255.; drawing.spColors[25] = 54/255.; drawing.spColors[26] = 130/255.;  //RGB values for color 9 (solarized magenta)
-  drawing.spColors[27] = 181/255.; drawing.spColors[28] = 137/255.; drawing.spColors[29] = 0.0;      //RGB values for color 10 (solarized yellow)
-  drawing.spColors[30] = 0.5; drawing.spColors[31] = 0.5; drawing.spColors[32] = 0.5;                //RGB values for color 11
-  drawing.spColors[33] = 0.7; drawing.spColors[34] = 0.0; drawing.spColors[35] = 0.3;                //RGB values for color 12
+  drawing.spColors[0] = 220/255.f; drawing.spColors[1] = 50/255.f; drawing.spColors[2] = 47/255.f;      //RGB values for color 1 (solarized red)
+  drawing.spColors[3] = 38/255.f; drawing.spColors[4] = 139/255.f; drawing.spColors[5] = 210/255.f;     //RGB values for color 2 (solarized blue)
+  drawing.spColors[6] = 0.0f; drawing.spColors[7] = 0.8f; drawing.spColors[8] = 0.0f;                   //RGB values for color 3
+  drawing.spColors[9] = 0.8f; drawing.spColors[10] = 0.0f; drawing.spColors[11] = 0.8f;                 //RGB values for color 4
+  drawing.spColors[12] = 0.7f; drawing.spColors[13] = 0.4f; drawing.spColors[14] = 0.0f;                //RGB values for color 5
+  drawing.spColors[15] = 42/255.f; drawing.spColors[16] = 161/255.f; drawing.spColors[17] = 152/255.f;  //RGB values for color 6 (solarized cyan)
+  drawing.spColors[18] = 203/255.f; drawing.spColors[19] = 75/255.f; drawing.spColors[20] = 22/255.f;   //RGB values for color 7 (solarized orange)
+  drawing.spColors[21] = 133/255.f; drawing.spColors[22] = 153/255.f; drawing.spColors[23] = 0.0f;      //RGB values for color 8 (solarized green)
+  drawing.spColors[24] = 211/255.f; drawing.spColors[25] = 54/255.f; drawing.spColors[26] = 130/255.f;  //RGB values for color 9 (solarized magenta)
+  drawing.spColors[27] = 181/255.f; drawing.spColors[28] = 137/255.f; drawing.spColors[29] = 0.0f;      //RGB values for color 10 (solarized yellow)
+  drawing.spColors[30] = 0.5f; drawing.spColors[31] = 0.5f; drawing.spColors[32] = 0.5f;                //RGB values for color 11
+  drawing.spColors[33] = 0.7f; drawing.spColors[34] = 0.0f; drawing.spColors[35] = 0.3f;                //RGB values for color 12
   guiglobals.fittingSp = 0;
   guiglobals.deferSpSelChange = 0;
   guiglobals.deferToggleRow = 0;

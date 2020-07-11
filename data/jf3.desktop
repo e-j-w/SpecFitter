@@ -1,9 +1,9 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name[en_CA]=jf3 Spectrum Viewer
-Name[en_US]=jf3 Spectrum Viewer
-Name=jf3 Spectrum Viewer
+Name[en_CA]=jf3
+Name[en_US]=jf3
+Name=jf3
 GenericName=Spectrum Viewer
 Exec=/usr/bin/jf3
 Icon=jf3-application-icon

@@ -164,7 +164,7 @@ struct {
   unsigned char numSpOpened; //number of spectra in the opened file(s)
   unsigned char numFilesOpened; //number of files containing spectra opened
   char viewComment[MAXNVIEWS][256]; //view description/comment
-  char viewMultiplotMode[MAXNVIEWS]; //multiplot mode for each saved view
+  unsigned char viewMultiplotMode[MAXNVIEWS]; //multiplot mode for each saved view
   int viewNumMultiplotSp[MAXNVIEWS]; //number of spectra to show for each saved view
   double viewScaleFactor[MAXNVIEWS][NSPECT]; //scaling factors for each spectrum in each saved view
   int viewMultiPlots[MAXNVIEWS][NSPECT]; //indices of all the spectra to show for each saved view
@@ -186,7 +186,7 @@ struct {
   int logScale; //0=draw in linear scale, 1=draw in log scale (y-axis)
   float scaleLevelMax[MAX_DISP_SP], scaleLevelMin[MAX_DISP_SP]; //the y scale values, ie. the maximum and minimum values to show on the y axis
   int contractFactor; //the number of channels per bin (default=1)
-  char multiplotMode; //0=no multiplot, 1=summed spectra, 2=overlay spectra (common scaling), 3=overlay spectra (independent scaling), 4=stacked view
+  unsigned char multiplotMode; //0=no multiplot, 1=summed spectra, 2=overlay spectra (common scaling), 3=overlay spectra (independent scaling), 4=stacked view
   int numMultiplotSp; //number of spectra to show in multiplot mode
   double scaleFactor[NSPECT]; //scaling factors for each spectrum
   int multiPlots[NSPECT]; //indices of all the spectra to show in multiplot mode
@@ -211,9 +211,9 @@ struct {
   double widthFGH[3]; //F,G,H parameters used to evaluate widths
   double fitParVal[6+(3*MAX_FIT_PK)]; //parameter values found by the fitter
   double fitParErr[6+(3*MAX_FIT_PK)]; //errors in parameter values
-  int numFitPeaks; //number of peaks to fit
-  char fixRelativeWidths; //0=don't fix width, 1=fix widths
-  char weightMode; //0=weight using data (properly weighting for background subtraction), 1=weight using fit, 2=no weights
+  unsigned int numFitPeaks; //number of peaks to fit
+  unsigned char fixRelativeWidths; //0=don't fix width, 1=fix widths
+  unsigned char weightMode; //0=weight using data (properly weighting for background subtraction), 1=weight using fit, 2=no weights
   double relWidths[MAX_FIT_PK]; //relative width factors
   char errFound; //whether or not paramter errors have been found
 } fitpar;

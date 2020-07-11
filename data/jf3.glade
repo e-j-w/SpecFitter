@@ -129,10 +129,12 @@ Author: Jonathan Williams
     <property name="modal">True</property>
     <property name="type_hint">dialog</property>
     <property name="attached_to">window</property>
-    <property name="program_name">jf3 Spectrum Viewer</property>
+    <property name="program_name">jf3</property>
     <property name="copyright" translatable="yes">© 2020 Jonathan Williams</property>
-    <property name="comments" translatable="yes">A spectrum/histogram viewer and analysis application.</property>
+    <property name="comments" translatable="yes">A GTK-based spectrum/histogram
+viewer and analysis application.</property>
     <property name="website">https://github.com/e-j-w/jf3</property>
+    <property name="website_label" translatable="yes">Source Repository</property>
     <property name="authors">Jonathan Williams</property>
     <property name="artists">Jonathan Williams</property>
     <property name="logo">jf3-application-icon.svg</property>
@@ -2921,7 +2923,7 @@ Weight by fit function - Weights are proportional to the fit function values det
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">More information about this program.</property>
-            <property name="text" translatable="yes">About jf3 Spectrum Viewer</property>
+            <property name="text" translatable="yes">About jf3</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -3093,7 +3095,7 @@ Weight by fit function - Weights are proportional to the fit function values det
                     <property name="can_focus">False</property>
                     <property name="valign">start</property>
                     <property name="vexpand">True</property>
-                    <property name="label" translatable="yes">No spectrum data opened</property>
+                    <property name="label" translatable="yes">No data has been opened</property>
                     <attributes>
                       <attribute name="weight" value="bold"/>
                     </attributes>
@@ -3315,7 +3317,7 @@ Weight by fit function - Weights are proportional to the fit function values det
       <object class="GtkHeaderBar" id="header_bar">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="title" translatable="yes">jf3 Spectrum Viewer</property>
+        <property name="title" translatable="yes">jf3</property>
         <property name="show_close_button">True</property>
         <child>
           <object class="GtkMenuButton" id="primary_menu_button">

@@ -98,9 +98,9 @@ int readConfigFile(FILE *file)
 				}
 			}
 			if(strcmp(par,"fit_weight_mode") == 0){
-				int intVal = atoi(val);
-				if((intVal >= 0)&&(intVal <= 2))
-					fitpar.weightMode = intVal;
+				unsigned char ucVal = (unsigned char)atoi(val);
+				if(ucVal <= 2)
+					fitpar.weightMode = ucVal;
 			}
 			if(strcmp(par,"autozoom") == 0){
 				if(strcmp(val,"yes") == 0){
@@ -117,13 +117,13 @@ int readConfigFile(FILE *file)
 				}
 			}
 			if(strcmp(par,"cal_parameter0") == 0){
-				calpar.calpar0 = atof(val);
+				calpar.calpar0 = (float)atof(val);
 			}
 			if(strcmp(par,"cal_parameter1") == 0){
-				calpar.calpar1 = atof(val);
+				calpar.calpar1 = (float)atof(val);
 			}
 			if(strcmp(par,"cal_parameter2") == 0){
-				calpar.calpar2 = atof(val);
+				calpar.calpar2 = (float)atof(val);
 			}
 			if(strcmp(par,"cal_unit") == 0){
 				val[15] = '\0'; //truncate string

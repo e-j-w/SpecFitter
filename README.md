@@ -4,7 +4,7 @@
 
 ## Description
 
-A spectrum/histogram viewer and fitter app, with functionality inspired by the `gf3` program for gamma-ray spectroscopy in the [RadWare](https://radware.phy.ornl.gov/) software package.  Takes advantage of the modern GTK toolkit to provide smooth rendering and (hopefully) an easy to understand interface.
+A spectrum/histogram viewer and fitter app, with functionality inspired by the `gf3` program for gamma-ray spectroscopy in the [RadWare](https://radware.phy.ornl.gov/) software package.  Takes advantage of GTK3 to provide smooth rendering and (hopefully) an easy to understand interface.
 
 ## Screenshot
 
@@ -62,14 +62,33 @@ Conversion codes for some of the above data formats are available in the [FileCo
 
 ### Compatibility
 
-The build process has been tested on CentOS 7 and Arch Linux (as of July 2020) under the GNOME desktop environment.  It should work on any Linux distro that satisfies the build dependencies below.  It may be possible to build this on other platforms where GTK is [available](https://www.gtk.org/docs/installations/), but that hasn't been tested.
+The build process has been tested on CentOS 7, Ubuntu 20.04, and Arch Linux (as of July 2020) under the GNOME desktop environment.  It should work on any Linux distro that satisfies the build dependencies below.  It may be possible to build this on other platforms where GTK is [available](https://www.gtk.org/docs/installations/), but that hasn't been tested.
 
 ### Build dependencies
 
 * make
 * gcc
-* pkg-config (`pkgconf` in Arch Linux)
-* GTK3 (`gtk3-devel` in CentOS)
+* pkg-config
+* GTK3
+
+In CentOS 7:
+
+```
+sudo yum install gtk3-devel
+```
+
+In Ubuntu:
+
+```
+sudo apt install build-essential libgtk-3-dev
+```
+
+In Arch Linux:
+
+```
+sudo pacman -S gcc make pkgconf gtk3
+```
+
 
 ### Build instructions
 

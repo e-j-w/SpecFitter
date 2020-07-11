@@ -991,7 +991,7 @@ int getPlotRangeXUnits(){
 //showFit: 0=don't show, 1=show without highlighted peaks, 2=show with highlighted peaks
 //drawComments: 0=don't draw, 1=draw
 //drawFast: 0=don't interpolate, 1=interpolate (faster drawing, less accurate)
-void drawSpectrum(cairo_t *cr, const float width, const float height, const float scaleFactor, const char drawLabels, const char showFit, const char drawComments, const char drawFast){
+void drawSpectrum(cairo_t *cr, const float width, const float height, const float scaleFactor, const unsigned char drawLabels, const unsigned char showFit, const unsigned char drawComments, const unsigned char drawFast){
 
 	if(!rawdata.openedSp){
 		return;

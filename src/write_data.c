@@ -53,9 +53,9 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
 		}
 	}
 
-	float lastBin = 0.;
-	float currentBin;
-	float val;
+	double lastBin = 0.;
+	double currentBin;
+	double val;
 	signed char packetCounter;
 	for(i=0;i<rawdata.numSpOpened;i++){
 		if(i<NSPECT){
