@@ -472,7 +472,7 @@ void on_open_button_clicked(GtkButton *b)
           snprintf(errMsg,256,"Data does not exist in file %s or is incorrectly formatted.",filename);
           break;
       }
-      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),errMsg);
+      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
       gtk_dialog_run (GTK_DIALOG (message_dialog));
       gtk_widget_destroy (message_dialog);
     }else{
@@ -572,7 +572,7 @@ void on_append_button_clicked(GtkButton *b)
           snprintf(errMsg,256,"Data does not exist in file %s or is incorrectly formatted.",filename);
           break;
       }
-      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),errMsg);
+      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
       gtk_dialog_run (GTK_DIALOG (message_dialog));
       gtk_widget_destroy (message_dialog);
     }else{
@@ -627,23 +627,23 @@ void on_save_button_clicked(GtkButton *b)
     if(saveErr>0){
       GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
       GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error saving spectrum data!");
-      char errMsg[256];
+      char errMsg[512];
       switch (saveErr)
       {
         case 1:
-          snprintf(errMsg,256,"Error writing to file %s.",fileName);
+          snprintf(errMsg,512,"Error writing to file %s.",fileName);
           break;
         default:
-          snprintf(errMsg,256,"Unknown error saving spectrum data.");
+          snprintf(errMsg,512,"Unknown error saving spectrum data.");
           break;
       }
-      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),errMsg);
+      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
       gtk_dialog_run (GTK_DIALOG (message_dialog));
       gtk_widget_destroy (message_dialog);
     }else{
       //update the status bar
-      char saveMsg[256];
-      snprintf(saveMsg,256,"Saved data to file %s.",fileName);
+      char saveMsg[512];
+      snprintf(saveMsg,512,"Saved data to file %s.",fileName);
       gtk_label_set_text(bottom_info_text,saveMsg);
     }
     g_free(fn);
@@ -769,7 +769,7 @@ void on_export_save_button_clicked(GtkButton *b){
           snprintf(errMsg,256,"Unknown error exporting spectrum data.");
           break;
       }
-      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),errMsg);
+      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
       gtk_dialog_run (GTK_DIALOG (message_dialog));
       gtk_widget_destroy (message_dialog);
     }else{
@@ -845,7 +845,7 @@ void on_export_image_button_clicked(GtkButton *b){
           snprintf(errMsg,256,"Unknown error exporting spectrum data.");
           break;
       }
-      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),errMsg);
+      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
       gtk_dialog_run (GTK_DIALOG (message_dialog));
       gtk_widget_destroy (message_dialog);
     }else{
@@ -1162,7 +1162,7 @@ void on_multiplot_make_view_button_clicked(GtkButton *b)
     if(rawdata.viewNumMultiplotSp[rawdata.numViews] > MAX_DISP_SP){
       char errStr[256];
       snprintf(errStr,256,"The maximum number of spectra\nthat may be plotted at once is %i.",MAX_DISP_SP);
-      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),errStr);
+      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errStr);
     }
 
     gtk_dialog_run (GTK_DIALOG (message_dialog));
@@ -1240,7 +1240,7 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
       if(drawing.numMultiplotSp > MAX_DISP_SP){
         char errStr[256];
         snprintf(errStr,256,"The maximum number of spectra\nthat may be plotted at once is %i.",MAX_DISP_SP);
-        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),errStr);
+        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errStr);
       }
 
       //reset default values, in case the multiplot window is closed
@@ -1425,7 +1425,7 @@ void on_manage_delete_button_clicked(GtkButton *b)
           snprintf(messageStr,512,"One or more saved views depends on the data: %s\nRemoving the data will remove the view(s) as well.",rawdata.histComment[spInd-deletedSpCounter]);
           GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
           GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_manage_window, flags, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO, "Delete data?");
-          gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),messageStr);
+          gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",messageStr);
           if (gtk_dialog_run(GTK_DIALOG(message_dialog)) == GTK_RESPONSE_YES){
             deleteSpectrumOrView(spInd-deletedSpCounter); //remember that indices are changed each time a spectrum is deleted
             deletedSpCounter++;
