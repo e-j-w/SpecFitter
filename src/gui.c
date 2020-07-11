@@ -1510,6 +1510,7 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data
         drawing.multiPlots[0] = spNum;
         drawing.multiplotMode = 0;//unset multiplot, if it is being used
         drawing.numMultiplotSp = 1;//unset multiplot
+        drawing.scaleFactor[spNum] = 1.0; //reset any scaling from custom views
         
         gtk_label_set_text(display_spectrumname_label,rawdata.histComment[spNum]);
 

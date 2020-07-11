@@ -43,7 +43,7 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
 	fwrite(&uintBuf,sizeof(unsigned int),1,out);
 	for(i=0;i<rawdata.numViews;i++){
 		fwrite(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,out);
-		fwrite(&rawdata.viewMultiplotMode[i],sizeof(char),1,out);
+		fwrite(&rawdata.viewMultiplotMode[i],sizeof(unsigned char),1,out);
 		fwrite(&rawdata.viewNumMultiplotSp[i],sizeof(int),1,out);
 		for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
 			fwrite(&rawdata.viewMultiPlots[i][j],sizeof(int),1,out);
@@ -53,9 +53,9 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
 		}
 	}
 
-	double lastBin = 0.;
-	double currentBin;
-	double val;
+	float lastBin = 0.;
+	float currentBin;
+	float val;
 	signed char packetCounter;
 	for(i=0;i<rawdata.numSpOpened;i++){
 		if(i<NSPECT){
@@ -76,11 +76,11 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
 			for(j=0;j<S32K;j++){
 				
 				//get bin values
-				currentBin = inpHist[i][j];
+				currentBin = (float)inpHist[i][j];
 				if(j>0)
-					lastBin = inpHist[i][j-1];
+					lastBin = (float)inpHist[i][j-1];
 				else
-					lastBin = inpHist[i][j];
+					lastBin = (float)inpHist[i][j];
 				
 				//printf("bin: %i cuurent val: %f last val: %f packetCounter: %i\n",j,currentBin,lastBin,packetCounter);
 
@@ -333,7 +333,7 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
 
 			//write views
 			for(i=0;i<rawdata.numViews;i++){
-				fprintf(out,"VIEW %s\nVIEWPAR %i %i\n",rawdata.viewComment[i],rawdata.viewMultiplotMode[i],rawdata.viewNumMultiplotSp[i]);
+				fprintf(out,"VIEW %s\nVIEWPAR %u %i\n",rawdata.viewComment[i],rawdata.viewMultiplotMode[i],rawdata.viewNumMultiplotSp[i]);
 				fprintf(out,"VIEWSP ");
 				for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
 					fprintf(out," %i", rawdata.viewMultiPlots[i][j]);

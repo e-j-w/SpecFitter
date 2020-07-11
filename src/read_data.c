@@ -23,10 +23,10 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 		exit(-1);
 	}
 
-	(void)fread(&ucharBuf, sizeof(unsigned char), 1, inp);
+	if(fread(&ucharBuf, sizeof(unsigned char), 1, inp)!=1) return 0;
 	if(ucharBuf==0){
 		//version 0 of file format
-		(void)fread(&ucharBuf, sizeof(unsigned char), 1, inp);
+		if(fread(&ucharBuf, sizeof(unsigned char), 1, inp)!=1) return 0;
 		numSpec = ucharBuf;
 		if(numSpec > 0){
 
@@ -38,33 +38,33 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 			//read labels
 			for(i=0;i<numSpec;i++){
 				if(i<NSPECT){
-					(void)fread(rawdata.histComment[i+outHistStartSp],sizeof(rawdata.histComment[i+outHistStartSp]), 1, inp);
+					if(fread(rawdata.histComment[i+outHistStartSp],sizeof(rawdata.histComment[i+outHistStartSp]), 1, inp)!=1) return 0;
 				}
 			}
 
 			//read comments
-			(void)fread(&uintBuf, sizeof(unsigned int), 1, inp);
+			if(fread(&uintBuf, sizeof(unsigned int), 1, inp)!=1) return 0;
 			if(outHistStartSp == 0){
 				//no comments exist already
 				rawdata.numChComments = uintBuf;
 				for(i=0;i<rawdata.numChComments;i++){
 					if(i<NCHCOM){
-						(void)fread(&rawdata.chanCommentSp[i],sizeof(rawdata.chanCommentSp[i]), 1, inp);
-						(void)fread(&rawdata.chanCommentCh[i],sizeof(rawdata.chanCommentCh[i]), 1, inp);
-						(void)fread(&rawdata.chanCommentVal[i],sizeof(rawdata.chanCommentVal[i]), 1, inp);
-						(void)fread(rawdata.chanComment[i],sizeof(rawdata.chanComment[i]), 1, inp);
+						if(fread(&rawdata.chanCommentSp[i],sizeof(rawdata.chanCommentSp[i]), 1, inp)!=1) return 0;
+						if(fread(&rawdata.chanCommentCh[i],sizeof(rawdata.chanCommentCh[i]), 1, inp)!=1) return 0;
+						if(fread(&rawdata.chanCommentVal[i],sizeof(rawdata.chanCommentVal[i]), 1, inp)!=1) return 0;
+						if(fread(rawdata.chanComment[i],sizeof(rawdata.chanComment[i]), 1, inp)!=1) return 0;
 					}
 				}
 			}else{
 				//appending spectra, comments may already exist
 				for(i=rawdata.numChComments;i<rawdata.numChComments+uintBuf;i++){
 					if(i<NCHCOM){
-						(void)fread(&rawdata.chanCommentSp[i],sizeof(rawdata.chanCommentSp[i]), 1, inp);
+						if(fread(&rawdata.chanCommentSp[i],sizeof(rawdata.chanCommentSp[i]), 1, inp)!=1) return 0;
 						rawdata.chanCommentSp[i]+=outHistStartSp; //assign to the correct (appended) spectrum
 						//printf("Comment %i went to sp %i\n",i,rawdata.chanCommentSp[i]+1);
-						(void)fread(&rawdata.chanCommentCh[i],sizeof(rawdata.chanCommentCh[i]), 1, inp);
-						(void)fread(&rawdata.chanCommentVal[i],sizeof(rawdata.chanCommentVal[i]), 1, inp);
-						(void)fread(rawdata.chanComment[i],sizeof(rawdata.chanComment[i]), 1, inp);
+						if(fread(&rawdata.chanCommentCh[i],sizeof(rawdata.chanCommentCh[i]), 1, inp)!=1) return 0;
+						if(fread(&rawdata.chanCommentVal[i],sizeof(rawdata.chanCommentVal[i]), 1, inp)!=1) return 0;
+						if(fread(rawdata.chanComment[i],sizeof(rawdata.chanComment[i]), 1, inp)!=1) return 0;
 					}
 				}
 				rawdata.numChComments += uintBuf;
@@ -75,22 +75,22 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 			}
 
 			//read views
-			(void)fread(&uintBuf, sizeof(unsigned int), 1, inp);
+			if(fread(&uintBuf, sizeof(unsigned int), 1, inp)!=1) return 0;
 			if(outHistStartSp == 0){
 				//no comments exist already
 				rawdata.numViews = uintBuf;
 				for(i=0;i<rawdata.numViews;i++){
 					if(i<MAXNVIEWS){
 						memset(rawdata.viewScaleFactor[i],0,sizeof(rawdata.viewScaleFactor[i]));
-						(void)fread(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,inp);
-						(void)fread(&rawdata.viewMultiplotMode[i],sizeof(char),1,inp);
-						(void)fread(&rawdata.viewNumMultiplotSp[i],sizeof(int),1,inp);
+						if(fread(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,inp)!=1) return 0;
+						if(fread(&rawdata.viewMultiplotMode[i],sizeof(unsigned char),1,inp)!=1) return 0;
+						if(fread(&rawdata.viewNumMultiplotSp[i],sizeof(int),1,inp)!=1) return 0;
 						for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
-							(void)fread(&rawdata.viewMultiPlots[i][j],sizeof(int),1,inp);
+							if(fread(&rawdata.viewMultiPlots[i][j],sizeof(int),1,inp)!=1) return 0;
 						}
 						for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
 							if((rawdata.viewMultiPlots[i][j]>=0)&&(rawdata.viewMultiPlots[i][j]<NSPECT)){
-								(void)fread(&rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]],sizeof(double),1,inp);
+								if(fread(&rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]],sizeof(double),1,inp)!=1) return 0;
 							}
 						}
 					}
@@ -100,15 +100,15 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 				for(i=rawdata.numViews;i<rawdata.numViews+uintBuf;i++){
 					if(i<MAXNVIEWS){
 						memset(rawdata.viewScaleFactor[i],0,sizeof(rawdata.viewScaleFactor[i]));
-						(void)fread(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,inp);
-						(void)fread(&rawdata.viewMultiplotMode[i],sizeof(char),1,inp);
-						(void)fread(&rawdata.viewNumMultiplotSp[i],sizeof(int),1,inp);
+						if(fread(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,inp)!=1) return 0;
+						if(fread(&rawdata.viewMultiplotMode[i],sizeof(unsigned char),1,inp)!=1) return 0;
+						if(fread(&rawdata.viewNumMultiplotSp[i],sizeof(int),1,inp)!=1) return 0;
 						for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
-							(void)fread(&rawdata.viewMultiPlots[i][j],sizeof(int),1,inp);
+							if(fread(&rawdata.viewMultiPlots[i][j],sizeof(int),1,inp)!=1) return 0;
 						}
 						for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
 							if((rawdata.viewMultiPlots[i][j]>=0)&&(rawdata.viewMultiPlots[i][j]<NSPECT)){
-								(void)fread(&rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]],sizeof(double),1,inp);
+								if(fread(&rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]],sizeof(double),1,inp)!=1) return 0;
 							}
 						}
 						//realign view data
@@ -142,16 +142,16 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 				spInd = 0;
 				while(doneSp==0){
 					//read packet header
-					(void)fread(&scharBuf,sizeof(signed char), 1, inp);
+					if(fread(&scharBuf,sizeof(signed char), 1, inp)!=1) return 0;
 					//printf("read packet counter: %i\n",scharBuf);
 					if(scharBuf == 0){
-						(void)fread(&val,sizeof(float), 1, inp); //read in final value
+						if(fread(&val,sizeof(float), 1, inp)!=1) return 0; //read in final value
 						outHist[i+outHistStartSp][spInd] = (double)val;
 						spInd++;
 						doneSp = 1; //move on to the next spectrum
 					}else if(scharBuf > 0){
 						//duplicated entries
-						(void)fread(&val,sizeof(float), 1, inp); //read in value
+						if(fread(&val,sizeof(float), 1, inp)!=1) return 0; //read in value
 						for(j=0;j<scharBuf;j++){
 							outHist[i+outHistStartSp][spInd+j] = (double)val;
 						}
@@ -160,7 +160,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 						//non-duplicated entries
 						int numEntr = abs(scharBuf);
 						for(j=0;j<numEntr;j++){
-							(void)fread(&val,sizeof(float), 1, inp); //read in value
+							if(fread(&val,sizeof(float), 1, inp)!=1) return 0; //read in value
 							outHist[i+outHistStartSp][spInd+j] = (double)val;
 							//printf("val %f\n",val);
 						}
@@ -172,7 +172,6 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 				//fill the rest of the histogram
 				for(j=spInd;j<S32K;j++)
 					outHist[i+outHistStartSp][j] = 0.;
-				
 			}
 
 		}else{
@@ -309,17 +308,15 @@ int readSPE(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 	}
 
 	//read .spe header
-	(void)fread(&intBuf,sizeof(int32_t),1,inp);
-	(void)fread(&spLabel,sizeof(spLabel),1,inp);
-	if (fread(header, 24, 1, inp) != 1)
-	{
+	if(fread(&intBuf,sizeof(int32_t),1,inp)!=1) return 0;
+	if(fread(&spLabel,sizeof(spLabel),1,inp)!=1) return 0;
+	if(fread(header, 24, 1, inp) != 1){
 		printf("ERROR: Cannot read header from the .spe file: %s\n", filename);
 		printf("Verify that the format of the file is correct.\n");
 		return 0;
 	}
 	int numElementsRead = fread(inpHist, sizeof(float), 4096, inp);
-	if (numElementsRead < 1)
-	{
+	if(numElementsRead < 1){
 		printf("ERROR: Cannot read spectrum from the .spe file: %s\n", filename);
 		printf("fread code: %i\n",numElementsRead);
 		printf("Verify that the format of the file is correct.\n");
@@ -427,7 +424,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 													if(strcmp(tok,"VIEWPAR")==0){
 														tok = strtok(NULL," ");
 														if(tok!=NULL){
-															rawdata.viewMultiplotMode[rawdata.numViews] = (char)atoi(tok);
+															rawdata.viewMultiplotMode[rawdata.numViews] = (unsigned char)atoi(tok);
 															tok = strtok(NULL," ");
 															if(tok!=NULL){
 																rawdata.viewNumMultiplotSp[rawdata.numViews] = atoi(tok);

@@ -1460,7 +1460,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   }else{
     //set labels to calibrated units
     strcpy(axisLabel,calpar.calUnit);
-    sprintf(axisYLabel,calpar.calYUnit);
+    sprintf(axisYLabel,"%s",calpar.calYUnit);
   }
   cairo_text_extents(cr, axisLabel, &extents);
   cairo_set_font_size(cr, plotFontSize*1.2);
