@@ -21,6 +21,7 @@ void showPreferences(int page){
 }
 
 void setupUITheme(){
+
   //set whether dark theme is preferred
   g_object_set(gtk_settings_get_default(),"gtk-application-prefer-dark-theme", guiglobals.preferDarkTheme, NULL);
   if(guiglobals.preferDarkTheme){
@@ -28,13 +29,29 @@ void setupUITheme(){
     gtk_image_set_from_pixbuf(display_button_icon1, spIconPixbufDark);
     gtk_image_set_from_pixbuf(display_button_icon2, spIconPixbufDark);
     gtk_image_set_from_pixbuf(no_sp_image, spIconPixbufDark);
-    
   }else{
     gtk_image_set_from_pixbuf(display_button_icon, spIconPixbuf);
     gtk_image_set_from_pixbuf(display_button_icon1, spIconPixbuf);
     gtk_image_set_from_pixbuf(display_button_icon2, spIconPixbuf);
     gtk_image_set_from_pixbuf(no_sp_image, spIconPixbuf);
   }
+
+  //handle some special DARK AS MY SOUL themes
+  GtkSettings *settings;
+  gchar *themeName;
+  settings = gtk_settings_get_default();
+  g_object_get(settings, "gtk-theme-name", &themeName, NULL);
+  if((strcmp(themeName,"Yaru")==0)||(strcmp(themeName,"Yaru-dark")==0)){
+    gtk_image_set_from_pixbuf(display_button_icon, spIconPixbufDark);
+    if(strcmp(themeName,"Yaru-dark")==0){
+      gtk_image_set_from_pixbuf(display_button_icon1, spIconPixbufDark);
+      gtk_image_set_from_pixbuf(display_button_icon2, spIconPixbufDark);
+      gtk_image_set_from_pixbuf(no_sp_image, spIconPixbufDark);
+    }
+  }
+
+  g_free(themeName);
+
 }
 
 void setSpOpenView(const char spOpened){
