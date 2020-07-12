@@ -41,9 +41,10 @@ void setupUITheme(){
   gchar *themeName;
   settings = gtk_settings_get_default();
   g_object_get(settings, "gtk-theme-name", &themeName, NULL);
-  if((strcmp(themeName,"Yaru")==0)||(strcmp(themeName,"Yaru-dark")==0)){
+  //printf("Theme: %s\n",themeName);
+  if((strcmp(themeName,"Yaru")==0)||(strcmp(themeName,"Yaru-dark")==0)||(strcmp(themeName,"Adwaita-dark")==0)){
     gtk_image_set_from_pixbuf(display_button_icon, spIconPixbufDark);
-    if(strcmp(themeName,"Yaru-dark")==0){
+    if((strcmp(themeName,"Yaru-dark")==0)||(strcmp(themeName,"Adwaita-dark")==0)){
       gtk_image_set_from_pixbuf(display_button_icon1, spIconPixbufDark);
       gtk_image_set_from_pixbuf(display_button_icon2, spIconPixbufDark);
       gtk_image_set_from_pixbuf(no_sp_image, spIconPixbufDark);
