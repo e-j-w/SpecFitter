@@ -1189,17 +1189,13 @@ void on_multiplot_make_view_button_clicked(GtkButton *b)
   rawdata.viewMultiplotMode[rawdata.numViews] = (unsigned char)gtk_combo_box_get_active(GTK_COMBO_BOX(multiplot_mode_combobox));
 
 
-  if((rawdata.viewNumMultiplotSp[rawdata.numViews] > MAX_DISP_SP)||((rawdata.viewMultiplotMode[rawdata.numViews] < 0))){
+  if(rawdata.viewNumMultiplotSp[rawdata.numViews] > MAX_DISP_SP){
     //show an error dialog
     GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
     GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_manage_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Invalid selection for view!");
-    if(rawdata.viewMultiplotMode[rawdata.numViews] < 0)
-      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Please select a plotting mode.");
-    if(rawdata.viewNumMultiplotSp[rawdata.numViews] > MAX_DISP_SP){
-      char errStr[256];
-      snprintf(errStr,256,"The maximum number of spectra\nthat may be plotted at once is %i.",MAX_DISP_SP);
-      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errStr);
-    }
+    char errStr[256];
+    snprintf(errStr,256,"The maximum number of spectra\nthat may be plotted at once is %i.",MAX_DISP_SP);
+    gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errStr);
 
     gtk_dialog_run (GTK_DIALOG (message_dialog));
     gtk_widget_destroy (message_dialog);
@@ -1266,18 +1262,14 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
     drawing.numMultiplotSp = selectedSpCount;
     drawing.multiplotMode = (unsigned char)gtk_combo_box_get_active(GTK_COMBO_BOX(multiplot_mode_combobox));
 
-    if((drawing.numMultiplotSp > MAX_DISP_SP)||((drawing.multiplotMode < 0))){
+    if(drawing.numMultiplotSp > MAX_DISP_SP){
 
       //show an error dialog
       GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
       GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_manage_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Invalid selection!");
-      if(drawing.multiplotMode < 0)
-        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Please select a plotting mode.");
-      if(drawing.numMultiplotSp > MAX_DISP_SP){
-        char errStr[256];
-        snprintf(errStr,256,"The maximum number of spectra\nthat may be plotted at once is %i.",MAX_DISP_SP);
-        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errStr);
-      }
+      char errStr[256];
+      snprintf(errStr,256,"The maximum number of spectra\nthat may be plotted at once is %i.",MAX_DISP_SP);
+      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errStr);
 
       //reset default values, in case the multiplot window is closed
       drawing.multiplotMode = 0;

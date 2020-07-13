@@ -4,7 +4,7 @@
 
 ## Description
 
-A spectrum/histogram viewer and fitter app, with functionality inspired by the `gf3` program for gamma-ray spectroscopy in the [RadWare](https://radware.phy.ornl.gov/) software package.  Takes advantage of GTK3 to provide smooth rendering and (hopefully) an easy to understand interface.
+A spectrum/histogram viewer and fitter app, with functionality inspired by the `gf3` program for gamma-ray spectroscopy in the [RadWare](https://radware.phy.ornl.gov/) software package.  Takes advantage of [GTK](https://www.gtk.org/) to provide smooth rendering and (hopefully) an easy to understand interface.
 
 ## Screenshot
 
@@ -52,7 +52,7 @@ Conversion codes for some of the above data formats are available in the [FileCo
 
 ### Data management
 
-* Append, rename, or delete spectra to/from the opened session.
+* Rename, or delete spectra from the opened session.
 * Store custom views of multiple spectra using any of the available plotting modes.
 * Double click anywhere on a plot to write/edit a comment there.
 * The full session including comments and custom views can be saved to disk using the **.jf3** (compressed) or **.txt** (ACSII) file formats.

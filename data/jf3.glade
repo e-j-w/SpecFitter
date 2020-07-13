@@ -543,6 +543,9 @@ viewer and analysis application.</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Apply all changes and return.</property>
                 <property name="halign">end</property>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -661,6 +664,9 @@ viewer and analysis application.</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="halign">end</property>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">False</property>
