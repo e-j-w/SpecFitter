@@ -15,6 +15,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 	unsigned char ucharBuf, numSpec;
 	unsigned int uintBuf;
 	FILE *inp;
+	unsigned char startNumViews = rawdata.numViews;
 
 	if ((inp = fopen(filename, "r")) == NULL) //open the file
 	{
@@ -49,6 +50,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 				rawdata.numChComments = uintBuf;
 				for(i=0;i<rawdata.numChComments;i++){
 					if(i<NCHCOM){
+						if(fread(&rawdata.chanCommentView[i],sizeof(rawdata.chanCommentView[i]), 1, inp)!=1) return 0;
 						if(fread(&rawdata.chanCommentSp[i],sizeof(rawdata.chanCommentSp[i]), 1, inp)!=1) return 0;
 						if(fread(&rawdata.chanCommentCh[i],sizeof(rawdata.chanCommentCh[i]), 1, inp)!=1) return 0;
 						if(fread(&rawdata.chanCommentVal[i],sizeof(rawdata.chanCommentVal[i]), 1, inp)!=1) return 0;
@@ -59,8 +61,13 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 				//appending spectra, comments may already exist
 				for(i=rawdata.numChComments;i<rawdata.numChComments+uintBuf;i++){
 					if(i<NCHCOM){
+						if(fread(&rawdata.chanCommentView[i],sizeof(rawdata.chanCommentView[i]), 1, inp)!=1) return 0;
 						if(fread(&rawdata.chanCommentSp[i],sizeof(rawdata.chanCommentSp[i]), 1, inp)!=1) return 0;
-						rawdata.chanCommentSp[i]+=outHistStartSp; //assign to the correct (appended) spectrum
+						if(rawdata.chanCommentView[i] == 1){
+							rawdata.chanCommentSp[i]+=startNumViews; //assign to the correct (appended) view
+						}else{
+							rawdata.chanCommentSp[i]+=outHistStartSp; //assign to the correct (appended) spectrum
+						}
 						//printf("Comment %i went to sp %i\n",i,rawdata.chanCommentSp[i]+1);
 						if(fread(&rawdata.chanCommentCh[i],sizeof(rawdata.chanCommentCh[i]), 1, inp)!=1) return 0;
 						if(fread(&rawdata.chanCommentVal[i],sizeof(rawdata.chanCommentVal[i]), 1, inp)!=1) return 0;
@@ -349,6 +356,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 	FILE *inp;
 	double num[NSPECT];
 	int numColumns = 0; // the detected number of columns in the first line
+	unsigned char startNumViews = rawdata.numViews;
 
 	if ((inp = fopen(filename, "r")) == NULL){ //open the file
 		printf("ERROR: Cannot open the input file: %s\n", filename);
@@ -382,19 +390,29 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 									if(rawdata.numChComments < NCHCOM){
 										tok = strtok(NULL," ");
 										if(tok!=NULL){
-											rawdata.chanCommentSp[rawdata.numChComments] = (char)atoi(tok);
-											rawdata.chanCommentSp[rawdata.numChComments]+=outHistStartSp; //assign to the correct (appended) spectrum
+											rawdata.chanCommentView[rawdata.numChComments] = (unsigned char)atoi(tok);
 											tok = strtok(NULL," ");
 											if(tok!=NULL){
-												rawdata.chanCommentCh[rawdata.numChComments] = atoi(tok);
+												rawdata.chanCommentSp[rawdata.numChComments] = (char)atoi(tok);
+												if(outHistStartSp > 0){
+													if(rawdata.chanCommentView[rawdata.numChComments] == 1){
+														rawdata.chanCommentSp[rawdata.numChComments]+=startNumViews; //assign to the correct (appended) view
+													}else{
+														rawdata.chanCommentSp[rawdata.numChComments]+=outHistStartSp; //assign to the correct (appended) spectrum
+													}
+												}
 												tok = strtok(NULL," ");
 												if(tok!=NULL){
-													rawdata.chanCommentVal[rawdata.numChComments] = atof(tok);
-													tok = strtok(NULL,""); //get the rest of the string
+													rawdata.chanCommentCh[rawdata.numChComments] = atoi(tok);
+													tok = strtok(NULL," ");
 													if(tok!=NULL){
-														strncpy(rawdata.chanComment[rawdata.numChComments],tok,256);
-														rawdata.chanComment[rawdata.numChComments][strcspn(rawdata.chanComment[rawdata.numChComments], "\r\n")] = 0;//strips newline characters from the string
-														rawdata.numChComments += 1;
+														rawdata.chanCommentVal[rawdata.numChComments] = atof(tok);
+														tok = strtok(NULL,""); //get the rest of the string
+														if(tok!=NULL){
+															strncpy(rawdata.chanComment[rawdata.numChComments],tok,256);
+															rawdata.chanComment[rawdata.numChComments][strcspn(rawdata.chanComment[rawdata.numChComments], "\r\n")] = 0;//strips newline characters from the string
+															rawdata.numChComments += 1;
+														}
 													}
 												}
 											}
@@ -403,7 +421,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 								}else if(strcmp(tok,"TITLE")==0){
 									tok = strtok(NULL," ");
 									if(tok!=NULL){
-										int spID = atoi(tok) - 1;
+										int spID = atoi(tok) - 1 + outHistStartSp;
 										if((spID >= 0)&&(spID < NSPECT)){
 											tok = strtok(NULL,""); //get the rest of the string
 											if(tok!=NULL){

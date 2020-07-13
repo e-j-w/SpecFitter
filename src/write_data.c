@@ -33,6 +33,7 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
 	uintBuf = rawdata.numChComments; //number of comments to write
 	fwrite(&uintBuf,sizeof(unsigned int),1,out);
 	for(i=0;i<rawdata.numChComments;i++){
+		fwrite(&rawdata.chanCommentView[i],sizeof(rawdata.chanCommentView[i]),1,out);
 		fwrite(&rawdata.chanCommentSp[i],sizeof(rawdata.chanCommentSp[i]),1,out);
 		fwrite(&rawdata.chanCommentCh[i],sizeof(rawdata.chanCommentCh[i]),1,out);
 		fwrite(&rawdata.chanCommentVal[i],sizeof(rawdata.chanCommentVal[i]),1,out);
@@ -390,7 +391,7 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
 
 	//write comments
 	for(i=0;i<rawdata.numChComments;i++){
-		fprintf(out,"COMMENT %i %i %f %s\n", rawdata.chanCommentSp[i], rawdata.chanCommentCh[i], rawdata.chanCommentVal[i], rawdata.chanComment[i]);
+		fprintf(out,"COMMENT %i %i %i %f %s\n", rawdata.chanCommentView[i], rawdata.chanCommentSp[i], rawdata.chanCommentCh[i], rawdata.chanCommentVal[i], rawdata.chanComment[i]);
 	}
 
 	fclose(out);

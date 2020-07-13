@@ -166,7 +166,8 @@ struct {
   int viewMultiPlots[MAXNVIEWS][NSPECT]; //indices of all the spectra to show for each saved view
   unsigned char numViews; //number of views that have been saved
   char chanComment[NCHCOM][256]; //channel comment text
-  char chanCommentSp[NCHCOM]; //spectra at which channel comments are displayed
+  unsigned char chanCommentView[NCHCOM]; //0=comment is on spectrum, 1=comment is on view
+  char chanCommentSp[NCHCOM]; //spectrum/view number at which channel comments are displayed
   int chanCommentCh[NCHCOM]; //channels at which channel comments are displayed
   float chanCommentVal[NCHCOM]; //y-values at which channel comments are displayed
   unsigned int numChComments; //number of comments which have been placed
@@ -186,6 +187,7 @@ struct {
   int numMultiplotSp; //number of spectra to show in multiplot mode
   double scaleFactor[NSPECT]; //scaling factors for each spectrum
   int multiPlots[NSPECT]; //indices of all the spectra to show in multiplot mode
+  int displayedView; //-1 if no view is being displayed, -2 if temporary view dispalyed, otherwise the index of the displayed view
   float spColors[MAX_DISP_SP*3];
   signed char highlightedPeak; //the peak to highlight when drawing spectra, -1=don't highlight
   signed char highlightedComment; //the comment to highlight when drawing spectra, -1=don't highlight

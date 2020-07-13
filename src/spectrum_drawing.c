@@ -80,6 +80,22 @@ int getCommentAtCursor(const float cursorx, const float cursory, const float xor
     float cursorYVal = getCursorYVal(cursorx, cursory, xorigin, yorigin);
     switch (drawing.multiplotMode)
     {
+      case 1:
+        //sum plot mode
+        for(i=0;i<rawdata.numChComments;i++){
+          if(rawdata.chanCommentView[i] == 1){
+            if(rawdata.chanCommentSp[i] == drawing.displayedView){
+              //check proximity to channel
+              if(fabs(rawdata.chanCommentCh[i] - cursorCh) < (30.0*(drawing.upperLimit - drawing.lowerLimit)/dasize.width)){
+                //check proximity to y-val
+                if(fabs(rawdata.chanCommentVal[i] - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/dasize.height)){
+                  return i; //this comment is close
+                }
+              }
+            }
+          }
+        }
+        break;
       case 0:
         //single plot mode
         for(i=0;i<rawdata.numChComments;i++){
@@ -390,6 +406,53 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
           case 1:
             //summed single plot
             //to be implemented: offer option to create a new summed spectrum and comment on that
+            guiglobals.commentEditInd = getCommentAtCursor(event->x, event->y, 80.0, 40.0);
+            if((guiglobals.commentEditInd >= 0)&&(guiglobals.commentEditInd < NCHCOM)){
+              gtk_widget_set_sensitive(GTK_WIDGET(remove_comment_button),TRUE);
+              gtk_entry_set_text(comment_entry, rawdata.chanComment[guiglobals.commentEditInd]);
+              gtk_button_set_label(comment_ok_button,"Apply");
+              gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),TRUE);
+            }else{
+              if(rawdata.numChComments >= NCHCOM){
+                printf("Cannot add any more comments.\n");
+                GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+                GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot add comment!");
+                gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"The maximum number of comments has been reached.  Older comments must be deleted before more can be added.");
+                gtk_dialog_run (GTK_DIALOG (message_dialog));
+                gtk_widget_destroy (message_dialog);
+                return;
+              }
+              gtk_widget_set_sensitive(GTK_WIDGET(remove_comment_button),FALSE);
+              //setup comment data
+              rawdata.chanCommentVal[(int)rawdata.numChComments] = cursorYVal;
+              rawdata.chanCommentCh[(int)rawdata.numChComments] = cursorChan;
+              rawdata.chanCommentView[(int)rawdata.numChComments] = 1;
+              if(drawing.displayedView >= 0){
+                rawdata.chanCommentSp[(int)rawdata.numChComments] = drawing.displayedView;
+                gtk_button_set_label(comment_ok_button,"Apply");
+              }else if (drawing.displayedView == -2){
+                //this is a view that hasn't been saved yet
+                if(rawdata.numViews >= MAXNVIEWS){
+                  printf("Cannot add any more views.\n");
+                  GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+                  GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot add comment!");
+                  gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Adding a comment would require the current view to be saved, however the maximum number of custom views has been reached.  Older custom views must be deleted before more can be added.");
+                  gtk_dialog_run (GTK_DIALOG (message_dialog));
+                  gtk_widget_destroy (message_dialog);
+                  return;
+                }
+                rawdata.chanCommentSp[(int)rawdata.numChComments] = rawdata.numViews;
+                gtk_button_set_label(comment_ok_button,"Save View and Apply");
+              }else{
+                printf("WARNING: undefined view state, not displaying edit window.\n");
+              }
+              gtk_entry_set_text(comment_entry, "");
+              gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
+            }
+            //re-enable comment display
+            guiglobals.drawSpComments=1;
+            //show the window to edit the comment
+            gtk_window_present(comment_window);
             break;
           case 0:
             //single plot being displayed
@@ -399,6 +462,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
             if((guiglobals.commentEditInd >= 0)&&(guiglobals.commentEditInd < NCHCOM)){
               gtk_widget_set_sensitive(GTK_WIDGET(remove_comment_button),TRUE);
               gtk_entry_set_text(comment_entry, rawdata.chanComment[guiglobals.commentEditInd]);
+              gtk_button_set_label(comment_ok_button,"Apply");
               gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),TRUE);
             }else{
               if(rawdata.numChComments >= NCHCOM){
@@ -415,6 +479,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
               rawdata.chanCommentVal[(int)rawdata.numChComments] = cursorYVal;
               rawdata.chanCommentCh[(int)rawdata.numChComments] = cursorChan;
               rawdata.chanCommentSp[(int)rawdata.numChComments] = drawing.multiPlots[0];
+              rawdata.chanCommentView[(int)rawdata.numChComments] = 0;
               gtk_entry_set_text(comment_entry, "");
               gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
             }
@@ -1530,12 +1595,45 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
 
   //draw comment indicators
   if(drawComments){
+    cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
     switch (drawing.multiplotMode)
     {
+      case 1:
+        //sum view
+        for(i=0;i<rawdata.numChComments;i++){
+          if(rawdata.chanCommentView[i]==1){
+            if(rawdata.chanCommentSp[i]==drawing.displayedView){
+              if(rawdata.chanCommentCh[i] > drawing.lowerLimit){
+                if(rawdata.chanCommentCh[i] < drawing.upperLimit){
+                  if(rawdata.chanCommentVal[i] > drawing.scaleLevelMin[0]){
+                    if(rawdata.chanCommentVal[i] < drawing.scaleLevelMax[0]){
+                      if((!drawing.logScale)||(rawdata.chanCommentVal[i] > 0)){
+                        if(drawing.highlightedComment == i){
+                          cairo_set_line_width(cr, 8.0*scaleFactor);
+                        }else{
+                          cairo_set_line_width(cr, 4.0*scaleFactor);
+                        }
+                        float xc = getXPosFromCh(rawdata.chanCommentCh[i],width,1,xorigin);
+                        float yc = -1.0*getYPos(rawdata.chanCommentVal[i],0,height,yorigin);
+                        float radius = 14.0;
+                        cairo_arc(cr,xc,yc,radius,0.,2*G_PI);
+                        cairo_set_font_size(cr, plotFontSize*1.5);
+                        cairo_text_extents(cr, "i", &extents);
+                        cairo_move_to(cr,xc-(extents.width),yc+(extents.height/2.));
+                        cairo_show_text(cr, "i");
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          cairo_stroke(cr);
+          //cairo_fill(cr);
+        }
+        break;
       case 0:
         //single non-summed spectrum
-        cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
-        
         for(i=0;i<rawdata.numChComments;i++){
           if(rawdata.chanCommentSp[i]==drawing.multiPlots[0]){
             if(rawdata.chanCommentCh[i] > drawing.lowerLimit){

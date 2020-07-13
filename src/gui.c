@@ -1006,6 +1006,24 @@ void on_comment_ok_button_clicked(GtkButton *b)
   if(strcmp(gtk_entry_get_text(comment_entry),"")!=0){
     if(guiglobals.commentEditInd == -1){
       //making a new comment
+      if(drawing.displayedView == -2){
+        if(rawdata.numViews < MAXNVIEWS){
+          //make a new view
+
+          drawing.displayedView = rawdata.numViews;
+
+          rawdata.viewMultiplotMode[rawdata.numViews] = drawing.multiplotMode;
+          rawdata.viewNumMultiplotSp[rawdata.numViews] = drawing.numMultiplotSp;
+          memcpy(&rawdata.viewScaleFactor[rawdata.numViews],&drawing.scaleFactor,sizeof(drawing.scaleFactor));
+          memcpy(&rawdata.viewMultiPlots[rawdata.numViews],&drawing.multiPlots,sizeof(drawing.multiPlots));
+
+          //setup default view name
+          char viewStr[256];
+          getViewStr(viewStr,256,rawdata.numViews);
+          memcpy(rawdata.viewComment[rawdata.numViews],viewStr,sizeof(viewStr));
+          rawdata.numViews++;
+        }
+      }
       strncpy(rawdata.chanComment[(int)rawdata.numChComments],gtk_entry_get_text(comment_entry),256);
       rawdata.numChComments++;
     }else{
@@ -1278,6 +1296,8 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
         drawing.multiplotMode++; //value of 0 means no multiplot
       }
 
+      drawing.displayedView = -2; //this is only a temporary view
+
       guiglobals.deferSpSelChange = 1;
       gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened+rawdata.numViews+1);
       gtk_spin_button_set_value(spectrum_selector, rawdata.numSpOpened+rawdata.numViews+1);
@@ -1315,6 +1335,7 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
         drawing.numMultiplotSp = rawdata.viewNumMultiplotSp[viewInd];
         memcpy(&drawing.scaleFactor,&rawdata.viewScaleFactor[viewInd],sizeof(drawing.scaleFactor));
         memcpy(&drawing.multiPlots,&rawdata.viewMultiPlots[viewInd],sizeof(drawing.multiPlots));
+        drawing.displayedView = viewInd;
         gtk_spin_button_set_value(spectrum_selector, rawdata.numSpOpened+viewInd+1);
       }
     } 
@@ -1501,6 +1522,8 @@ void on_sum_all_button_clicked(GtkButton *b)
   gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened+rawdata.numViews+1);
   gtk_spin_button_set_value(spectrum_selector, rawdata.numSpOpened+rawdata.numViews+1);
 
+  drawing.displayedView = -2; //this is a temporary view
+
   char viewStr[256];
   getViewStr(viewStr,256,-1);
   gtk_label_set_text(display_spectrumname_label,viewStr);
@@ -1529,6 +1552,7 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data
         drawing.multiplotMode = 0;//unset multiplot, if it is being used
         drawing.numMultiplotSp = 1;//unset multiplot
         drawing.scaleFactor[spNum] = 1.0; //reset any scaling from custom views
+        drawing.displayedView = -1;
         
         gtk_label_set_text(display_spectrumname_label,rawdata.histComment[spNum]);
 
@@ -1540,6 +1564,7 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button, gpointer user_data
         drawing.multiplotMode = rawdata.viewMultiplotMode[viewNum];
         memcpy(&drawing.scaleFactor,&rawdata.viewScaleFactor[viewNum],sizeof(drawing.scaleFactor));
         memcpy(&drawing.multiPlots,&rawdata.viewMultiPlots[viewNum],sizeof(drawing.multiPlots));
+        drawing.displayedView = viewNum;
 
         gtk_label_set_text(display_spectrumname_label,rawdata.viewComment[viewNum]);
 
@@ -2012,6 +2037,7 @@ void iniitalizeUIElements(){
   rawdata.dropEmptySpectra = 1;
   rawdata.numSpOpened = 0;
   rawdata.numChComments = 0;
+  drawing.displayedView = -1;
   drawing.multiplotMode = 0;
   drawing.numMultiplotSp = 1;
   drawing.highlightedPeak = -1;

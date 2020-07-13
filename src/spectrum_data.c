@@ -34,19 +34,22 @@ void deleteSpectrumOrView(const int spInd){
 
     //delete comments
     for(i=0;i<rawdata.numChComments;i++){
-      if(rawdata.chanCommentSp[i] == spInd){
-        //delete the comment
-        for(j=i;j<(rawdata.numChComments-1);j++){
-          memcpy(&rawdata.chanComment[j],&rawdata.chanComment[j+1],sizeof(rawdata.chanComment[j]));
-          memcpy(&rawdata.chanCommentSp[j],&rawdata.chanCommentSp[j+1],sizeof(rawdata.chanCommentSp[j]));
-          memcpy(&rawdata.chanCommentCh[j],&rawdata.chanCommentCh[j+1],sizeof(rawdata.chanCommentCh[j]));
-          memcpy(&rawdata.chanCommentVal[j],&rawdata.chanCommentVal[j+1],sizeof(rawdata.chanCommentVal[j]));
+      if(rawdata.chanCommentView[i] == 0){
+        if(rawdata.chanCommentSp[i] == spInd){
+          //delete the comment
+          for(j=i;j<(rawdata.numChComments-1);j++){
+            memcpy(&rawdata.chanComment[j],&rawdata.chanComment[j+1],sizeof(rawdata.chanComment[j]));
+            memcpy(&rawdata.chanCommentView[j],&rawdata.chanCommentView[j+1],sizeof(rawdata.chanCommentView[j]));
+            memcpy(&rawdata.chanCommentSp[j],&rawdata.chanCommentSp[j+1],sizeof(rawdata.chanCommentSp[j]));
+            memcpy(&rawdata.chanCommentCh[j],&rawdata.chanCommentCh[j+1],sizeof(rawdata.chanCommentCh[j]));
+            memcpy(&rawdata.chanCommentVal[j],&rawdata.chanCommentVal[j+1],sizeof(rawdata.chanCommentVal[j]));
+          }
+          rawdata.numChComments -= 1;
+          i -= 1; //indices have shifted, reheck the current index
+        }else if(rawdata.chanCommentSp[i] > spInd){
+          //change to the new index for the spectrum
+          rawdata.chanCommentSp[i] -= 1;
         }
-        rawdata.numChComments -= 1;
-        i -= 1; //indices have shifted, reheck the current index
-      }else if(rawdata.chanCommentSp[i] > spInd){
-        //change to the new index for the spectrum
-        rawdata.chanCommentSp[i] -= 1;
       }
     }
 
@@ -55,6 +58,28 @@ void deleteSpectrumOrView(const int spInd){
     while(deletingViews){
       int viewToDel = getFirstViewDependingOnSp(spInd);
       if(viewToDel >= 0){
+
+        //delete comments associated with the view
+        for(i=0;i<rawdata.numChComments;i++){
+          if(rawdata.chanCommentView[i] == 1){
+            if(rawdata.chanCommentSp[i] == viewToDel){
+              //delete the comment
+              for(j=i;j<(rawdata.numChComments-1);j++){
+                memcpy(&rawdata.chanComment[j],&rawdata.chanComment[j+1],sizeof(rawdata.chanComment[j]));
+                memcpy(&rawdata.chanCommentView[j],&rawdata.chanCommentView[j+1],sizeof(rawdata.chanCommentView[j]));
+                memcpy(&rawdata.chanCommentSp[j],&rawdata.chanCommentSp[j+1],sizeof(rawdata.chanCommentSp[j]));
+                memcpy(&rawdata.chanCommentCh[j],&rawdata.chanCommentCh[j+1],sizeof(rawdata.chanCommentCh[j]));
+                memcpy(&rawdata.chanCommentVal[j],&rawdata.chanCommentVal[j+1],sizeof(rawdata.chanCommentVal[j]));
+              }
+              rawdata.numChComments -= 1;
+              i -= 1; //indices have shifted, reheck the current index
+            }else if(rawdata.chanCommentSp[i] > viewToDel){
+              //change to the new index for the view
+              rawdata.chanCommentSp[i] -= 1;
+            }
+          }
+        }
+
         //delete view
         for(i=viewToDel;i<(rawdata.numViews-1);i++){
           memcpy(&rawdata.viewComment[i],&rawdata.viewComment[i+1],sizeof(rawdata.viewComment[i]));
@@ -99,6 +124,27 @@ void deleteSpectrumOrView(const int spInd){
     //deleting view
 
     int viewInd = spInd - rawdata.numSpOpened;
+
+    //delete comments associated with the view
+    for(i=0;i<rawdata.numChComments;i++){
+      if(rawdata.chanCommentView[i] == 1){
+        if(rawdata.chanCommentSp[i] == viewInd){
+          //delete the comment
+          for(j=i;j<(rawdata.numChComments-1);j++){
+            memcpy(&rawdata.chanComment[j],&rawdata.chanComment[j+1],sizeof(rawdata.chanComment[j]));
+            memcpy(&rawdata.chanCommentView[j],&rawdata.chanCommentView[j+1],sizeof(rawdata.chanCommentView[j]));
+            memcpy(&rawdata.chanCommentSp[j],&rawdata.chanCommentSp[j+1],sizeof(rawdata.chanCommentSp[j]));
+            memcpy(&rawdata.chanCommentCh[j],&rawdata.chanCommentCh[j+1],sizeof(rawdata.chanCommentCh[j]));
+            memcpy(&rawdata.chanCommentVal[j],&rawdata.chanCommentVal[j+1],sizeof(rawdata.chanCommentVal[j]));
+          }
+          rawdata.numChComments -= 1;
+          i -= 1; //indices have shifted, reheck the current index
+        }else if(rawdata.chanCommentSp[i] > viewInd){
+          //change to the new index for the view
+          rawdata.chanCommentSp[i] -= 1;
+        }
+      }
+    }
 
     //delete view
     for(i=viewInd;i<(rawdata.numViews-1);i++){
