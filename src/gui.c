@@ -137,6 +137,7 @@ void getViewStr(char *viewStr, const unsigned int strSize, const int viewNum){
     }
   }else{
     printf("WARNING: getViewStr incorrect view index (%i).\n",viewNum);
+    snprintf(viewStr,strSize,"MissingNo.");
     return;
   }
   
@@ -386,6 +387,8 @@ void openSingleFile(char *filename, int append){
   }
   
   if(openErr>0){
+    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+    GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error opening spectrum data!");
     char errMsg[256];
     switch (openErr)
     {
@@ -399,8 +402,10 @@ void openSingleFile(char *filename, int append){
         snprintf(errMsg,256,"Data does not exist in file %s or is incorrectly formatted.",filename);
         break;
     }
-    printf("ERROR: %s\n",errMsg);
-    exit(-1);
+    gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
+    gtk_dialog_run (GTK_DIALOG (message_dialog));
+    gtk_widget_destroy (message_dialog);
+    exit(-1); //quit the application
   }
 
   //autozoom if needed

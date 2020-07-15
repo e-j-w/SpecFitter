@@ -1,6 +1,6 @@
 GLIB_COMPILE_RESOURCES = `pkg-config --variable=glib_compile_resources gio-2.0`
 
-resources = $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir=./data --generate-dependencies data/jf3.gresource.xml)
+RESOURCES = $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir=./data --generate-dependencies data/jf3.gresource.xml)
 
 CFLAGS = -I. -I./src/lin_eq_solver -O2 -Wall -Wshadow -Wunreachable-code -Wpointer-arith -Wcast-align -std=c99
 
@@ -10,7 +10,7 @@ jf3: src/jf3.c src/jf3.h src/read_data.c src/read_config.c src/fit_data.c src/sp
 	gcc src/jf3.c $(CFLAGS) -lm `pkg-config --cflags --libs gtk+-3.0` -export-dynamic -o jf3 src/lin_eq_solver/lin_eq_solver.o
 	rm jf3-resources.c
 
-jf3-resources.c: data/jf3.gresource.xml data/jf3.glade $(resources)
+jf3-resources.c: data/jf3.gresource.xml data/jf3.glade $(RESOURCES)
 	$(GLIB_COMPILE_RESOURCES) data/jf3.gresource.xml --target=jf3-resources.c --sourcedir=./data --generate-source
 
 lin_eq_solver: src/lin_eq_solver/lin_eq_solver.c src/lin_eq_solver/lin_eq_solver.h
@@ -25,7 +25,9 @@ install:
 		cp jf3 /usr/bin ; \
 		cp data/jf3-application-icon.svg /usr/share/icons/hicolor/scalable/apps ; \
 		cp data/jf3.desktop /usr/share/applications ; \
-		update-desktop-database /usr/share/applications; \
+		cp data/jf3-mime.xml /usr/share/mime/packages ; \
+		update-mime-database /usr/share/mime ; \
+		update-desktop-database /usr/share/applications ; \
 		echo "Done!" ; \
 	fi
 
@@ -38,7 +40,9 @@ uninstall:
 		rm /usr/bin/jf3 ; \
 		rm /usr/share/icons/hicolor/scalable/apps/jf3-application-icon.svg ; \
 		rm /usr/share/applications/jf3.desktop ; \
-		update-desktop-database /usr/share/applications; \
+		rm /usr/share/mime/packages/jf3-mime.xml ; \
+		update-mime-database /usr/share/mime ; \
+		update-desktop-database /usr/share/applications ; \
 		echo "Done!" ; \
 	fi
 

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+    <mime-type type="application/spectrum-jf3">
+        <comment>jf3 data file</comment>
+        <icon name="application-spectrum-jf3"/>
+        <glob-deleteall/>
+        <glob pattern="*.jf3"/>
+    </mime-type>
+    <mime-type type="application/spectrum-spe">
+        <comment>RadWare file</comment>
+        <icon name="application-spectrum-spe"/>
+        <glob-deleteall/>
+        <glob pattern="*.spe"/>
+    </mime-type>
+    <mime-type type="application/spectrum-mca">
+        <comment>MCA file</comment>
+        <icon name="application-spectrum-mca"/>
+        <glob-deleteall/>
+        <glob pattern="*.mca"/>
+    </mime-type>
+    <mime-type type="application/spectrum-fmca">
+        <comment>FMCA file</comment>
+        <icon name="application-spectrum-fmca"/>
+        <glob-deleteall/>
+        <glob pattern="*.fmca"/>
+    </mime-type>
+</mime-info>

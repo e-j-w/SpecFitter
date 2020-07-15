@@ -6,5 +6,6 @@ Name[en_US]=jf3
 Name=jf3
 GenericName=Spectrum Viewer
 Exec=/usr/bin/jf3
+MimeType=application/spectrum-jf3;application/spectrum-spe;application/spectrum-mca;application/spectrum-fmca;text/plain;
 Icon=jf3-application-icon
-Categories=Utility;GTK;Science;Physics;
+Categories=Utility;

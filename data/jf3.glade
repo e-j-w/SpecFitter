@@ -643,6 +643,7 @@ viewer and analysis application.</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Delete the comment.  Cannot be undone.</property>
                 <property name="halign">end</property>
                 <property name="hexpand">False</property>
                 <style>
@@ -663,6 +664,7 @@ viewer and analysis application.</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Save the comment as written.</property>
                 <property name="halign">end</property>
                 <style>
                   <class name="suggested-action"/>

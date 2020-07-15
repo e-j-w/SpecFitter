@@ -100,7 +100,7 @@ The resulting `jf3` executable can be run directly from the command line or your
 
 ```sudo make install```
 
-This will place the `jf3` binary in `/usr/bin` and a desktop entry file in `/usr/share/applications` (for desktop environment integration).  These changes can be undone with:
+This will place the `jf3` binary in `/usr/bin`, a data-type definition file in `/usr/share/mime/packages` (to allow opening compatible files directly from the file manager), and a desktop entry file in `/usr/share/applications` (for desktop environment integration).  These changes can be undone with:
 
 ```sudo make uninstall```
 
