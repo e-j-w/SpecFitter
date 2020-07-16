@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
-    <mime-type type="application/spectrum-jf3">
-        <comment>jf3 data file</comment>
-        <icon name="application-spectrum-jf3"/>
+    <mime-type type="application/x-spectrum-jf3">
+        <comment>jf3 spectrum data file</comment>
+        <icon name="application-x-spectrum-jf3"/>
         <glob-deleteall/>
         <glob pattern="*.jf3"/>
     </mime-type>
-    <mime-type type="application/spectrum-spe">
-        <comment>RadWare file</comment>
-        <icon name="application-spectrum-spe"/>
+    <mime-type type="application/x-spectrum-spe">
+        <comment>RadWare spectrum data file</comment>
+        <icon name="application-x-spectrum-spe"/>
         <glob-deleteall/>
         <glob pattern="*.spe"/>
     </mime-type>
-    <mime-type type="application/spectrum-mca">
-        <comment>MCA file</comment>
-        <icon name="application-spectrum-mca"/>
+    <mime-type type="application/x-spectrum-mca">
+        <comment>MCA spectrum data file</comment>
+        <icon name="application-x-spectrum-mca"/>
         <glob-deleteall/>
         <glob pattern="*.mca"/>
     </mime-type>
-    <mime-type type="application/spectrum-fmca">
-        <comment>FMCA file</comment>
-        <icon name="application-spectrum-fmca"/>
+    <mime-type type="application/x-spectrum-fmca">
+        <comment>FMCA spectrum data file</comment>
+        <icon name="application-x-spectrum-fmca"/>
         <glob-deleteall/>
         <glob pattern="*.fmca"/>
     </mime-type>
