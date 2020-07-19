@@ -88,7 +88,13 @@ int getCommentAtCursor(const float cursorx, const float cursory, const float xor
               //check proximity to channel
               if(fabs(rawdata.chanCommentCh[i] - cursorCh) < (30.0*(drawing.upperLimit - drawing.lowerLimit)/dasize.width)){
                 //check proximity to y-val
-                if(fabs(rawdata.chanCommentVal[i] - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/dasize.height)){
+                float chYVal = rawdata.chanCommentVal[i];
+                if(chYVal < drawing.scaleLevelMin[0]){
+                  chYVal = drawing.scaleLevelMin[0];
+                }else if(chYVal > drawing.scaleLevelMax[0]){
+                  chYVal = drawing.scaleLevelMax[0];
+                }
+                if(fabs(chYVal - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/dasize.height)){
                   return i; //this comment is close
                 }
               }
@@ -98,17 +104,28 @@ int getCommentAtCursor(const float cursorx, const float cursory, const float xor
         break;
       case 0:
         //single plot mode
-        for(i=0;i<rawdata.numChComments;i++){
-          if(rawdata.chanCommentSp[i] == drawing.multiPlots[0]){
-            //check proximity to channel
-            if(fabs(rawdata.chanCommentCh[i] - cursorCh) < (30.0*(drawing.upperLimit - drawing.lowerLimit)/dasize.width)){
-              //check proximity to y-val
-              if(fabs(rawdata.chanCommentVal[i] - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/dasize.height)){
-                return i; //this comment is close
+        if(drawing.displayedView == -1){
+          for(i=0;i<rawdata.numChComments;i++){
+            if(rawdata.chanCommentView[i] == 0){
+              if(rawdata.chanCommentSp[i] == drawing.multiPlots[0]){
+                //check proximity to channel
+                if(fabs(rawdata.chanCommentCh[i] - cursorCh) < (30.0*(drawing.upperLimit - drawing.lowerLimit)/dasize.width)){
+                  //check proximity to y-val
+                  float chYVal = rawdata.chanCommentVal[i];
+                  if(chYVal < drawing.scaleLevelMin[0]){
+                    chYVal = drawing.scaleLevelMin[0];
+                  }else if(chYVal > drawing.scaleLevelMax[0]){
+                    chYVal = drawing.scaleLevelMax[0];
+                  }
+                  if(fabs(chYVal - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/dasize.height)){
+                    return i; //this comment is close
+                  }
+                }
               }
             }
           }
         }
+        
         break;
       default:
         break;
@@ -182,58 +199,6 @@ void autoZoom(){
   }
   //printf("lowerLimit: %i, upperLimit: %i, xChanFocus: %i, zoomLevel: %f\n",drawing.lowerLimit,drawing.upperLimit,drawing.xChanFocus, drawing.zoomLevel);
 }
-
-void on_toggle_autoscale(GtkToggleButton *togglebutton, gpointer user_data)
-{
-  if(gtk_toggle_button_get_active(togglebutton))
-    drawing.autoScale=1;
-  else
-    drawing.autoScale=0;
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
-}
-
-void on_toggle_logscale(GtkToggleButton *togglebutton, gpointer user_data)
-{
-  if(rawdata.openedSp){
-    if(gtk_toggle_button_get_active(togglebutton))
-      drawing.logScale=1;
-    else
-      drawing.logScale=0;
-    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
-  }
-}
-//used for keyboard shortcut
-void toggle_logscale(){
-  if(rawdata.openedSp){
-    if(drawing.logScale){
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(logscale_button),FALSE);
-    }else{
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(logscale_button),TRUE);
-    }
-  }
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
-}
-
-void on_toggle_cursor(GtkToggleButton *togglebutton, gpointer user_data)
-{
-  if(gtk_toggle_button_get_active(togglebutton))
-    guiglobals.drawSpCursor=0;
-  else
-    guiglobals.drawSpCursor=-1;
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
-}
-//used for keyboard shortcut
-void toggle_cursor(){
-  if(rawdata.openedSp){
-    if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cursor_draw_button))){
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cursor_draw_button),FALSE);
-    }else{
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cursor_draw_button),TRUE);
-    }
-  }
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
-}
-
 
 //This callback implements a delay after zooming in of 60 frames, during which the 
 //focused x-value cannot be changed.  This is so that of the user rapidly scrolls over
@@ -405,7 +370,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
         {
           case 1:
             //summed single plot
-            //to be implemented: offer option to create a new summed spectrum and comment on that
+            //offer option to create a new summed spectrum and comment on that
             guiglobals.commentEditInd = getCommentAtCursor(event->x, event->y, 80.0, 40.0);
             if((guiglobals.commentEditInd >= 0)&&(guiglobals.commentEditInd < NCHCOM)){
               gtk_widget_set_sensitive(GTK_WIDGET(remove_comment_button),TRUE);
@@ -1605,63 +1570,71 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
             if(rawdata.chanCommentSp[i]==drawing.displayedView){
               if(rawdata.chanCommentCh[i] > drawing.lowerLimit){
                 if(rawdata.chanCommentCh[i] < drawing.upperLimit){
-                  if(rawdata.chanCommentVal[i] > drawing.scaleLevelMin[0]){
-                    if(rawdata.chanCommentVal[i] < drawing.scaleLevelMax[0]){
-                      if((!drawing.logScale)||(rawdata.chanCommentVal[i] > 0)){
-                        if(drawing.highlightedComment == i){
-                          cairo_set_line_width(cr, 8.0*scaleFactor);
-                        }else{
-                          cairo_set_line_width(cr, 4.0*scaleFactor);
-                        }
-                        float xc = getXPosFromCh(rawdata.chanCommentCh[i],width,1,xorigin);
-                        float yc = -1.0*getYPos(rawdata.chanCommentVal[i],0,height,yorigin);
-                        float radius = 14.0;
-                        cairo_arc(cr,xc,yc,radius,0.,2*G_PI);
-                        cairo_set_font_size(cr, plotFontSize*1.5);
-                        cairo_text_extents(cr, "i", &extents);
-                        cairo_move_to(cr,xc-(extents.width),yc+(extents.height/2.));
-                        cairo_show_text(cr, "i");
-                      }
+                  if((!drawing.logScale)||(rawdata.chanCommentVal[i] > 0)){
+                    if(drawing.highlightedComment == i){
+                      cairo_set_line_width(cr, 8.0*scaleFactor);
+                    }else{
+                      cairo_set_line_width(cr, 4.0*scaleFactor);
                     }
+                    float chYVal = rawdata.chanCommentVal[i];
+                    if(chYVal < drawing.scaleLevelMin[0]){
+                      chYVal = drawing.scaleLevelMin[0];
+                    }else if(chYVal > drawing.scaleLevelMax[0]){
+                      chYVal = drawing.scaleLevelMax[0];
+                    }
+                    float xc = getXPosFromCh(rawdata.chanCommentCh[i],width,1,xorigin);
+                    float yc = -1.0*getYPos(chYVal,0,height,yorigin);
+                    float radius = 14.0;
+                    cairo_arc(cr,xc,yc,radius,0.,2*G_PI);
+                    cairo_set_font_size(cr, plotFontSize*1.5);
+                    cairo_text_extents(cr, "i", &extents);
+                    cairo_move_to(cr,xc-(extents.width),yc+(extents.height/2.));
+                    cairo_show_text(cr, "i");
+                    cairo_stroke(cr);
+                    //cairo_fill(cr);
                   }
                 }
               }
             }
           }
-          cairo_stroke(cr);
-          //cairo_fill(cr);
         }
         break;
       case 0:
         //single non-summed spectrum
-        for(i=0;i<rawdata.numChComments;i++){
-          if(rawdata.chanCommentSp[i]==drawing.multiPlots[0]){
-            if(rawdata.chanCommentCh[i] > drawing.lowerLimit){
-              if(rawdata.chanCommentCh[i] < drawing.upperLimit){
-                if(rawdata.chanCommentVal[i] > drawing.scaleLevelMin[0]){
-                  if(rawdata.chanCommentVal[i] < drawing.scaleLevelMax[0]){
+        if(drawing.displayedView == -1){
+          for(i=0;i<rawdata.numChComments;i++){
+            if(rawdata.chanCommentView[i]==0){
+              if(rawdata.chanCommentSp[i]==drawing.multiPlots[0]){
+                if(rawdata.chanCommentCh[i] > drawing.lowerLimit){
+                  if(rawdata.chanCommentCh[i] < drawing.upperLimit){
                     if((!drawing.logScale)||(rawdata.chanCommentVal[i] > 0)){
                       if(drawing.highlightedComment == i){
                         cairo_set_line_width(cr, 8.0*scaleFactor);
                       }else{
                         cairo_set_line_width(cr, 4.0*scaleFactor);
                       }
+                      float chYVal = rawdata.chanCommentVal[i];
+                      if(chYVal < drawing.scaleLevelMin[0]){
+                        chYVal = drawing.scaleLevelMin[0];
+                      }else if(chYVal > drawing.scaleLevelMax[0]){
+                        chYVal = drawing.scaleLevelMax[0];
+                      }
                       float xc = getXPosFromCh(rawdata.chanCommentCh[i],width,1,xorigin);
-                      float yc = -1.0*getYPos(rawdata.chanCommentVal[i],0,height,yorigin);
+                      float yc = -1.0*getYPos(chYVal,0,height,yorigin);
                       float radius = 14.0;
                       cairo_arc(cr,xc,yc,radius,0.,2*G_PI);
                       cairo_set_font_size(cr, plotFontSize*1.5);
                       cairo_text_extents(cr, "i", &extents);
                       cairo_move_to(cr,xc-(extents.width),yc+(extents.height/2.));
                       cairo_show_text(cr, "i");
+                      cairo_stroke(cr);
+                      //cairo_fill(cr);
                     }
                   }
                 }
               }
             }
           }
-          cairo_stroke(cr);
-          //cairo_fill(cr);
         }
         break;
       default:

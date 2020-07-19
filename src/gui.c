@@ -483,7 +483,7 @@ void on_open_button_clicked(GtkButton *b)
 {
   unsigned int i,j;
 
-  GtkFileChooserNative *native = gtk_file_chooser_native_new ("Open Spectrum File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
+  GtkFileChooserNative *native = gtk_file_chooser_native_new ("Open Data File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
   file_open_dialog = GTK_FILE_CHOOSER(native);
   gtk_file_chooser_set_select_multiple(file_open_dialog, TRUE);
   file_filter = gtk_file_filter_new();
@@ -599,7 +599,7 @@ void on_append_button_clicked(GtkButton *b)
 
   unsigned int i,j;
   
-  GtkFileChooserNative *native = gtk_file_chooser_native_new ("Add More Spectrum File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
+  GtkFileChooserNative *native = gtk_file_chooser_native_new ("Add More Data File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
   file_open_dialog = GTK_FILE_CHOOSER(native);
   gtk_file_chooser_set_select_multiple(file_open_dialog, TRUE);
   file_filter = gtk_file_filter_new();
@@ -1758,6 +1758,58 @@ void on_about_button_clicked(GtkButton *b)
 {
   gtk_window_present(GTK_WINDOW(about_dialog)); //show the window
 }
+
+void on_toggle_autoscale(GtkToggleButton *togglebutton, gpointer user_data)
+{
+  if(gtk_toggle_button_get_active(togglebutton))
+    drawing.autoScale=1;
+  else
+    drawing.autoScale=0;
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+}
+
+void on_toggle_logscale(GtkToggleButton *togglebutton, gpointer user_data)
+{
+  if(rawdata.openedSp){
+    if(gtk_toggle_button_get_active(togglebutton))
+      drawing.logScale=1;
+    else
+      drawing.logScale=0;
+    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+  }
+}
+//used for keyboard shortcut
+void toggle_logscale(){
+  if(rawdata.openedSp){
+    if(drawing.logScale){
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(logscale_button),FALSE);
+    }else{
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(logscale_button),TRUE);
+    }
+  }
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+}
+
+void on_toggle_cursor(GtkToggleButton *togglebutton, gpointer user_data)
+{
+  if(gtk_toggle_button_get_active(togglebutton))
+    guiglobals.drawSpCursor=0;
+  else
+    guiglobals.drawSpCursor=-1;
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+}
+//used for keyboard shortcut
+void toggle_cursor(){
+  if(rawdata.openedSp){
+    if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(cursor_draw_button))){
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cursor_draw_button),FALSE);
+    }else{
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cursor_draw_button),TRUE);
+    }
+  }
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+}
+
 
 
 void iniitalizeUIElements(){
