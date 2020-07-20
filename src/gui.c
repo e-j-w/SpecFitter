@@ -399,6 +399,13 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button)
       //update widgets
       update_gui_fit_state();
     }
+
+    /*printf("Number of spectra selected for plotting: %i.  Selected spectra: ", drawing.numMultiplotSp);
+    int i;
+    for(i=0;i<drawing.numMultiplotSp;i++){
+      printf("%i ",drawing.multiPlots[i]);
+    }
+    printf(", multiplot mode: %i\n",drawing.multiplotMode);*/
     
     //printf("Set selected spectrum to %i\n",dispSp);
     gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));

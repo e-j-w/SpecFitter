@@ -237,7 +237,6 @@ float getSpBinValOrWeight(const int dispSpNum, const int bin, const int getWeigh
             val += drawing.scaleFactor[drawing.multiPlots[k]]*rawdata.hist[drawing.multiPlots[k]][bin+j];
           }
         }
-        break;
       }
       break;
     case 4:
