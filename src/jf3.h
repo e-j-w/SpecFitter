@@ -207,12 +207,21 @@ struct {
   int ndf; //DOF for fit
   float fitPeakInitGuess[MAX_FIT_PK]; //initial guess of peak positions, in channels
   double widthFGH[3]; //F,G,H parameters used to evaluate widths
-  double fitParVal[6+(3*MAX_FIT_PK)]; //parameter values found by the fitter
-  double fitParErr[6+(3*MAX_FIT_PK)]; //errors in parameter values
   unsigned int numFitPeaks; //number of peaks to fit
   unsigned char fixRelativeWidths; //0=don't fix width, 1=fix widths
   unsigned char weightMode; //0=weight using data (properly weighting for background subtraction), 1=weight using fit, 2=no weights
   double relWidths[MAX_FIT_PK]; //relative width factors
-  char errFound; //whether or not paramter errors have been found
+  unsigned char errFound; //whether or not paramter errors have been found
+  unsigned char fitType; //0=Gaussian, 1=skewed Gaussian
+  //fit parameters: 
+  //0, 1, 2       : quadratic background
+  //3             : R (ratio of normal and skewed Gaussians, range 0 to 1)
+  //4             : beta (skewness)
+  //5             : reserved
+  //6, 9, 12 ...  : Peak amplitude(s)
+  //7, 10, 13 ... : Peak position(s)
+  //8, 11, 14 ... : Peak width(s)
+  double fitParVal[6+(3*MAX_FIT_PK)]; //parameter values found by the fitter
+  double fitParErr[6+(3*MAX_FIT_PK)]; //errors in parameter values
 } fitpar;
 

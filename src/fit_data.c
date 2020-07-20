@@ -169,6 +169,18 @@ long double evalGaussTermDerivative(int peakNum, double xval, int derPar){
   return evalGDer;
 }
 
+//get the value of the fitted skewed gaussian term for a given x value
+long double evalSkewedGaussTerm(int peakNum, double xval){
+  long double evalG;
+  if(fitpar.fixRelativeWidths){
+    evalG = exp((xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4]) * erfc( (xval-fitpar.fitParVal[7+(3*peakNum)])/(1.4142*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]) + (fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.4142*fitpar.fitParVal[4]) ) ;
+  }else{
+    evalG = exp((xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4]) * erfc( (xval-fitpar.fitParVal[7+(3*peakNum)])/(1.4142*fitpar.fitParVal[8+(3*peakNum)]) + fitpar.fitParVal[8+(3*peakNum)]/(1.4142*fitpar.fitParVal[4]) ) ;
+  }
+  //printf("peakNum: %i, xval: %f, pos: %f, width: %f, eval: %f\n",peakNum,xval,fitpar.fitParVal[7+(3*peakNum)],fitpar.fitParVal[8+(3*peakNum)],evalG);
+  return evalG;
+}
+
 double evalFitBG(double xval){
   return fitpar.fitParVal[0] + xval*fitpar.fitParVal[1] + xval*xval*fitpar.fitParVal[2];
 }
@@ -214,7 +226,11 @@ double getFitChisq(){
     f = fitpar.fitParVal[0] + fitpar.fitParVal[1]*xval + fitpar.fitParVal[2]*xval*xval;
     //gaussian(s)
     for(j=0;j<fitpar.numFitPeaks;j++){
-      f += fitpar.fitParVal[6+(3*j)]*evalGaussTerm(j,xval);
+      f += fitpar.fitParVal[6+(3*j)]*(1.0 - fitpar.fitParVal[3])*evalGaussTerm(j,xval);
+      if(fitpar.fitType == 1){
+        f += fitpar.fitParVal[6+(3*j)]*fitpar.fitParVal[3]*evalSkewedGaussTerm(j,xval);
+      }
+        
     }
 
     //model cannot give less than 0 counts
@@ -236,7 +252,7 @@ double getFitChisq(){
   return chisq;
 }
 
-int getParameterErrors(lin_eq_type *linEq){
+unsigned char getParameterErrors(lin_eq_type *linEq){
 
   if(fitpar.fixRelativeWidths){
     if(linEq->dim != 4 + (2*fitpar.numFitPeaks)){
@@ -308,7 +324,7 @@ int getParameterErrors(lin_eq_type *linEq){
 //see eq. 2.4.14, 2.4.15, pg. 47 J. Wolberg 
 //'Data Analysis Using the Method of Least Squares'
 //returns 1 if successful
-int setupFitSums(lin_eq_type *linEq, double flambda){
+int setupFitSums(lin_eq_type *linEq, const double flambda){
 
   int i,j,k;
   long double cmatrix[MAX_DIM][MAX_DIM];
@@ -624,8 +640,6 @@ int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFra
           //printf("par %i: %f\n",6+i,fitpar.fitParVal[6+i]);
         }
       }
-      
-      
 
       //check chisq, if it increased change value of flambda and try again
       iterEndChisq = getFitChisq();
@@ -823,10 +837,20 @@ int startGausFit(){
   }
 
   //printf("Initial guesses: %f %f %f %f %f %f\n",fitpar.fitParVal[0],fitpar.fitParVal[1],fitpar.fitParVal[2],fitpar.fitParVal[6],fitpar.fitParVal[7],fitpar.fitParVal[8]);
-  if (g_thread_try_new("fitthread", performGausFitThreaded, NULL, NULL) == NULL){
-    printf("WARNING: Couldn't initialize thread for fit, will try on the main thread.\n");
-    performGausFit(); //try non-threaded fit
+
+  switch (fitpar.fitType)
+  {
+    case 0:
+      //Gaussian
+      if (g_thread_try_new("fit_thread", performGausFitThreaded, NULL, NULL) == NULL){
+        printf("WARNING: Couldn't initialize thread for fit, will try on the main thread.\n");
+        performGausFit(); //try non-threaded fit
+      }
+      break;
+    default:
+      break;
   }
+  
   
   return 1;
 }
