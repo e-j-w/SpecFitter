@@ -242,6 +242,47 @@ gboolean zoom_out_tick_callback(GtkWidget *widget, GdkFrameClock *frame_clock, g
   return G_SOURCE_CONTINUE;
 }
 
+//zoom in on the spectrum, not following the cursor (for use with keyboard shortcut)
+void on_zoom_in_x(){
+  //handle case where this is called by shortcut, and spectra are not open
+  if(rawdata.openedSp == 0){
+    return;
+  }
+  if(guiglobals.useZoomAnimations){
+    drawing.zoomToLevel = drawing.zoomLevel * 2.0;
+    if(drawing.zoomToLevel > 1024.0)
+      drawing.zoomToLevel = 1024.0;
+    drawing.xChanToFocus = drawing.xChanFocus; //not zooming to cursor position
+    drawing.xChanFocusChangePerFrame = 0.0; //not zooming to cursor position
+    gtk_widget_add_tick_callback(GTK_WIDGET(spectrum_drawing_area), zoom_in_tick_callback, NULL, NULL);
+  }else{
+    drawing.zoomLevel *= 2.0;
+    if(drawing.zoomLevel > 1024.0)
+      drawing.zoomLevel = 1024.0;
+    gtk_range_set_value(GTK_RANGE(zoom_scale),log(drawing.zoomLevel)/log(2.));//base 2 log of zoom
+    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+  }
+}
+
+void on_zoom_out_x(){
+  //handle case where this is called by shortcut, and spectra are not open
+  if(rawdata.openedSp == 0){
+    return;
+  }
+  if(guiglobals.useZoomAnimations){
+    drawing.zoomToLevel = drawing.zoomLevel * 0.5;
+    if(drawing.zoomToLevel < 1.0)
+      drawing.zoomToLevel = 1.0;
+    gtk_widget_add_tick_callback(GTK_WIDGET(spectrum_drawing_area), zoom_out_tick_callback, NULL, NULL);
+  }else{
+    drawing.zoomLevel *= 0.5;
+    if(drawing.zoomLevel < 1.0)
+      drawing.zoomLevel = 1.0;
+    gtk_range_set_value(GTK_RANGE(zoom_scale),log(drawing.zoomLevel)/log(2.));//base 2 log of zoom
+    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+  }
+}
+
 //function handling mouse wheel scrolling to zoom the displayed spectrum
 void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
   if(!rawdata.openedSp){
@@ -255,17 +296,9 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
 
   if((e->direction == 1)&&(drawing.zoomLevel > 1.0)){
     //printf("Scrolling down at %f %f!\n",e->x,e->y);
-    if(guiglobals.useZoomAnimations){
-      drawing.zoomToLevel = drawing.zoomLevel * 0.5;
-      if(drawing.zoomToLevel < 1.0)
-        drawing.zoomToLevel = 1.0;
-      gtk_widget_add_tick_callback(widget, zoom_out_tick_callback, NULL, NULL);
-    }else{
-      drawing.zoomLevel *= 0.5;
-      if(drawing.zoomLevel < 1.0)
-        drawing.zoomLevel = 1.0;
-    }
+    on_zoom_out_x();
   }else if((e->direction != 1)&&(drawing.zoomLevel < 1024.0)){
+    //handle zooming that follows cursor
     //printf("Scrolling up at %f %f!\n",e->x,e->y);
     GdkRectangle dasize;  // GtkDrawingArea size
     GdkWindow *wwindow = gtk_widget_get_window(widget);
@@ -296,12 +329,11 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
       }
       guiglobals.framesSinceZoom = 0;
       drawing.zoomLevel *= 2.0;
+      gtk_range_set_value(GTK_RANGE(zoom_scale),log(drawing.zoomLevel)/log(2.));//base 2 log of zoom
+      gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
     }
   }
-  if(!(guiglobals.useZoomAnimations)){
-    gtk_range_set_value(GTK_RANGE(zoom_scale),log(drawing.zoomLevel)/log(2.));//base 2 log of zoom
-    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
-  }
+  
 }
 
 void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){

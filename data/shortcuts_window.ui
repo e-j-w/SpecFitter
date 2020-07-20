@@ -101,6 +101,20 @@
                 <property name="title" translatable="yes" context="shortcut window">Toggle cursor</property>
               </object>
             </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="visible">1</property>
+                <property name="accelerator">plus</property>
+                <property name="title" translatable="yes" context="shortcut window">Zoom in spectrum</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="visible">1</property>
+                <property name="accelerator">minus</property>
+                <property name="title" translatable="yes" context="shortcut window">Zoom out spectrum</property>
+              </object>
+            </child>
           </object>
         </child>
       </object>
