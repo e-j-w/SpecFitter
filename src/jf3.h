@@ -215,9 +215,9 @@ struct {
   unsigned char fitType; //0=Gaussian, 1=skewed Gaussian
   //fit parameters: 
   //0, 1, 2       : quadratic background
-  //3             : R (ratio of normal and skewed Gaussians, range 0 to 1)
+  //3             : R (ratio of symmetric and skewed Gaussians, range 0 to 1)
   //4             : beta (skewness)
-  //5             : reserved
+  //5             : reserved for future use
   //6, 9, 12 ...  : Peak amplitude(s)
   //7, 10, 13 ... : Peak position(s)
   //8, 11, 14 ... : Peak width(s)

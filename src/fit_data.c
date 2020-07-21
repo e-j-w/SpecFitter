@@ -139,36 +139,6 @@ long double evalGaussTerm(int peakNum, double xval){
   return evalG;
 }
 
-//evaluate the derivative of a gaussian peak term, needed for non-linear fits 
-//derPar: 0=amplitude, 1=centroid, 2=width
-long double evalGaussTermDerivative(int peakNum, double xval, int derPar){
-  long double evalGDer = evalGaussTerm(peakNum,xval);
-  switch (derPar){
-  case 2:
-    evalGDer *= fitpar.fitParVal[6+(3*peakNum)];
-    if(fitpar.fixRelativeWidths){
-      evalGDer *= pow((xval-fitpar.fitParVal[7+(3*peakNum)]),2.0)/(pow(fitpar.fitParVal[8],3.0)*pow(fitpar.relWidths[peakNum],2.0));
-    }else{
-      evalGDer *= pow((xval-fitpar.fitParVal[7+(3*peakNum)]),2.0)/pow(fitpar.fitParVal[8+(3*peakNum)],3.0);
-    }
-    break;
-  case 1:
-    evalGDer *= fitpar.fitParVal[6+(3*peakNum)];
-    if(fitpar.fixRelativeWidths){
-      evalGDer *= (xval-fitpar.fitParVal[7+(3*peakNum)])/pow(fitpar.fitParVal[8]*fitpar.relWidths[peakNum],2.0);
-    }else{
-      evalGDer *= (xval-fitpar.fitParVal[7+(3*peakNum)])/pow(fitpar.fitParVal[8+(3*peakNum)],2.0);
-    }
-    break;
-  case 0:
-    break;
-  default:
-    printf("WARNING: invalid derivative parameter (%i).\n",derPar);
-    break;
-  }
-  return evalGDer;
-}
-
 //get the value of the fitted skewed gaussian term for a given x value
 long double evalSkewedGaussTerm(int peakNum, double xval){
   long double evalG;
@@ -179,6 +149,94 @@ long double evalSkewedGaussTerm(int peakNum, double xval){
   }
   //printf("peakNum: %i, xval: %f, pos: %f, width: %f, eval: %f\n",peakNum,xval,fitpar.fitParVal[7+(3*peakNum)],fitpar.fitParVal[8+(3*peakNum)],evalG);
   return evalG;
+}
+
+//evaluate the derivative of a gaussian peak term, needed for non-linear fits 
+//derPar: 0=amplitude, 1=centroid, 2=width, 3=R, 4=beta
+long double evalGaussTermDerivative(int peakNum, double xval, int derPar){
+  long double evalGDer = evalGaussTerm(peakNum,xval);
+  switch (derPar){
+    case 4:
+      evalGDer *= 0.0; //no skewness in symmetric Gaussian
+      break;
+    case 3:
+      evalGDer *= -1.0*fitpar.fitParVal[6+(3*peakNum)];
+      break;
+    case 2:
+      evalGDer *= fitpar.fitParVal[6+(3*peakNum)]*(1.0 - fitpar.fitParVal[3]);
+      if(fitpar.fixRelativeWidths){
+        evalGDer *= pow((xval-fitpar.fitParVal[7+(3*peakNum)]),2.0)/(pow(fitpar.fitParVal[8],3.0)*pow(fitpar.relWidths[peakNum],2.0));
+      }else{
+        evalGDer *= pow((xval-fitpar.fitParVal[7+(3*peakNum)]),2.0)/pow(fitpar.fitParVal[8+(3*peakNum)],3.0);
+      }
+      break;
+    case 1:
+      evalGDer *= fitpar.fitParVal[6+(3*peakNum)]*(1.0 - fitpar.fitParVal[3]);
+      if(fitpar.fixRelativeWidths){
+        evalGDer *= (xval-fitpar.fitParVal[7+(3*peakNum)])/pow(fitpar.fitParVal[8]*fitpar.relWidths[peakNum],2.0);
+      }else{
+        evalGDer *= (xval-fitpar.fitParVal[7+(3*peakNum)])/pow(fitpar.fitParVal[8+(3*peakNum)],2.0);
+      }
+      break;
+    case 0:
+      evalGDer *= (1.0 - fitpar.fitParVal[3]);
+      break;
+    default:
+      printf("WARNING: invalid derivative parameter (%i).\n",derPar);
+      break;
+  }
+  return evalGDer;
+}
+
+//evaluate the derivative of a skewed gaussian peak term, needed for non-linear fits 
+//derPar: 0=amplitude, 1=centroid, 2=width, 3=R, 4=beta
+long double evalSkewedGaussTermDerivative(int peakNum, double xval, int derPar){
+  long double evalGDer = 1.0;
+  switch (derPar){
+    case 4:
+      evalGDer *= fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]*(xval-fitpar.fitParVal[7+(3*peakNum)])*evalSkewedGaussTerm(peakNum,xval)/(fitpar.fitParVal[4]*fitpar.fitParVal[4]);
+      long double evalGDerT2 = 2.0*fitpar.fitParVal[6+(3*peakNum)]/(2.5066*fitpar.fitParVal[4]*fitpar.fitParVal[4]);
+      if(fitpar.fixRelativeWidths){
+        evalGDerT2 *= exp( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - pow((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.4142*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]) + (fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.4142*fitpar.fitParVal[4]),2.0) ) ;
+        evalGDerT2 *= fitpar.fitParVal[8]*fitpar.relWidths[peakNum];
+      }else{
+        evalGDerT2 *= exp( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - pow((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.4142*fitpar.fitParVal[8+(3*peakNum)]) + (fitpar.fitParVal[8+(3*peakNum)])/(1.4142*fitpar.fitParVal[4]),2.0) ) ;
+        evalGDerT2 *= fitpar.fitParVal[8+(3*peakNum)];
+      }
+      evalGDer = evalGDerT2 - evalGDer;
+      break;
+    case 3:
+      evalGDer *= fitpar.fitParVal[6+(3*peakNum)]*evalSkewedGaussTerm(peakNum,xval);
+      break;
+    case 2:
+      evalGDer *= 2.0*fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]/1.7725;
+      if(fitpar.fixRelativeWidths){
+        evalGDer *= exp( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - pow((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.4142*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]) + (fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.4142*fitpar.fitParVal[4]),2.0) ) ;
+        evalGDer *= 1.0/(1.4142*fitpar.fitParVal[4]) - (xval-fitpar.fitParVal[7+(3*peakNum)])/(1.4142*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]);
+      }else{
+        evalGDer *= exp( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - pow((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.4142*fitpar.fitParVal[8+(3*peakNum)]) + (fitpar.fitParVal[8+(3*peakNum)])/(1.4142*fitpar.fitParVal[4]),2.0) ) ;
+        evalGDer *= 1.0/(1.4142*fitpar.fitParVal[4]) - (xval-fitpar.fitParVal[7+(3*peakNum)])/(1.4142*fitpar.fitParVal[8+(3*peakNum)]*fitpar.fitParVal[8+(3*peakNum)]);
+      }
+      break;
+    case 1:
+      evalGDer *= fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]*evalSkewedGaussTerm(peakNum,xval)/fitpar.fitParVal[4];
+      evalGDer *= 2.0*fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]/2.5066;
+      if(fitpar.fixRelativeWidths){
+        evalGDer *= exp( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - pow((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.4142*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]) + (fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.4142*fitpar.fitParVal[4]),2.0) ) ;
+        evalGDer /= fitpar.fitParVal[8]*fitpar.relWidths[peakNum];
+      }else{
+        evalGDer *= exp( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - pow((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.4142*fitpar.fitParVal[8+(3*peakNum)]) + (fitpar.fitParVal[8+(3*peakNum)])/(1.4142*fitpar.fitParVal[4]),2.0) ) ;
+        evalGDer /= fitpar.fitParVal[8+(3*peakNum)];
+      }
+      break;
+    case 0:
+      evalGDer *= fitpar.fitParVal[3]*evalSkewedGaussTerm(peakNum,xval);
+      break;
+    default:
+      printf("WARNING: invalid derivative parameter (%i).\n",derPar);
+      break;
+  }
+  return evalGDer;
 }
 
 double evalFitBG(double xval){
@@ -545,6 +603,8 @@ int areParsValid(){
     }
     if(fabs(fitpar.fitParVal[8+(3*i)]) > (fitRange)/2.){
       return 0;
+    }else if(fitpar.fitParVal[8+(3*i)] <= 0.){
+      return 0; //cannot have 0 or negative width
     }
     if(getSpBinVal(0,fitpar.fitPeakInitGuess[i]) > 0){
       if(fitpar.fitParVal[6+(3*i)] < 0.){
