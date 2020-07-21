@@ -243,31 +243,68 @@ double evalFitBG(double xval){
   return fitpar.fitParVal[0] + xval*fitpar.fitParVal[1] + xval*xval*fitpar.fitParVal[2];
 }
 
-double evalFit(double xval){
+double evalFit(const double xval){
   int i;
   double val = evalFitBG(xval);
-  for(i=0;i<fitpar.numFitPeaks;i++)
-    val += fitpar.fitParVal[6+(3*i)]*evalGaussTerm(i,xval);
+  for(i=0;i<fitpar.numFitPeaks;i++){
+    val += fitpar.fitParVal[6+(3*i)]*(1.0 - fitpar.fitParVal[3])*evalGaussTerm(i,xval);
+    if(fitpar.fitType == 1){
+      val += fitpar.fitParVal[6+(3*i)]*fitpar.fitParVal[3]*evalSkewedGaussTerm(i,xval);
+    }
+  }
   return val;
 }
 
-double evalFitOnePeak(double xval, int peak){
+double evalFitOnePeak(const double xval, const int peak){
   if(peak>=fitpar.numFitPeaks)
     return 0.0;
   double val = evalFitBG(xval);
-  val += fitpar.fitParVal[6+(3*peak)]*evalGaussTerm(peak,xval);
+  val += fitpar.fitParVal[6+(3*peak)]*(1.0 - fitpar.fitParVal[3])*evalGaussTerm(peak,xval);
+  if(fitpar.fitType == 1)
+    val += fitpar.fitParVal[6+(3*peak)]*fitpar.fitParVal[3]*evalSkewedGaussTerm(peak,xval);
   return val;
 }
 
-double evalPeakArea(int peakNum){
-  return fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[8+(3*peakNum)]*sqrt(2.0*G_PI)/(1.0*drawing.contractFactor);
+double evalSymGaussArea(const int peakNum){
+  //use Guassian integral
+  return fitpar.fitParVal[6+(3*peakNum)]*(1.0 - fitpar.fitParVal[3])*fitpar.fitParVal[8+(3*peakNum)]*sqrt(2.0*G_PI)/(1.0*drawing.contractFactor);
+}
+
+double evalSkewedGaussArea(const int peakNum){
+  //use definite integral of skewed Gaussian wrt x, taken
+  //from -inf to inf (which collapses erf and erfc terms)
+  return fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]*fitpar.fitParVal[4]*exp(-2.0*fitpar.fitParVal[8+(3*peakNum)]*fitpar.fitParVal[8+(3*peakNum)]/(4.0*fitpar.fitParVal[4]*fitpar.fitParVal[4]));
+}
+
+double evalPeakArea(const int peakNum){
+  double area = evalSymGaussArea(peakNum);
+  if(fitpar.fitType == 1){
+    area += evalSkewedGaussArea(peakNum);
+  }
+  return area;
 }
 
 double evalPeakAreaErr(int peakNum){
+  //propagate uncertainty through the expression in the function evalSymGaussArea()
   double err = (fitpar.fitParErr[6+(3*peakNum)]/fitpar.fitParVal[6+(3*peakNum)])*(fitpar.fitParErr[6+(3*peakNum)]/fitpar.fitParVal[6+(3*peakNum)]);
   err += (fitpar.fitParErr[8+(3*peakNum)]/fitpar.fitParVal[8+(3*peakNum)])*(fitpar.fitParErr[8+(3*peakNum)]/fitpar.fitParVal[8+(3*peakNum)]);
+  err += (fitpar.fitParErr[3]/(1.0 - fitpar.fitParVal[3]))*(fitpar.fitParErr[3]/(1.0 - fitpar.fitParVal[3]));
   err = sqrt(err);
-  err = err*evalPeakArea(peakNum);
+  err = err*evalSymGaussArea(peakNum);
+  if(fitpar.fitType == 1){
+    //propagate uncertainty through the expression in the function evalSkewedGaussArea()
+    double errsk = (fitpar.fitParErr[8+(3*peakNum)]/fitpar.fitParVal[8+(3*peakNum)])*(fitpar.fitParErr[8+(3*peakNum)]/fitpar.fitParVal[8+(3*peakNum)]);
+    errsk += (fitpar.fitParErr[4]/fitpar.fitParVal[4])*(fitpar.fitParErr[4]/fitpar.fitParVal[4]);
+    errsk *= fitpar.fitParVal[8+(3*peakNum)]*fitpar.fitParVal[8+(3*peakNum)]/fitpar.fitParVal[4]*fitpar.fitParVal[4];
+    errsk *= 0.5; //abs(constant) in the exponential term of evalSkewedGaussArea()
+    errsk += (fitpar.fitParErr[6+(3*peakNum)]/fitpar.fitParVal[6+(3*peakNum)])*(fitpar.fitParErr[6+(3*peakNum)]/fitpar.fitParVal[6+(3*peakNum)]);
+    errsk += (fitpar.fitParErr[3]/fitpar.fitParVal[3])*(fitpar.fitParErr[3]/fitpar.fitParVal[3]);
+    errsk += (fitpar.fitParErr[4]/fitpar.fitParVal[4])*(fitpar.fitParErr[4]/fitpar.fitParVal[4]);
+    errsk = sqrt(errsk);
+    errsk = errsk*evalSkewedGaussArea(peakNum);
+    //add all errors in quadrature
+    err = sqrt(err*err + errsk*errsk);
+  }
   return err;
 }
 
