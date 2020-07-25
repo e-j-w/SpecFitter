@@ -16,6 +16,7 @@ void showPreferences(int page){
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_comment_checkbutton),guiglobals.drawSpComments);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(relative_widths_checkbutton),fitpar.fixRelativeWidths);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(popup_results_checkbutton),guiglobals.popupFitResults);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(peak_shape_combobox),fitpar.fitType);
   gtk_combo_box_set_active(GTK_COMBO_BOX(weight_mode_combobox),fitpar.weightMode);
   gtk_window_present(preferences_window); //show the window
 }
@@ -1737,6 +1738,7 @@ void on_preferences_button_clicked(GtkButton *b)
 
 void on_preferences_apply_button_clicked(GtkButton *b)
 {
+  fitpar.fitType = (unsigned char)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox));
   fitpar.weightMode = (unsigned char)gtk_combo_box_get_active(GTK_COMBO_BOX(weight_mode_combobox));
   updateConfigFile();
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
@@ -1965,6 +1967,7 @@ void iniitalizeUIElements(){
   spectrum_label_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "spectrum_label_checkbutton"));
   spectrum_comment_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "spectrum_comment_checkbutton"));
   relative_widths_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "relative_widths_checkbutton"));
+  peak_shape_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "peak_shape_combobox"));
   weight_mode_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "weight_mode_combobox"));
   popup_results_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "popup_results_checkbutton"));
   animation_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "animation_checkbutton"));
@@ -2133,7 +2136,7 @@ void iniitalizeUIElements(){
   fitpar.fitStartCh = -1;
   fitpar.fitEndCh = -1;
   fitpar.numFitPeaks = 0;
-  fitpar.fitType = 0;
+  fitpar.fitType = 1;
 
   gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);
   gtk_adjustment_set_upper(spectrum_selector_adjustment, 1);

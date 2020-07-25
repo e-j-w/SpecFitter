@@ -115,7 +115,7 @@ GtkNotebook *preferences_notebook;
 GtkCheckButton *discard_empty_checkbutton, *bin_errors_checkbutton, *round_errors_checkbutton, *dark_theme_checkbutton, *spectrum_label_checkbutton, *spectrum_comment_checkbutton, *autozoom_checkbutton;
 GtkCheckButton *relative_widths_checkbutton;
 GtkButton *preferences_apply_button;
-GtkComboBoxText *weight_mode_combobox;
+GtkComboBoxText *peak_shape_combobox, *weight_mode_combobox;
 GtkCheckButton *popup_results_checkbutton;
 GtkCheckButton *animation_checkbutton;
 //shortcuts window
@@ -223,5 +223,6 @@ struct {
   //8, 11, 14 ... : Peak width(s)
   double fitParVal[6+(3*MAX_FIT_PK)]; //parameter values found by the fitter
   double fitParErr[6+(3*MAX_FIT_PK)]; //errors in parameter values
+  unsigned char fixPar[6+(3*MAX_FIT_PK)]; //0=don't fix parameter, 1=fix at current value
 } fitpar;
 

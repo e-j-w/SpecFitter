@@ -370,50 +370,31 @@ unsigned char getParameterErrors(lin_eq_type *linEq){
 
   int i;
 
-  if(fitpar.fixRelativeWidths){
-    //Calculate uncertainties from linear equation solution
-    if(fitpar.fitType == 0){
-      if(linEq->dim != 4 + (2*fitpar.numFitPeaks)){
-        printf("WARNING: trying to get parameter errors without all parameters in use!\n");
-      }
-      for(i=0;i<3;i++)
+  //Calculate uncertainties from linear equation solution
+  if(linEq->dim >= 5){
+    for(i=0;i<5;i++){
+      if(fitpar.fixPar[i] == 0){
         fitpar.fitParErr[i]=sqrt((double)(linEq->inv_matrix[i][i]*linEq->mat_weights[i][i]));
-      for(i=0;i<fitpar.numFitPeaks;i++){
-        fitpar.fitParErr[6+(3*i)] = sqrt((double)(linEq->inv_matrix[4+(2*i)][4+(2*i)]*linEq->mat_weights[4+(2*i)][4+(2*i)]));
-        fitpar.fitParErr[7+(3*i)] = sqrt((double)(linEq->inv_matrix[5+(2*i)][5+(2*i)]*linEq->mat_weights[5+(2*i)][5+(2*i)]));
-        fitpar.fitParErr[8+(3*i)] = fitpar.relWidths[i]*sqrt((double)(linEq->inv_matrix[3][3]*linEq->mat_weights[3][3]));
       }
-    }else if(fitpar.fitType == 1){
-      if(linEq->dim != 6 + (2*fitpar.numFitPeaks)){
-        printf("WARNING: trying to get parameter errors without all parameters in use!\n");
-      }
-      for(i=0;i<5;i++)
-        fitpar.fitParErr[i]=sqrt((double)(linEq->inv_matrix[i][i]*linEq->mat_weights[i][i]));
-      for(i=0;i<fitpar.numFitPeaks;i++){
-        fitpar.fitParErr[6+(3*i)] = sqrt((double)(linEq->inv_matrix[6+(2*i)][6+(2*i)]*linEq->mat_weights[6+(2*i)][6+(2*i)]));
-        fitpar.fitParErr[7+(3*i)] = sqrt((double)(linEq->inv_matrix[7+(2*i)][7+(2*i)]*linEq->mat_weights[7+(2*i)][7+(2*i)]));
-        fitpar.fitParErr[8+(3*i)] = fitpar.relWidths[i]*sqrt((double)(linEq->inv_matrix[5][5]*linEq->mat_weights[5][5]));
-      }
+    }
+  }
+
+  if(fitpar.fixRelativeWidths){ 
+    if(linEq->dim != 6 + (2*fitpar.numFitPeaks)){
+      printf("WARNING: trying to get parameter errors without all parameters in use!\n");
+    }
+    for(i=0;i<fitpar.numFitPeaks;i++){
+      fitpar.fitParErr[6+(3*i)] = sqrt((double)(linEq->inv_matrix[6+(2*i)][6+(2*i)]*linEq->mat_weights[6+(2*i)][6+(2*i)]));
+      fitpar.fitParErr[7+(3*i)] = sqrt((double)(linEq->inv_matrix[7+(2*i)][7+(2*i)]*linEq->mat_weights[7+(2*i)][7+(2*i)]));
+      fitpar.fitParErr[8+(3*i)] = fitpar.relWidths[i]*sqrt((double)(linEq->inv_matrix[5][5]*linEq->mat_weights[5][5]));
     }
   }else{
     //Calculate uncertainties from linear equation solution
-    if(fitpar.fitType == 0){
-      if(linEq->dim != 3 + (3*fitpar.numFitPeaks)){
-        printf("WARNING: trying to get parameter errors without all parameters in use!\n");
-      }
-      for(i=0;i<3;i++)
-        fitpar.fitParErr[i]=sqrt((double)(linEq->inv_matrix[i][i]*linEq->mat_weights[i][i]));
-      for(i=0;i<(3*fitpar.numFitPeaks);i++)
-        fitpar.fitParErr[6+i]=sqrt((double)(linEq->inv_matrix[3+i][3+i]*linEq->mat_weights[3+i][3+i]));
-    }else if(fitpar.fitType == 1){
-      if(linEq->dim != 5 + (3*fitpar.numFitPeaks)){
-        printf("WARNING: trying to get parameter errors without all parameters in use!\n");
-      }
-      for(i=0;i<5;i++)
-        fitpar.fitParErr[i]=sqrt((double)(linEq->inv_matrix[i][i]*linEq->mat_weights[i][i]));
-      for(i=0;i<(3*fitpar.numFitPeaks);i++)
-        fitpar.fitParErr[6+i]=sqrt((double)(linEq->inv_matrix[5+i][5+i]*linEq->mat_weights[5+i][5+i]));
+    if(linEq->dim != 5 + (3*fitpar.numFitPeaks)){
+      printf("WARNING: trying to get parameter errors without all parameters in use!\n");
     }
+    for(i=0;i<(3*fitpar.numFitPeaks);i++)
+      fitpar.fitParErr[6+i]=sqrt((double)(linEq->inv_matrix[5+i][5+i]*linEq->mat_weights[5+i][5+i]));
   }
 
   //add Guassian parameter errors in quadrature against Cramer–Rao lower bounds
@@ -448,26 +429,19 @@ int setupFitSums(lin_eq_type *linEq, const double flambda){
   memset(linEq->vector,0,sizeof(linEq->vector));
   memset(linEq->solution,0,sizeof(linEq->solution));
   memset(linEq->inv_matrix,0,sizeof(linEq->inv_matrix));
+  memset(linEq->mat_weights,0,sizeof(linEq->mat_weights));
   memset(cmatrix,0,sizeof(cmatrix));
   long double xval,weight,ydiff;
   long double widthDerSum = 0.;
+  long double rDerSum = 0.;
+  long double betaDerSum = 0.;
   int peakNum, peakNum2, parNum, parNum2;
 
 
-  if(fitpar.fitType == 1){
-    //skewed Guassian fit
-    if(fitpar.fixRelativeWidths){
-      linEq->dim = 6 + (2*fitpar.numFitPeaks);
-    }else{
-      linEq->dim = 5 + (3*fitpar.numFitPeaks);
-    }
+  if(fitpar.fixRelativeWidths){
+    linEq->dim = 6 + (2*fitpar.numFitPeaks);
   }else{
-    //symmetric Gaussian fit
-    if(fitpar.fixRelativeWidths){
-      linEq->dim = 4 + (2*fitpar.numFitPeaks);
-    }else{
-      linEq->dim = 3 + (3*fitpar.numFitPeaks);
-    }
+    linEq->dim = 5 + (3*fitpar.numFitPeaks);
   }
 
   for(i=fitpar.fitStartCh;i<=fitpar.fitEndCh;i+=drawing.contractFactor){
@@ -490,12 +464,15 @@ int setupFitSums(lin_eq_type *linEq, const double flambda){
           weight = 1.; //why?
         
         widthDerSum = 0.;
+        rDerSum = 0.;
+        betaDerSum = 0.;
       }
 
       //parameters 0-2: background (always used)
       linEq->matrix[0][0] += 1./weight;
       linEq->matrix[0][1] += xval/weight;
       linEq->matrix[0][2] += xval*xval/weight;
+      linEq->matrix[1][1] += xval*xval/weight;
       linEq->matrix[1][2] += xval*xval*xval/weight;
       linEq->matrix[2][2] += xval*xval*xval*xval/weight;
       linEq->vector[0] += ydiff/weight;
@@ -503,119 +480,78 @@ int setupFitSums(lin_eq_type *linEq, const double flambda){
       linEq->vector[2] += ydiff*xval*xval/weight;
 
       if(fitpar.fitType == 1){
-        //skewed Gaussian fit
-
         //parameters 3 and 4: R and beta
         for(j=0;j<fitpar.numFitPeaks;j++){
-          linEq->matrix[0][3] += evalAllTermDerivative(j,xval,3)/weight;
-          linEq->matrix[1][3] += xval*evalAllTermDerivative(j,xval,3)/weight;
-          linEq->matrix[2][3] += xval*xval*evalAllTermDerivative(j,xval,3)/weight;
-          linEq->matrix[3][3] += evalAllTermDerivative(j,xval,3)*evalAllTermDerivative(j,xval,3)/weight;
-          linEq->matrix[0][4] += evalAllTermDerivative(j,xval,4)/weight;
-          linEq->matrix[1][4] += xval*evalAllTermDerivative(j,xval,4)/weight;
-          linEq->matrix[2][4] += xval*xval*evalAllTermDerivative(j,xval,4)/weight;
-          linEq->matrix[3][4] += evalAllTermDerivative(j,xval,3)*evalAllTermDerivative(j,xval,4)/weight;
-          linEq->matrix[4][4] += evalAllTermDerivative(j,xval,4)*evalAllTermDerivative(j,xval,4)/weight;
-          linEq->vector[3] += ydiff*evalAllTermDerivative(j,xval,3)/weight;
-          linEq->vector[4] += ydiff*evalAllTermDerivative(j,xval,4)/weight;
+          rDerSum += evalAllTermDerivative(j,xval,3);
+          betaDerSum += evalAllTermDerivative(j,xval,4);
         }
+        linEq->matrix[0][3] += rDerSum/weight;
+        linEq->matrix[1][3] += xval*rDerSum/weight;
+        linEq->matrix[2][3] += xval*xval*rDerSum/weight;
+        linEq->matrix[3][3] += rDerSum*rDerSum/weight;
+        linEq->matrix[0][4] += betaDerSum/weight;
+        linEq->matrix[1][4] += xval*betaDerSum/weight;
+        linEq->matrix[2][4] += xval*xval*betaDerSum/weight;
+        linEq->matrix[3][4] += rDerSum*betaDerSum/weight;
+        linEq->matrix[4][4] += betaDerSum*betaDerSum/weight;
+        linEq->vector[3] += ydiff*rDerSum/weight;
+        linEq->vector[4] += ydiff*betaDerSum/weight;
+      }    
 
-        if(fitpar.fixRelativeWidths){
-          //parameter 5: width
-          for(j=0;j<fitpar.numFitPeaks;j++){
-            widthDerSum += evalAllTermDerivative(j,xval,2);
+      if(fitpar.fixRelativeWidths){
+        //parameter 5: width
+        for(j=0;j<fitpar.numFitPeaks;j++){
+          widthDerSum += evalAllTermDerivative(j,xval,2);
+        }
+        linEq->matrix[0][5] += widthDerSum/weight;
+        linEq->matrix[1][5] += xval*widthDerSum/weight;
+        linEq->matrix[2][5] += xval*xval*widthDerSum/weight;
+        if(fitpar.fitType == 1){
+          linEq->matrix[3][5] += rDerSum*widthDerSum/weight;
+          linEq->matrix[4][5] += betaDerSum*widthDerSum/weight;
+        }
+        linEq->matrix[5][5] += widthDerSum*widthDerSum/weight;
+        linEq->vector[5] += ydiff*widthDerSum/weight;
+      
+        //parameters 6 and above: amplitudes, positions
+        for(j=6;j<linEq->dim;j++){
+          peakNum = (int)((j-6)/2);
+          parNum = j % 2;
+          linEq->matrix[0][j] += evalAllTermDerivative(peakNum,xval,parNum)/weight;
+          linEq->matrix[1][j] += xval*evalAllTermDerivative(peakNum,xval,parNum)/weight;
+          linEq->matrix[2][j] += xval*xval*evalAllTermDerivative(peakNum,xval,parNum)/weight;
+          if(fitpar.fitType == 1){
+            linEq->matrix[3][j] += rDerSum*evalAllTermDerivative(peakNum,xval,parNum)/weight;
+            linEq->matrix[4][j] += betaDerSum*evalAllTermDerivative(peakNum,xval,parNum)/weight;
           }
-          linEq->matrix[0][5] += widthDerSum/weight;
-          linEq->matrix[1][5] += xval*widthDerSum/weight;
-          linEq->matrix[2][5] += xval*xval*widthDerSum/weight;
-          linEq->matrix[3][5] += evalAllTermDerivative(j,xval,3)*widthDerSum/weight;
-          linEq->matrix[4][5] += evalAllTermDerivative(j,xval,4)*widthDerSum/weight;
-          linEq->matrix[5][5] += widthDerSum*widthDerSum/weight;
-          linEq->vector[5] += ydiff*widthDerSum/weight;
-        
-          //parameters 6 and above: amplitudes, positions
-          for(j=4;j<linEq->dim-2;j++){
-            peakNum = (int)((j-4)/2);
-            parNum = j % 2;
-            linEq->matrix[0][j+2] += evalAllTermDerivative(peakNum,xval,parNum)/weight;
-            linEq->matrix[1][j+2] += xval*evalAllTermDerivative(peakNum,xval,parNum)/weight;
-            linEq->matrix[2][j+2] += xval*xval*evalAllTermDerivative(peakNum,xval,parNum)/weight;
-            linEq->matrix[3][j+2] += evalAllTermDerivative(j,xval,3)*evalAllTermDerivative(peakNum,xval,parNum)/weight;
-            linEq->matrix[4][j+2] += evalAllTermDerivative(j,xval,4)*evalAllTermDerivative(peakNum,xval,parNum)/weight;
-            linEq->matrix[5][j+2] += widthDerSum*evalAllTermDerivative(peakNum,xval,parNum)/weight;
-            linEq->vector[j+2] += ydiff*evalAllTermDerivative(peakNum,xval,parNum)/weight;
-            //printf("j: %i, j-4/2: %i, jmod2: %i\n",j,(int)(j-4)/2,j % 2);
-            for(k=4;k<linEq->dim-2;k++){
-              peakNum2 = (int)((k-4)/2);
-              parNum2 = k % 2;
-              linEq->matrix[j+2][k+2] += evalAllTermDerivative(peakNum,xval,parNum)*evalAllTermDerivative(peakNum2,xval,parNum2)/weight;
-            }
-          }
-        }else{ //fitpar.fixRelativeWidths = 0
-          //parameters 5 and above: amplitudes, positions, widths
-          for(j=3;j<linEq->dim-2;j++){
-            peakNum = (int)((j-3)/3);
-            parNum = j % 3;
-            linEq->matrix[0][j+2] += evalAllTermDerivative(peakNum,xval,parNum)/weight;
-            linEq->matrix[1][j+2] += xval*evalAllTermDerivative(peakNum,xval,parNum)/weight;
-            linEq->matrix[2][j+2] += xval*xval*evalAllTermDerivative(peakNum,xval,parNum)/weight;
-            linEq->matrix[3][j+2] += evalAllTermDerivative(j,xval,3)*evalAllTermDerivative(peakNum,xval,parNum)/weight;
-            linEq->matrix[4][j+2] += evalAllTermDerivative(j,xval,4)*evalAllTermDerivative(peakNum,xval,parNum)/weight;
-            linEq->vector[j+2] += ydiff*evalAllTermDerivative(peakNum,xval,parNum)/weight;
-            //printf("j: %i, j-3/3: %i, jmod3: %i\n",j,(int)(j-3)/3,j % 3);
-            for(k=3;k<linEq->dim-2;k++){
-              peakNum2 = (int)((k-3)/3);
-              parNum2 = k % 3;
-              linEq->matrix[j+2][k+2] += evalAllTermDerivative(peakNum,xval,parNum)*evalAllTermDerivative(peakNum2,xval,parNum2)/weight;
-              //printf("weight: %f, j: %i, k: %i, evalgaussder j: %f, evalgaussder k: %f\n",weight,j,k,evalAllTermDerivative((int)(j-3)/3,xval,j % 3),evalAllTermDerivative((int)(k-3)/3,xval,k % 3));
-            }
+          linEq->matrix[5][j] += widthDerSum*evalAllTermDerivative(peakNum,xval,parNum)/weight;
+          linEq->vector[j] += ydiff*evalAllTermDerivative(peakNum,xval,parNum)/weight;
+          //printf("j: %i, j-4/2: %i, jmod2: %i\n",j,(int)(j-6)/2,j % 2);
+          for(k=6;k<=j;k++){
+            peakNum2 = (int)((k-6)/2);
+            parNum2 = k % 2;
+            linEq->matrix[k][j] += evalAllTermDerivative(peakNum,xval,parNum)*evalAllTermDerivative(peakNum2,xval,parNum2)/weight;
           }
         }
-      }else{
-        //symmetric Gaussian fit
-        if(fitpar.fixRelativeWidths){
-          //parameter 3: width
-          for(j=0;j<fitpar.numFitPeaks;j++){
-            widthDerSum += evalGaussTermDerivative(j,xval,2);
+      }else{ //fitpar.fixRelativeWidths = 0
+        //parameters 5 and above: amplitudes, positions, widths
+        for(j=5;j<linEq->dim;j++){
+          peakNum = (int)((j-5)/3);
+          parNum = j % 3;
+          linEq->matrix[0][j] += evalAllTermDerivative(peakNum,xval,parNum)/weight;
+          linEq->matrix[1][j] += xval*evalAllTermDerivative(peakNum,xval,parNum)/weight;
+          linEq->matrix[2][j] += xval*xval*evalAllTermDerivative(peakNum,xval,parNum)/weight;
+          if(fitpar.fitType == 1){
+            linEq->matrix[3][j] += rDerSum*evalAllTermDerivative(peakNum,xval,parNum)/weight;
+            linEq->matrix[4][j] += betaDerSum*evalAllTermDerivative(peakNum,xval,parNum)/weight;
           }
-          linEq->matrix[0][3] += widthDerSum/weight;
-          linEq->matrix[1][3] += xval*widthDerSum/weight;
-          linEq->matrix[2][3] += xval*xval*widthDerSum/weight;
-          linEq->matrix[3][3] += widthDerSum*widthDerSum/weight;
-          linEq->vector[3] += ydiff*widthDerSum/weight;
-        
-          //parameters 4 and above: amplitudes, positions
-          for(j=4;j<linEq->dim;j++){
-            peakNum = (int)((j-4)/2);
-            parNum = j % 2;
-            linEq->matrix[0][j] += evalGaussTermDerivative(peakNum,xval,parNum)/weight;
-            linEq->matrix[1][j] += xval*evalGaussTermDerivative(peakNum,xval,parNum)/weight;
-            linEq->matrix[2][j] += xval*xval*evalGaussTermDerivative(peakNum,xval,parNum)/weight;
-            linEq->matrix[3][j] += widthDerSum*evalGaussTermDerivative(peakNum,xval,parNum)/weight;
-            linEq->vector[j] += ydiff*evalGaussTermDerivative(peakNum,xval,parNum)/weight;
-            //printf("j: %i, j-4/2: %i, jmod2: %i\n",j,(int)(j-4)/2,j % 2);
-            for(k=4;k<linEq->dim;k++){
-              peakNum2 = (int)((k-4)/2);
-              parNum2 = k % 2;
-              linEq->matrix[j][k] += evalGaussTermDerivative(peakNum,xval,parNum)*evalGaussTermDerivative(peakNum2,xval,parNum2)/weight;
-            }
-          }
-        }else{ //fitpar.fixRelativeWidths = 0
-          //parameters 3 and above: amplitudes, positions, widths
-          for(j=3;j<linEq->dim;j++){
-            peakNum = (int)((j-3)/3);
-            parNum = j % 3;
-            linEq->matrix[0][j] += evalGaussTermDerivative(peakNum,xval,parNum)/weight;
-            linEq->matrix[1][j] += xval*evalGaussTermDerivative(peakNum,xval,parNum)/weight;
-            linEq->matrix[2][j] += xval*xval*evalGaussTermDerivative(peakNum,xval,parNum)/weight;
-            linEq->vector[j] += ydiff*evalGaussTermDerivative(peakNum,xval,parNum)/weight;
-            //printf("j: %i, j-3/3: %i, jmod3: %i\n",j,(int)(j-3)/3,j % 3);
-            for(k=3;k<linEq->dim;k++){
-              peakNum2 = (int)((k-3)/3);
-              parNum2 = k % 3;
-              linEq->matrix[j][k] += evalGaussTermDerivative(peakNum,xval,parNum)*evalGaussTermDerivative(peakNum2,xval,parNum2)/weight;
-              //printf("weight: %f, j: %i, k: %i, evalgaussder j: %f, evalgaussder k: %f\n",weight,j,k,evalGaussTermDerivative((int)(j-3)/3,xval,j % 3),evalGaussTermDerivative((int)(k-3)/3,xval,k % 3));
-            }
+          linEq->vector[j] += ydiff*evalAllTermDerivative(peakNum,xval,parNum)/weight;
+          //printf("j: %i, j-3/3: %i, jmod3: %i\n",j,(int)(j-5)/3,j % 3);
+          for(k=5;k<=j;k++){
+            peakNum2 = (int)((k-5)/3);
+            parNum2 = k % 3;
+            linEq->matrix[k][j] += evalAllTermDerivative(peakNum,xval,parNum)*evalAllTermDerivative(peakNum2,xval,parNum2)/weight;
+            //printf("weight: %f, j: %i, k: %i, evalgaussder j: %f, evalgaussder k: %f\n",weight,j,k,evalAllTermDerivative((int)(j-5)/3,xval,j % 3),evalAllTermDerivative((int)(k-5)/3,xval,k % 3));
           }
         }
       }
@@ -624,25 +560,10 @@ int setupFitSums(lin_eq_type *linEq, const double flambda){
 
   }
 
-  linEq->matrix[1][0] = linEq->matrix[0][1];
-  linEq->matrix[2][0] = linEq->matrix[0][2];
-  linEq->matrix[1][1] = linEq->matrix[0][2];
-  linEq->matrix[2][1] = linEq->matrix[1][2];
-  if(fitpar.fixRelativeWidths){
-    linEq->matrix[3][0] = linEq->matrix[0][3];
-    linEq->matrix[3][1] = linEq->matrix[1][3];
-    linEq->matrix[3][2] = linEq->matrix[2][3];
-    for(i=4;i<linEq->dim;i++){
-      linEq->matrix[i][0] = linEq->matrix[0][i];
-      linEq->matrix[i][1] = linEq->matrix[1][i];
-      linEq->matrix[i][2] = linEq->matrix[2][i];
-      linEq->matrix[i][3] = linEq->matrix[3][i];
-    }
-  }else{
-    for(i=3;i<linEq->dim;i++){
-      linEq->matrix[i][0] = linEq->matrix[0][i];
-      linEq->matrix[i][1] = linEq->matrix[1][i];
-      linEq->matrix[i][2] = linEq->matrix[2][i];
+  //mirror the matrix
+  for(i=0;i<linEq->dim;i++){
+    for(j=(i+1);j<linEq->dim;j++){
+      linEq->matrix[i][j] = linEq->matrix[j][i];
     }
   }
 
@@ -656,21 +577,27 @@ int setupFitSums(lin_eq_type *linEq, const double flambda){
 
   //check if matrix has zeroes
   for(i=0;i<linEq->dim;i++){
-    if(linEq->matrix[i][i] == 0.){
-      printf("WARNING: matrix element %i is zero, cannot solve.\n",i);
-      return 0;
+    if(fitpar.fixPar[i] == 0){
+      if(linEq->matrix[i][i] == 0.){
+        printf("WARNING: matrix element %i is zero, cannot solve.\n",i);
+        return 0;
+      }
     }
   } 
 
   //modify the curvature matrix
   for(i=0;i<linEq->dim;i++){
-    for(j=0;j<linEq->dim;j++){
-      if(i!=j){
-        linEq->mat_weights[i][j] = 1.0/sqrt(linEq->matrix[i][i]*linEq->matrix[j][j]);
-        cmatrix[i][j] = linEq->matrix[i][j]*linEq->mat_weights[i][j];
-      }  
+    if(fitpar.fixPar[i] == 0){
+      for(j=0;j<linEq->dim;j++){
+        if(fitpar.fixPar[j] == 0){
+          if(i!=j){
+            linEq->mat_weights[i][j] = 1.0/sqrt(linEq->matrix[i][i]*linEq->matrix[j][j]);
+            cmatrix[i][j] = linEq->matrix[i][j]*linEq->mat_weights[i][j];
+          }
+        }
+      }
+      linEq->mat_weights[i][i] = 1.0/sqrt(linEq->matrix[i][i]*linEq->matrix[i][i]);
     }
-    linEq->mat_weights[i][i] = 1.0/sqrt(linEq->matrix[i][i]*linEq->matrix[i][i]);
     cmatrix[i][i] = flambda + 1.0;
   }
 
@@ -694,7 +621,8 @@ int setupFitSums(lin_eq_type *linEq, const double flambda){
   for(i=0;i<linEq->dim;i++){
     printf("%10.4Lf ",linEq->vector[i]);
   }
-  printf("\n");*/
+  printf("\n");
+  getc(stdin);*/
 
   return 1;
 
@@ -787,10 +715,8 @@ int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFra
       printf("\n");*/
 
       //assign parameter values
-      
-      if(fitpar.fitType == 0){
-        //symmetric Gaussian fit
-        for(i=0;i<3;i++){
+      for(i=0;i<5;i++){
+        if(fitpar.fixPar[i] == 0){
           if((fitpar.fitParVal[i]!=0.)&&(fabs(linEq->solution[i]/fitpar.fitParVal[i]) > convergenceFrac)){
             //printf("frac %i: %f\n",i,fabs(linEq->solution[i]/fitpar.fitParVal[i]));
             conv=0;
@@ -798,69 +724,32 @@ int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFra
           fitpar.fitParVal[i] += linEq->solution[i];
           //printf("par %i: %f\n",i,fitpar.fitParVal[i]);
         }
-        if(fitpar.fixRelativeWidths){
-          for(i=0;i<fitpar.numFitPeaks;i++){
-            if((fitpar.fitParVal[8+(3*i)]!=0.)&&(fabs(fitpar.relWidths[i]*linEq->solution[3]/fitpar.fitParVal[8+(3*i)]) > convergenceFrac)){
-              conv=0;
-            }
-            fitpar.fitParVal[8+(3*i)] += fitpar.relWidths[i]*linEq->solution[3];
-            //printf("par %i: %f\n",6+i,fitpar.fitParVal[6+i]);
-          }
-          for(i=0;i<(2*fitpar.numFitPeaks);i++){
-            peakNum = (int)(i/2);
-            parNum = i % 2;
-            if((fitpar.fitParVal[6+(3*peakNum)+parNum]!=0.)&&(fabs(linEq->solution[4+i]/fitpar.fitParVal[6+(3*peakNum)+parNum]) > convergenceFrac)){
-              conv=0;
-            }
-            fitpar.fitParVal[6+(3*peakNum)+parNum] += linEq->solution[4+i];
-            //printf("par %i: %f\n",6+i,fitpar.fitParVal[6+i]);
-          }
-        }else{
-          for(i=0;i<(3*fitpar.numFitPeaks);i++){
-            if((fitpar.fitParVal[6+i]!=0.)&&(fabs(linEq->solution[3+i]/fitpar.fitParVal[6+i]) > convergenceFrac)){
-              //printf("frac %i: %f\n",3+i,fabs(linEq->solution[3+i]/fitpar.fitParVal[6+i]));
-              conv=0;
-            }
-            fitpar.fitParVal[6+i] += linEq->solution[3+i];
-            //printf("par %i: %f\n",6+i,fitpar.fitParVal[6+i]);
-          }
-        }
-      }else if(fitpar.fitType == 1){
-        //skewed Gaussian fit
-        for(i=0;i<5;i++){
-          if((fitpar.fitParVal[i]!=0.)&&(fabs(linEq->solution[i]/fitpar.fitParVal[i]) > convergenceFrac)){
-            //printf("frac %i: %f\n",i,fabs(linEq->solution[i]/fitpar.fitParVal[i]));
+      }
+      if(fitpar.fixRelativeWidths){
+        for(i=0;i<fitpar.numFitPeaks;i++){
+          if((fitpar.fitParVal[8+(3*i)]!=0.)&&(fabs(fitpar.relWidths[i]*linEq->solution[5]/fitpar.fitParVal[8+(3*i)]) > convergenceFrac)){
             conv=0;
           }
-          fitpar.fitParVal[i] += linEq->solution[i];
-          //printf("par %i: %f\n",i,fitpar.fitParVal[i]);
+          fitpar.fitParVal[8+(3*i)] += fitpar.relWidths[i]*linEq->solution[5];
+          //printf("par %i: %f\n",6+i,fitpar.fitParVal[6+i]);
         }
-        if(fitpar.fixRelativeWidths){
-          for(i=0;i<fitpar.numFitPeaks;i++){
-            if((fitpar.fitParVal[8+(3*i)]!=0.)&&(fabs(fitpar.relWidths[i]*linEq->solution[5]/fitpar.fitParVal[8+(3*i)]) > convergenceFrac)){
-              conv=0;
-            }
-            fitpar.fitParVal[8+(3*i)] += fitpar.relWidths[i]*linEq->solution[5];
-            //printf("par %i: %f\n",6+i,fitpar.fitParVal[6+i]);
+        for(i=0;i<(2*fitpar.numFitPeaks);i++){
+          peakNum = (int)(i/2);
+          parNum = i % 2;
+          if((fitpar.fitParVal[6+(3*peakNum)+parNum]!=0.)&&(fabs(linEq->solution[6+i]/fitpar.fitParVal[6+(3*peakNum)+parNum]) > convergenceFrac)){
+            conv=0;
           }
-          for(i=0;i<(2*fitpar.numFitPeaks);i++){
-            peakNum = (int)(i/2);
-            parNum = i % 2;
-            if((fitpar.fitParVal[6+(3*peakNum)+parNum]!=0.)&&(fabs(linEq->solution[6+i]/fitpar.fitParVal[6+(3*peakNum)+parNum]) > convergenceFrac)){
-              conv=0;
-            }
-            fitpar.fitParVal[6+(3*peakNum)+parNum] += linEq->solution[6+i];
-            //printf("par %i: %f\n",6+i,fitpar.fitParVal[6+i]);
+          fitpar.fitParVal[6+(3*peakNum)+parNum] += linEq->solution[6+i];
+          //printf("par %i: %f\n",6+i,fitpar.fitParVal[6+i]);
+        }
+      }else{
+        for(i=0;i<(3*fitpar.numFitPeaks);i++){
+          if((fitpar.fitParVal[6+i]!=0.)&&(fabs(linEq->solution[5+i]/fitpar.fitParVal[6+i]) > convergenceFrac)){
+            //printf("frac %i: %f\n",3+i,fabs(linEq->solution[5+i]/fitpar.fitParVal[6+i]));
+            conv=0;
           }
-        }else{
-          for(i=0;i<(3*fitpar.numFitPeaks);i++){
-            if((fitpar.fitParVal[6+i]!=0.)&&(fabs(linEq->solution[5+i]/fitpar.fitParVal[6+i]) > convergenceFrac)){
-              //printf("frac %i: %f\n",3+i,fabs(linEq->solution[5+i]/fitpar.fitParVal[6+i]));
-              conv=0;
-            }
-            fitpar.fitParVal[6+i] += linEq->solution[5+i];
-            //printf("par %i: %f\n",6+i,fitpar.fitParVal[6+i]);
-          }
+          fitpar.fitParVal[6+i] += linEq->solution[5+i];
+          //printf("par %i: %f\n",6+i,fitpar.fitParVal[6+i]);
         }
       }
 
@@ -1018,6 +907,8 @@ int startGausFit(){
   int i;
   fitpar.errFound = 0;
 
+  memset(fitpar.fixPar,0,sizeof(fitpar.fixPar));
+
   //width parameters
   fitpar.widthFGH[0] = 3.;
   fitpar.widthFGH[1] = 2.;
@@ -1064,12 +955,14 @@ int startGausFit(){
     case 1:
       //skewed Guassian
       fitpar.fitParVal[3] = 0.1;
-      fitpar.fitParVal[4] = 5.0;
+      fitpar.fitParVal[4] = 10.0;
       break;
     case 0:
       //Gaussian
       fitpar.fitParVal[3] = 0.0; //unused in this fit
       fitpar.fitParVal[4] = 0.0; //unused in this fit
+      fitpar.fixPar[3] = 1; //fix unused parameter at zero
+      fitpar.fixPar[4] = 1; //fix unused parameter at zero
       break;
     default:
       break;

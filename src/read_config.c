@@ -102,6 +102,11 @@ int readConfigFile(FILE *file)
 				if(ucVal <= 2)
 					fitpar.weightMode = ucVal;
 			}
+			if(strcmp(par,"fit_type") == 0){
+				unsigned char ucVal = (unsigned char)atoi(val);
+				if(ucVal <= 1)
+					fitpar.fitType = ucVal;
+			}
 			if(strcmp(par,"autozoom") == 0){
 				if(strcmp(val,"yes") == 0){
 					guiglobals.autoZoom = 1;
@@ -207,6 +212,11 @@ int writeConfigFile(FILE *file)
 		fprintf(file,"popup_fit_results=yes\n");
 	}else{
 		fprintf(file,"popup_fit_results=no\n");
+	}
+	if(fitpar.fitType == 0){
+		fprintf(file,"fit_type=0\n");
+	}else if(fitpar.fitType == 1){
+		fprintf(file,"fit_type=1\n");
 	}
 	if(fitpar.weightMode == 0){
 		fprintf(file,"fit_weight_mode=0\n");
