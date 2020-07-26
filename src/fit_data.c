@@ -154,9 +154,9 @@ long double evalGaussTerm(int peakNum, double xval){
 long double evalSkewedGaussTerm(const int peakNum, const double xval){
   long double evalG;
   if(fitpar.fixRelativeWidths){
-    evalG = expl((xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4]) * erfcl( (xval-fitpar.fitParVal[7+(3*peakNum)])/(1.4142*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]) + (fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.4142*fitpar.fitParVal[4]) ) ;
+    evalG = expl((xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4]) * erfcl( (xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]) + (fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.41421356*fitpar.fitParVal[4]) ) ;
   }else{
-    evalG = expl((xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4]) * erfcl( (xval-fitpar.fitParVal[7+(3*peakNum)])/(1.4142*fitpar.fitParVal[8+(3*peakNum)]) + fitpar.fitParVal[8+(3*peakNum)]/(1.4142*fitpar.fitParVal[4]) ) ;
+    evalG = expl((xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4]) * erfcl( (xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8+(3*peakNum)]) + fitpar.fitParVal[8+(3*peakNum)]/(1.41421356*fitpar.fitParVal[4]) ) ;
   }
   //printf("peakNum: %i, xval: %f, pos: %f, width: %f, eval: %f\n",peakNum,xval,fitpar.fitParVal[7+(3*peakNum)],fitpar.fitParVal[8+(3*peakNum)],evalG);
   return evalG;
@@ -167,9 +167,9 @@ long double evalSkewedGaussTerm(const int peakNum, const double xval){
 long double evalGaussTermDerivative(const int peakNum, const double xval, const int derPar){
   long double evalGDer = evalGaussTerm(peakNum,xval);
   switch (derPar){
-    case 4:
+    /*case 4:
       evalGDer *= 0.0; //no skewness in symmetric Gaussian
-      break;
+      break;*/
     case 3:
       evalGDer *= -1.0*fitpar.fitParVal[6+(3*peakNum)];
       break;
@@ -209,10 +209,10 @@ long double evalSkewedGaussTermDerivative(const int peakNum, const double xval, 
       evalGDer *= fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]*(xval-fitpar.fitParVal[7+(3*peakNum)])*evalSkewedGaussTerm(peakNum,xval)/(fitpar.fitParVal[4]*fitpar.fitParVal[4]);
       evalGDerT2 = 2.0*fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]/(2.5066*fitpar.fitParVal[4]*fitpar.fitParVal[4]);
       if(fitpar.fixRelativeWidths){
-        evalGDerT2 *= expl( ((xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4]) - pow( ((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.4142*fitpar.fitParVal[8]*fitpar.relWidths[peakNum])) + ((fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.4142*fitpar.fitParVal[4])),2.0) ) ;
+        evalGDerT2 *= expl( ((xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4]) - pow( ((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8]*fitpar.relWidths[peakNum])) + ((fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.41421356*fitpar.fitParVal[4])),2.0) ) ;
         evalGDerT2 *= fitpar.fitParVal[8]*fitpar.relWidths[peakNum];
       }else{
-        evalGDerT2 *= expl( ((xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4]) - pow( ((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.4142*fitpar.fitParVal[8+(3*peakNum)])) + ((fitpar.fitParVal[8+(3*peakNum)])/(1.4142*fitpar.fitParVal[4])),2.0) ) ;
+        evalGDerT2 *= expl( ((xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4]) - pow( ((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8+(3*peakNum)])) + ((fitpar.fitParVal[8+(3*peakNum)])/(1.41421356*fitpar.fitParVal[4])),2.0) ) ;
         evalGDerT2 *= fitpar.fitParVal[8+(3*peakNum)];
       }
       evalGDer = evalGDerT2 - evalGDer;
@@ -223,21 +223,21 @@ long double evalSkewedGaussTermDerivative(const int peakNum, const double xval, 
     case 2:
       evalGDer *= 2.0*fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]/1.7725;
       if(fitpar.fixRelativeWidths){
-        evalGDer *= expl( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - pow((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.4142*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]) + (fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.4142*fitpar.fitParVal[4]),2.0) ) ;
-        evalGDer *= ( (1.0/(1.4142*fitpar.fitParVal[4])) - (xval-fitpar.fitParVal[7+(3*peakNum)])/(1.4142*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]) );
+        evalGDer *= expl( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - pow((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]) + (fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.41421356*fitpar.fitParVal[4]),2.0) ) ;
+        evalGDer *= ( (1.0/(1.41421356*fitpar.fitParVal[4])) - (xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]) );
       }else{
-        evalGDer *= expl( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - pow((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.4142*fitpar.fitParVal[8+(3*peakNum)]) + (fitpar.fitParVal[8+(3*peakNum)])/(1.4142*fitpar.fitParVal[4]),2.0) ) ;
-        evalGDer *= ( (1.0/(1.4142*fitpar.fitParVal[4])) - (xval-fitpar.fitParVal[7+(3*peakNum)])/(1.4142*fitpar.fitParVal[8+(3*peakNum)]*fitpar.fitParVal[8+(3*peakNum)]) );
+        evalGDer *= expl( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - pow((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8+(3*peakNum)]) + (fitpar.fitParVal[8+(3*peakNum)])/(1.41421356*fitpar.fitParVal[4]),2.0) ) ;
+        evalGDer *= ( (1.0/(1.41421356*fitpar.fitParVal[4])) - (xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8+(3*peakNum)]*fitpar.fitParVal[8+(3*peakNum)]) );
       }
       break;
     case 1:
       evalGDer *= fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]*evalSkewedGaussTerm(peakNum,xval)/fitpar.fitParVal[4];
       evalGDerT2 = 2.0*fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]/2.5066;
       if(fitpar.fixRelativeWidths){
-        evalGDerT2 *= expl( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - pow((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.4142*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]) + (fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.4142*fitpar.fitParVal[4]),2.0) ) ;
+        evalGDerT2 *= expl( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - pow((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]) + (fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.41421356*fitpar.fitParVal[4]),2.0) ) ;
         evalGDerT2 /= fitpar.fitParVal[8]*fitpar.relWidths[peakNum];
       }else{
-        evalGDerT2 *= expl( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - pow((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.4142*fitpar.fitParVal[8+(3*peakNum)]) + (fitpar.fitParVal[8+(3*peakNum)])/(1.4142*fitpar.fitParVal[4]),2.0) ) ;
+        evalGDerT2 *= expl( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - pow((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8+(3*peakNum)]) + (fitpar.fitParVal[8+(3*peakNum)])/(1.41421356*fitpar.fitParVal[4]),2.0) ) ;
         evalGDerT2 /= fitpar.fitParVal[8+(3*peakNum)];
       }
       evalGDer = evalGDerT2 - evalGDer;
@@ -260,11 +260,11 @@ long double evalAllTermDerivative(const int peakNum, const double xval, const in
   return val;
 }
 
-long double evalFitBG(const double xval){
+long double evalFitBG(const long double xval){
   return fitpar.fitParVal[0] + xval*fitpar.fitParVal[1] + xval*xval*fitpar.fitParVal[2];
 }
 
-long double evalFit(const double xval){
+long double evalFit(const long double xval){
   int i;
   long double val = evalFitBG(xval);
   for(i=0;i<fitpar.numFitPeaks;i++){
@@ -276,7 +276,7 @@ long double evalFit(const double xval){
   return val;
 }
 
-long double evalFitOnePeak(const double xval, const int peak){
+long double evalFitOnePeak(const long double xval, const int peak){
   if(peak>=fitpar.numFitPeaks)
     return 0.0;
   long double val = evalFitBG(xval);
@@ -458,6 +458,10 @@ int setupFitSums(lin_eq_type *linEq, const double flambda){
       weight = 1.;
     }
 
+    if(weight < 0.){
+      weight=fabsl(weight);
+    }
+
     if(weight != 0){
 
       //parameters 0-2: background (always used)
@@ -477,7 +481,7 @@ int setupFitSums(lin_eq_type *linEq, const double flambda){
         betaDerSum = 0.;
         for(j=0;j<fitpar.numFitPeaks;j++){
           rDerSum += evalAllTermDerivative(j,xval,3);
-          betaDerSum += evalAllTermDerivative(j,xval,4);
+          betaDerSum += evalSkewedGaussTermDerivative(j,xval,4);
         }
         linEq->matrix[0][3] += rDerSum/weight;
         linEq->matrix[1][3] += xval*rDerSum/weight;
@@ -558,7 +562,7 @@ int setupFitSums(lin_eq_type *linEq, const double flambda){
   //mirror the matrix
   for(i=0;i<linEq->dim;i++){
     for(j=(i+1);j<linEq->dim;j++){
-      linEq->matrix[i][j] = linEq->matrix[j][i];
+      linEq->matrix[j][i] = linEq->matrix[i][j];
     }
   }
 
