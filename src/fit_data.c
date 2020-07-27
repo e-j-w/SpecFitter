@@ -176,17 +176,17 @@ long double evalGaussTermDerivative(const int peakNum, const double xval, const 
     case 2:
       evalGDer *= fitpar.fitParVal[6+(3*peakNum)]*(1.0 - fitpar.fitParVal[3]);
       if(fitpar.fixRelativeWidths){
-        evalGDer *= pow((xval-fitpar.fitParVal[7+(3*peakNum)]),2.0)/(pow(fitpar.fitParVal[8],3.0)*pow(fitpar.relWidths[peakNum],2.0));
+        evalGDer *= powl((xval-fitpar.fitParVal[7+(3*peakNum)]),2.0)/(powl(fitpar.fitParVal[8],3.0)*powl(fitpar.relWidths[peakNum],2.0));
       }else{
-        evalGDer *= pow((xval-fitpar.fitParVal[7+(3*peakNum)]),2.0)/pow(fitpar.fitParVal[8+(3*peakNum)],3.0);
+        evalGDer *= powl((xval-fitpar.fitParVal[7+(3*peakNum)]),2.0)/powl(fitpar.fitParVal[8+(3*peakNum)],3.0);
       }
       break;
     case 1:
       evalGDer *= fitpar.fitParVal[6+(3*peakNum)]*(1.0 - fitpar.fitParVal[3]);
       if(fitpar.fixRelativeWidths){
-        evalGDer *= (xval-fitpar.fitParVal[7+(3*peakNum)])/pow(fitpar.fitParVal[8]*fitpar.relWidths[peakNum],2.0);
+        evalGDer *= (xval-fitpar.fitParVal[7+(3*peakNum)])/powl(fitpar.fitParVal[8]*fitpar.relWidths[peakNum],2.0);
       }else{
-        evalGDer *= (xval-fitpar.fitParVal[7+(3*peakNum)])/pow(fitpar.fitParVal[8+(3*peakNum)],2.0);
+        evalGDer *= (xval-fitpar.fitParVal[7+(3*peakNum)])/powl(fitpar.fitParVal[8+(3*peakNum)],2.0);
       }
       break;
     case 0:
@@ -203,47 +203,47 @@ long double evalGaussTermDerivative(const int peakNum, const double xval, const 
 //derPar: 0=amplitude, 1=centroid, 2=width, 3=R, 4=beta
 long double evalSkewedGaussTermDerivative(const int peakNum, const double xval, const int derPar){
   long double evalGDer = 1.0;
-  long double evalGDerT2 = 1.0;
+  long double evalGDerT2;
   switch (derPar){
     case 4:
-      evalGDer *= fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]*(xval-fitpar.fitParVal[7+(3*peakNum)])*evalSkewedGaussTerm(peakNum,xval)/(fitpar.fitParVal[4]*fitpar.fitParVal[4]);
+      evalGDer = fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]*(xval-fitpar.fitParVal[7+(3*peakNum)])*evalSkewedGaussTerm(peakNum,xval)/(fitpar.fitParVal[4]*fitpar.fitParVal[4]);
       evalGDerT2 = 2.0*fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]/(2.5066*fitpar.fitParVal[4]*fitpar.fitParVal[4]);
       if(fitpar.fixRelativeWidths){
-        evalGDerT2 *= expl( ((xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4]) - pow( ((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8]*fitpar.relWidths[peakNum])) + ((fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.41421356*fitpar.fitParVal[4])),2.0) ) ;
+        evalGDerT2 *= expl( ((xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4]) - powl( ((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8]*fitpar.relWidths[peakNum])) + ((fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.41421356*fitpar.fitParVal[4])),2.0) ) ;
         evalGDerT2 *= fitpar.fitParVal[8]*fitpar.relWidths[peakNum];
       }else{
-        evalGDerT2 *= expl( ((xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4]) - pow( ((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8+(3*peakNum)])) + ((fitpar.fitParVal[8+(3*peakNum)])/(1.41421356*fitpar.fitParVal[4])),2.0) ) ;
+        evalGDerT2 *= expl( ((xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4]) - powl( ((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8+(3*peakNum)])) + ((fitpar.fitParVal[8+(3*peakNum)])/(1.41421356*fitpar.fitParVal[4])),2.0) ) ;
         evalGDerT2 *= fitpar.fitParVal[8+(3*peakNum)];
       }
       evalGDer = evalGDerT2 - evalGDer;
       break;
     case 3:
-      evalGDer *= fitpar.fitParVal[6+(3*peakNum)]*evalSkewedGaussTerm(peakNum,xval);
+      evalGDer = fitpar.fitParVal[6+(3*peakNum)]*evalSkewedGaussTerm(peakNum,xval);
       break;
     case 2:
-      evalGDer *= 2.0*fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]/1.7725;
+      evalGDer = -2.0*fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]/1.7725;
       if(fitpar.fixRelativeWidths){
-        evalGDer *= expl( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - pow((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]) + (fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.41421356*fitpar.fitParVal[4]),2.0) ) ;
+        evalGDer *= expl( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - powl((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]) + (fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.41421356*fitpar.fitParVal[4]),2.0) ) ;
         evalGDer *= ( (1.0/(1.41421356*fitpar.fitParVal[4])) - (xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]) );
       }else{
-        evalGDer *= expl( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - pow((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8+(3*peakNum)]) + (fitpar.fitParVal[8+(3*peakNum)])/(1.41421356*fitpar.fitParVal[4]),2.0) ) ;
+        evalGDer *= expl( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - powl((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8+(3*peakNum)]) + (fitpar.fitParVal[8+(3*peakNum)])/(1.41421356*fitpar.fitParVal[4]),2.0) ) ;
         evalGDer *= ( (1.0/(1.41421356*fitpar.fitParVal[4])) - (xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8+(3*peakNum)]*fitpar.fitParVal[8+(3*peakNum)]) );
       }
       break;
     case 1:
-      evalGDer *= fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]*evalSkewedGaussTerm(peakNum,xval)/fitpar.fitParVal[4];
+      evalGDer = fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]*evalSkewedGaussTerm(peakNum,xval)/fitpar.fitParVal[4];
       evalGDerT2 = 2.0*fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]/2.5066;
       if(fitpar.fixRelativeWidths){
-        evalGDerT2 *= expl( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - pow((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]) + (fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.41421356*fitpar.fitParVal[4]),2.0) ) ;
-        evalGDerT2 /= fitpar.fitParVal[8]*fitpar.relWidths[peakNum];
+        evalGDerT2 *= expl( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - powl((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]) + (fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.41421356*fitpar.fitParVal[4]),2.0) ) ;
+        evalGDerT2 = evalGDerT2/(fitpar.fitParVal[8]*fitpar.relWidths[peakNum]);
       }else{
-        evalGDerT2 *= expl( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - pow((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8+(3*peakNum)]) + (fitpar.fitParVal[8+(3*peakNum)])/(1.41421356*fitpar.fitParVal[4]),2.0) ) ;
-        evalGDerT2 /= fitpar.fitParVal[8+(3*peakNum)];
+        evalGDerT2 *= expl( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - powl((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8+(3*peakNum)]) + (fitpar.fitParVal[8+(3*peakNum)])/(1.41421356*fitpar.fitParVal[4]),2.0) ) ;
+        evalGDerT2 = evalGDerT2/fitpar.fitParVal[8+(3*peakNum)];
       }
       evalGDer = evalGDerT2 - evalGDer;
       break;
     case 0:
-      evalGDer *= fitpar.fitParVal[3]*evalSkewedGaussTerm(peakNum,xval);
+      evalGDer = fitpar.fitParVal[3]*evalSkewedGaussTerm(peakNum,xval);
       break;
     default:
       printf("WARNING: invalid skewed Gaussian derivative parameter (%i).\n",derPar);
@@ -376,7 +376,7 @@ unsigned char getParameterErrors(lin_eq_type *linEq){
   if(linEq->dim >= 5){
     for(i=0;i<5;i++){
       if(fitpar.fixPar[i] == 0){
-        fitpar.fitParErr[i]=sqrt((double)(linEq->inv_matrix[i][i]*linEq->mat_weights[i][i]));
+        fitpar.fitParErr[i]=sqrtl(linEq->inv_matrix[i][i]*linEq->mat_weights[i][i]);
       }
     }
   }
@@ -386,9 +386,9 @@ unsigned char getParameterErrors(lin_eq_type *linEq){
       printf("WARNING: trying to get parameter errors without all parameters in use!\n");
     }
     for(i=0;i<fitpar.numFitPeaks;i++){
-      fitpar.fitParErr[6+(3*i)] = sqrt((double)(linEq->inv_matrix[6+(2*i)][6+(2*i)]*linEq->mat_weights[6+(2*i)][6+(2*i)]));
-      fitpar.fitParErr[7+(3*i)] = sqrt((double)(linEq->inv_matrix[7+(2*i)][7+(2*i)]*linEq->mat_weights[7+(2*i)][7+(2*i)]));
-      fitpar.fitParErr[8+(3*i)] = fitpar.relWidths[i]*sqrt((double)(linEq->inv_matrix[5][5]*linEq->mat_weights[5][5]));
+      fitpar.fitParErr[6+(3*i)] = sqrtl(linEq->inv_matrix[6+(2*i)][6+(2*i)]*linEq->mat_weights[6+(2*i)][6+(2*i)]);
+      fitpar.fitParErr[7+(3*i)] = sqrtl(linEq->inv_matrix[7+(2*i)][7+(2*i)]*linEq->mat_weights[7+(2*i)][7+(2*i)]);
+      fitpar.fitParErr[8+(3*i)] = fitpar.relWidths[i]*sqrtl(linEq->inv_matrix[5][5]*linEq->mat_weights[5][5]);
     }
   }else{
     //Calculate uncertainties from linear equation solution
@@ -396,7 +396,7 @@ unsigned char getParameterErrors(lin_eq_type *linEq){
       printf("WARNING: trying to get parameter errors without all parameters in use!\n");
     }
     for(i=0;i<(3*fitpar.numFitPeaks);i++)
-      fitpar.fitParErr[6+i]=sqrt((double)(linEq->inv_matrix[5+i][5+i]*linEq->mat_weights[5+i][5+i]));
+      fitpar.fitParErr[6+i]=sqrtl(linEq->inv_matrix[5+i][5+i]*linEq->mat_weights[5+i][5+i]);
   }
 
   //add Guassian parameter errors in quadrature against Cramer–Rao lower bounds
@@ -405,13 +405,13 @@ unsigned char getParameterErrors(lin_eq_type *linEq){
   for(i=0;i<fitpar.numFitPeaks;i++){
     //Cramer–Rao lower bound variances
     //(see https://en.wikipedia.org/wiki/Gaussian_function#Gaussian_profile_estimation for an explanation)
-    double aCRLB = fabs(3.0*fitpar.fitParVal[6+(3*i)]/(2.0*sqrt(2.0*G_PI)*fitpar.fitParVal[8+(3*i)]));
-    double pCRLB = fabs(fitpar.fitParVal[8+(3*i)]/(sqrt(2.0*G_PI)*fitpar.fitParVal[6+(3*i)]));
-    double wCRLB = fabs(fitpar.fitParVal[8+(3*i)]/(2.0*sqrt(2.0*G_PI)*fitpar.fitParVal[6+(3*i)]));
+    long double aCRLB = fabsl(3.0*fitpar.fitParVal[6+(3*i)]/(2.0*sqrt(2.0*G_PI)*fitpar.fitParVal[8+(3*i)]));
+    long double pCRLB = fabsl(fitpar.fitParVal[8+(3*i)]/(sqrt(2.0*G_PI)*fitpar.fitParVal[6+(3*i)]));
+    long double wCRLB = fabsl(fitpar.fitParVal[8+(3*i)]/(2.0*sqrt(2.0*G_PI)*fitpar.fitParVal[6+(3*i)]));
 
-    fitpar.fitParErr[6+(3*i)] = sqrt(fitpar.fitParErr[6+(3*i)]*fitpar.fitParErr[6+(3*i)] + aCRLB);
-    fitpar.fitParErr[7+(3*i)] = sqrt(fitpar.fitParErr[7+(3*i)]*fitpar.fitParErr[7+(3*i)] + pCRLB);
-    fitpar.fitParErr[8+(3*i)] = sqrt(fitpar.fitParErr[8+(3*i)]*fitpar.fitParErr[8+(3*i)] + wCRLB);
+    fitpar.fitParErr[6+(3*i)] = sqrtl(fitpar.fitParErr[6+(3*i)]*fitpar.fitParErr[6+(3*i)] + aCRLB);
+    fitpar.fitParErr[7+(3*i)] = sqrtl(fitpar.fitParErr[7+(3*i)]*fitpar.fitParErr[7+(3*i)] + pCRLB);
+    fitpar.fitParErr[8+(3*i)] = sqrtl(fitpar.fitParErr[8+(3*i)]*fitpar.fitParErr[8+(3*i)] + wCRLB);
   }
 
   return 1;
@@ -658,7 +658,10 @@ int areParsValid(){
     }
   }
   if(fitpar.fitType == 1){
-    if((fitpar.fitParVal[3] < 0.0)||(fitpar.fitParVal[3] > 1.0)){
+    if((fitpar.fitParVal[3]!=fitpar.fitParVal[3])||(fitpar.fitParVal[4]!=fitpar.fitParVal[4])){
+      return 0;
+    }
+    if((fitpar.fitParVal[3] < -1.0)||(fitpar.fitParVal[3] > 1.0)){
       return 0;
     }
     if(fitpar.fitParVal[4] < 0.0){
@@ -776,10 +779,7 @@ int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFra
         //revert fit parameters
         //printf("Invalid parameters!\n");
         memcpy(fitpar.fitParVal,prevFitParVal,sizeof(fitpar.fitParVal));
-      }
-
-      //check convergence condition
-      if(conv == 1){
+      }else if(conv == 1){ //check convergence condition
         return -1;
       }
       //getc(stdin);

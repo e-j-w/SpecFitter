@@ -12,7 +12,33 @@ A spectrum/histogram viewer and fitter app, with functionality inspired by the `
 
 ## Features
 
-### Supported file formats
+### Display data
+
+* Import data from one or multiple [files](#filecompat) and plot multiple spectra simultaneously:
+    * Sum spectra together.
+    * Overlay spectra, with either common or independent scaling on the y-axis.
+    * Show spectra in a "stacked" view (tiled vertically with a common x-axis).
+* Zoom and pan using the mouse (mouse wheel, click and drag).
+* Display in linear or logarithmic scale on the y-axis.
+* Calibrate spectra (with constant, linear, quadratic terms) to express bins in desired units.
+* Rescale spectra, to perform operations such as background subtraction.
+* Rebin spectra, with results displayed in real time.
+
+### Fit data
+
+* Fit multiple Gaussian peak shapes on quadratic background (iterative least-squares fitter).
+* Relative peak widths may be fixed (recommended for gamma-ray spectroscopy) or allowed to freely vary.
+* Weight by the data (taking background subtraction into account) or by the fit function.  Or don't weight the fit at all.
+
+### Manage data
+
+* Rename, or delete spectra from the opened session.
+* Store custom views of multiple spectra using any of the available plotting modes.
+* Double click anywhere on a plot to write/edit a comment there.
+* The full session including comments and custom views can be saved to disk using the **.jf3** (compressed) or **.txt** (ACSII) file formats.
+* Export image files (.png format) at arbitrary resolution for use in presentations and publications.
+
+### Supported file formats<a name="filecompat"></a>
 
 #### Read/write support
 
@@ -31,32 +57,6 @@ A spectrum/histogram viewer and fitter app, with functionality inspired by the `
 Some sample files that the program can open are available [here](https://mega.nz/#!yUtRBAYR!ATst0ngazksR-g-P-Qdsw2rd4lpHJXBpd6nJq6pW77I) (.zip archive).
 
 Conversion codes for some of the above data formats are available in the [FileConvTools](https://github.com/e-j-w/FileConvTools) repository.
-
-### Data display options
-
-* Import spectra from multiple files and plot multiple spectra simultaneously:
-    * Sum spectra together.
-    * Overlay spectra, with either common or independent scaling on the y-axis.
-    * Show spectra in a "stacked" view (tiled vertically with a common x-axis).
-* Zoom and pan using the mouse (mouse wheel, click and drag).
-* Display in linear or logarithmic scale on the y-axis.
-* Calibrate spectra (with constant, linear, quadratic terms) to express bins in desired units.
-* Rescale spectra, to perform operations such as background subtraction.
-* Rebin spectra, with results displayed in real time.
-
-### Peak fitting
-
-* Fit multiple Gaussian peak shapes on quadratic background (iterative least-squares fitter).
-* Relative peak widths may be fixed (recommended for gamma-ray spectroscopy) or allowed to freely vary.
-* Weight by the data (taking background subtraction into account) or by the fit function.  Or don't weight the fit at all.
-
-### Data management
-
-* Rename, or delete spectra from the opened session.
-* Store custom views of multiple spectra using any of the available plotting modes.
-* Double click anywhere on a plot to write/edit a comment there.
-* The full session including comments and custom views can be saved to disk using the **.jf3** (compressed) or **.txt** (ACSII) file formats.
-* Export image files (.png format) at arbitrary resolution for use in presentations and publications.
 
 ## Getting started
 
