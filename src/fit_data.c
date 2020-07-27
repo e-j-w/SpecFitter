@@ -682,7 +682,7 @@ int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFra
   double iterStartChisq, iterEndChisq;
   double flamda = .001;
 
-  double prevFitParVal[6+(3*MAX_FIT_PK)]; //storage for previous iteration fit parameters
+  long double prevFitParVal[6+(3*MAX_FIT_PK)]; //storage for previous iteration fit parameters
 
   while(iterCurrent < numIter){
 

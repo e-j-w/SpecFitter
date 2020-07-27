@@ -221,8 +221,8 @@ struct {
   //6, 9, 12 ...  : Peak amplitude(s)
   //7, 10, 13 ... : Peak position(s)
   //8, 11, 14 ... : Peak width(s)
-  double fitParVal[6+(3*MAX_FIT_PK)]; //parameter values found by the fitter
-  double fitParErr[6+(3*MAX_FIT_PK)]; //errors in parameter values
+  long double fitParVal[6+(3*MAX_FIT_PK)]; //parameter values found by the fitter
+  long double fitParErr[6+(3*MAX_FIT_PK)]; //errors in parameter values
   unsigned char fixPar[6+(3*MAX_FIT_PK)]; //0=don't fix parameter, 1=fix at current value
 } fitpar;
 

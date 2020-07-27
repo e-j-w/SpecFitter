@@ -652,7 +652,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
             getFormattedValAndUncertainty(2.35482*fitpar.fitParVal[8+(3*drawing.highlightedPeak)],2.35482*fitpar.fitParErr[8+(3*drawing.highlightedPeak)],fitParStr[2],50,1,guiglobals.roundErrors);
             snprintf(statusBarLabel,256,"Area: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
           }else{
-            snprintf(statusBarLabel,256,"Area: %0.3f, Centroid: %0.3f, FWHM: %0.3f",evalPeakArea(drawing.highlightedPeak),fitpar.fitParVal[7+(3*drawing.highlightedPeak)],2.35482*fitpar.fitParVal[8+(3*drawing.highlightedPeak)]);
+            snprintf(statusBarLabel,256,"Area: %0.3f, Centroid: %0.3Lf, FWHM: %0.3Lf",evalPeakArea(drawing.highlightedPeak),fitpar.fitParVal[7+(3*drawing.highlightedPeak)],2.35482*fitpar.fitParVal[8+(3*drawing.highlightedPeak)]);
           }
         }
 
