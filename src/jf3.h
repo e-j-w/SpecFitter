@@ -41,7 +41,6 @@ GtkFileChooser *file_open_dialog, *file_save_dialog;
 GtkFileFilter *file_filter;
 GtkAccelGroup *main_window_accelgroup;
 GtkBox *no_sp_box;
-GtkImage *display_button_icon;
 GtkImage *no_sp_image;
 //display menu
 GtkSpinButton *spectrum_selector;
@@ -123,7 +122,6 @@ GtkModelButton *shortcuts_button;
 GtkShortcutsWindow *shortcuts_window;
 //help window
 GtkWindow *help_window;
-GtkImage *display_button_icon1, *display_button_icon2;
 //builder
 GtkBuilder *builder;
 //custom icons
@@ -223,6 +221,6 @@ struct {
   //8, 11, 14 ... : Peak width(s)
   long double fitParVal[6+(3*MAX_FIT_PK)]; //parameter values found by the fitter
   long double fitParErr[6+(3*MAX_FIT_PK)]; //errors in parameter values
-  unsigned char fixPar[6+(3*MAX_FIT_PK)]; //0=don't fix parameter, 1=fix at current value
+  unsigned char fixPar[6+(3*MAX_FIT_PK)]; //0=don't fix parameter, 1=fix at current value, 2=fix at relative value
 } fitpar;
 

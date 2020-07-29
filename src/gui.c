@@ -26,14 +26,8 @@ void setupUITheme(){
   //set whether dark theme is preferred
   g_object_set(gtk_settings_get_default(),"gtk-application-prefer-dark-theme", guiglobals.preferDarkTheme, NULL);
   if(guiglobals.preferDarkTheme){
-    gtk_image_set_from_pixbuf(display_button_icon, spIconPixbufDark);
-    gtk_image_set_from_pixbuf(display_button_icon1, spIconPixbufDark);
-    gtk_image_set_from_pixbuf(display_button_icon2, spIconPixbufDark);
     gtk_image_set_from_pixbuf(no_sp_image, spIconPixbufDark);
   }else{
-    gtk_image_set_from_pixbuf(display_button_icon, spIconPixbuf);
-    gtk_image_set_from_pixbuf(display_button_icon1, spIconPixbuf);
-    gtk_image_set_from_pixbuf(display_button_icon2, spIconPixbuf);
     gtk_image_set_from_pixbuf(no_sp_image, spIconPixbuf);
   }
 
@@ -43,13 +37,8 @@ void setupUITheme(){
   settings = gtk_settings_get_default();
   g_object_get(settings, "gtk-theme-name", &themeName, NULL);
   //printf("Theme: %s\n",themeName);
-  if((strcmp(themeName,"Yaru")==0)||(strcmp(themeName,"Yaru-dark")==0)||(strcmp(themeName,"Adwaita-dark")==0)){
-    gtk_image_set_from_pixbuf(display_button_icon, spIconPixbufDark);
-    if((strcmp(themeName,"Yaru-dark")==0)||(strcmp(themeName,"Adwaita-dark")==0)){
-      gtk_image_set_from_pixbuf(display_button_icon1, spIconPixbufDark);
-      gtk_image_set_from_pixbuf(display_button_icon2, spIconPixbufDark);
-      gtk_image_set_from_pixbuf(no_sp_image, spIconPixbufDark);
-    }
+  if((strcmp(themeName,"Yaru-dark")==0)||(strcmp(themeName,"Adwaita-dark")==0)){
+    gtk_image_set_from_pixbuf(no_sp_image, spIconPixbufDark);
   }
 
   g_free(themeName);
@@ -1874,7 +1863,6 @@ void iniitalizeUIElements(){
   save_button_png = GTK_BUTTON(gtk_builder_get_object(builder, "save_button_png"));
   help_button = GTK_BUTTON(gtk_builder_get_object(builder, "help_button"));
   display_button = GTK_BUTTON(gtk_builder_get_object(builder, "display_button"));
-  display_button_icon = GTK_IMAGE(gtk_builder_get_object(builder, "display_button_icon"));
   no_sp_image = GTK_IMAGE(gtk_builder_get_object(builder, "no_sp_image"));
   spectrum_drawing_area = GTK_WIDGET(gtk_builder_get_object(builder, "spectrumdrawingarea"));
   spectrum_drag_gesture = gtk_gesture_drag_new(spectrum_drawing_area); //without this, cannot click away from menus onto the drawing area, needs further investigation
@@ -1972,10 +1960,6 @@ void iniitalizeUIElements(){
   popup_results_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "popup_results_checkbutton"));
   animation_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "animation_checkbutton"));
   preferences_apply_button = GTK_BUTTON(gtk_builder_get_object(builder, "preferences_apply_button"));
-
-  //help window UI elements
-  display_button_icon1 = GTK_IMAGE(gtk_builder_get_object(builder, "display_button_icon1"));
-  display_button_icon2 = GTK_IMAGE(gtk_builder_get_object(builder, "display_button_icon2"));
 
   //display menu UI elements
   multiplot_button = GTK_BUTTON(gtk_builder_get_object(builder, "multiplot_button"));

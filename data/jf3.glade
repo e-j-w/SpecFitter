@@ -1606,7 +1606,7 @@ and binning factors will be preserved.</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="halign">start</property>
-                    <property name="icon_name">emblem-photos-symbolic</property>
+                    <property name="icon_name">document-edit-symbolic</property>
                   </object>
                 </child>
               </object>
@@ -1702,7 +1702,7 @@ and binning factors will be preserved.</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="halign">start</property>
-                    <property name="icon_name">emblem-photos-symbolic</property>
+                    <property name="icon_name">document-edit-symbolic</property>
                   </object>
                 </child>
               </object>
@@ -3320,7 +3320,7 @@ Weight by fit function - Weights are proportional to the fit function values det
                 </child>
                 <child>
                   <object class="GtkScale" id="zoom_scale">
-                    <property name="width_request">300</property>
+                    <property name="width_request">250</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="adjustment">zoom_adjustment</property>
@@ -3445,7 +3445,7 @@ Weight by fit function - Weights are proportional to the fit function values det
               <object class="GtkImage" id="display_button_icon">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="icon_name">emblem-photos-symbolic</property>
+                <property name="icon_name">document-edit-symbolic</property>
               </object>
             </child>
           </object>

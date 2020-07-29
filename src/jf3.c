@@ -1,5 +1,5 @@
 /* J. Williams, 2020 */
-// jf3 - A simple spectrum viewer app using GTK3, for gamma-ray spectroscopy or similar
+// jf3 - A spectrum viewer/analysis app using GTK3, for gamma-ray spectroscopy or similar
 
 //definitions and global variables
 #include "jf3.h"
