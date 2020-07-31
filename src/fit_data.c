@@ -408,6 +408,36 @@ unsigned char getParameterErrors(lin_eq_type *linEq){
 }
 
 
+void modifyLinEqFlambda(lin_eq_type *linEq, const double flambda){
+  int i;
+  //modify the curvature matrix
+  for(i=0;i<linEq->dim;i++){
+    linEq->matrix[i][i] = flambda + 1.0;
+  }
+
+  /*printf("\nModifying flambda to %e, matrix\n", flambda);
+  int j;
+  for(i=0;i<linEq->dim;i++){
+    for(j=0;j<linEq->dim;j++){
+      printf("%10.4Lf ",linEq->matrix[i][j]);
+    }
+    printf("\n");
+  }
+  printf("Weight Matrix\n");
+  for(i=0;i<linEq->dim;i++){
+    for(j=0;j<linEq->dim;j++){
+      printf("%10.4Lf ",linEq->mat_weights[i][j]);
+    }
+    printf("\n");
+  }
+  printf("Vector\n");
+  for(i=0;i<linEq->dim;i++){
+    printf("%10.4Lf ",linEq->vector[i]);
+  }
+  printf("\n\n");*/
+
+}
+
 //setup sums for the non-linearized fit
 //using a CURFIT-like method
 //see eq. 2.4.14, 2.4.15, pg. 47 J. Wolberg 
@@ -590,10 +620,11 @@ int setupFitSums(lin_eq_type *linEq, const double flambda){
       }
       linEq->mat_weights[i][i] = 1.0/sqrt(linEq->matrix[i][i]*linEq->matrix[i][i]);
     }
-    cmatrix[i][i] = flambda + 1.0;
   }
 
   memcpy(linEq->matrix,cmatrix,sizeof(linEq->matrix));
+
+  modifyLinEqFlambda(linEq,flambda);
 
   /*printf("Matrix\n");
   for(i=0;i<linEq->dim;i++){
@@ -675,7 +706,7 @@ int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFra
   int lmCount = 0; //counter if at a chisq local minimum
 
   double iterStartChisq, iterEndChisq;
-  double flamda = .001;
+  double flambda = .001;
 
   long double prevFitParVal[6+(3*MAX_FIT_PK)]; //storage for previous iteration fit parameters
 
@@ -684,91 +715,118 @@ int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFra
     iterStartChisq = getFitChisq();
     memcpy(prevFitParVal,fitpar.fitParVal,sizeof(fitpar.fitParVal));
 
-    /*printf("\nFit iteration %i - A: %f, B: %f, C: %f\n",iterCurrent, fitpar.fitParVal[0],fitpar.fitParVal[1],fitpar.fitParVal[2]);
+    /*printf("\nFit iteration %i - A: %Lf, B: %Lf, C: %Lf\n",iterCurrent, fitpar.fitParVal[0],fitpar.fitParVal[1],fitpar.fitParVal[2]);
     for(i=0;i<fitpar.numFitPeaks;i++){
-      printf("A%i: %f, P%i: %f, W%i: %f\n",i+1,fitpar.fitParVal[6+(3*i)],i+1,fitpar.fitParVal[7+(3*i)],i+1,fitpar.fitParVal[8+(3*i)]);
+      printf("A%i: %Lf, P%i: %Lf, W%i: %Lf\n",i+1,fitpar.fitParVal[6+(3*i)],i+1,fitpar.fitParVal[7+(3*i)],i+1,fitpar.fitParVal[8+(3*i)]);
     }
     printf("chisq: %f\n",iterStartChisq);
     printf("\n");*/
 
-    if(!(setupFitSums(linEq,flamda))){
+    if(!(setupFitSums(linEq,flambda))){
       //the return value being less than the requested number of iterations indicates a failure
       return iterCurrent; 
     }
-    if(!(solve_lin_eq(linEq,1))){
-      //the return value being less than the requested number of iterations indicates a failure
-      return iterCurrent; 
-    }else{
-      iterCurrent++;
-      conv=1;
 
-      /*printf("Inv Matrix\n");
-      int j;
-      for(i=0;i<linEq->dim;i++){
-        for(j=0;j<linEq->dim;j++){
-          printf("%10.4Lf ",linEq->inv_matrix[i][j]);
+    int doneIter = 0;
+    while(doneIter != 1){
+
+      if(doneIter == -1){
+        if(flambda == 0.){
+          flambda = .001;
         }
-        printf("\n");
-      }*/
-
-      /*printf("Solution\n");
-      for(i=0;i<linEq->dim;i++){
-        printf("%10.4Lf ",linEq->solution[i]);
-      }
-      printf("\n");*/
-
-      //assign parameter values
-      for(i=0;i<linEq->dim;i++){
-        if(fitpar.fixPar[i] == 0){
-          if((fitpar.fitParVal[i]!=0.)&&(fabs(linEq->solution[i]/fitpar.fitParVal[i]) > convergenceFrac)){
-            //printf("frac %i: %f\n",i,fabs(linEq->solution[i]/fitpar.fitParVal[i]));
-            conv=0;
-          }
-          fitpar.fitParVal[i] += linEq->solution[i];
-          //printf("par %i: %f\n",i,fitpar.fitParVal[i]);
-        }
-      }
-
-      if(fitpar.fixRelativeWidths){
-        for(i=0;i<fitpar.numFitPeaks;i++){
-          if((fitpar.fitParVal[8+(3*i)]!=0.)&&(fabs(fitpar.relWidths[i]*linEq->solution[8]/fitpar.fitParVal[8+(3*i)]) > convergenceFrac)){
-            conv=0;
-          }
-          fitpar.fitParVal[8+(3*i)] += fitpar.relWidths[i]*linEq->solution[8];
-          //printf("par %i: %f\n",6+i,fitpar.fitParVal[6+i]);
-        }
-      }
-
-      //check chisq, if it increased change value of flambda and try again
-      iterEndChisq = getFitChisq();
-      //printf("Start chisq: %f, end chisq: %f\n",iterStartChisq,iterEndChisq);
-
-      if((iterEndChisq!=iterEndChisq)||((iterEndChisq > iterStartChisq)&&(iterEndChisq > 0.))){
-        if(flamda < 2.0){
-          flamda *= 2.0;
-          //revert fit parameters
-          memcpy(fitpar.fitParVal,prevFitParVal,sizeof(fitpar.fitParVal));
-        }else{
-          flamda /= 10.;
-        }
-      }else if(((iterStartChisq-iterEndChisq)/iterStartChisq) < convergenceFrac) {
-        lmCount++;
-        flamda /= 10.;
-      }else{
-        lmCount = 0;
-        flamda /= 10.;
-      }
-
-      if(areParsValid() == 0){
         //revert fit parameters
-        //printf("Invalid parameters!\n");
         memcpy(fitpar.fitParVal,prevFitParVal,sizeof(fitpar.fitParVal));
-      }else if(conv == 1){ //check convergence condition
-        return -1;
+        //modify the matrix
+        modifyLinEqFlambda(linEq,flambda);
       }
-      //getc(stdin);
+
+      if(!(solve_lin_eq(linEq,1))){
+        //the return value being less than the requested number of iterations indicates a failure
+        return iterCurrent; 
+      }else{
+        iterCurrent++;
+        conv=1;
+
+        /*printf("Inv Matrix\n");
+        int j;
+        for(i=0;i<linEq->dim;i++){
+          for(j=0;j<linEq->dim;j++){
+            printf("%10.4Lf ",linEq->inv_matrix[i][j]);
+          }
+          printf("\n");
+        }*/
+
+        /*printf("Solution\n");
+        for(i=0;i<linEq->dim;i++){
+          printf("%10.4Lf ",linEq->solution[i]);
+        }
+        printf("\n");*/
+
+        //assign parameter values
+        for(i=0;i<linEq->dim;i++){
+          if(fitpar.fixPar[i] == 0){
+            if((fitpar.fitParVal[i]!=0.)&&(fabs(linEq->solution[i]/fitpar.fitParVal[i]) > convergenceFrac)){
+              //printf("frac %i: %f\n",i,fabs(linEq->solution[i]/fitpar.fitParVal[i]));
+              conv=0;
+            }
+            fitpar.fitParVal[i] += linEq->solution[i];
+            //printf("par %i: %f\n",i,fitpar.fitParVal[i]);
+          }
+        }
+
+        if(fitpar.fixRelativeWidths){
+          for(i=0;i<fitpar.numFitPeaks;i++){
+            if((fitpar.fitParVal[8+(3*i)]!=0.)&&(fabs(fitpar.relWidths[i]*linEq->solution[8]/fitpar.fitParVal[8+(3*i)]) > convergenceFrac)){
+              conv=0;
+            }
+            fitpar.fitParVal[8+(3*i)] += fitpar.relWidths[i]*linEq->solution[8];
+            //printf("par %i: %f\n",6+i,fitpar.fitParVal[6+i]);
+          }
+        }
+
+        //check chisq, if it increased change value of flambda and try again
+        iterEndChisq = getFitChisq();
+        //printf("Start chisq: %f, end chisq: %f\n",iterStartChisq,iterEndChisq);
+
+        if(areParsValid() != 0){
+          if((iterEndChisq!=iterEndChisq)||((iterEndChisq > iterStartChisq)&&(iterEndChisq > 0.))){
+            if(flambda < 2.0){
+              flambda *= 2.0;
+              doneIter = -1;
+            }else{
+              flambda /= 10.;
+              doneIter = 1;
+            }
+          }else if(((iterStartChisq-iterEndChisq)/iterStartChisq) < convergenceFrac) {
+            lmCount++;
+            flambda /= 10.;
+            doneIter = 1;
+          }else{
+            lmCount = 0;
+            flambda /= 10.;
+            doneIter = 1;
+          }
+        }else if(conv == 1){ //check convergence condition
+          //printf("\nConverged!\n");
+          return -1;
+        }else{
+          if(flambda < 2.0){
+            flambda *= 2.0;
+            doneIter = -1;
+          }else{
+            //revert fit parameters
+            memcpy(fitpar.fitParVal,prevFitParVal,sizeof(fitpar.fitParVal));
+            flambda /= 10.;
+            doneIter = 1;
+          }
+        }
+        
+      }
 
     }
+
+    
+    
   }
 
   return iterCurrent;
@@ -846,40 +904,99 @@ gpointer performGausFitThreaded(){
 //do some math (assuming a Gaussian peak shape) to get a better initial estimate of the peak width
 long double widthGuess(const double centroidCh, const double widthInit){
 
-  long double centroidYVal = getSpBinVal(0,centroidCh);
-  centroidYVal -= fitpar.fitParVal[0] + fitpar.fitParVal[1]*centroidCh;
-  long double HWInit = 2.35482*widthInit/2.; //initial half-width
-  long double FWHighEdgeVal, FWLowEdgeVal;
-  long double highRatio, lowRatio, avgRatio;
-  int i;
+  int windowSize = 5;
+  int halfSearchLength = 100;
+  int scanPastLength = 10;
+  int i,j,ctr;
+  float lowWindowVal, highWindowVal, filterVal;
+  float minFilterVal = BIG_NUMBER;
+  float maxFilterVal = -1.0*BIG_NUMBER;
+  float minChVal = -1; //negative value indicates bound not found yet
+  float maxChVal = -1; //negative value indicates bound not found yet
 
-  for(i=0;i<5;i++){   
-    FWHighEdgeVal = (getSpBinVal(0,centroidCh+HWInit) + getSpBinVal(0,centroidCh+HWInit+drawing.contractFactor) + getSpBinVal(0,centroidCh+HWInit-drawing.contractFactor))/3.;
-    FWHighEdgeVal -= fitpar.fitParVal[0] + fitpar.fitParVal[1]*(centroidCh+HWInit);
-    FWLowEdgeVal = (getSpBinVal(0,centroidCh-HWInit) + getSpBinVal(0,centroidCh-HWInit+drawing.contractFactor) + getSpBinVal(0,centroidCh-HWInit-drawing.contractFactor))/3.;
-    FWLowEdgeVal -= fitpar.fitParVal[0] + fitpar.fitParVal[1]*(centroidCh-HWInit);
-
-    if(centroidYVal != 0.){
-      //get average ratio of half-values from centroid y-value
-      highRatio = fabs(centroidYVal/FWHighEdgeVal);
-      lowRatio = fabs(centroidYVal/FWLowEdgeVal);
-      avgRatio = 0.;
-      if((highRatio > 1.)&&(lowRatio > 1.)){
-        avgRatio = (fabs(centroidYVal/FWHighEdgeVal) + fabs(centroidYVal/FWLowEdgeVal))/2.;
-      }else if(highRatio > 1.){
-        avgRatio = highRatio;
-      }else{
-        avgRatio = lowRatio;
-      }
-      //printf("avgRatio: %f, highRatio: %f, lowRatio: %f\n",avgRatio,highRatio,lowRatio);
-      if(avgRatio > 1.){
-        //printf("Width guess: %f\n",HWInit/(sqrt(2.*log(avgRatio))));
-        return HWInit/(sqrt(2.*log(avgRatio)));
-      }
-      HWInit *= 2.0; //try a larger width
+  //scan forward, find minimum
+  ctr = 0;
+  for(i=0;i<(halfSearchLength-windowSize);i++){
+    lowWindowVal = 0.;
+    highWindowVal = 0.;
+    for(j=0;j<windowSize;j++){
+      lowWindowVal += getSpBinVal(0,centroidCh+(drawing.contractFactor*(i + j)));
+      highWindowVal += getSpBinVal(0,centroidCh+(drawing.contractFactor*(i + j + windowSize)));
+    }
+    filterVal = highWindowVal - lowWindowVal;
+    if(filterVal < minFilterVal){
+      minChVal = centroidCh+(drawing.contractFactor*i);
+      minFilterVal = filterVal;
+      ctr=0;
+    }else{
+      ctr++;
+    }
+    //printf("i=%i, ch=%f, lowwindow=%f, highwindow=%f, filterVal=%f\n",i,centroidCh+(drawing.contractFactor*i),lowWindowVal,highWindowVal,filterVal);
+    if(ctr>=scanPastLength){
+      break;
+    }
+    if(i==(halfSearchLength-windowSize-1)){
+      //end of the search window
+      minChVal = -1;
+      break;
     }
   }
-  
+
+  //scan backward, find maximum
+  ctr = 0;
+  for(i=0;i>(windowSize-halfSearchLength);i--){
+    lowWindowVal = 0.;
+    highWindowVal = 0.;
+    for(j=0;j<windowSize;j++){
+      lowWindowVal += getSpBinVal(0,centroidCh+(drawing.contractFactor*(i - j - windowSize)));
+      highWindowVal += getSpBinVal(0,centroidCh+(drawing.contractFactor*(i - j)));
+    }
+    filterVal = highWindowVal - lowWindowVal;
+    if(filterVal > maxFilterVal){
+      maxChVal = centroidCh+(drawing.contractFactor*i);
+      maxFilterVal = filterVal;
+      ctr=0;
+    }else{
+      ctr++;
+    }
+    //printf("i=%i, ch=%f, lowwindow=%f, highwindow=%f, filterVal=%f\n",i,centroidCh+(drawing.contractFactor*i),lowWindowVal,highWindowVal,filterVal);
+    if(ctr>=scanPastLength){
+      break;
+    }
+    if(i==(windowSize-halfSearchLength+1)){
+      //end of the search window
+      maxChVal = -1;
+      break;
+    }
+  }
+
+  //check that neither bound is invalid
+  if(minChVal <= centroidCh){
+    minChVal = -1;
+  }
+  if(maxChVal >= centroidCh){
+    maxChVal = -1;
+  }
+  if(minChVal == maxChVal){
+    minChVal = -1;
+    maxChVal = -1;
+  }
+
+  if((minChVal>=0)&&(maxChVal>=0)){
+    //both bounds valid
+    //printf("Both bounds valid, centroid=%f, lower=%f, upper=%f, width=%f\n",centroidCh,minChVal,maxChVal,(minChVal-maxChVal)/2.35482);
+    return (minChVal-maxChVal)/2.35482;
+  }else if(minChVal>=0){
+    //only lower bound valid
+    //printf("Lower bound invalid, centroid=%f, upper=%f, width=%f\n",centroidCh,minChVal,(minChVal-centroidCh)/1.1774);
+    return (minChVal-centroidCh)/1.1774;
+  }else if(maxChVal>=0){
+    //only upper bound valid
+    //printf("Upper bound invalid, centroid=%f, lower=%f, width=%f\n",centroidCh,maxChVal,(centroidCh-maxChVal)/1.1774);
+    return (centroidCh-maxChVal)/1.1774;
+  }
+
+  //only get here if neither bound is valid
 
   //assume width is at least 2 bins
   if(widthInit < drawing.contractFactor*2.)
@@ -982,7 +1099,7 @@ int startGausFit(){
   {
     case 1:
       //skewed Guassian
-      fitpar.fitParVal[3] = 0.1;
+      fitpar.fitParVal[3] = 0.05;
       fitpar.fitParVal[4] = fitpar.fitParVal[8] / 2.0;
       break;
     case 0:
