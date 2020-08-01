@@ -5,14 +5,14 @@
 //in turn calls other subroutines.
 
 //external declarations
-extern double evalPeakArea(int peakNum);
-extern double evalPeakAreaErr(int peakNum);
+extern double evalPeakArea(const int peakNum, const int fitType);
+extern double evalPeakAreaErr(const int peakNum, const int fitType);
 extern double getFitChisq();
 
 //update the gui state while/after fitting
 gboolean update_gui_fit_state(){
   switch(guiglobals.fittingSp){
-    case 5:
+    case 6:
       gtk_widget_set_sensitive(GTK_WIDGET(open_button),TRUE);
       if(rawdata.openedSp)
         gtk_widget_set_sensitive(GTK_WIDGET(append_button),TRUE);
@@ -24,6 +24,10 @@ gboolean update_gui_fit_state(){
       gtk_widget_hide(GTK_WIDGET(fit_spinner));
       gtk_revealer_set_reveal_child(revealer_info_panel, FALSE);
       gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw to show the fit
+      break;
+    case 5:
+      gtk_label_set_text(revealer_info_label,"Further refining fit...");
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
       break;
     case 4:
       gtk_label_set_text(revealer_info_label,"Refining fit...");
@@ -98,7 +102,7 @@ gboolean print_fit_results(){
   }
   length += snprintf(fitResStr+length,strSize-length,"Peaks");
   for(i=0;i<fitpar.numFitPeaks;i++){
-    getFormattedValAndUncertainty(evalPeakArea(i),evalPeakAreaErr(i),fitParStr[0],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty(evalPeakArea(i,fitpar.fitType),evalPeakAreaErr(i,fitpar.fitType),fitParStr[0],50,1,guiglobals.roundErrors);
     if(calpar.calMode == 1){
       getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[7+(3*i)]),getCalVal(fitpar.fitParErr[7+(3*i)]),fitParStr[1],50,1,guiglobals.roundErrors);
       getFormattedValAndUncertainty(2.35482*getCalVal(fitpar.fitParVal[8+(3*i)]),2.35482*getCalVal(fitpar.fitParErr[8+(3*i)]),fitParStr[2],50,1,guiglobals.roundErrors);
@@ -252,9 +256,9 @@ long double evalSkewedGaussTermDerivative(const int peakNum, const double xval, 
   return evalGDer;
 }
 
-long double evalAllTermDerivative(const int peakNum, const double xval, const int derPar){
+long double evalAllTermDerivative(const int peakNum, const double xval, const int derPar, const int fitType){
   long double val = evalGaussTermDerivative(peakNum,xval,derPar);
-  if(fitpar.fitType == 1){
+  if(fitType == 1){
     val += evalSkewedGaussTermDerivative(peakNum,xval,derPar);
   }
   return val;
@@ -264,24 +268,24 @@ long double evalFitBG(const long double xval){
   return fitpar.fitParVal[0] + xval*fitpar.fitParVal[1] + xval*xval*fitpar.fitParVal[2];
 }
 
-long double evalFit(const long double xval){
+long double evalFit(const long double xval, const int fitType){
   int i;
   long double val = evalFitBG(xval);
   for(i=0;i<fitpar.numFitPeaks;i++){
     val += fitpar.fitParVal[6+(3*i)]*(1.0 - fitpar.fitParVal[3])*evalGaussTerm(i,xval);
-    if(fitpar.fitType == 1){
+    if(fitType == 1){
       val += fitpar.fitParVal[6+(3*i)]*fitpar.fitParVal[3]*evalSkewedGaussTerm(i,xval);
     }
   }
   return val;
 }
 
-long double evalFitOnePeak(const long double xval, const int peak){
+long double evalFitOnePeak(const long double xval, const int peak, const int fitType){
   if(peak>=fitpar.numFitPeaks)
     return 0.0;
   long double val = evalFitBG(xval);
   val += fitpar.fitParVal[6+(3*peak)]*(1.0 - fitpar.fitParVal[3])*evalGaussTerm(peak,xval);
-  if(fitpar.fitType == 1)
+  if(fitType == 1)
     val += fitpar.fitParVal[6+(3*peak)]*fitpar.fitParVal[3]*evalSkewedGaussTerm(peak,xval);
   return val;
 }
@@ -297,22 +301,22 @@ double evalSkewedGaussArea(const int peakNum){
   return fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]*fitpar.fitParVal[4]*expl(-2.0*fitpar.fitParVal[8+(3*peakNum)]*fitpar.fitParVal[8+(3*peakNum)]/(4.0*fitpar.fitParVal[4]*fitpar.fitParVal[4]));
 }
 
-double evalPeakArea(const int peakNum){
+double evalPeakArea(const int peakNum, const int fitType){
   double area = evalSymGaussArea(peakNum);
-  if(fitpar.fitType == 1){
+  if(fitType == 1){
     area += evalSkewedGaussArea(peakNum);
   }
   return area;
 }
 
-double evalPeakAreaErr(int peakNum){
+double evalPeakAreaErr(int peakNum, const int fitType){
   //propagate uncertainty through the expression in the function evalSymGaussArea()
   double err = (fitpar.fitParErr[6+(3*peakNum)]/fitpar.fitParVal[6+(3*peakNum)])*(fitpar.fitParErr[6+(3*peakNum)]/fitpar.fitParVal[6+(3*peakNum)]);
   err += (fitpar.fitParErr[8+(3*peakNum)]/fitpar.fitParVal[8+(3*peakNum)])*(fitpar.fitParErr[8+(3*peakNum)]/fitpar.fitParVal[8+(3*peakNum)]);
   err += (fitpar.fitParErr[3]/(1.0 - fitpar.fitParVal[3]))*(fitpar.fitParErr[3]/(1.0 - fitpar.fitParVal[3]));
   err = sqrt(err);
   err = err*evalSymGaussArea(peakNum);
-  if(fitpar.fitType == 1){
+  if(fitType == 1){
     //propagate uncertainty through the expression in the function evalSkewedGaussArea()
     double errsk = (fitpar.fitParErr[8+(3*peakNum)]/fitpar.fitParVal[8+(3*peakNum)])*(fitpar.fitParErr[8+(3*peakNum)]/fitpar.fitParVal[8+(3*peakNum)]);
     errsk += (fitpar.fitParErr[4]/fitpar.fitParVal[4])*(fitpar.fitParErr[4]/fitpar.fitParVal[4]);
@@ -330,7 +334,7 @@ double evalPeakAreaErr(int peakNum){
 }
 
 //function returns chisq evaluated for the current fit
-double getFitChisq(){
+double getFitChisq(const int fitType){
   int i,j;
   double chisq = 0.;
   double f;
@@ -343,7 +347,7 @@ double getFitChisq(){
     //gaussian(s)
     for(j=0;j<fitpar.numFitPeaks;j++){
       f += fitpar.fitParVal[6+(3*j)]*(1.0 - fitpar.fitParVal[3])*evalGaussTerm(j,xval);
-      if(fitpar.fitType == 1){
+      if(fitType == 1){
         f += fitpar.fitParVal[6+(3*j)]*fitpar.fitParVal[3]*evalSkewedGaussTerm(j,xval);
       }
         
@@ -379,13 +383,15 @@ unsigned char getParameterErrors(lin_eq_type *linEq){
   for(i=0;i<linEq->dim;i++){
     if(fitpar.fixPar[i] == 0){
       //printf("i: %i, inv: %10.4Lf, weight: %10.4Lf\n",i,linEq->inv_matrix[i][i],linEq->mat_weights[i][i]);
-      fitpar.fitParErr[i]=sqrtl(linEq->inv_matrix[i][i]*linEq->mat_weights[i][i]);
+      fitpar.fitParErr[i]=sqrtl(fabsl(linEq->inv_matrix[i][i]*linEq->mat_weights[i][i]));
+    }else{
+      fitpar.fitParErr[i]=0.;
     }
   }
 
   if(fitpar.fixRelativeWidths){ 
     for(i=1;i<fitpar.numFitPeaks;i++){
-      fitpar.fitParErr[8+(3*i)] = fitpar.relWidths[i]*sqrtl(linEq->inv_matrix[8][8]*linEq->mat_weights[8][8]);
+      fitpar.fitParErr[8+(3*i)] = fitpar.relWidths[i]*sqrtl(fabsl(linEq->inv_matrix[8][8]*linEq->mat_weights[8][8]));
     }
   }
 
@@ -443,7 +449,7 @@ void modifyLinEqFlambda(lin_eq_type *linEq, const double flambda){
 //see eq. 2.4.14, 2.4.15, pg. 47 J. Wolberg 
 //'Data Analysis Using the Method of Least Squares'
 //returns 1 if successful
-int setupFitSums(lin_eq_type *linEq, const double flambda){
+int setupFitSums(lin_eq_type *linEq, const double flambda, const int fitType){
 
   int i,j,k;
   long double cmatrix[MAX_DIM][MAX_DIM];
@@ -464,12 +470,12 @@ int setupFitSums(lin_eq_type *linEq, const double flambda){
   for(i=fitpar.fitStartCh;i<=fitpar.fitEndCh;i+=drawing.contractFactor){
 
     xval = (long double)(i);
-    ydiff = getSpBinVal(0,i) - evalFit(xval);
+    ydiff = getSpBinVal(0,i) - evalFit(xval,fitType);
 
     if(fitpar.weightMode == 0){
       weight = getSpBinFitWeight(0,i);
     }else if(fitpar.weightMode == 1){
-      weight = evalFit(xval);
+      weight = evalFit(xval,fitType);
     }else{
       weight = 1.;
     }
@@ -491,12 +497,12 @@ int setupFitSums(lin_eq_type *linEq, const double flambda){
       linEq->vector[1] += ydiff*xval/weight;
       linEq->vector[2] += ydiff*xval*xval/weight;
 
-      if(fitpar.fitType == 1){
+      if(fitType == 1){
         //parameters 3 and 4: R and beta
         rDerSum = 0.;
         betaDerSum = 0.;
         for(j=0;j<fitpar.numFitPeaks;j++){
-          rDerSum += evalAllTermDerivative(j,xval,3);
+          rDerSum += evalAllTermDerivative(j,xval,3,fitType);
           betaDerSum += evalSkewedGaussTermDerivative(j,xval,4);
         }
         linEq->matrix[0][3] += rDerSum/weight;
@@ -516,12 +522,12 @@ int setupFitSums(lin_eq_type *linEq, const double flambda){
         //parameter 8: width
         widthDerSum = 0.;
         for(j=0;j<fitpar.numFitPeaks;j++){
-          widthDerSum += evalAllTermDerivative(j,xval,2);
+          widthDerSum += evalAllTermDerivative(j,xval,2,fitType);
         }
         linEq->matrix[0][8] += widthDerSum/weight;
         linEq->matrix[1][8] += xval*widthDerSum/weight;
         linEq->matrix[2][8] += xval*xval*widthDerSum/weight;
-        if(fitpar.fitType == 1){
+        if(fitType == 1){
           linEq->matrix[3][8] += rDerSum*widthDerSum/weight;
           linEq->matrix[4][8] += betaDerSum*widthDerSum/weight;
         }
@@ -533,23 +539,23 @@ int setupFitSums(lin_eq_type *linEq, const double flambda){
           peakNum = (int)((j-6)/3);
           parNum = j % 3;
           if(parNum < 2){
-            linEq->matrix[0][j] += evalAllTermDerivative(peakNum,xval,parNum)/weight;
-            linEq->matrix[1][j] += xval*evalAllTermDerivative(peakNum,xval,parNum)/weight;
-            linEq->matrix[2][j] += xval*xval*evalAllTermDerivative(peakNum,xval,parNum)/weight;
-            if(fitpar.fitType == 1){
-              linEq->matrix[3][j] += rDerSum*evalAllTermDerivative(peakNum,xval,parNum)/weight;
-              linEq->matrix[4][j] += betaDerSum*evalAllTermDerivative(peakNum,xval,parNum)/weight;
+            linEq->matrix[0][j] += evalAllTermDerivative(peakNum,xval,parNum,fitType)/weight;
+            linEq->matrix[1][j] += xval*evalAllTermDerivative(peakNum,xval,parNum,fitType)/weight;
+            linEq->matrix[2][j] += xval*xval*evalAllTermDerivative(peakNum,xval,parNum,fitType)/weight;
+            if(fitType == 1){
+              linEq->matrix[3][j] += rDerSum*evalAllTermDerivative(peakNum,xval,parNum,fitType)/weight;
+              linEq->matrix[4][j] += betaDerSum*evalAllTermDerivative(peakNum,xval,parNum,fitType)/weight;
             }
             if(j>=8){
-              linEq->matrix[8][j] += widthDerSum*evalAllTermDerivative(peakNum,xval,parNum)/weight;
+              linEq->matrix[8][j] += widthDerSum*evalAllTermDerivative(peakNum,xval,parNum,fitType)/weight;
             }
-            linEq->vector[j] += ydiff*evalAllTermDerivative(peakNum,xval,parNum)/weight;
+            linEq->vector[j] += ydiff*evalAllTermDerivative(peakNum,xval,parNum,fitType)/weight;
             //printf("j: %i, j-4/2: %i, jmod2: %i\n",j,(int)(j-6)/2,j % 2);
             for(k=6;k<=j;k++){
               peakNum2 = (int)((k-6)/3);
               parNum2 = k % 3;
               if(parNum2 < 2){
-                linEq->matrix[k][j] += evalAllTermDerivative(peakNum,xval,parNum)*evalAllTermDerivative(peakNum2,xval,parNum2)/weight;
+                linEq->matrix[k][j] += evalAllTermDerivative(peakNum,xval,parNum,fitType)*evalAllTermDerivative(peakNum2,xval,parNum2,fitType)/weight;
               }
             }
           }
@@ -560,19 +566,19 @@ int setupFitSums(lin_eq_type *linEq, const double flambda){
         for(j=6;j<linEq->dim;j++){
           peakNum = (int)((j-6)/3);
           parNum = j % 3;
-          linEq->matrix[0][j] += evalAllTermDerivative(peakNum,xval,parNum)/weight;
-          linEq->matrix[1][j] += xval*evalAllTermDerivative(peakNum,xval,parNum)/weight;
-          linEq->matrix[2][j] += xval*xval*evalAllTermDerivative(peakNum,xval,parNum)/weight;
-          if(fitpar.fitType == 1){
-            linEq->matrix[3][j] += rDerSum*evalAllTermDerivative(peakNum,xval,parNum)/weight;
-            linEq->matrix[4][j] += betaDerSum*evalAllTermDerivative(peakNum,xval,parNum)/weight;
+          linEq->matrix[0][j] += evalAllTermDerivative(peakNum,xval,parNum,fitType)/weight;
+          linEq->matrix[1][j] += xval*evalAllTermDerivative(peakNum,xval,parNum,fitType)/weight;
+          linEq->matrix[2][j] += xval*xval*evalAllTermDerivative(peakNum,xval,parNum,fitType)/weight;
+          if(fitType == 1){
+            linEq->matrix[3][j] += rDerSum*evalAllTermDerivative(peakNum,xval,parNum,fitType)/weight;
+            linEq->matrix[4][j] += betaDerSum*evalAllTermDerivative(peakNum,xval,parNum,fitType)/weight;
           }
-          linEq->vector[j] += ydiff*evalAllTermDerivative(peakNum,xval,parNum)/weight;
+          linEq->vector[j] += ydiff*evalAllTermDerivative(peakNum,xval,parNum,fitType)/weight;
           //printf("j: %i, j-3/3: %i, jmod3: %i\n",j,(int)(j-5)/3,j % 3);
           for(k=6;k<=j;k++){
             peakNum2 = (int)((k-6)/3);
             parNum2 = k % 3;
-            linEq->matrix[k][j] += evalAllTermDerivative(peakNum,xval,parNum)*evalAllTermDerivative(peakNum2,xval,parNum2)/weight;
+            linEq->matrix[k][j] += evalAllTermDerivative(peakNum,xval,parNum,fitType)*evalAllTermDerivative(peakNum2,xval,parNum2,fitType)/weight;
             //printf("weight: %f, j: %i, k: %i, evalgaussder j: %f, evalgaussder k: %f\n",weight,j,k,evalAllTermDerivative((int)(j-5)/3,xval,j % 3),evalAllTermDerivative((int)(k-5)/3,xval,k % 3));
           }
         }
@@ -613,12 +619,12 @@ int setupFitSums(lin_eq_type *linEq, const double flambda){
       for(j=0;j<linEq->dim;j++){
         if(fitpar.fixPar[j] == 0){
           if(i!=j){
-            linEq->mat_weights[i][j] = 1.0/sqrt(linEq->matrix[i][i]*linEq->matrix[j][j]);
+            linEq->mat_weights[i][j] = 1.0/sqrtl(linEq->matrix[i][i]*linEq->matrix[j][j]);
             cmatrix[i][j] = linEq->matrix[i][j]*linEq->mat_weights[i][j];
           }
         }
       }
-      linEq->mat_weights[i][i] = 1.0/sqrt(linEq->matrix[i][i]*linEq->matrix[i][i]);
+      linEq->mat_weights[i][i] = 1.0/sqrtl(linEq->matrix[i][i]*linEq->matrix[i][i]);
     }
   }
 
@@ -652,7 +658,7 @@ int setupFitSums(lin_eq_type *linEq, const double flambda){
 }
 
 //function which specifies constraining conditions for peak fit parameters
-int areParsValid(){
+int areParsValid(const int fitType){
   int i;
   int fitRange = fitpar.fitEndCh - fitpar.fitStartCh;
   for(i=0;i<fitpar.numFitPeaks;i+=3){
@@ -681,16 +687,24 @@ int areParsValid(){
       }
     }
   }
-  if(fitpar.fitType == 1){
-    if((fitpar.fitParVal[3]!=fitpar.fitParVal[3])||(fitpar.fitParVal[4]!=fitpar.fitParVal[4])){
-      return 0;
+  if(fitType == 1){
+    if(fitpar.fixPar[3]==0){
+      if(fitpar.fitParVal[3]!=fitpar.fitParVal[3]){
+        return 0;
+      }
+      if((fitpar.fitParVal[3] < -1.0)||(fitpar.fitParVal[3] > 1.0)){
+        return 0;
+      }
     }
-    if((fitpar.fitParVal[3] < -1.0)||(fitpar.fitParVal[3] > 1.0)){
-      return 0;
-    }
-    if(fitpar.fitParVal[4] < 0.0){
-      return 0;
-    }
+    if(fitpar.fixPar[4]==0){
+      if(fitpar.fitParVal[4]!=fitpar.fitParVal[4]){
+        return 0;
+      }
+      if(fitpar.fitParVal[4] < 0.0){
+        return 0;
+      }
+
+    }    
   }
   return 1;
 }
@@ -698,7 +712,7 @@ int areParsValid(){
 
 //non-linearized fitting
 //return value: number of iterations performed (if fit not converged), -1 (if fit converged)
-int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFrac, lin_eq_type *linEq){
+int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFrac, lin_eq_type *linEq, const int fitType){
 
   int i;
   int iterCurrent = 0;
@@ -712,7 +726,7 @@ int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFra
 
   while(iterCurrent < numIter){
 
-    iterStartChisq = getFitChisq();
+    iterStartChisq = getFitChisq(fitType);
     memcpy(prevFitParVal,fitpar.fitParVal,sizeof(fitpar.fitParVal));
 
     /*printf("\nFit iteration %i - A: %Lf, B: %Lf, C: %Lf\n",iterCurrent, fitpar.fitParVal[0],fitpar.fitParVal[1],fitpar.fitParVal[2]);
@@ -722,7 +736,7 @@ int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFra
     printf("chisq: %f\n",iterStartChisq);
     printf("\n");*/
 
-    if(!(setupFitSums(linEq,flambda))){
+    if(!(setupFitSums(linEq,flambda,fitType))){
       //the return value being less than the requested number of iterations indicates a failure
       return iterCurrent; 
     }
@@ -785,10 +799,10 @@ int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFra
         }
 
         //check chisq, if it increased change value of flambda and try again
-        iterEndChisq = getFitChisq();
+        iterEndChisq = getFitChisq(fitType);
         //printf("Start chisq: %f, end chisq: %f\n",iterStartChisq,iterEndChisq);
 
-        if(areParsValid() != 0){
+        if(areParsValid(fitType) != 0){
           if((iterEndChisq!=iterEndChisq)||((iterEndChisq > iterStartChisq)&&(iterEndChisq > 0.))){
             if(flambda < 2.0){
               flambda *= 2.0;
@@ -838,20 +852,28 @@ void performGausFit(){
   int i;
   lin_eq_type linEq;
 
+  //initially fix skew parameters (first fit symmetric shape, then vary these after)
+  fitpar.fitParVal[3] = 0.0; //unused in this fit
+  fitpar.fitParVal[4] = 0.0; //unused in this fit
+  fitpar.fixPar[3] = 1; //fix unused parameter at zero
+  fitpar.fixPar[4] = 1; //fix unused parameter at zero
+
   //do non-linearized fit
   int numNLIterTry = 50;
-  int numNLIter = nonLinearizedGausFit(numNLIterTry, 0.001, &linEq);
+  int numNLIter = nonLinearizedGausFit(numNLIterTry, 0.001, &linEq,0);
   if(numNLIter >= numNLIterTry){
     //printf("Fit did not converge after %i iterations.  Continuing...\n",numNLIter);
     guiglobals.fittingSp = 4;
     g_idle_add(update_gui_fit_state,NULL);
     numNLIterTry = 100;
-    numNLIter = nonLinearizedGausFit(numNLIterTry, 0.001, &linEq);
+    numNLIter = nonLinearizedGausFit(numNLIterTry, 0.001, &linEq,0);
   }
 
   if(numNLIter == -1){
-    printf("Non-linear fit converged.\n");
-    fitpar.errFound = getParameterErrors(&linEq);
+    if(fitpar.fitType == 0){
+      printf("Non-linear fit converged.\n");
+    }
+    //fitpar.errFound = getParameterErrors(&linEq);
   }else if(numNLIter < numNLIterTry){
     printf("WARNING: failed fit, iteration %i.\n",numNLIter);
     guiglobals.fittingSp = 0;
@@ -859,12 +881,32 @@ void performGausFit(){
     return;
   }
 
+  //for skewed Guassian, allow R and beta to vary
+  if(fitpar.fitType == 1){
+    guiglobals.fittingSp = 5;
+    g_idle_add(update_gui_fit_state,NULL);
+    fitpar.fitParVal[3] = 0.05;
+    fitpar.fitParVal[4] = fitpar.fitParVal[8] / 2.0;
+    fitpar.fixPar[3] = 0; //unfix the R parameter
+    fitpar.fixPar[4] = 0; //unfix the beta parameter
+    numNLIterTry = 100;
+    numNLIter = nonLinearizedGausFit(numNLIterTry, 0.001, &linEq, fitpar.fitType);
+
+    if(numNLIter == -1){
+      printf("Non-linear fit converged.\n");
+    }else if(numNLIter < numNLIterTry){
+      printf("WARNING: failed fit, iteration %i.\n",numNLIter);
+      guiglobals.fittingSp = 0;
+      g_idle_add(update_gui_fit_state,NULL);
+      return;
+    }
+  }
+
   //get fit parameter uncertainties
   fitpar.errFound = 0;
-  if(setupFitSums(&linEq,0.)){
-    if(solve_lin_eq(&linEq,1)){
-      fitpar.errFound = getParameterErrors(&linEq);
-    }
+  modifyLinEqFlambda(&linEq,0.);
+  if(solve_lin_eq(&linEq,1)){
+    fitpar.errFound = getParameterErrors(&linEq);
   }
 
   /*printf("Matrix\n");
@@ -889,7 +931,7 @@ void performGausFit(){
     }
   }
   
-  guiglobals.fittingSp = 5;
+  guiglobals.fittingSp = 6;
   g_idle_add(update_gui_fit_state,NULL);
   g_idle_add(print_fit_results,NULL);
 
@@ -1046,6 +1088,7 @@ int startGausFit(){
   fitpar.errFound = 0;
 
   memset(fitpar.fixPar,0,sizeof(fitpar.fixPar));
+  memset(fitpar.fitParErr,0,sizeof(fitpar.fitParErr));
 
   //width parameters
   fitpar.widthFGH[0] = 3.;
@@ -1095,24 +1138,6 @@ int startGausFit(){
   fitpar.fitParVal[5] = 0.0; //unused parameter
   fitpar.fixPar[5] = 1; //fix unused parameter at zero
   
-  switch (fitpar.fitType)
-  {
-    case 1:
-      //skewed Guassian
-      fitpar.fitParVal[3] = 0.05;
-      fitpar.fitParVal[4] = fitpar.fitParVal[8] / 2.0;
-      break;
-    case 0:
-      //Gaussian
-      fitpar.fitParVal[3] = 0.0; //unused in this fit
-      fitpar.fitParVal[4] = 0.0; //unused in this fit
-      fitpar.fixPar[3] = 1; //fix unused parameter at zero
-      fitpar.fixPar[4] = 1; //fix unused parameter at zero
-      break;
-    default:
-      break;
-  }
-
   //printf("Initial guesses: %f %f %f %f %f %f %f %f\n",fitpar.fitParVal[0],fitpar.fitParVal[1],fitpar.fitParVal[2],fitpar.fitParVal[3],fitpar.fitParVal[4],fitpar.fitParVal[6],fitpar.fitParVal[7],fitpar.fitParVal[8]);
 
   if (g_thread_try_new("fit_thread", performGausFitThreaded, NULL, NULL) == NULL){

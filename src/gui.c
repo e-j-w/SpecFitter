@@ -384,7 +384,7 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button)
     gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened+rawdata.numViews);
 
     //clear fit if necessary
-    if(guiglobals.fittingSp == 5){
+    if(guiglobals.fittingSp == 6){
       guiglobals.fittingSp = 0;
       //update widgets
       update_gui_fit_state();
@@ -964,7 +964,7 @@ void on_zoom_scale_changed(GtkRange *range, gpointer user_data){
 void on_contract_scale_changed(GtkRange *range, gpointer user_data){
   int oldContractFactor = drawing.contractFactor;
   drawing.contractFactor = (int)gtk_range_get_value(range); //modify the contraction factor
-  if(guiglobals.fittingSp == 5){
+  if(guiglobals.fittingSp == 6){
     int i;
     //rescale fit (optimization - don't refit)
     for(i=0;i<fitpar.numFitPeaks;i++){
@@ -1401,7 +1401,7 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
   //handle fitting
   if(drawing.multiplotMode > 1){
     guiglobals.fittingSp = 0; //clear any fits being displayed
-  }else if(guiglobals.fittingSp == 5){
+  }else if(guiglobals.fittingSp == 6){
     startGausFit(); //refit
   }
   
@@ -1586,7 +1586,7 @@ void on_sum_all_button_clicked(GtkButton *b)
   gtk_label_set_text(display_spectrumname_label,viewStr);
 
   //clear fit if necessary
-  if(guiglobals.fittingSp == 5){
+  if(guiglobals.fittingSp == 6){
     guiglobals.fittingSp = 0;
     //update widgets
     update_gui_fit_state();
@@ -1603,7 +1603,7 @@ void on_fit_button_clicked(GtkButton *b)
   //spectrum must be open to fit
   if(rawdata.openedSp){
     //cannot be already fitting
-    if((guiglobals.fittingSp == 0)||(guiglobals.fittingSp == 5)){
+    if((guiglobals.fittingSp == 0)||(guiglobals.fittingSp == 6)){
       //must be displaying only a single spectrum
       if(drawing.multiplotMode < 2){
 

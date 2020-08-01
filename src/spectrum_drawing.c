@@ -342,7 +342,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
     //right mouse button being pressed
     float cursorChan = getCursorChannel(event->x, event->y, 80.0, 40.0);
     switch(guiglobals.fittingSp){
-      case 5:
+      case 6:
         //fit being displayed, clear it on right click
         guiglobals.fittingSp = 0;
         gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
@@ -544,7 +544,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
     }
     
     int peakToHighlight = -1;
-    if(guiglobals.fittingSp == 5){
+    if(guiglobals.fittingSp == 6){
       //check if the cursor is over a peak
       int i;
       for(i=0;i<fitpar.numFitPeaks;i++){
@@ -637,22 +637,22 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
             float calCentrErr = getCalVal(fitpar.fitParErr[7+(3*drawing.highlightedPeak)]);
             float calWidthErr = getCalVal(fitpar.fitParErr[8+(3*drawing.highlightedPeak)]);
             char fitParStr[3][50];
-            getFormattedValAndUncertainty(evalPeakArea(drawing.highlightedPeak),evalPeakAreaErr(drawing.highlightedPeak),fitParStr[0],50,1,guiglobals.roundErrors);
+            getFormattedValAndUncertainty(evalPeakArea(drawing.highlightedPeak,fitpar.fitType),evalPeakAreaErr(drawing.highlightedPeak,fitpar.fitType),fitParStr[0],50,1,guiglobals.roundErrors);
             getFormattedValAndUncertainty(calCentr,calCentrErr,fitParStr[1],50,1,guiglobals.roundErrors);
             getFormattedValAndUncertainty(2.35482*calWidth,2.35482*calWidthErr,fitParStr[2],50,1,guiglobals.roundErrors);
             snprintf(statusBarLabel,256,"Area: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
           }else{
-            snprintf(statusBarLabel,256,"Area: %0.3f, Centroid: %0.3f, FWHM: %0.3f",evalPeakArea(drawing.highlightedPeak),calCentr,2.35482*calWidth);
+            snprintf(statusBarLabel,256,"Area: %0.3f, Centroid: %0.3f, FWHM: %0.3f",evalPeakArea(drawing.highlightedPeak,fitpar.fitType),calCentr,2.35482*calWidth);
           }
         }else{
           if(fitpar.errFound){
             char fitParStr[3][50];
-            getFormattedValAndUncertainty(evalPeakArea(drawing.highlightedPeak),evalPeakAreaErr(drawing.highlightedPeak),fitParStr[0],50,1,guiglobals.roundErrors);
+            getFormattedValAndUncertainty(evalPeakArea(drawing.highlightedPeak,fitpar.fitType),evalPeakAreaErr(drawing.highlightedPeak,fitpar.fitType),fitParStr[0],50,1,guiglobals.roundErrors);
             getFormattedValAndUncertainty(fitpar.fitParVal[7+(3*drawing.highlightedPeak)],fitpar.fitParErr[7+(3*drawing.highlightedPeak)],fitParStr[1],50,1,guiglobals.roundErrors);
             getFormattedValAndUncertainty(2.35482*fitpar.fitParVal[8+(3*drawing.highlightedPeak)],2.35482*fitpar.fitParErr[8+(3*drawing.highlightedPeak)],fitParStr[2],50,1,guiglobals.roundErrors);
             snprintf(statusBarLabel,256,"Area: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
           }else{
-            snprintf(statusBarLabel,256,"Area: %0.3f, Centroid: %0.3Lf, FWHM: %0.3Lf",evalPeakArea(drawing.highlightedPeak),fitpar.fitParVal[7+(3*drawing.highlightedPeak)],2.35482*fitpar.fitParVal[8+(3*drawing.highlightedPeak)]);
+            snprintf(statusBarLabel,256,"Area: %0.3f, Centroid: %0.3Lf, FWHM: %0.3Lf",evalPeakArea(drawing.highlightedPeak,fitpar.fitType),fitpar.fitParVal[7+(3*drawing.highlightedPeak)],2.35482*fitpar.fitParVal[8+(3*drawing.highlightedPeak)]);
           }
         }
 
@@ -1292,7 +1292,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   }
 
   //draw fit
-  if((guiglobals.fittingSp == 5)&&(showFit>0)){
+  if((guiglobals.fittingSp == 6)&&(showFit>0)){
     if((drawing.lowerLimit < fitpar.fitEndCh)&&(drawing.upperLimit > fitpar.fitStartCh)){
       cairo_set_line_width(cr, 3.0*scaleFactor);
       cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
@@ -1304,8 +1304,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           xpos = getXPosFromCh(fitDrawX,width,1,xorigin);
           nextXpos = getXPosFromCh(nextFitDrawX,width,1,xorigin);
           if((xpos > 0)&&(nextXpos > 0)){
-            cairo_move_to (cr, xpos, getYPos(evalFitOnePeak(fitDrawX,i),0,height,yorigin));
-            cairo_line_to (cr, nextXpos, getYPos(evalFitOnePeak(nextFitDrawX,i),0,height,yorigin));
+            cairo_move_to (cr, xpos, getYPos(evalFitOnePeak(fitDrawX,i,fitpar.fitType),0,height,yorigin));
+            cairo_line_to (cr, nextXpos, getYPos(evalFitOnePeak(nextFitDrawX,i,fitpar.fitType),0,height,yorigin));
           }
         }
       }
@@ -1328,8 +1328,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           xpos = getXPosFromCh(fitDrawX,width,1,xorigin);
           nextXpos = getXPosFromCh(nextFitDrawX,width,1,xorigin);
           if((xpos > 0)&&(nextXpos > 0)){
-            cairo_move_to (cr, xpos, getYPos(evalFit(fitDrawX),0,height,yorigin));
-            cairo_line_to (cr, nextXpos, getYPos(evalFit(nextFitDrawX),0,height,yorigin));
+            cairo_move_to (cr, xpos, getYPos(evalFit(fitDrawX,fitpar.fitType),0,height,yorigin));
+            cairo_line_to (cr, nextXpos, getYPos(evalFit(nextFitDrawX,fitpar.fitType),0,height,yorigin));
           }
         }
         cairo_stroke(cr);
@@ -1342,8 +1342,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           xpos = getXPosFromCh(fitDrawX,width,1,xorigin);
           nextXpos = getXPosFromCh(nextFitDrawX,width,1,xorigin);
           if((xpos > 0)&&(nextXpos > 0)){
-            cairo_move_to (cr, xpos, getYPos(evalFitOnePeak(fitDrawX,drawing.highlightedPeak),0,height,yorigin));
-            cairo_line_to (cr, nextXpos, getYPos(evalFitOnePeak(nextFitDrawX,drawing.highlightedPeak),0,height,yorigin));
+            cairo_move_to (cr, xpos, getYPos(evalFitOnePeak(fitDrawX,drawing.highlightedPeak,fitpar.fitType),0,height,yorigin));
+            cairo_line_to (cr, nextXpos, getYPos(evalFitOnePeak(nextFitDrawX,drawing.highlightedPeak,fitpar.fitType),0,height,yorigin));
           }
         }
         cairo_stroke(cr);
@@ -1565,7 +1565,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     }
 
     //draw peak position indicators
-    if((guiglobals.fittingSp >= 2)&&(guiglobals.fittingSp < 5)){
+    if((guiglobals.fittingSp >= 2)&&(guiglobals.fittingSp < 6)){
       //put markers at guessed positions
       cairo_set_source_rgb (cr, 0.0, 0.0, 0.8);
       cairo_set_line_width(cr, 2.0*scaleFactor);
@@ -1576,13 +1576,13 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         cairo_stroke_preserve(cr);
         cairo_fill(cr);
       }
-    }else if(guiglobals.fittingSp == 5){
+    }else if(guiglobals.fittingSp == 6){
       //put markers at fitted positions
       cairo_set_source_rgb (cr, 0.0, 0.0, 0.8);
       cairo_set_line_width(cr, 2.0*scaleFactor);
       for(i=0;i<fitpar.numFitPeaks;i++){
         if((fitpar.fitParVal[7+(3*i)] > drawing.lowerLimit)&&(fitpar.fitParVal[7+(3*i)] < drawing.upperLimit)){
-          cairo_arc(cr,getXPosFromCh(fitpar.fitParVal[7+(3*i)],width,1,xorigin),(-0.002*(height)*30.0)-getYPos(evalFit(fitpar.fitParVal[7+(3*i)]),0,height,yorigin),5.,0.,2*G_PI);
+          cairo_arc(cr,getXPosFromCh(fitpar.fitParVal[7+(3*i)],width,1,xorigin),(-0.002*(height)*30.0)-getYPos(evalFit(fitpar.fitParVal[7+(3*i)],fitpar.fitType),0,height,yorigin),5.,0.,2*G_PI);
         }
         cairo_stroke_preserve(cr);
         cairo_fill(cr);

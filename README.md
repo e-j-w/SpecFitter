@@ -26,9 +26,9 @@ A spectrum/histogram viewer and fitter app, with functionality inspired by the `
 
 ### Fit data
 
-* Fit multiple Gaussian peak shapes on quadratic background (iterative least-squares fitter).
+* Fit multiple Gaussian peak shapes (symmetric or skewed) on quadratic background (iterative least-squares fitter).
 * Relative peak widths may be fixed (recommended for gamma-ray spectroscopy) or allowed to freely vary.
-* Weight by the data (taking background subtraction into account) or by the fit function.  Or don't weight the fit at all.
+* Weight the fit by the data (taking background subtraction into account) or by the fit function.  Or don't weight the fit at all.
 
 ### Manage data
 
