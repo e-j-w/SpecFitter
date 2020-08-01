@@ -101,7 +101,7 @@ void getViewStr(char *viewStr, const unsigned int strSize, const int viewNum){
         break;
       default:
         //single spectrum
-        snprintf(viewStr,strSize,"View of spectrum %i",drawing.multiPlots[0]);
+        snprintf(viewStr,strSize,"View of spectrum %i",drawing.multiPlots[0]+1);
         break;
     }
   }else if((viewNum < rawdata.numViews+1)&&(viewNum<MAXNVIEWS)){ //+1 in this condition needed to allow generating new view names
@@ -123,7 +123,7 @@ void getViewStr(char *viewStr, const unsigned int strSize, const int viewNum){
         break;
       default:
         //single spectrum
-        snprintf(viewStr,strSize,"View of spectrum %i",rawdata.viewMultiPlots[viewNum][0]);
+        snprintf(viewStr,strSize,"View of spectrum %i",rawdata.viewMultiPlots[viewNum][0]+1);
         break;
     }
   }else{
@@ -217,6 +217,7 @@ void setup_multiplot_window(){
   //multiplot tree view
   GtkTreeIter iter;
   gboolean val = FALSE;
+  gboolean scaledSelSpExists = FALSE;
   GtkTreeModel *model = gtk_tree_view_get_model(multiplot_tree_view);
   int i;
   char scaleFacStr[16];
@@ -240,12 +241,15 @@ void setup_multiplot_window(){
     if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
       if(val==TRUE){
         selectedSpCount++;
+        if(drawing.scaleFactor[spInd] != 1.0){
+          scaledSelSpExists = TRUE;
+        }
       }
     }
     readingTreeModel = gtk_tree_model_iter_next (model, &iter);
   }
   
-  if(selectedSpCount > 1){
+  if((selectedSpCount > 1)||(scaledSelSpExists==TRUE)){
     gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),TRUE);
     gtk_widget_set_sensitive(GTK_WIDGET(multiplot_make_view_button),TRUE);
   }else{
@@ -1126,6 +1130,7 @@ void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
   GtkTreeIter iter;
   gboolean toggleVal = FALSE;
   gboolean val = FALSE;
+  gboolean scaledSelSpExists = FALSE;
   GtkTreeModel *model = gtk_tree_view_get_model(multiplot_tree_view);
 
   //get the value of the cell which was toggled
@@ -1166,11 +1171,14 @@ void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
     if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
       if(val==TRUE){
         selectedSpCount++;
+        if(drawing.scaleFactor[spInd] != 1.0){
+          scaledSelSpExists = TRUE;
+        }
       }
     }
     readingTreeModel = gtk_tree_model_iter_next (model, &iter);
   }
-  if(selectedSpCount > 1){
+  if((selectedSpCount > 1)||(scaledSelSpExists==TRUE)){
     gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),TRUE);
     gtk_widget_set_sensitive(GTK_WIDGET(multiplot_make_view_button),TRUE);
   }else{
@@ -1189,16 +1197,18 @@ void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
 void on_multiplot_scaling_edited(GtkCellRendererText *c, gchar *path_string, gchar *new_text, gpointer user_data){
   //int i;
   GtkTreeIter iter;
-  gdouble val = 1.0;
+  gdouble scaleVal = 1.0;
   gint spInd = -1;
+  gboolean val = FALSE;
+  gboolean scaledSelSpExists = FALSE;
   GtkTreeModel *model = gtk_tree_view_get_model(multiplot_tree_view);
 
   //get the value of the cell which was toggled
   gtk_tree_model_get_iter_from_string(model, &iter, path_string);
-  val = atof(new_text);
+  scaleVal = atof(new_text);
   gtk_tree_model_get(model,&iter,3,&spInd,-1); //get the spectrum index
   if((spInd >= 0)&&(spInd < NSPECT)){
-    drawing.scaleFactor[spInd] = val;
+    drawing.scaleFactor[spInd] = scaleVal;
     printf("Set scaling for spectrum %i to %.2f\n",spInd,drawing.scaleFactor[spInd]);
   }else{
     printf("WARNING: scale factor belongs to invalid spectrum number (%i).\n",spInd);
@@ -1208,6 +1218,31 @@ void on_multiplot_scaling_edited(GtkCellRendererText *c, gchar *path_string, gch
   char scaleFacStr[16];
   snprintf(scaleFacStr,16,"%.2f",drawing.scaleFactor[spInd]);
   gtk_list_store_set(multiplot_liststore,&iter,2,scaleFacStr,-1); //set the string
+
+  //now see whether the view can be saved
+  int selectedSpCount = 0;
+  gboolean readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
+  while (readingTreeModel)
+  {
+    gtk_tree_model_get(model,&iter,1,&val,3,&spInd,-1); //get whether the spectrum is selected and the spectrum index
+    if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
+      if(val==TRUE){
+        selectedSpCount++;
+        if(drawing.scaleFactor[spInd] != 1.0){
+          scaledSelSpExists = TRUE;
+        }
+      }
+    }
+    readingTreeModel = gtk_tree_model_iter_next (model, &iter);
+  }
+
+  if((selectedSpCount > 1)||(scaledSelSpExists==TRUE)){
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),TRUE);
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_make_view_button),TRUE);
+  }else{
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_mode_combobox),FALSE);
+    gtk_widget_set_sensitive(GTK_WIDGET(multiplot_make_view_button),FALSE);
+  }
 
   //gtk_widget_queue_draw(GTK_WIDGET(multiplot_window));
 }

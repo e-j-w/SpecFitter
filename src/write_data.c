@@ -317,7 +317,7 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
 					break;
 				}
 			}
-
+			
 			//write histogram (not applying rebin or scale factors since the whole session with custom views is saved)
 			for(j=0;j<maxArraySize;j++){
 				for(i=0;i<rawdata.numSpOpened;i++){

@@ -124,6 +124,27 @@ int getCommentAtCursor(const float cursorx, const float cursory, const float xor
               }
             }
           }
+        }else{
+          //scaled single spectrum view
+          for(i=0;i<rawdata.numChComments;i++){
+            if(rawdata.chanCommentView[i] == 1){
+              if(rawdata.chanCommentSp[i] == drawing.displayedView){
+                //check proximity to channel
+                if(fabs(rawdata.chanCommentCh[i] - cursorCh) < (30.0*(drawing.upperLimit - drawing.lowerLimit)/dasize.width)){
+                  //check proximity to y-val
+                  float chYVal = rawdata.chanCommentVal[i];
+                  if(chYVal < drawing.scaleLevelMin[0]){
+                    chYVal = drawing.scaleLevelMin[0];
+                  }else if(chYVal > drawing.scaleLevelMax[0]){
+                    chYVal = drawing.scaleLevelMax[0];
+                  }
+                  if(fabs(chYVal - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/dasize.height)){
+                    return i; //this comment is close
+                  }
+                }
+              }
+            }
+          }
         }
         
         break;
@@ -475,8 +496,32 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
               //setup comment data
               rawdata.chanCommentVal[(int)rawdata.numChComments] = cursorYVal;
               rawdata.chanCommentCh[(int)rawdata.numChComments] = cursorChan;
-              rawdata.chanCommentSp[(int)rawdata.numChComments] = drawing.multiPlots[0];
-              rawdata.chanCommentView[(int)rawdata.numChComments] = 0;
+              if(drawing.displayedView == -1){
+                //commenting on a raw spectrum, not a view
+                rawdata.chanCommentSp[(int)rawdata.numChComments] = drawing.multiPlots[0];
+                rawdata.chanCommentView[(int)rawdata.numChComments] = 0;
+              }else if(drawing.displayedView >= 0){
+                //commenting on a saved view
+                rawdata.chanCommentView[(int)rawdata.numChComments] = 1;
+                rawdata.chanCommentSp[(int)rawdata.numChComments] = drawing.displayedView;
+                gtk_button_set_label(comment_ok_button,"Apply");
+              }else if (drawing.displayedView == -2){
+                //commenting on a view that hasn't been saved yet
+                if(rawdata.numViews >= MAXNVIEWS){
+                  printf("Cannot add any more views.\n");
+                  GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+                  GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot add comment!");
+                  gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Adding a comment would require the current view to be saved, however the maximum number of custom views has been reached.  Older custom views must be deleted before more can be added.");
+                  gtk_dialog_run (GTK_DIALOG (message_dialog));
+                  gtk_widget_destroy (message_dialog);
+                  return;
+                }
+                rawdata.chanCommentView[(int)rawdata.numChComments] = 1;
+                rawdata.chanCommentSp[(int)rawdata.numChComments] = rawdata.numViews;
+                gtk_button_set_label(comment_ok_button,"Save View and Apply");
+              }else{
+                printf("WARNING: undefined view state, not displaying edit window.\n");
+              }
               gtk_entry_set_text(comment_entry, "");
               gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
             }
@@ -1637,6 +1682,40 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           for(i=0;i<rawdata.numChComments;i++){
             if(rawdata.chanCommentView[i]==0){
               if(rawdata.chanCommentSp[i]==drawing.multiPlots[0]){
+                if(rawdata.chanCommentCh[i] > drawing.lowerLimit){
+                  if(rawdata.chanCommentCh[i] < drawing.upperLimit){
+                    if((!drawing.logScale)||(rawdata.chanCommentVal[i] > 0)){
+                      if(drawing.highlightedComment == i){
+                        cairo_set_line_width(cr, 8.0*scaleFactor);
+                      }else{
+                        cairo_set_line_width(cr, 4.0*scaleFactor);
+                      }
+                      float chYVal = rawdata.chanCommentVal[i];
+                      if(chYVal < drawing.scaleLevelMin[0]){
+                        chYVal = drawing.scaleLevelMin[0];
+                      }else if(chYVal > drawing.scaleLevelMax[0]){
+                        chYVal = drawing.scaleLevelMax[0];
+                      }
+                      float xc = getXPosFromCh(rawdata.chanCommentCh[i],width,1,xorigin);
+                      float yc = -1.0*getYPos(chYVal,0,height,yorigin);
+                      float radius = 14.0;
+                      cairo_arc(cr,xc,yc,radius,0.,2*G_PI);
+                      cairo_set_font_size(cr, plotFontSize*1.5);
+                      cairo_text_extents(cr, "i", &extents);
+                      cairo_move_to(cr,xc-(extents.width),yc+(extents.height/2.));
+                      cairo_show_text(cr, "i");
+                      cairo_stroke(cr);
+                      //cairo_fill(cr);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }else{
+          for(i=0;i<rawdata.numChComments;i++){
+            if(rawdata.chanCommentView[i]==1){
+              if(rawdata.chanCommentSp[i]==drawing.displayedView){
                 if(rawdata.chanCommentCh[i] > drawing.lowerLimit){
                   if(rawdata.chanCommentCh[i] < drawing.upperLimit){
                     if((!drawing.logScale)||(rawdata.chanCommentVal[i] > 0)){

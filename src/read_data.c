@@ -351,7 +351,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 {
 	int i,j;
 	int numElementsRead = 0;
-	char str[256];
+	char str[256], str2[256];
 	char *tok;
 	FILE *inp;
 	double num[NSPECT];
@@ -367,7 +367,27 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 			{
 				if(numElementsRead<S32K){
 					if(fgets(str,256,inp)!=NULL){ //get an entire line
-						int numLineEntries = sscanf(str,"%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",&num[0],&num[1],&num[2],&num[3],&num[4],&num[5],&num[6],&num[7],&num[8],&num[9],&num[10],&num[11]);
+						strncpy(str2,str,256);
+						int numLineEntries = 0;
+						tok = strtok(str2," ");
+						if((strcmp(tok,"SPECTRUM1")==0)||(strcmp(tok,"TITLE")==0)||(strcmp(tok,"VIEW")==0)||(strcmp(tok,"VIEWPAR")==0)||(strcmp(tok,"VIEWSP")==0)||(strcmp(tok,"VIEWSCALE")==0)||(strcmp(tok,"COMMENT")==0)){
+							numLineEntries = 0;
+						}else{
+							//line is data
+							while(tok!=NULL){
+								if(numLineEntries<NSPECT){
+									num[numLineEntries] = atof(tok);
+									//printf("numLineEntries: %i, num: %f\n",numLineEntries, num[numLineEntries]);
+									numLineEntries++;
+									tok = strtok(NULL," ");
+								}else{
+									numLineEntries++;
+									break;
+								}
+							}
+							numLineEntries--;
+						}
+						//getc(stdin);
 						if(numLineEntries > 0){
 							if(numColumns == 0){
 								numColumns = numLineEntries;
@@ -384,7 +404,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 							}
 							numElementsRead++;
 						}else{
-							tok = strtok (str," ");
+							tok = strtok(str," ");
 							if(tok!=NULL){
 								if(strcmp(tok,"COMMENT")==0){
 									if(rawdata.numChComments < NCHCOM){
