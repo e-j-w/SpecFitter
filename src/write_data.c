@@ -8,394 +8,394 @@
 //if the packet header is 0, that is the end of the spectrum  
 int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
 {
-	int i, j, k;
-	FILE *out;
-	unsigned char ucharBuf;
-	unsigned int uintBuf;
+  int i, j, k;
+  FILE *out;
+  unsigned char ucharBuf;
+  unsigned int uintBuf;
 
-	if ((out = fopen(filename, "w")) == NULL) //open the file
-	{
-		printf("ERROR: Cannot open the output file: %s\n", filename);
-		printf("The file may not be accesible.\n");
-		return 1;
-	}
+  if ((out = fopen(filename, "w")) == NULL) //open the file
+  {
+    printf("ERROR: Cannot open the output file: %s\n", filename);
+    printf("The file may not be accesible.\n");
+    return 1;
+  }
 
-	//printf("Number of spectra to write: %i\n",rawdata.numSpOpened);
+  //printf("Number of spectra to write: %i\n",rawdata.numSpOpened);
 
-	ucharBuf = 0; //file version number
-	fwrite(&ucharBuf,sizeof(unsigned char),1,out);
-	ucharBuf = rawdata.numSpOpened; //number of spectra to write
-	fwrite(&ucharBuf,sizeof(unsigned char),1,out);
-	for(i=0;i<rawdata.numSpOpened;i++){
-		fwrite(&rawdata.histComment[i],sizeof(rawdata.histComment[i]),1,out);
-	}
-	//write comments
-	uintBuf = rawdata.numChComments; //number of comments to write
-	fwrite(&uintBuf,sizeof(unsigned int),1,out);
-	for(i=0;i<rawdata.numChComments;i++){
-		fwrite(&rawdata.chanCommentView[i],sizeof(rawdata.chanCommentView[i]),1,out);
-		fwrite(&rawdata.chanCommentSp[i],sizeof(rawdata.chanCommentSp[i]),1,out);
-		fwrite(&rawdata.chanCommentCh[i],sizeof(rawdata.chanCommentCh[i]),1,out);
-		fwrite(&rawdata.chanCommentVal[i],sizeof(rawdata.chanCommentVal[i]),1,out);
-		fwrite(&rawdata.chanComment[i],sizeof(rawdata.chanComment[i]),1,out);
-	}
-	//write views
-	uintBuf = rawdata.numViews; //number of views to write
-	fwrite(&uintBuf,sizeof(unsigned int),1,out);
-	for(i=0;i<rawdata.numViews;i++){
-		fwrite(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,out);
-		fwrite(&rawdata.viewMultiplotMode[i],sizeof(unsigned char),1,out);
-		fwrite(&rawdata.viewNumMultiplotSp[i],sizeof(int),1,out);
-		for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
-			fwrite(&rawdata.viewMultiPlots[i][j],sizeof(int),1,out);
-		}
-		for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
-			fwrite(&rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]],sizeof(double),1,out);
-		}
-	}
+  ucharBuf = 0; //file version number
+  fwrite(&ucharBuf,sizeof(unsigned char),1,out);
+  ucharBuf = rawdata.numSpOpened; //number of spectra to write
+  fwrite(&ucharBuf,sizeof(unsigned char),1,out);
+  for(i=0;i<rawdata.numSpOpened;i++){
+    fwrite(&rawdata.histComment[i],sizeof(rawdata.histComment[i]),1,out);
+  }
+  //write comments
+  uintBuf = rawdata.numChComments; //number of comments to write
+  fwrite(&uintBuf,sizeof(unsigned int),1,out);
+  for(i=0;i<rawdata.numChComments;i++){
+    fwrite(&rawdata.chanCommentView[i],sizeof(rawdata.chanCommentView[i]),1,out);
+    fwrite(&rawdata.chanCommentSp[i],sizeof(rawdata.chanCommentSp[i]),1,out);
+    fwrite(&rawdata.chanCommentCh[i],sizeof(rawdata.chanCommentCh[i]),1,out);
+    fwrite(&rawdata.chanCommentVal[i],sizeof(rawdata.chanCommentVal[i]),1,out);
+    fwrite(&rawdata.chanComment[i],sizeof(rawdata.chanComment[i]),1,out);
+  }
+  //write views
+  uintBuf = rawdata.numViews; //number of views to write
+  fwrite(&uintBuf,sizeof(unsigned int),1,out);
+  for(i=0;i<rawdata.numViews;i++){
+    fwrite(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,out);
+    fwrite(&rawdata.viewMultiplotMode[i],sizeof(unsigned char),1,out);
+    fwrite(&rawdata.viewNumMultiplotSp[i],sizeof(int),1,out);
+    for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
+      fwrite(&rawdata.viewMultiPlots[i][j],sizeof(int),1,out);
+    }
+    for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
+      fwrite(&rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]],sizeof(double),1,out);
+    }
+  }
 
-	float lastBin = 0.;
-	float currentBin;
-	float val;
-	signed char packetCounter;
-	for(i=0;i<rawdata.numSpOpened;i++){
-		if(i<NSPECT){
+  float lastBin = 0.;
+  float currentBin;
+  float val;
+  signed char packetCounter;
+  for(i=0;i<rawdata.numSpOpened;i++){
+    if(i<NSPECT){
 
-			//printf("Writing spectrum %i\n",i);
+      //printf("Writing spectrum %i\n",i);
 
-			//scan for end of spectrum
-			int lastCh = 0;
-			for(j=S32K-1;j>=0;j--){
-				if(inpHist[i][j]!=0){
-					lastCh=j;
-					break;
-				}
-			}
+      //scan for end of spectrum
+      int lastCh = 0;
+      for(j=S32K-1;j>=0;j--){
+        if(inpHist[i][j]!=0){
+          lastCh=j;
+          break;
+        }
+      }
 
-			//encode spectrum
-			packetCounter = 1;
-			for(j=0;j<S32K;j++){
-				
-				//get bin values
-				currentBin = (float)inpHist[i][j];
-				if(j>0)
-					lastBin = (float)inpHist[i][j-1];
-				else
-					lastBin = (float)inpHist[i][j];
-				
-				//printf("bin: %i cuurent val: %f last val: %f packetCounter: %i\n",j,currentBin,lastBin,packetCounter);
+      //encode spectrum
+      packetCounter = 1;
+      for(j=0;j<S32K;j++){
+        
+        //get bin values
+        currentBin = (float)inpHist[i][j];
+        if(j>0)
+          lastBin = (float)inpHist[i][j-1];
+        else
+          lastBin = (float)inpHist[i][j];
+        
+        //printf("bin: %i cuurent val: %f last val: %f packetCounter: %i\n",j,currentBin,lastBin,packetCounter);
 
-				if(j>=lastCh){
-					//end of spectrum reached
-					if(packetCounter > 0){
-						//write last packet
-						fwrite(&packetCounter,sizeof(signed char),1,out);
-						//printf("wrote packet counter %i\n",packetCounter);
-						val = (float)inpHist[i][j-1];
-						fwrite(&val,sizeof(float),1,out);
-					}else{
-						//write last packet
-						fwrite(&packetCounter,sizeof(signed char),1,out);
-						//printf("wrote packet counter %i\n",packetCounter);
-						for(k=0;k<(packetCounter*-1);k++){
-							val = (float)inpHist[i][j+packetCounter+k];
-							fwrite(&val,sizeof(float),1,out);
-						}
-					}
-					//write final packet
-					packetCounter = 0;
-					fwrite(&packetCounter,sizeof(signed char),1,out);
-					//printf("wrote packet counter %i\n",packetCounter);
-					val = (float)inpHist[i][j];
-					fwrite(&val,sizeof(float),1,out);
-					break;
-				}else if(packetCounter > 126){
-					//write last packet
-					fwrite(&packetCounter,sizeof(signed char),1,out);
-					val = (float)inpHist[i][j-1];
-					fwrite(&val,sizeof(float),1,out);
-					//start new packet
-					packetCounter = 1;
-				}else if (packetCounter < -126){
-					//write last packet
-					fwrite(&packetCounter,sizeof(signed char),1,out);
-					//printf("wrote packet counter %i\n",packetCounter);
-					for(k=0;k<(packetCounter*-1);k++){
-						val = (float)inpHist[i][j+packetCounter+k];
-						fwrite(&val,sizeof(float),1,out);
-					}
-					//start new packet
-					packetCounter = 1;
-				}else if((currentBin == lastBin)&&(packetCounter>0)){
-					//continue packet
-					if(j>0) //remember we start off with a value of 1
-						packetCounter++;
-				}else if((currentBin != lastBin)&&(packetCounter>1)){
-					//write last packet
-					fwrite(&packetCounter,sizeof(signed char),1,out);
-					//printf("wrote packet counter %i\n",packetCounter);
-					val = (float)inpHist[i][j-1];
-					fwrite(&val,sizeof(float),1,out);
-					//start new packet
-					packetCounter = 1;
-				}else if((currentBin != lastBin)&&(packetCounter==1)){
-					//change packet type
-					packetCounter = -2;
-				}else if((currentBin == lastBin)&&(packetCounter<0)){
-					//write last packet
-					fwrite(&packetCounter,sizeof(signed char),1,out);
-					//printf("wrote packet counter %i\n",packetCounter);
-					for(k=0;k<(packetCounter*-1);k++){
-						val = (float)inpHist[i][j+packetCounter+k];
-						fwrite(&val,sizeof(float),1,out);
-					}
-					//start new packet
-					packetCounter = 1;
-				}else if((currentBin != lastBin)&&(packetCounter<0)){
-					//continue packet
-					packetCounter--;
-				}
-			}
+        if(j>=lastCh){
+          //end of spectrum reached
+          if(packetCounter > 0){
+            //write last packet
+            fwrite(&packetCounter,sizeof(signed char),1,out);
+            //printf("wrote packet counter %i\n",packetCounter);
+            val = (float)inpHist[i][j-1];
+            fwrite(&val,sizeof(float),1,out);
+          }else{
+            //write last packet
+            fwrite(&packetCounter,sizeof(signed char),1,out);
+            //printf("wrote packet counter %i\n",packetCounter);
+            for(k=0;k<(packetCounter*-1);k++){
+              val = (float)inpHist[i][j+packetCounter+k];
+              fwrite(&val,sizeof(float),1,out);
+            }
+          }
+          //write final packet
+          packetCounter = 0;
+          fwrite(&packetCounter,sizeof(signed char),1,out);
+          //printf("wrote packet counter %i\n",packetCounter);
+          val = (float)inpHist[i][j];
+          fwrite(&val,sizeof(float),1,out);
+          break;
+        }else if(packetCounter > 126){
+          //write last packet
+          fwrite(&packetCounter,sizeof(signed char),1,out);
+          val = (float)inpHist[i][j-1];
+          fwrite(&val,sizeof(float),1,out);
+          //start new packet
+          packetCounter = 1;
+        }else if (packetCounter < -126){
+          //write last packet
+          fwrite(&packetCounter,sizeof(signed char),1,out);
+          //printf("wrote packet counter %i\n",packetCounter);
+          for(k=0;k<(packetCounter*-1);k++){
+            val = (float)inpHist[i][j+packetCounter+k];
+            fwrite(&val,sizeof(float),1,out);
+          }
+          //start new packet
+          packetCounter = 1;
+        }else if((currentBin == lastBin)&&(packetCounter>0)){
+          //continue packet
+          if(j>0) //remember we start off with a value of 1
+            packetCounter++;
+        }else if((currentBin != lastBin)&&(packetCounter>1)){
+          //write last packet
+          fwrite(&packetCounter,sizeof(signed char),1,out);
+          //printf("wrote packet counter %i\n",packetCounter);
+          val = (float)inpHist[i][j-1];
+          fwrite(&val,sizeof(float),1,out);
+          //start new packet
+          packetCounter = 1;
+        }else if((currentBin != lastBin)&&(packetCounter==1)){
+          //change packet type
+          packetCounter = -2;
+        }else if((currentBin == lastBin)&&(packetCounter<0)){
+          //write last packet
+          fwrite(&packetCounter,sizeof(signed char),1,out);
+          //printf("wrote packet counter %i\n",packetCounter);
+          for(k=0;k<(packetCounter*-1);k++){
+            val = (float)inpHist[i][j+packetCounter+k];
+            fwrite(&val,sizeof(float),1,out);
+          }
+          //start new packet
+          packetCounter = 1;
+        }else if((currentBin != lastBin)&&(packetCounter<0)){
+          //continue packet
+          packetCounter--;
+        }
+      }
 
-		}
+    }
 
-	}
+  }
 
-	fclose(out);
-	printf("Wrote data to file: %s\n",filename);
-	return 0;
+  fclose(out);
+  printf("Wrote data to file: %s\n",filename);
+  return 0;
 }
 
 //routine to export a RadWare compatible file
 //exportMode: 0=write displayed spectrum, 1=write all imported spectra
 int exportSPE(const char *filePrefix, const int exportMode, const int rebin)
 {
-	int i,j;
-	int spID;
-	float val;
-	FILE *out;
-	char outFileName[256];
+  int i,j;
+  int spID;
+  float val;
+  FILE *out;
+  char outFileName[256];
 
-	//radware file header info
+  //radware file header info
   int32_t buffSize = 24;
   char spLabel[8];
   int32_t arraySize = 4096;
   int32_t junk = 1;
-	int32_t byteSize = arraySize*4;
-	
-	switch (exportMode)
-	{
-		case 0:
-			//export all
-			for(i=0;i<rawdata.numSpOpened;i++){
+  int32_t byteSize = arraySize*4;
+  
+  switch (exportMode)
+  {
+    case 0:
+      //export all
+      for(i=0;i<rawdata.numSpOpened;i++){
 
-				snprintf(outFileName,256,"%s_hist%i.spe",filePrefix,i+1);
-				if((out = fopen(outFileName, "w")) == NULL) //open the file
-				{
-					printf("ERROR: Cannot open the output file: %s\n", outFileName);
-					printf("The file may not be accesible.\n");
-					return 1;
-				}
+        snprintf(outFileName,256,"%s_hist%i.spe",filePrefix,i+1);
+        if((out = fopen(outFileName, "w")) == NULL) //open the file
+        {
+          printf("ERROR: Cannot open the output file: %s\n", outFileName);
+          printf("The file may not be accesible.\n");
+          return 1;
+        }
 
-				//write .spe header
-				strncpy(spLabel,rawdata.histComment[i],7);
-				fwrite(&buffSize,sizeof(int32_t),1,out);
-				fwrite(&spLabel,sizeof(spLabel),1,out);
-				fwrite(&arraySize,sizeof(int32_t),1,out);
-				fwrite(&junk,sizeof(int32_t),1,out);
-				fwrite(&junk,sizeof(int32_t),1,out);
-				fwrite(&junk,sizeof(int32_t),1,out);
-				fwrite(&buffSize,sizeof(int32_t),1,out);
-				fwrite(&byteSize,sizeof(int32_t),1,out);
-				
-				//write histogram
-				if(rebin){
-					for(j=0;j<(arraySize*drawing.contractFactor);j+=drawing.contractFactor){
-						val = getSpBinValRaw(i,j,drawing.scaleFactor[i],drawing.contractFactor);
-						fwrite(&val,sizeof(float),1,out);
-					}
-				}else{
-					for(j=0;j<arraySize;j++){
-						val = getSpBinValRaw(i,j,1,1);
-						fwrite(&val,sizeof(float),1,out);
-					}
-				}
-				fwrite(&byteSize,sizeof(int32_t),1,out);
-				fclose(out);
-				printf("Wrote data to file: %s\n",outFileName);
-			}
-			break;
-		default:
-			//export one histogram
-			
-			spID = exportMode-1;
-			if((spID < 0)||(spID >= rawdata.numSpOpened)){
-				printf("ERROR: invalid spectrum index for export.\n");
-				return 2;
-			}
+        //write .spe header
+        strncpy(spLabel,rawdata.histComment[i],7);
+        fwrite(&buffSize,sizeof(int32_t),1,out);
+        fwrite(&spLabel,sizeof(spLabel),1,out);
+        fwrite(&arraySize,sizeof(int32_t),1,out);
+        fwrite(&junk,sizeof(int32_t),1,out);
+        fwrite(&junk,sizeof(int32_t),1,out);
+        fwrite(&junk,sizeof(int32_t),1,out);
+        fwrite(&buffSize,sizeof(int32_t),1,out);
+        fwrite(&byteSize,sizeof(int32_t),1,out);
+        
+        //write histogram
+        if(rebin){
+          for(j=0;j<(arraySize*drawing.contractFactor);j+=drawing.contractFactor){
+            val = getSpBinValRaw(i,j,drawing.scaleFactor[i],drawing.contractFactor);
+            fwrite(&val,sizeof(float),1,out);
+          }
+        }else{
+          for(j=0;j<arraySize;j++){
+            val = getSpBinValRaw(i,j,1,1);
+            fwrite(&val,sizeof(float),1,out);
+          }
+        }
+        fwrite(&byteSize,sizeof(int32_t),1,out);
+        fclose(out);
+        printf("Wrote data to file: %s\n",outFileName);
+      }
+      break;
+    default:
+      //export one histogram
+      
+      spID = exportMode-1;
+      if((spID < 0)||(spID >= rawdata.numSpOpened)){
+        printf("ERROR: invalid spectrum index for export.\n");
+        return 2;
+      }
 
-			snprintf(outFileName,256,"%s.spe",filePrefix);
-			if((out = fopen(outFileName, "w")) == NULL) //open the file
-			{
-				printf("ERROR: Cannot open the output file: %s\n", outFileName);
-				printf("The file may not be accesible.\n");
-				return 1;
-			}
+      snprintf(outFileName,256,"%s.spe",filePrefix);
+      if((out = fopen(outFileName, "w")) == NULL) //open the file
+      {
+        printf("ERROR: Cannot open the output file: %s\n", outFileName);
+        printf("The file may not be accesible.\n");
+        return 1;
+      }
 
-			//write .spe header
-			strncpy(spLabel,rawdata.histComment[spID],7);
-			fwrite(&buffSize,sizeof(int32_t),1,out);
-			fwrite(&spLabel,sizeof(spLabel),1,out);
-			fwrite(&arraySize,sizeof(int32_t),1,out);
-			fwrite(&junk,sizeof(int32_t),1,out);
-			fwrite(&junk,sizeof(int32_t),1,out);
-			fwrite(&junk,sizeof(int32_t),1,out);
-			fwrite(&buffSize,sizeof(int32_t),1,out);
-			fwrite(&byteSize,sizeof(int32_t),1,out);
+      //write .spe header
+      strncpy(spLabel,rawdata.histComment[spID],7);
+      fwrite(&buffSize,sizeof(int32_t),1,out);
+      fwrite(&spLabel,sizeof(spLabel),1,out);
+      fwrite(&arraySize,sizeof(int32_t),1,out);
+      fwrite(&junk,sizeof(int32_t),1,out);
+      fwrite(&junk,sizeof(int32_t),1,out);
+      fwrite(&junk,sizeof(int32_t),1,out);
+      fwrite(&buffSize,sizeof(int32_t),1,out);
+      fwrite(&byteSize,sizeof(int32_t),1,out);
 
-			//write histogram
-			if(rebin){
-				for(i=0;i<(arraySize*drawing.contractFactor);i+=drawing.contractFactor){
-					val = getSpBinValRaw(spID,i,drawing.scaleFactor[spID],drawing.contractFactor);
-					fwrite(&val,sizeof(float),1,out);
-				}
-			}else{
-				for(i=0;i<arraySize;i++){
-					val = getSpBinValRaw(spID,i,1,1);
-					fwrite(&val,sizeof(float),1,out);
-				}
-			}
-			fwrite(&byteSize,sizeof(int32_t),1,out);
-			fclose(out);
-			printf("Wrote data to file: %s\n",outFileName);
-			break;
-	}
+      //write histogram
+      if(rebin){
+        for(i=0;i<(arraySize*drawing.contractFactor);i+=drawing.contractFactor){
+          val = getSpBinValRaw(spID,i,drawing.scaleFactor[spID],drawing.contractFactor);
+          fwrite(&val,sizeof(float),1,out);
+        }
+      }else{
+        for(i=0;i<arraySize;i++){
+          val = getSpBinValRaw(spID,i,1,1);
+          fwrite(&val,sizeof(float),1,out);
+        }
+      }
+      fwrite(&byteSize,sizeof(int32_t),1,out);
+      fclose(out);
+      printf("Wrote data to file: %s\n",outFileName);
+      break;
+  }
 
-	return 0;
+  return 0;
 }
 
 //routine to export a plaintext file
 //exportMode: 0=write displayed spectrum, 1=write all imported spectra
 int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
 {
-	int i,j;
-	int spID;
-	int maxArraySize;
-	float val;
-	FILE *out;
-	char outFileName[256];
+  int i,j;
+  int spID;
+  int maxArraySize;
+  float val;
+  FILE *out;
+  char outFileName[256];
 
-	snprintf(outFileName,256,"%s.txt",filePrefix);
-	if((out = fopen(outFileName, "w")) == NULL) //open the file
-	{
-		printf("ERROR: Cannot open the output file: %s\n", outFileName);
-		printf("The file may not be accesible.\n");
-		return 1;
-	}
-	
-	switch (exportMode)
-	{
-		case 0:
-			//export all
+  snprintf(outFileName,256,"%s.txt",filePrefix);
+  if((out = fopen(outFileName, "w")) == NULL) //open the file
+  {
+    printf("ERROR: Cannot open the output file: %s\n", outFileName);
+    printf("The file may not be accesible.\n");
+    return 1;
+  }
+  
+  switch (exportMode)
+  {
+    case 0:
+      //export all
 
-			//write header
-			for(i=0;i<rawdata.numSpOpened;i++){
-				fprintf(out,"SPECTRUM%i ",i+1);
-			}
-			fprintf(out,"\n");
+      //write header
+      for(i=0;i<rawdata.numSpOpened;i++){
+        fprintf(out,"SPECTRUM%i ",i+1);
+      }
+      fprintf(out,"\n");
 
-			//get max array size
-			maxArraySize = S32K;
-			for(j=S32K-1;j>=0;j--){
-				for(i=0;i<rawdata.numSpOpened;i++){
-					if(rawdata.hist[i][j] != 0.){
-						maxArraySize = j+1;
-						break;
-					}
-				}
-				if(maxArraySize < S32K){
-					break;
-				}
-			}
-			
-			//write histogram (not applying rebin or scale factors since the whole session with custom views is saved)
-			for(j=0;j<maxArraySize;j++){
-				for(i=0;i<rawdata.numSpOpened;i++){
-					val = getSpBinValRaw(i,j,drawing.scaleFactor[i],1);
-					fprintf(out,"%f ",val);
-				}
-				fprintf(out,"\n");
-			}
+      //get max array size
+      maxArraySize = S32K;
+      for(j=S32K-1;j>=0;j--){
+        for(i=0;i<rawdata.numSpOpened;i++){
+          if(rawdata.hist[i][j] != 0.){
+            maxArraySize = j+1;
+            break;
+          }
+        }
+        if(maxArraySize < S32K){
+          break;
+        }
+      }
+      
+      //write histogram (not applying rebin or scale factors since the whole session with custom views is saved)
+      for(j=0;j<maxArraySize;j++){
+        for(i=0;i<rawdata.numSpOpened;i++){
+          val = getSpBinValRaw(i,j,drawing.scaleFactor[i],1);
+          fprintf(out,"%f ",val);
+        }
+        fprintf(out,"\n");
+      }
 
-			//write histogram titles
-			for(i=0;i<rawdata.numSpOpened;i++){
-				fprintf(out,"TITLE %i %s\n",i+1,rawdata.histComment[i]);
-			}
+      //write histogram titles
+      for(i=0;i<rawdata.numSpOpened;i++){
+        fprintf(out,"TITLE %i %s\n",i+1,rawdata.histComment[i]);
+      }
 
-			//write views
-			for(i=0;i<rawdata.numViews;i++){
-				fprintf(out,"VIEW %s\nVIEWPAR %u %i\n",rawdata.viewComment[i],rawdata.viewMultiplotMode[i],rawdata.viewNumMultiplotSp[i]);
-				fprintf(out,"VIEWSP ");
-				for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
-					fprintf(out," %i", rawdata.viewMultiPlots[i][j]);
-				}
-				fprintf(out,"\nVIEWSCALE ");
-				for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
-					if((rawdata.viewMultiPlots[i][j]>=0)&&(rawdata.viewMultiPlots[i][j]<NSPECT)){
-						fprintf(out," %0.3f", rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]]);
-					}
-				}
-				fprintf(out,"\n");
-			}
+      //write views
+      for(i=0;i<rawdata.numViews;i++){
+        fprintf(out,"VIEW %s\nVIEWPAR %u %i\n",rawdata.viewComment[i],rawdata.viewMultiplotMode[i],rawdata.viewNumMultiplotSp[i]);
+        fprintf(out,"VIEWSP ");
+        for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
+          fprintf(out," %i", rawdata.viewMultiPlots[i][j]);
+        }
+        fprintf(out,"\nVIEWSCALE ");
+        for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
+          if((rawdata.viewMultiPlots[i][j]>=0)&&(rawdata.viewMultiPlots[i][j]<NSPECT)){
+            fprintf(out," %0.3f", rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]]);
+          }
+        }
+        fprintf(out,"\n");
+      }
 
-			break;
-		default:
-			//export one histogram
-			
-			spID = exportMode-1;
-			if((spID < 0)||(spID >= rawdata.numSpOpened)){
-				printf("ERROR: invalid spectrum index for export.\n");
-				return 2;
-			}
+      break;
+    default:
+      //export one histogram
+      
+      spID = exportMode-1;
+      if((spID < 0)||(spID >= rawdata.numSpOpened)){
+        printf("ERROR: invalid spectrum index for export.\n");
+        return 2;
+      }
 
-			//write header
-			fprintf(out,"SPECTRUM%i\n",exportMode);
+      //write header
+      fprintf(out,"SPECTRUM%i\n",exportMode);
 
-			//get array size
-			maxArraySize = S32K;
-			for(j=S32K-1;j>=0;j--){
-				if(rawdata.hist[spID][j] != 0.){
-					maxArraySize = j+1;
-					break;
-				}
-			}
+      //get array size
+      maxArraySize = S32K;
+      for(j=S32K-1;j>=0;j--){
+        if(rawdata.hist[spID][j] != 0.){
+          maxArraySize = j+1;
+          break;
+        }
+      }
 
-			//write histogram
-			if(rebin){
-				for(j=0;j<maxArraySize;j+=drawing.contractFactor){
-					val = getSpBinValRaw(spID,j,drawing.scaleFactor[spID],drawing.contractFactor);
-					fprintf(out,"%f\n",val);
-				}
-			}else{
-				for(j=0;j<maxArraySize;j++){
-					val = getSpBinValRaw(spID,j,drawing.scaleFactor[spID],1);
-					fprintf(out,"%f\n",val);
-				}
-			}
+      //write histogram
+      if(rebin){
+        for(j=0;j<maxArraySize;j+=drawing.contractFactor){
+          val = getSpBinValRaw(spID,j,drawing.scaleFactor[spID],drawing.contractFactor);
+          fprintf(out,"%f\n",val);
+        }
+      }else{
+        for(j=0;j<maxArraySize;j++){
+          val = getSpBinValRaw(spID,j,drawing.scaleFactor[spID],1);
+          fprintf(out,"%f\n",val);
+        }
+      }
 
-			//write histogram title
-			fprintf(out,"TITLE 1 %s\n",rawdata.histComment[spID]);
+      //write histogram title
+      fprintf(out,"TITLE 1 %s\n",rawdata.histComment[spID]);
 
-			break;
-	}
+      break;
+  }
 
-	//write comments
-	for(i=0;i<rawdata.numChComments;i++){
-		fprintf(out,"COMMENT %i %i %i %f %s\n", rawdata.chanCommentView[i], rawdata.chanCommentSp[i], rawdata.chanCommentCh[i], rawdata.chanCommentVal[i], rawdata.chanComment[i]);
-	}
+  //write comments
+  for(i=0;i<rawdata.numChComments;i++){
+    fprintf(out,"COMMENT %i %i %i %f %s\n", rawdata.chanCommentView[i], rawdata.chanCommentSp[i], rawdata.chanCommentCh[i], rawdata.chanCommentVal[i], rawdata.chanComment[i]);
+  }
 
-	fclose(out);
-	printf("Wrote data to file: %s\n",outFileName);
+  fclose(out);
+  printf("Wrote data to file: %s\n",outFileName);
 
-	return 0;
+  return 0;
 }

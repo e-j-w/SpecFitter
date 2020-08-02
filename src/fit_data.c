@@ -7,7 +7,7 @@
 //external declarations
 extern double evalPeakArea(const int peakNum, const int fitType);
 extern double evalPeakAreaErr(const int peakNum, const int fitType);
-extern double getFitChisq();
+extern double getFitChisq(const int fitType);
 
 //update the gui state while/after fitting
 gboolean update_gui_fit_state(){
@@ -89,7 +89,7 @@ gboolean print_fit_results(){
     getFormattedValAndUncertainty(fitpar.fitParVal[1],fitpar.fitParErr[1],fitParStr[1],50,1,guiglobals.roundErrors);
     getFormattedValAndUncertainty(fitpar.fitParVal[2],fitpar.fitParErr[2],fitParStr[2],50,1,guiglobals.roundErrors);
   }
-  length += snprintf(fitResStr+length,strSize-length,"Chisq/NDF: %f\n\nBackground\nA: %s, B: %s, C: %s\n\n",getFitChisq()/(1.0*fitpar.ndf),fitParStr[0],fitParStr[1],fitParStr[2]);
+  length += snprintf(fitResStr+length,strSize-length,"Chisq/NDF: %f\n\nBackground\nA: %s, B: %s, C: %s\n\n",getFitChisq(fitpar.fitType)/(1.0*fitpar.ndf),fitParStr[0],fitParStr[1],fitParStr[2]);
   if(fitpar.fitType == 1){
     if(calpar.calMode == 1){
       getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[3]),getCalVal(fitpar.fitParErr[3]),fitParStr[0],50,1,guiglobals.roundErrors);

@@ -307,8 +307,8 @@ void on_zoom_out_x(){
 //function handling mouse wheel scrolling to zoom the displayed spectrum
 void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
   if(!rawdata.openedSp){
-		return;
-	}
+    return;
+  }
 
   if(e->x < 80.0){
     //out of plot range
@@ -542,8 +542,8 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
 void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data){
 
   if(!rawdata.openedSp){
-		return;
-	}
+    return;
+  }
 
   int cursorChan = (int)getCursorChannel(event->x, event->y, 80.0, 40.0);
   int cursorChanRounded = cursorChan - (cursorChan % drawing.contractFactor); //channel at the start of the bin (if rebinned)
@@ -799,7 +799,7 @@ float getYPos(const float val, const int multiplotSpNum, const float height, con
       break;
   }
   //printf("pos: %f\n",pos);
-	return pos;
+  return pos;
 }
 
 //axis tick drawing
@@ -1100,22 +1100,22 @@ int getPlotRangeXUnits(){
 //drawFast: 0=don't interpolate, 1=interpolate (faster drawing, less accurate)
 void drawSpectrum(cairo_t *cr, const float width, const float height, const float scaleFactor, const unsigned char drawLabels, const unsigned char showFit, const unsigned char drawComments, const unsigned char drawFast){
 
-	if(!rawdata.openedSp){
-		return;
-	}
+  if(!rawdata.openedSp){
+    return;
+  }
 
-	if (drawing.multiPlots[0] >= NSPECT)
-	{
-		printf("Spectrum number too high (%i)!\n", drawing.multiPlots[0]);
-		return;
-	}
+  if (drawing.multiPlots[0] >= NSPECT)
+  {
+    printf("Spectrum number too high (%i)!\n", drawing.multiPlots[0]);
+    return;
+  }
 
   int i,j,k;
 
   //set the origin of the coordinate system in pixels
   float xorigin = 80.0*scaleFactor;
   float yorigin = 40.0*scaleFactor;
-	
+  
   // Draw the background colour
   //cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
   //cairo_paint(cr);
@@ -1233,7 +1233,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   //be a multiple of the skip factor
   int startBin = 0 - (drawing.lowerLimit % binSkipFactor);
 
-	//draw the actual histogram
+  //draw the actual histogram
   switch(drawing.multiplotMode){
     case 4:
       //stacked
@@ -1772,8 +1772,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
 void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data){
 
   if(!rawdata.openedSp){
-		return;
-	}
+    return;
+  }
 
   //printf("Drawing spectrum!\n");
   
