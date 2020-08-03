@@ -193,7 +193,7 @@ struct {
 
 //calibration globals
 struct {
-  char calMode; //0=no calibration, 1=calibration enabled
+  unsigned char calMode; //0=no calibration, 1=calibration enabled
   float calpar0,calpar1,calpar2; //0th, 1st, and 2nd order calibration parameters
   char calUnit[16]; //name of the unit used for calibration
   char calYUnit[32]; //name of the y-axis units

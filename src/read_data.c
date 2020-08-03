@@ -43,6 +43,9 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
         }
       }
 
+      //read calibration parameters
+      if(fread(&calpar, sizeof(calpar), 1, inp)!=1) return 0;
+
       //read comments
       if(fread(&uintBuf, sizeof(unsigned int), 1, inp)!=1) return 0;
       if(outHistStartSp == 0){
@@ -370,7 +373,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
             strncpy(str2,str,1024);
             int numLineEntries = 0;
             tok = strtok(str2," ");
-            if((strcmp(tok,"SPECTRUM1")==0)||(strcmp(tok,"TITLE")==0)||(strcmp(tok,"VIEW")==0)||(strcmp(tok,"VIEWPAR")==0)||(strcmp(tok,"VIEWSP")==0)||(strcmp(tok,"VIEWSCALE")==0)||(strcmp(tok,"COMMENT")==0)){
+            if((strcmp(tok,"SPECTRUM1")==0)||(strcmp(tok,"TITLE")==0)||(strcmp(tok,"VIEW")==0)||(strcmp(tok,"VIEWPAR")==0)||(strcmp(tok,"VIEWSP")==0)||(strcmp(tok,"VIEWSCALE")==0)||(strcmp(tok,"COMMENT")==0)||(strcmp(tok,"CALPAR")==0)||(strcmp(tok,"CALXUNIT")==0)||(strcmp(tok,"CALYUNIT")==0)){
               numLineEntries = 0;
             }else{
               //line is data
@@ -429,7 +432,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
                             rawdata.chanCommentVal[rawdata.numChComments] = atof(tok);
                             tok = strtok(NULL,""); //get the rest of the string
                             if(tok!=NULL){
-                              strncpy(rawdata.chanComment[rawdata.numChComments],tok,256);
+                              strncpy(rawdata.chanComment[rawdata.numChComments],tok,sizeof(rawdata.chanComment[rawdata.numChComments])-1);
                               rawdata.chanComment[rawdata.numChComments][strcspn(rawdata.chanComment[rawdata.numChComments], "\r\n")] = 0;//strips newline characters from the string
                               rawdata.numChComments += 1;
                             }
@@ -445,7 +448,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
                     if((spID >= 0)&&(spID < NSPECT)){
                       tok = strtok(NULL,""); //get the rest of the string
                       if(tok!=NULL){
-                        strncpy(rawdata.histComment[spID],tok,256);
+                        strncpy(rawdata.histComment[spID],tok,sizeof(rawdata.histComment[spID])-1);
                         rawdata.histComment[spID][strcspn(rawdata.histComment[spID], "\r\n")] = 0;//strips newline characters from the string
                       }
                     }						
@@ -454,7 +457,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
                   if(rawdata.numViews < MAXNVIEWS){
                     tok = strtok(NULL,""); //get the rest of the string
                     if(tok!=NULL){
-                      strncpy(rawdata.viewComment[rawdata.numViews],tok,256);
+                      strncpy(rawdata.viewComment[rawdata.numViews],tok,sizeof(rawdata.viewComment[rawdata.numViews])-1);
                       rawdata.viewComment[rawdata.numViews][strcspn(rawdata.viewComment[rawdata.numViews], "\r\n")] = 0;//strips newline characters from the string
                       if(fgets(str,256,inp)!=NULL){ //get an entire line
                         tok = strtok(str," ");
@@ -502,6 +505,35 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
                       }
                     }
                   }
+                }else if(strcmp(tok,"CALPAR")==0){
+                  tok = strtok(NULL," ");
+                  if(tok!=NULL){
+                    calpar.calpar0 = (float)atof(tok);
+                    tok = strtok(NULL," ");
+                    if(tok!=NULL){
+                      calpar.calpar1 = (float)atof(tok);
+                      tok = strtok(NULL," ");
+                      if(tok!=NULL){
+                        calpar.calpar2 = (float)atof(tok);
+                        tok = strtok(NULL," ");
+                        if(tok!=NULL){
+                          calpar.calMode = (unsigned char)atoi(tok);
+                        }
+                      }
+                    }
+                  }
+                }else if(strcmp(tok,"CALXUNIT")==0){
+                  tok = strtok(NULL,""); //get the rest of the string
+                  if(tok!=NULL){
+                    strncpy(calpar.calUnit,tok,sizeof(calpar.calUnit)-1);
+                    calpar.calUnit[strcspn(calpar.calUnit, "\r\n")] = 0;//strips newline characters from the string
+                  }						
+                }else if(strcmp(tok,"CALYUNIT")==0){
+                  tok = strtok(NULL,""); //get the rest of the string
+                  if(tok!=NULL){
+                    strncpy(calpar.calYUnit,tok,sizeof(calpar.calYUnit)-1);
+                    calpar.calYUnit[strcspn(calpar.calYUnit, "\r\n")] = 0;//strips newline characters from the string
+                  }						
                 }
               }
             }

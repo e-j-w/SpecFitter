@@ -29,6 +29,8 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
   for(i=0;i<rawdata.numSpOpened;i++){
     fwrite(&rawdata.histComment[i],sizeof(rawdata.histComment[i]),1,out);
   }
+  //write calibration parameters
+  fwrite(&calpar,sizeof(calpar),1,out);
   //write comments
   uintBuf = rawdata.numChComments; //number of comments to write
   fwrite(&uintBuf,sizeof(unsigned int),1,out);
@@ -393,6 +395,11 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
   for(i=0;i<rawdata.numChComments;i++){
     fprintf(out,"COMMENT %i %i %i %f %s\n", rawdata.chanCommentView[i], rawdata.chanCommentSp[i], rawdata.chanCommentCh[i], rawdata.chanCommentVal[i], rawdata.chanComment[i]);
   }
+
+  //write calibration parameters
+  fprintf(out,"CALPAR %f %f %f %i\n", calpar.calpar0, calpar.calpar1, calpar.calpar2, calpar.calMode);
+  fprintf(out,"CALXUNIT %s\n", calpar.calUnit);
+  fprintf(out,"CALYUNIT %s\n", calpar.calYUnit);
 
   fclose(out);
   printf("Wrote data to file: %s\n",outFileName);
