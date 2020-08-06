@@ -1,14 +1,20 @@
 #include "lin_eq_solver.h"
 
-int solve_lin_eq(lin_eq_type * lin_eq, int weighted)
+int solve_lin_eq(lin_eq_type *lin_eq, int weighted)
 {
 
   int i,j;//iterators
   int n=lin_eq->dim;//dimension of the matrix (assume square)
+
+  if(n > MAX_DIM)
+    {
+      printf("Too many parameters in linear equation.");
+      return 0;
+    }
   
   if(get_inv(lin_eq)==0) //compute the inverse matrix
     {
-      //printf("Linear equation set has no solutions\n");
+      //printf("Linear equation set has no solutions.\n");
       return 0;
     }
   
@@ -28,7 +34,7 @@ int solve_lin_eq(lin_eq_type * lin_eq, int weighted)
 }
 
 //get the inverse matrix using Gauss-Jordan elimination
-int get_inv(lin_eq_type * lin_eq)
+int get_inv(lin_eq_type *lin_eq)
 {
 
   int i,j,k,l;//iterators
@@ -36,12 +42,12 @@ int get_inv(lin_eq_type * lin_eq)
   long double s;//storage variable
 
   //allocate the identity matrix to be transformed to the inverse
-  long double id[MAX_DIM][MAX_DIM];//stack overflow risk?
-  memset(id,0,sizeof(id));
+  long double *id = malloc(MAX_DIM*MAX_DIM*sizeof(long double));
+  memset(id,0,MAX_DIM*MAX_DIM*sizeof(long double));
   for(i=0;i<n;i++)
     for(j=0;j<n;j++)
       if(i==j)
-        id[i][j]=1.0L;
+        id[i*MAX_DIM + j]=1.0L;
         
   memcpy(lin_eq->inv_matrix,lin_eq->matrix,sizeof(lin_eq->matrix));
         
@@ -57,15 +63,15 @@ int get_inv(lin_eq_type * lin_eq)
                   lin_eq->inv_matrix[i][k]=lin_eq->inv_matrix[j][k];
                   lin_eq->inv_matrix[j][k]=s;
                   
-                  s=id[i][k];
-                  id[i][k]=id[j][k];
-                  id[j][k]=s;
+                  s=id[i*MAX_DIM + k];
+                  id[i*MAX_DIM + k]=id[j*MAX_DIM + k];
+                  id[j*MAX_DIM + k]=s;
                 }
               s=1.0L/lin_eq->inv_matrix[i][i];
               for(k=0;k<n;k++)
                 {
                   lin_eq->inv_matrix[i][k]=s*lin_eq->inv_matrix[i][k];
-                  id[i][k]=s*id[i][k];
+                  id[i*MAX_DIM + k]=s*id[i*MAX_DIM + k];
                 }
               for(k=0;k<n;k++)
                 if(k!=i)
@@ -74,7 +80,7 @@ int get_inv(lin_eq_type * lin_eq)
                     for(l=0;l<n;l++)
                       {
                         lin_eq->inv_matrix[k][l]=lin_eq->inv_matrix[k][l] + s*lin_eq->inv_matrix[i][l];
-                        id[k][l]=id[k][l] + s*id[i][l];
+                        id[k*MAX_DIM + l]=id[k*MAX_DIM + l] + s*id[i*MAX_DIM + l];
                       }
                   }
             }
@@ -89,13 +95,15 @@ int get_inv(lin_eq_type * lin_eq)
     for(j=0;j<n;j++)
      printf("id[%i][%i] = %0.6LE\n",i,j,lin_eq->inv_matrix[i][j]);*/
   
-  memcpy(lin_eq->inv_matrix,id,sizeof(id));
+  memcpy(lin_eq->inv_matrix,id,MAX_DIM*MAX_DIM*sizeof(long double));
   
   //print the inverse matrix
   /*printf("\n");
   for(i=0;i<n;i++)
     for(j=0;j<n;j++)
      printf("inverse[%i][%i] = %0.6LE\n",i,j,lin_eq->inv_matrix[i][j]);*/
+  
+  free(id);
 
   return 1;
 

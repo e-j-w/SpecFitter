@@ -1074,7 +1074,7 @@ float centroidGuess(const float centroidInit){
 }
 
 int startGausFit(){
-
+printf("Here!\n");
   fitpar.ndf = (int)((fitpar.fitEndCh - fitpar.fitStartCh)/(1.0*drawing.contractFactor)) - (3+(3*fitpar.numFitPeaks));
   if(fitpar.ndf <= 0){
     printf("Not enough degrees of freedom to fit!\n");

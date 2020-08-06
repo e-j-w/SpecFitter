@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAX_DIM 20
+#define MAX_DIM 36 //for jf3, should be 6 + 3*MAX_FIT_PK
 
 typedef struct
 {
