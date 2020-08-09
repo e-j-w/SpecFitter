@@ -1101,8 +1101,20 @@ float centroidGuess(const float centroidInit){
     }
   }
 
-  printf("Centroid guess: %f\n",centroidVal);
+  //printf("Centroid guess: %f\n",centroidVal);
   return centroidVal;
+}
+
+int isCentroidNearOthers(const int centInd, const float dist){
+  int i;
+  for(i=0;i<fitpar.numFitPeaks;i++){
+    if(i!=centInd){
+      if(fabs(fitpar.fitPeakInitGuess[centInd] - fitpar.fitPeakInitGuess[i])<dist){
+        return 1;
+      }
+    }
+  }
+  return 0;
 }
 
 int startGausFit(){
@@ -1134,7 +1146,9 @@ printf("Here!\n");
 
   //assign initial guesses for non-linear params
   for(i=0;i<fitpar.numFitPeaks;i++){
-    fitpar.fitPeakInitGuess[i] = centroidGuess(fitpar.fitPeakInitGuess[i]); //guess peak positions
+    if(isCentroidNearOthers(i,10.0)==0){
+      fitpar.fitPeakInitGuess[i] = centroidGuess(fitpar.fitPeakInitGuess[i]); //guess peak positions
+    }
     fitpar.fitParVal[6+(3*i)] = getSpBinVal(0,fitpar.fitPeakInitGuess[i]) - fitpar.fitParVal[0] - fitpar.fitParVal[1]*fitpar.fitPeakInitGuess[i];
     fitpar.fitParVal[7+(3*i)] = fitpar.fitPeakInitGuess[i];
   }
