@@ -343,8 +343,8 @@ int readSPE(const char *filename, double outHist[NSPECT][S32K], int outHistStart
     outHist[outHistStartSp][i] = (double)inpHist[i];
   for (i = numElementsRead; i < S32K; i++)
     outHist[outHistStartSp][i] = 0.;
-
-  snprintf(rawdata.histComment[outHistStartSp],256,"%s %s",spLabel,basename((char*)filename));
+  gchar *label = g_convert(spLabel, -1, "UTF-8", "ISO-8859-1", NULL, NULL, NULL); //can get weirdly encoded junk, make sure it is properly converted
+  snprintf(rawdata.histComment[outHistStartSp],256,"%s %s",label,basename((char*)filename));
 
   fclose(inp);
   return 1;
