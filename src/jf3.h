@@ -17,8 +17,9 @@
 
 #define BIG_NUMBER    1E30
 #define SMALL_NUMBER -1E30
+
 #define MAX_DISP_SP   12 //maximum number of spectra which may be displayed at once
-#define MAX_FIT_PK    10 //maximum number of peaks which may be fit at once
+#define MAX_FIT_PK    10 //maximum number of peaks which may be fit at once (when changing, also change MAX_DIM in lin_eq_solver.h)
 
 /* Data file specs (be careful if changing these, can break compatibility) */
 #define S32K      32768 //maximum number of channels per spectrum in .mca and .fmca (changing breaks file compatibility)

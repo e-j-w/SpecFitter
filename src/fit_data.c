@@ -1055,8 +1055,39 @@ float centroidGuess(const float centroidInit){
   int i,j;
   float lowWindowVal, highWindowVal, filterVal;
   float minFilterVal = BIG_NUMBER;
+  float maxFilterVal = -1.0*BIG_NUMBER;
   float minCentroidVal = centroidInit;
+  float maxCentroidVal = centroidInit;
+  float centroidVal = centroidInit;
+
+  //first get maximum positive and negative slope
   for(i=0;i<((2*halfSearchLength)-windowSize);i++){
+    lowWindowVal = 0.;
+    highWindowVal = 0.;
+    for(j=0;j<windowSize;j++){
+      lowWindowVal += getSpBinVal(0,centroidInit+(drawing.contractFactor*(i - halfSearchLength + j)));
+      highWindowVal += getSpBinVal(0,centroidInit+(drawing.contractFactor*(i - halfSearchLength + j + windowSize)));
+    }
+    filterVal = highWindowVal - lowWindowVal;
+    if(filterVal < minFilterVal){
+      minCentroidVal = i;
+      minFilterVal = filterVal;
+    }
+    if(filterVal > maxFilterVal){
+      maxCentroidVal = i;
+      maxFilterVal = filterVal;
+    }
+  }
+
+  //then get slope closest to zero between the maximum positive and negative slopes
+  minFilterVal = BIG_NUMBER;
+  if(minCentroidVal > maxCentroidVal){
+    //swap values so that minCentroidVal is the smaller of the two
+    float swapVal = minCentroidVal;
+    minCentroidVal = maxCentroidVal;
+    maxCentroidVal = swapVal;
+  }
+  for(i=minCentroidVal; i<=maxCentroidVal; i++){
     lowWindowVal = 0.;
     highWindowVal = 0.;
     for(j=0;j<windowSize;j++){
@@ -1065,12 +1096,13 @@ float centroidGuess(const float centroidInit){
     }
     filterVal = fabsf(highWindowVal - lowWindowVal);
     if(filterVal < minFilterVal){
-      minCentroidVal = centroidInit - halfSearchLength + i + windowSize;
+      centroidVal = centroidInit - halfSearchLength + i + windowSize;
       minFilterVal = filterVal;
     }
   }
-  printf("Centroid guess: %f\n",minCentroidVal);
-  return minCentroidVal;
+
+  printf("Centroid guess: %f\n",centroidVal);
+  return centroidVal;
 }
 
 int startGausFit(){

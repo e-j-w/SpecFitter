@@ -1381,9 +1381,9 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       }
       //draw highlighed peak
       if((drawing.highlightedPeak >= 0)&&(drawing.highlightedPeak <= fitpar.numFitPeaks)&&(showFit>1)){
-        cairo_set_line_width(cr, 10.0*scaleFactor);
-        for(fitDrawX=(fitpar.fitParVal[7+(3*drawing.highlightedPeak)] - 3.*fitpar.fitParVal[8+(3*drawing.highlightedPeak)]);  fitDrawX<=(fitpar.fitParVal[7+(3*drawing.highlightedPeak)] + 3.*fitpar.fitParVal[8+(3*drawing.highlightedPeak)]); fitDrawX+= 0.2){
-          nextFitDrawX = fitDrawX + 0.2;
+        cairo_set_line_width(cr, 6.0*scaleFactor);
+        for(fitDrawX=floorf(fitpar.fitParVal[7+(3*drawing.highlightedPeak)] - 3.*fitpar.fitParVal[8+(3*drawing.highlightedPeak)]);  fitDrawX<=floorf(fitpar.fitParVal[7+(3*drawing.highlightedPeak)] + 3.*fitpar.fitParVal[8+(3*drawing.highlightedPeak)]); fitDrawX+= 0.5){
+          nextFitDrawX = fitDrawX + 0.5;
           xpos = getXPosFromCh(fitDrawX,width,1,xorigin);
           nextXpos = getXPosFromCh(nextFitDrawX,width,1,xorigin);
           if((xpos > 0)&&(nextXpos > 0)){
