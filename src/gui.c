@@ -725,8 +725,8 @@ void on_save_button_clicked(GtkButton *b)
           break;
       }
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
-      gtk_dialog_run (GTK_DIALOG (message_dialog));
-      gtk_widget_destroy (message_dialog);
+      gtk_dialog_run(GTK_DIALOG(message_dialog));
+      gtk_widget_destroy(message_dialog);
     }else{
       //update the status bar
       char saveMsg[512];
@@ -933,8 +933,8 @@ void on_export_image_button_clicked(GtkButton *b){
           break;
       }
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
-      gtk_dialog_run (GTK_DIALOG (message_dialog));
-      gtk_widget_destroy (message_dialog);
+      gtk_dialog_run(GTK_DIALOG(message_dialog));
+      gtk_widget_destroy(message_dialog);
     }else{
       //update the status bar
       char saveMsg[256];
@@ -1043,8 +1043,8 @@ void on_calibrate_ok_button_clicked(GtkButton *b)
     GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
     GtkWidget *message_dialog = gtk_message_dialog_new(calibrate_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Invalid calibration!");
     gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"At least one of the calibration parameters must be non-zero.");
-    gtk_dialog_run (GTK_DIALOG (message_dialog));
-    gtk_widget_destroy (message_dialog);
+    gtk_dialog_run(GTK_DIALOG(message_dialog));
+    gtk_widget_destroy(message_dialog);
     //gtk_window_set_transient_for(message_dialog, calibrate_window); //center massage dialog on calibrate window
   }
   
@@ -1260,8 +1260,8 @@ void on_multiplot_make_view_button_clicked(GtkButton *b)
     GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
     GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_manage_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot create view!");
     gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Too many views have been created.  Remove one first before creating a new one.");
-    gtk_dialog_run (GTK_DIALOG (message_dialog));
-    gtk_widget_destroy (message_dialog);
+    gtk_dialog_run(GTK_DIALOG(message_dialog));
+    gtk_widget_destroy(message_dialog);
     return;
   }
 
@@ -1296,8 +1296,8 @@ void on_multiplot_make_view_button_clicked(GtkButton *b)
     snprintf(errStr,256,"The maximum number of spectra\nthat may be plotted at once is %i.",MAX_DISP_SP);
     gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errStr);
 
-    gtk_dialog_run (GTK_DIALOG (message_dialog));
-    gtk_widget_destroy (message_dialog);
+    gtk_dialog_run(GTK_DIALOG(message_dialog));
+    gtk_widget_destroy(message_dialog);
     
   }else{
     //set drawing mode for view
@@ -1597,8 +1597,21 @@ void on_manage_delete_button_clicked(GtkButton *b)
 
 void on_sum_all_button_clicked(GtkButton *b)
 {
-
   //set all opened spectra to be drawn, in sum mode 
+
+  if(rawdata.numSpOpened > MAX_DISP_SP){
+    //too many spectra opened to sum
+    //show an error dialog
+    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+    GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Too many spectra to show summed view!");
+    char errStr[256];
+    snprintf(errStr,256,"The current session contains %i spectra, cannot sum all of them.\nThe maximum number of spectra that may be plotted at once is %i.\n\nCustomized sum and overlay views can be made using the Advanced Plotting dialog.",rawdata.numSpOpened,MAX_DISP_SP);
+    gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errStr);
+
+    gtk_dialog_run (GTK_DIALOG (message_dialog));
+    gtk_widget_destroy (message_dialog);
+    return;
+  }
 
   int i;
   drawing.multiplotMode = 1;//sum spectra

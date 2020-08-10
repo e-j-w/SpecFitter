@@ -1502,7 +1502,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     case 0:
       //modes with a single scale
       setTextColor(cr);
-      numTickPerSp = height/yorigin + 1;
+      numTickPerSp = height/(2.0*yorigin) + 1;
       if(drawing.logScale){
         //numTickPerSp *= 2;
         int nsigf10 = 0;
