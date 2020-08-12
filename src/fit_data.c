@@ -70,6 +70,21 @@ gboolean update_gui_fit_state(){
   return FALSE; //stop running
 }
 
+gboolean print_fit_error(){
+
+  GtkDialogFlags flags; 
+  GtkWidget *message_dialog;
+
+  //show a dialog box
+  flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+  message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, "Fit error");
+  gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"An error was encountered during the fit process.\nTry again using a different fit range or peak position(s).");
+  gtk_dialog_run (GTK_DIALOG (message_dialog));
+  gtk_widget_destroy (message_dialog);
+
+  return FALSE; //stop running
+}
+
 gboolean print_fit_results(){
 
   int i;
@@ -878,6 +893,7 @@ void performGausFit(){
     printf("WARNING: failed fit, iteration %i.\n",numNLIter);
     guiglobals.fittingSp = 0;
     g_idle_add(update_gui_fit_state,NULL);
+    g_idle_add(print_fit_error,NULL);
     return;
   }
 
@@ -898,6 +914,7 @@ void performGausFit(){
       printf("WARNING: failed fit, iteration %i.\n",numNLIter);
       guiglobals.fittingSp = 0;
       g_idle_add(update_gui_fit_state,NULL);
+      g_idle_add(print_fit_error,NULL);
       return;
     }
   }
@@ -1118,7 +1135,7 @@ int isCentroidNearOthers(const int centInd, const float dist){
 }
 
 int startGausFit(){
-printf("Here!\n");
+  
   fitpar.ndf = (int)((fitpar.fitEndCh - fitpar.fitStartCh)/(1.0*drawing.contractFactor)) - (3+(3*fitpar.numFitPeaks));
   if(fitpar.ndf <= 0){
     printf("Not enough degrees of freedom to fit!\n");
