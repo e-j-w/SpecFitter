@@ -4,7 +4,7 @@
 
 ## Description
 
-A spectrum/histogram viewer and fitter app, with functionality inspired by the `gf3` program for gamma-ray spectroscopy in the [RadWare](https://radware.phy.ornl.gov/) software package.  Uses [GTK](https://www.gtk.org/) to provide smooth rendering and (hopefully) an easy to understand interface.
+A spectrum viewer and fitter app, suitable for gamma-ray spectroscopy or similar work.  Uses [GTK](https://www.gtk.org/) to provide smooth rendering and (hopefully) an easy to understand interface.
 
 ## Screenshot
 

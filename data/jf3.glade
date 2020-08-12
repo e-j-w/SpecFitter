@@ -3116,8 +3116,6 @@ Weight by fit function - Weights are proportional to the fit function values det
           <object class="GtkOverlay">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_start">6</property>
-            <property name="margin_end">6</property>
             <child>
               <object class="GtkBox" id="no_sp_box">
                 <property name="visible">True</property>
@@ -3394,7 +3392,6 @@ Weight by fit function - Weights are proportional to the fit function values det
             <child>
               <object class="GtkButton" id="open_button">
                 <property name="label" translatable="yes">Open...</property>
-                <property name="width_request">80</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>

@@ -1240,7 +1240,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     case 3:
       //overlay (independent scaling)
       for(i=0;i<drawing.numMultiplotSp;i++){
-        for(j=startBin;j<(drawing.upperLimit-drawing.lowerLimit-1);j+=binSkipFactor){
+        for(j=startBin;j<(drawing.upperLimit-drawing.lowerLimit);j+=binSkipFactor){
 
           float currentVal, nextVal;
 
@@ -1272,7 +1272,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     case 2:
       //overlay (common scaling)
       for(i=0;i<drawing.numMultiplotSp;i++){
-        for(j=startBin;j<(drawing.upperLimit-drawing.lowerLimit-1);j+=binSkipFactor){
+        for(j=startBin;j<(drawing.upperLimit-drawing.lowerLimit);j+=binSkipFactor){
 
           float currentVal, nextVal;
 
@@ -1304,7 +1304,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     case 1:
       //summed
     case 0:
-      for(i=startBin;i<(drawing.upperLimit-drawing.lowerLimit-1);i+=binSkipFactor){
+      for(i=startBin;i<(drawing.upperLimit-drawing.lowerLimit);i+=binSkipFactor){
 
         float currentVal, nextVal;
 
