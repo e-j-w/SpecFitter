@@ -2162,7 +2162,6 @@ void iniitalizeUIElements(){
   guiglobals.preferDarkTheme = 0;
   guiglobals.popupFitResults = 1;
   guiglobals.useZoomAnimations = 1;
-  guiglobals.framesSinceZoom = -1;
   guiglobals.exportFileType = 0;
   fitpar.fixRelativeWidths = 1;
   fitpar.fitStartCh = -1;

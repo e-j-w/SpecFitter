@@ -62,7 +62,7 @@ Conversion codes for some of the above data formats are available in the [FileCo
 
 ### Compatibility
 
-The build process has been tested on CentOS 7, Ubuntu 20.04, and Arch Linux (as of July 2020) under the GNOME desktop environment.  It should work on any Linux distro that satisfies the listed build dependencies.  It may be possible to build this on other platforms where GTK is [available](https://www.gtk.org/docs/installations/), but that hasn't been tested.
+The build process has been tested on CentOS 7, Ubuntu 20.04, and Arch Linux (as of October 2020) under the GNOME desktop environment.  It should work on any Linux distro that satisfies the listed build dependencies.  It may be possible to build this on other platforms where GTK is [available](https://www.gtk.org/docs/installations/), but that hasn't been tested.
 
 ### Build dependencies
 
@@ -89,7 +89,6 @@ In Arch Linux:
 sudo pacman -S gcc make pkgconf gtk3
 ```
 
-
 ### Build instructions
 
 A Makefile is provided, build the program using:
@@ -103,7 +102,6 @@ The resulting `jf3` executable can be run directly from the command line or your
 This will place the `jf3` binary in `/usr/bin`, a data-type definition file in `/usr/share/mime/packages` (to allow opening compatible files directly from the file manager), and a desktop entry file in `/usr/share/applications` (for desktop environment integration).  These changes can be undone with:
 
 ```sudo make uninstall```
-
 
 ## Usage tips
 

@@ -147,7 +147,6 @@ struct {
   char preferDarkTheme; //0=prefer light, 1=prefer dark
   char popupFitResults; //0=don't popup results after fit, 1=popup results
   char useZoomAnimations; //0=don't use, 1=use
-  int framesSinceZoom;
   char exportFileType; //0=text, 1=radware
 } guiglobals;
 
@@ -176,7 +175,8 @@ struct {
 //spectrum drawing globals
 struct {
   int lowerLimit, upperLimit; //lower and upper limits to plot spectrum (in uncalibrated units ie. channels)
-  int xChanFocus, xChanFocusChangePerFrame, xChanToFocus; //x channel to focus on when zooming
+  int xChanFocus; //x channel to focus on when zooming
+  float zoomFocusFrac; //fraction of the visible area to have before the zoom focus point
   float zoomLevel, zoomToLevel; //1.0 = zoomed out fully (on x axis)
   int autoScale; //0=don't autoscale y axis, 1=autoscale y axis
   int logScale; //0=draw in linear scale, 1=draw in log scale (y-axis)

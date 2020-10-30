@@ -24,57 +24,58 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
     exit(-1);
   }
 
-  if(fread(&ucharBuf, sizeof(unsigned char), 1, inp)!=1) return 0;
+  if(fread(&ucharBuf, sizeof(unsigned char), 1, inp)!=1){fclose(inp); return 0;}
   if(ucharBuf==0){
     //version 0 of file format
-    if(fread(&ucharBuf, sizeof(unsigned char), 1, inp)!=1) return 0;
+    if(fread(&ucharBuf, sizeof(unsigned char), 1, inp)!=1){fclose(inp); return 0;}
     numSpec = ucharBuf;
     if(numSpec > 0){
 
       if((numSpec + outHistStartSp)>NSPECT){
         printf("Cannot open file %s, number of spectra would exceed maximum!\n", filename);
+        fclose(inp);
         return -1; //over-import error
       }
 
       //read labels
       for(i=0;i<numSpec;i++){
         if(i<NSPECT){
-          if(fread(rawdata.histComment[i+outHistStartSp],sizeof(rawdata.histComment[i+outHistStartSp]), 1, inp)!=1) return 0;
+          if(fread(rawdata.histComment[i+outHistStartSp],sizeof(rawdata.histComment[i+outHistStartSp]), 1, inp)!=1){fclose(inp); return 0;}
         }
       }
 
       //read calibration parameters
-      if(fread(&calpar, sizeof(calpar), 1, inp)!=1) return 0;
+      if(fread(&calpar, sizeof(calpar), 1, inp)!=1){fclose(inp); return 0;}
 
       //read comments
-      if(fread(&uintBuf, sizeof(unsigned int), 1, inp)!=1) return 0;
+      if(fread(&uintBuf, sizeof(unsigned int), 1, inp)!=1){fclose(inp); return 0;}
       if(outHistStartSp == 0){
         //no comments exist already
         rawdata.numChComments = uintBuf;
         for(i=0;i<rawdata.numChComments;i++){
           if(i<NCHCOM){
-            if(fread(&rawdata.chanCommentView[i],sizeof(rawdata.chanCommentView[i]), 1, inp)!=1) return 0;
-            if(fread(&rawdata.chanCommentSp[i],sizeof(rawdata.chanCommentSp[i]), 1, inp)!=1) return 0;
-            if(fread(&rawdata.chanCommentCh[i],sizeof(rawdata.chanCommentCh[i]), 1, inp)!=1) return 0;
-            if(fread(&rawdata.chanCommentVal[i],sizeof(rawdata.chanCommentVal[i]), 1, inp)!=1) return 0;
-            if(fread(rawdata.chanComment[i],sizeof(rawdata.chanComment[i]), 1, inp)!=1) return 0;
+            if(fread(&rawdata.chanCommentView[i],sizeof(rawdata.chanCommentView[i]), 1, inp)!=1){fclose(inp); return 0;}
+            if(fread(&rawdata.chanCommentSp[i],sizeof(rawdata.chanCommentSp[i]), 1, inp)!=1){fclose(inp); return 0;}
+            if(fread(&rawdata.chanCommentCh[i],sizeof(rawdata.chanCommentCh[i]), 1, inp)!=1){fclose(inp); return 0;}
+            if(fread(&rawdata.chanCommentVal[i],sizeof(rawdata.chanCommentVal[i]), 1, inp)!=1){fclose(inp); return 0;}
+            if(fread(rawdata.chanComment[i],sizeof(rawdata.chanComment[i]), 1, inp)!=1){fclose(inp); return 0;}
           }
         }
       }else{
         //appending spectra, comments may already exist
         for(i=rawdata.numChComments;i<rawdata.numChComments+uintBuf;i++){
           if(i<NCHCOM){
-            if(fread(&rawdata.chanCommentView[i],sizeof(rawdata.chanCommentView[i]), 1, inp)!=1) return 0;
-            if(fread(&rawdata.chanCommentSp[i],sizeof(rawdata.chanCommentSp[i]), 1, inp)!=1) return 0;
+            if(fread(&rawdata.chanCommentView[i],sizeof(rawdata.chanCommentView[i]), 1, inp)!=1){fclose(inp); return 0;}
+            if(fread(&rawdata.chanCommentSp[i],sizeof(rawdata.chanCommentSp[i]), 1, inp)!=1){fclose(inp); return 0;}
             if(rawdata.chanCommentView[i] == 1){
               rawdata.chanCommentSp[i]+=startNumViews; //assign to the correct (appended) view
             }else{
               rawdata.chanCommentSp[i]+=outHistStartSp; //assign to the correct (appended) spectrum
             }
             //printf("Comment %i went to sp %i\n",i,rawdata.chanCommentSp[i]+1);
-            if(fread(&rawdata.chanCommentCh[i],sizeof(rawdata.chanCommentCh[i]), 1, inp)!=1) return 0;
-            if(fread(&rawdata.chanCommentVal[i],sizeof(rawdata.chanCommentVal[i]), 1, inp)!=1) return 0;
-            if(fread(rawdata.chanComment[i],sizeof(rawdata.chanComment[i]), 1, inp)!=1) return 0;
+            if(fread(&rawdata.chanCommentCh[i],sizeof(rawdata.chanCommentCh[i]), 1, inp)!=1){fclose(inp); return 0;}
+            if(fread(&rawdata.chanCommentVal[i],sizeof(rawdata.chanCommentVal[i]), 1, inp)!=1){fclose(inp); return 0;}
+            if(fread(rawdata.chanComment[i],sizeof(rawdata.chanComment[i]), 1, inp)!=1){fclose(inp); return 0;}
           }
         }
         rawdata.numChComments += uintBuf;
@@ -85,22 +86,22 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
       }
 
       //read views
-      if(fread(&uintBuf, sizeof(unsigned int), 1, inp)!=1) return 0;
+      if(fread(&uintBuf, sizeof(unsigned int), 1, inp)!=1){fclose(inp); return 0;}
       if(outHistStartSp == 0){
         //no comments exist already
         rawdata.numViews = uintBuf;
         for(i=0;i<rawdata.numViews;i++){
           if(i<MAXNVIEWS){
             memset(rawdata.viewScaleFactor[i],0,sizeof(rawdata.viewScaleFactor[i]));
-            if(fread(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,inp)!=1) return 0;
-            if(fread(&rawdata.viewMultiplotMode[i],sizeof(unsigned char),1,inp)!=1) return 0;
-            if(fread(&rawdata.viewNumMultiplotSp[i],sizeof(int),1,inp)!=1) return 0;
+            if(fread(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,inp)!=1){fclose(inp); return 0;}
+            if(fread(&rawdata.viewMultiplotMode[i],sizeof(unsigned char),1,inp)!=1){fclose(inp); return 0;}
+            if(fread(&rawdata.viewNumMultiplotSp[i],sizeof(int),1,inp)!=1){fclose(inp); return 0;}
             for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
-              if(fread(&rawdata.viewMultiPlots[i][j],sizeof(int),1,inp)!=1) return 0;
+              if(fread(&rawdata.viewMultiPlots[i][j],sizeof(int),1,inp)!=1){fclose(inp); return 0;}
             }
             for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
               if((rawdata.viewMultiPlots[i][j]>=0)&&(rawdata.viewMultiPlots[i][j]<NSPECT)){
-                if(fread(&rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]],sizeof(double),1,inp)!=1) return 0;
+                if(fread(&rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]],sizeof(double),1,inp)!=1){fclose(inp); return 0;}
               }
             }
           }
@@ -110,15 +111,15 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
         for(i=rawdata.numViews;i<rawdata.numViews+uintBuf;i++){
           if(i<MAXNVIEWS){
             memset(rawdata.viewScaleFactor[i],0,sizeof(rawdata.viewScaleFactor[i]));
-            if(fread(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,inp)!=1) return 0;
-            if(fread(&rawdata.viewMultiplotMode[i],sizeof(unsigned char),1,inp)!=1) return 0;
-            if(fread(&rawdata.viewNumMultiplotSp[i],sizeof(int),1,inp)!=1) return 0;
+            if(fread(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,inp)!=1){fclose(inp); return 0;}
+            if(fread(&rawdata.viewMultiplotMode[i],sizeof(unsigned char),1,inp)!=1){fclose(inp); return 0;}
+            if(fread(&rawdata.viewNumMultiplotSp[i],sizeof(int),1,inp)!=1){fclose(inp); return 0;}
             for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
-              if(fread(&rawdata.viewMultiPlots[i][j],sizeof(int),1,inp)!=1) return 0;
+              if(fread(&rawdata.viewMultiPlots[i][j],sizeof(int),1,inp)!=1){fclose(inp); return 0;}
             }
             for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
               if((rawdata.viewMultiPlots[i][j]>=0)&&(rawdata.viewMultiPlots[i][j]<NSPECT)){
-                if(fread(&rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]],sizeof(double),1,inp)!=1) return 0;
+                if(fread(&rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]],sizeof(double),1,inp)!=1){fclose(inp); return 0;}
               }
             }
             //realign view data
@@ -152,16 +153,16 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
         spInd = 0;
         while(doneSp==0){
           //read packet header
-          if(fread(&scharBuf,sizeof(signed char), 1, inp)!=1) return 0;
+          if(fread(&scharBuf,sizeof(signed char), 1, inp)!=1){fclose(inp); return 0;}
           //printf("read packet counter: %i\n",scharBuf);
           if(scharBuf == 0){
-            if(fread(&val,sizeof(float), 1, inp)!=1) return 0; //read in final value
+            if(fread(&val,sizeof(float), 1, inp)!=1){fclose(inp); return 0;} //read in final value
             outHist[i+outHistStartSp][spInd] = (double)val;
             spInd++;
             doneSp = 1; //move on to the next spectrum
           }else if(scharBuf > 0){
             //duplicated entries
-            if(fread(&val,sizeof(float), 1, inp)!=1) return 0; //read in value
+            if(fread(&val,sizeof(float), 1, inp)!=1){fclose(inp); return 0;} //read in value
             for(j=0;j<scharBuf;j++){
               outHist[i+outHistStartSp][spInd+j] = (double)val;
             }
@@ -170,7 +171,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
             //non-duplicated entries
             int numEntr = abs(scharBuf);
             for(j=0;j<numEntr;j++){
-              if(fread(&val,sizeof(float), 1, inp)!=1) return 0; //read in value
+              if(fread(&val,sizeof(float), 1, inp)!=1){fclose(inp); return 0;} //read in value
               outHist[i+outHistStartSp][spInd+j] = (double)val;
               //printf("val %f\n",val);
             }
@@ -186,10 +187,12 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 
     }else{
       printf("ERROR: file %s contains no spectra.\n",filename);
+      fclose(inp);
       return 0;
     }
   }else{
     printf("ERROR: file %s has unknown .jf3 file format version (%i).\n",filename,ucharBuf);
+    fclose(inp);
     return 0;
   }
 
@@ -223,6 +226,7 @@ int readMCA(const char *filename, double outHist[NSPECT][S32K], const unsigned i
   //printf("number of spectra in file '%s': %i\n",filename,numSpec);	
   if((outHistStartSp+numSpec)>=NSPECT){
     printf("Cannot open file %s, number of spectra would exceed maximum!\n", filename);
+    fclose(inp);
     return -1; //over-import error
   }
 
@@ -274,6 +278,7 @@ int readFMCA(const char *filename, double outHist[NSPECT][S32K], const unsigned 
   //printf("number of spectra in file '%s': %i\n",filename,numSpec);
   if((outHistStartSp+numSpec)>=NSPECT){
     printf("Cannot open file %s, number of spectra would exceed maximum!\n", filename);
+    fclose(inp);
     return -1;
   }
 
@@ -323,6 +328,7 @@ int readSPE(const char *filename, double outHist[NSPECT][S32K], int outHistStart
   if(fread(header, 24, 1, inp) != 1){
     printf("ERROR: Cannot read header from the .spe file: %s\n", filename);
     printf("Verify that the format of the file is correct.\n");
+    fclose(inp);
     return 0;
   }
   int numElementsRead = fread(inpHist, sizeof(float), 4096, inp);
@@ -330,11 +336,13 @@ int readSPE(const char *filename, double outHist[NSPECT][S32K], int outHistStart
     printf("ERROR: Cannot read spectrum from the .spe file: %s\n", filename);
     printf("fread code: %i\n",numElementsRead);
     printf("Verify that the format of the file is correct.\n");
+    fclose(inp);
     return 0;
   }
 
   if(outHistStartSp>=NSPECT){
     printf("Cannot open file %s, number of spectra would exceed maximum!\n", filename);
+    fclose(inp);
     return -1; //over-import error
   }
 
@@ -402,6 +410,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
                 }
               }else if(numLineEntries != numColumns){
                 printf("ERROR: inconsistent number of columns (%i) in line %i of file: %s\n",numLineEntries,numElementsRead,filename);
+                fclose(inp);
                 return 0;
               }
               for(i=0;i<numLineEntries;i++){
@@ -550,6 +559,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
   //check for import errors
   if(numElementsRead == 0){
     printf("ERROR: Empty input file: %s\n", filename);
+    fclose(inp);
     return 0;
   }
 
@@ -616,27 +626,28 @@ int readROOT(const char *filename, double outHist[NSPECT][S32K], const unsigned 
               }
             }
           }
-        }
-        
-        
-        if((strncmp(tok,"TH1F",256)==0)||(strncmp(tok,"TH1D",256)==0)||(strncmp(tok,"TH1I",256)==0)){
-          //printf("1-D histogram (floating point) found.\n");
-          histType = 1;
-          tok = strtok (NULL," *");
-          if(tok!=NULL){
-            //printf("Histogram name: %s\n",tok);
-            strncpy(histName,tok,255);
-            histNum++;
-            //get rid of any previous histogram values (for when overwriting other histos)
-            if(outHistStartSp+histNum<=NSPECT){
-              memset(outHist[outHistStartSp+histNum-1],0,sizeof(outHist[outHistStartSp+histNum-1]));
+
+          if((strncmp(tok,"TH1F",256)==0)||(strncmp(tok,"TH1D",256)==0)||(strncmp(tok,"TH1I",256)==0)){
+            //printf("1-D histogram (floating point) found.\n");
+            histType = 1;
+            tok = strtok (NULL," *");
+            if(tok!=NULL){
+              //printf("Histogram name: %s\n",tok);
+              strncpy(histName,tok,255);
+              histNum++;
+              if(outHistStartSp+histNum<=NSPECT){
+                //get rid of any previous histogram values (for when overwriting other histos)
+                memset(outHist[outHistStartSp+histNum-1],0,sizeof(outHist[outHistStartSp+histNum-1]));
+                snprintf(rawdata.histComment[outHistStartSp+histNum-1],256,"Spectrum %i of %s",histNum,basename((char*)filename));
+              }
             }
-            snprintf(rawdata.histComment[outHistStartSp+histNum-1],256,"Spectrum %i of %s",histNum,basename((char*)filename));
           }
         }
+        
       }
   }else{
     printf("Specified file %s has nothing in it.\n",filename);
+    fclose(inp);
     free(histName);
     free(str);
     return 0;
@@ -705,7 +716,6 @@ int readSpectrumDataFile(const char *filename, double outHist[NSPECT][S32K], con
       return passedSpCount;
     }
   }
-  
 
   return numSpec;
 }
