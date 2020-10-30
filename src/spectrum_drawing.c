@@ -24,6 +24,7 @@ float getCursorChannel(const float cursorx, const float cursory, const float xor
   if((cursorx > xorigin)&&(cursory < (dasize.height - yorigin))){
     
     float cursorChan = drawing.lowerLimit + (((cursorx)-xorigin)/(dasize.width-xorigin))*(drawing.upperLimit - drawing.lowerLimit);
+    //printf("chan: %f\n",cursorChan);
     return cursorChan;
     //return cursorChan - fmod(cursorChan,drawing.contractFactor);
   }
@@ -526,9 +527,6 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
     return;
   }
 
-  int cursorChan = (int)getCursorChannel(event->x, event->y, 80.0, 40.0);
-  int cursorChanRounded = cursorChan - (cursorChan % drawing.contractFactor); //channel at the start of the bin (if rebinned)
-
   //printf("Cursor pos: %f %f\n",event->x,event->y);
   if (event->state & GDK_BUTTON1_MASK){
     //left mouse button being pressed
@@ -560,6 +558,10 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
     //no button press
     guiglobals.draggingSp = 0;
   }
+
+  int cursorChan = (int)getCursorChannel(event->x, event->y, 80.0, 40.0);
+  int cursorChanRounded = cursorChan - (cursorChan % drawing.contractFactor); //channel at the start of the bin (if rebinned)
+  //printf("cursorChan: %i\n",cursorChan);
 
   if(cursorChan >= 0){
 
@@ -1758,9 +1760,6 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data){
   }
 
   //printf("Drawing spectrum!\n");
-  
-  if(guiglobals.draggingSp == 0)
-    gtk_label_set_text(bottom_info_text,"Drag spectrum to pan, mouse wheel to zoom.");
 
   GdkRectangle dasize;  // GtkDrawingArea size
   GdkWindow *wwindow = gtk_widget_get_window(widget);

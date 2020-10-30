@@ -81,6 +81,12 @@ void setSpOpenView(const char spOpened){
   }
 }
 
+//call this when manking a UI change to the spectrum drawing area
+void manualSpectrumAreaDraw(){
+  gtk_label_set_text(bottom_info_text,"Drag spectrum to pan, mouse wheel to zoom.");
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
+}
+
 void getViewStr(char *viewStr, const unsigned int strSize, const int viewNum){
   if(viewNum == -1){
     //generating string for temporary view
@@ -402,7 +408,7 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button)
     printf(", multiplot mode: %i\n",drawing.multiplotMode);*/
     
     //printf("Set selected spectrum to %i\n",dispSp);
-    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+    manualSpectrumAreaDraw();
   }else{
     guiglobals.deferSpSelChange = 0;
   }
@@ -585,7 +591,7 @@ void on_open_button_clicked(GtkButton *b)
   }
 
   g_object_unref(native);
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+  manualSpectrumAreaDraw();
   
 }
 
@@ -678,7 +684,7 @@ void on_append_button_clicked(GtkButton *b)
   }
 
   g_object_unref(native);
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+  manualSpectrumAreaDraw();
   
 }
 
@@ -963,7 +969,7 @@ void on_display_button_clicked(GtkButton *b)
 
 void on_zoom_scale_changed(GtkRange *range, gpointer user_data){
   drawing.zoomLevel = (float)pow(2,gtk_range_get_value(range)); //modify the zoom level
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw without changing the status bar label
 }
 void on_contract_scale_changed(GtkRange *range, gpointer user_data){
   int oldContractFactor = drawing.contractFactor;
@@ -978,7 +984,7 @@ void on_contract_scale_changed(GtkRange *range, gpointer user_data){
       fitpar.fitParVal[i] *= 1.0*drawing.contractFactor/oldContractFactor;
     }
   }
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
+  manualSpectrumAreaDraw(); //redraw the spectrum
 }
 
 void on_calibrate_button_clicked(GtkButton *b)
@@ -1037,7 +1043,7 @@ void on_calibrate_ok_button_clicked(GtkButton *b)
     //printf("Calibration parameters: %f %f %f, drawing.calMode: %i, calpar.calUnit: %s\n",calpar.calpar0,calpar.calpar1,calpar.calpar2,drawing.calMode,drawing.calUnit);
     updateConfigFile();
     gtk_widget_hide(GTK_WIDGET(calibrate_window)); //close the calibration window
-    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+    manualSpectrumAreaDraw();
   }else{
     calpar.calMode=0;
     GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
@@ -1056,7 +1062,7 @@ void on_remove_calibration_button_clicked(GtkButton *b)
   //printf("Calibration parameters: %f %f %f, drawing.calMode: %i, calpar.calUnit: %s\n",calpar.calpar0,calpar.calpar1,calpar.calpar2,drawing.calMode,drawing.calUnit);
   updateConfigFile();
   gtk_widget_hide(GTK_WIDGET(calibrate_window)); //close the calibration window
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+  manualSpectrumAreaDraw();
   
 }
 
@@ -1103,7 +1109,7 @@ void on_comment_ok_button_clicked(GtkButton *b)
     }
 
     gtk_widget_hide(GTK_WIDGET(comment_window)); //close the comment window
-    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
+    manualSpectrumAreaDraw(); //redraw the spectrum
   }
 }
 void on_remove_comment_button_clicked(GtkButton *b)
@@ -1122,7 +1128,7 @@ void on_remove_comment_button_clicked(GtkButton *b)
     rawdata.numChComments--;
   }
   gtk_widget_hide(GTK_WIDGET(comment_window)); //close the comment window
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
+  manualSpectrumAreaDraw(); //redraw the spectrum
 }
 
 void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
@@ -1441,7 +1447,7 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
   }
   
   gtk_widget_hide(GTK_WIDGET(multiplot_manage_window)); //close the multiplot/manage window
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
+  manualSpectrumAreaDraw(); //redraw the spectrum
   
 }
 
@@ -1475,7 +1481,7 @@ void on_manage_name_cell_edited(GtkCellRendererText *cell, gchar *path_string, g
   on_spectrum_selector_changed(spectrum_selector);
 
   //redraw the spectrum (in case its name changed)
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+  manualSpectrumAreaDraw();
 
 }
 
@@ -1641,7 +1647,7 @@ void on_sum_all_button_clicked(GtkButton *b)
   }
 
   gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE); //sum mode, therefore can fit
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+  manualSpectrumAreaDraw();
 
 }
 
@@ -1674,7 +1680,7 @@ void on_fit_button_clicked(GtkButton *b)
 void on_fit_fit_button_clicked(GtkButton *b)
 {
   startGausFit(); //perform the fit
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+  manualSpectrumAreaDraw();
   //update widgets
   update_gui_fit_state();
 }
@@ -1778,7 +1784,7 @@ void on_preferences_apply_button_clicked(GtkButton *b)
   fitpar.fitType = (unsigned char)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox));
   fitpar.weightMode = (unsigned char)gtk_combo_box_get_active(GTK_COMBO_BOX(weight_mode_combobox));
   updateConfigFile();
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
+  manualSpectrumAreaDraw(); //redraw the spectrum
   gtk_widget_hide(GTK_WIDGET(preferences_window)); //close the preferences window
 }
 
@@ -1811,7 +1817,7 @@ void on_toggle_autoscale(GtkToggleButton *togglebutton, gpointer user_data)
     drawing.autoScale=1;
   else
     drawing.autoScale=0;
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+  manualSpectrumAreaDraw();
 }
 
 void on_toggle_logscale(GtkToggleButton *togglebutton, gpointer user_data)
@@ -1821,7 +1827,7 @@ void on_toggle_logscale(GtkToggleButton *togglebutton, gpointer user_data)
       drawing.logScale=1;
     else
       drawing.logScale=0;
-    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+    manualSpectrumAreaDraw();
   }
 }
 //used for keyboard shortcut
@@ -1833,7 +1839,7 @@ void toggle_logscale(){
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(logscale_button),TRUE);
     }
   }
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+  manualSpectrumAreaDraw();
 }
 
 void on_toggle_cursor(GtkToggleButton *togglebutton, gpointer user_data)
@@ -1842,7 +1848,7 @@ void on_toggle_cursor(GtkToggleButton *togglebutton, gpointer user_data)
     guiglobals.drawSpCursor=0;
   else
     guiglobals.drawSpCursor=-1;
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+  manualSpectrumAreaDraw();
 }
 //used for keyboard shortcut
 void toggle_cursor(){
@@ -1853,7 +1859,7 @@ void toggle_cursor(){
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cursor_draw_button),TRUE);
     }
   }
-  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+  manualSpectrumAreaDraw();
 }
 
 
