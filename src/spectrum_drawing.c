@@ -231,7 +231,7 @@ void autoZoom(){
 
 gboolean zoom_in_tick_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gpointer user_data){
   drawing.zoomLevel *= 1.15;
-  if(drawing.zoomLevel > drawing.zoomToLevel){
+  if((drawing.zoomLevel > drawing.zoomToLevel)||(drawing.zoomLevel > 1024.0)){
     drawing.zoomLevel = drawing.zoomToLevel;
     gtk_range_set_value(GTK_RANGE(zoom_scale),log(drawing.zoomLevel)/log(2.));//base 2 log of zoom
     gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
@@ -244,7 +244,7 @@ gboolean zoom_in_tick_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gp
 
 gboolean zoom_out_tick_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gpointer user_data){
   drawing.zoomLevel *= 0.87;
-  if(drawing.zoomLevel < drawing.zoomToLevel){
+  if((drawing.zoomLevel < drawing.zoomToLevel)||(drawing.zoomLevel < 1.0)){
     drawing.zoomLevel = drawing.zoomToLevel;
     gtk_range_set_value(GTK_RANGE(zoom_scale),log(drawing.zoomLevel)/log(2.));//base 2 log of zoom
     gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
