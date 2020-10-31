@@ -131,8 +131,7 @@ Author: Jonathan Williams
     <property name="attached-to">window</property>
     <property name="program-name">jf3</property>
     <property name="copyright" translatable="yes">© 2020 Jonathan Williams</property>
-    <property name="comments" translatable="yes">A GTK-based spectrum/histogram
-viewer and analysis application.</property>
+    <property name="comments" translatable="yes">A GTK-based spectroscopy tool.</property>
     <property name="website">https://github.com/e-j-w/jf3</property>
     <property name="website-label" translatable="yes">Source Repository</property>
     <property name="authors">Jonathan Williams</property>

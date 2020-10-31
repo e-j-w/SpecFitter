@@ -538,6 +538,8 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
       guiglobals.dragstartul=drawing.upperLimit;
       guiglobals.dragstartll=drawing.lowerLimit;
       guiglobals.dragStartX = event->x;
+      drawing.xChanFocus = (drawing.upperLimit + drawing.lowerLimit)/2;
+      drawing.zoomFocusFrac = 0.5;
       //printf("Drag started! dragstartll=%i, dragstartul=%i\n",guiglobals.dragstartll,guiglobals.dragstartul);
     }else{
       //continue drag
@@ -546,10 +548,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
       GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
       // Determine GtkDrawingArea dimensions
       gdk_window_get_geometry (gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
-      int limitWidth = drawing.upperLimit-drawing.lowerLimit;
-      drawing.upperLimit = guiglobals.dragstartul - ((2.*(event->x - guiglobals.dragStartX)/(dasize.width))*limitWidth);
-      drawing.lowerLimit = guiglobals.dragstartll - ((2.*(event->x - guiglobals.dragStartX)/(dasize.width))*limitWidth);
-      drawing.xChanFocus = drawing.lowerLimit + (drawing.upperLimit - drawing.lowerLimit)/2.;
+      drawing.xChanFocus = (guiglobals.dragstartul + guiglobals.dragstartll)/2. + ((guiglobals.dragStartX - event->x)/(dasize.width-80.0))*(guiglobals.dragstartul - guiglobals.dragstartll);
       drawing.zoomFocusFrac = 0.5;
       //printf("startx = %f, x = %f, drawing.lowerLimit = %i, drawing.upperLimit = %i, width = %i, focus = %i\n",guiglobals.dragStartX,event->x,drawing.lowerLimit,drawing.upperLimit,dasize.width,drawing.xChanFocus);
       gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));

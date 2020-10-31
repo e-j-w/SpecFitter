@@ -1671,7 +1671,15 @@ void on_fit_button_clicked(GtkButton *b)
         fitpar.numFitPeaks = 0;
         //update widgets
         update_gui_fit_state();
-      }
+      }else{
+        GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+        GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot fit data!");
+        char errMsg[256];
+        snprintf(errMsg,256,"The fitter cannot be used while multiple spectra are being displayed.  Display a single spectrum or sum of spectra, and then try again.");
+        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
+        gtk_dialog_run (GTK_DIALOG (message_dialog));
+        gtk_widget_destroy (message_dialog);
+        }
     }
   }
   
