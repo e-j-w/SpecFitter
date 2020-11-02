@@ -645,12 +645,12 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
               int cursorChanEnd = cursorChanRounded + drawing.contractFactor;
               float cal_lowerChanLimit = getCalVal(cursorChanRounded);
               float cal_upperChanLimit = getCalVal(cursorChanEnd);
-              snprintf(statusBarLabel,256,"%s: %0.1f - %0.1f, Value: %s", calpar.calUnit,cal_lowerChanLimit,cal_upperChanLimit,binValStr);
+              snprintf(statusBarLabel,256,"%s: %0.1f to %0.1f, Value: %s", calpar.calUnit,cal_lowerChanLimit,cal_upperChanLimit,binValStr);
             }else{
               if(drawing.contractFactor <= 1){
                 snprintf(statusBarLabel,256,"Channel: %i, Value: %s",cursorChanRounded,binValStr);
               }else{
-                snprintf(statusBarLabel,256,"Channels: %i - %i, Value: %s",cursorChanRounded,cursorChanRounded + drawing.contractFactor - 1,binValStr);
+                snprintf(statusBarLabel,256,"Channels: %i to %i, Value: %s",cursorChanRounded,cursorChanRounded + drawing.contractFactor - 1,binValStr);
               }
             }
             break;
@@ -660,10 +660,10 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
         //print highlighted peak info
         if(calpar.calMode == 1){
           float calCentr = getCalVal(fitpar.fitParVal[7+(3*drawing.highlightedPeak)]);
-          float calWidth = getCalVal(fitpar.fitParVal[8+(3*drawing.highlightedPeak)]);
+          float calWidth = getCalWidth(fitpar.fitParVal[8+(3*drawing.highlightedPeak)]);
           if(fitpar.errFound){
-            float calCentrErr = getCalVal(fitpar.fitParErr[7+(3*drawing.highlightedPeak)]);
-            float calWidthErr = getCalVal(fitpar.fitParErr[8+(3*drawing.highlightedPeak)]);
+            float calCentrErr = getCalWidth(fitpar.fitParErr[7+(3*drawing.highlightedPeak)]);
+            float calWidthErr = getCalWidth(fitpar.fitParErr[8+(3*drawing.highlightedPeak)]);
             char fitParStr[3][50];
             getFormattedValAndUncertainty(evalPeakArea(drawing.highlightedPeak,fitpar.fitType),evalPeakAreaErr(drawing.highlightedPeak,fitpar.fitType),fitParStr[0],50,1,guiglobals.roundErrors);
             getFormattedValAndUncertainty(calCentr,calCentrErr,fitParStr[1],50,1,guiglobals.roundErrors);
@@ -794,23 +794,24 @@ float getAxisXPos(const int axisVal, const float width, const float xorigin){
     cal_lowerLimit = getCalVal(drawing.lowerLimit);
     cal_upperLimit = getCalVal(drawing.upperLimit);
   }
-  if((axisVal < cal_lowerLimit)||(axisVal >= cal_upperLimit))
-    return -1; //value is off the visible axis
+  if(((cal_upperLimit>cal_lowerLimit)&&((axisVal < cal_lowerLimit)||(axisVal >= cal_upperLimit))) || ((cal_lowerLimit>cal_upperLimit)&&((axisVal > cal_lowerLimit)||(axisVal <= cal_upperLimit))))
+    return (float)SMALL_NUMBER; //value is off the visible axis
   
   return xorigin + (width-xorigin)*(axisVal - cal_lowerLimit)/(cal_upperLimit - cal_lowerLimit);
 }
 void drawXAxisTick(const int axisVal, cairo_t *cr, const float width, const float height, const double baseFontSize, const float xorigin, const float yorigin){
-  int axisPos = getAxisXPos(axisVal,width,xorigin);
-  if(axisPos >= 0){
+  float axisPos = getAxisXPos(axisVal,width,xorigin);
+  //printf("axis Val: %i, axisPos: %f\n",axisVal,axisPos);
+  if(axisPos != (float)SMALL_NUMBER){
     //axis position is valid
-    cairo_move_to (cr, axisPos, -yorigin);
-    cairo_line_to (cr, axisPos, -yorigin*0.875);
+    cairo_move_to (cr, (int)axisPos, -yorigin);
+    cairo_line_to (cr, (int)axisPos, -yorigin*0.875);
     char tickLabel[20];
     sprintf(tickLabel,"%i",axisVal); //set string for label
     cairo_text_extents_t extents; //get dimensions needed to center text labels
     cairo_text_extents(cr, tickLabel, &extents);
     cairo_set_font_size(cr, baseFontSize);
-    cairo_move_to(cr, axisPos - extents.width/2., -yorigin*0.5);
+    cairo_move_to(cr, (int)axisPos - extents.width/2., -yorigin*0.5);
     cairo_show_text(cr, tickLabel);
   }
 }
@@ -1057,8 +1058,32 @@ float getDistBetweenXAxisTicks(const float axisRange){
     return 10;
   }else if(axisRange > 20){
     return 5;
-  }else{
+  }else if(axisRange >= 0){
     return 2;
+  }else if(axisRange > -20){
+    return -2;
+  }else if(axisRange > -50){
+    return -5;
+  }else if(axisRange > -100){
+    return -10;
+  }else if(axisRange > -200){
+    return -20;
+  }else if(axisRange > -500){
+    return -50;
+  }else if(axisRange > -1000){
+    return -100;
+  }else if(axisRange > -2000){
+    return -200;
+  }else if(axisRange > -3000){
+    return -300;
+  }else if(axisRange > -5000){
+    return -500;
+  }else if(axisRange > -10000){
+    return -1000;
+  }else if(axisRange > -20000){
+    return -2000;
+  }else{
+    return -5000;
   }
 }
 
@@ -1408,7 +1433,10 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
 
   //draw x axis ticks
   float tickDist = getDistBetweenXAxisTicks(getPlotRangeXUnits());
-  for(i=0;i<S32K;i+=tickDist){
+  for(i=0;abs(i)<S32K;i+=tickDist){
+    drawXAxisTick(i, cr, width, height, plotFontSize, xorigin, yorigin);
+  }
+  for(i=0;abs(i)<S32K;i-=tickDist){
     drawXAxisTick(i, cr, width, height, plotFontSize, xorigin, yorigin);
   }
   cairo_stroke(cr);

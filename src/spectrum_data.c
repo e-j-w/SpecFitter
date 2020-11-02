@@ -195,6 +195,11 @@ int isSpSelected(const int spNum){
 double getCalVal(const double val){
   return calpar.calpar0 + calpar.calpar1*val + calpar.calpar2*val*val;
 }
+//get a calibrated width from an uncalibrated one (is this always true?)
+//this is used for uncertainties as well (since these are "widths" around a central value)
+double getCalWidth(const double val){
+  return fabs(calpar.calpar1*val + calpar.calpar2*val*val);
+}
 
 //lower level spectrum data access routine which takes rebinning into account
 float getSpBinValRaw(const int spNumRaw, const int bin, const double scaleFactor, const int contractFactor){

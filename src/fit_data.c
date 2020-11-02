@@ -96,9 +96,9 @@ gboolean print_fit_results(){
 
   int length = 0;
   if(calpar.calMode == 1){
-    getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[0]),getCalVal(fitpar.fitParErr[0]),fitParStr[0],50,1,guiglobals.roundErrors);
-    getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[1]),getCalVal(fitpar.fitParErr[1]),fitParStr[1],50,1,guiglobals.roundErrors);
-    getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[2]),getCalVal(fitpar.fitParErr[2]),fitParStr[2],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[0]),getCalWidth(fitpar.fitParErr[0]),fitParStr[0],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[1]),getCalWidth(fitpar.fitParErr[1]),fitParStr[1],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[2]),getCalWidth(fitpar.fitParErr[2]),fitParStr[2],50,1,guiglobals.roundErrors);
   }else{
     getFormattedValAndUncertainty(fitpar.fitParVal[0],fitpar.fitParErr[0],fitParStr[0],50,1,guiglobals.roundErrors);
     getFormattedValAndUncertainty(fitpar.fitParVal[1],fitpar.fitParErr[1],fitParStr[1],50,1,guiglobals.roundErrors);
@@ -107,8 +107,8 @@ gboolean print_fit_results(){
   length += snprintf(fitResStr+length,strSize-length,"Chisq/NDF: %f\n\nBackground\nA: %s, B: %s, C: %s\n\n",getFitChisq(fitpar.fitType)/(1.0*fitpar.ndf),fitParStr[0],fitParStr[1],fitParStr[2]);
   if(fitpar.fitType == 1){
     if(calpar.calMode == 1){
-      getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[3]),getCalVal(fitpar.fitParErr[3]),fitParStr[0],50,1,guiglobals.roundErrors);
-      getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[4]),getCalVal(fitpar.fitParErr[4]),fitParStr[1],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[3]),getCalWidth(fitpar.fitParErr[3]),fitParStr[0],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[4]),getCalWidth(fitpar.fitParErr[4]),fitParStr[1],50,1,guiglobals.roundErrors);
     }else{
       getFormattedValAndUncertainty(fitpar.fitParVal[3],fitpar.fitParErr[3],fitParStr[0],50,1,guiglobals.roundErrors);
       getFormattedValAndUncertainty(fitpar.fitParVal[4],fitpar.fitParErr[4],fitParStr[1],50,1,guiglobals.roundErrors);
@@ -119,8 +119,8 @@ gboolean print_fit_results(){
   for(i=0;i<fitpar.numFitPeaks;i++){
     getFormattedValAndUncertainty(evalPeakArea(i,fitpar.fitType),evalPeakAreaErr(i,fitpar.fitType),fitParStr[0],50,1,guiglobals.roundErrors);
     if(calpar.calMode == 1){
-      getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[7+(3*i)]),getCalVal(fitpar.fitParErr[7+(3*i)]),fitParStr[1],50,1,guiglobals.roundErrors);
-      getFormattedValAndUncertainty(2.35482*getCalVal(fitpar.fitParVal[8+(3*i)]),2.35482*getCalVal(fitpar.fitParErr[8+(3*i)]),fitParStr[2],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[7+(3*i)]),getCalWidth(fitpar.fitParErr[7+(3*i)]),fitParStr[1],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty(2.35482*getCalWidth(fitpar.fitParVal[8+(3*i)]),2.35482*getCalWidth(fitpar.fitParErr[8+(3*i)]),fitParStr[2],50,1,guiglobals.roundErrors);
     }else{
       getFormattedValAndUncertainty(fitpar.fitParVal[7+(3*i)],fitpar.fitParErr[7+(3*i)],fitParStr[1],50,1,guiglobals.roundErrors);
       getFormattedValAndUncertainty(2.35482*fitpar.fitParVal[8+(3*i)],2.35482*fitpar.fitParErr[8+(3*i)],fitParStr[2],50,1,guiglobals.roundErrors);
@@ -942,7 +942,7 @@ void performGausFit(){
   //getc(stdin);
 
   //make sure widths are positive
-  for(i=0;i<fitpar.numFitPeaks;i+=3){
+  for(i=0;i<fitpar.numFitPeaks;i++){
     if(fitpar.fitParVal[8+(3*i)] < 0.){
       fitpar.fitParVal[8+(3*i)] = fabs(fitpar.fitParVal[8+(3*i)]);
     }

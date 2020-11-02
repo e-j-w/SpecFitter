@@ -6,16 +6,19 @@
 //if roundErr=1, error will be properly rounded using the '20 rule' for reporting uncertainties
 void getFormattedValAndUncertainty(const double val, const double err, char *str, const int strLength, const int showErr, const int roundErr){
 
-  if(err < 0){
+  /*if(err < 0){
     //invalid error
     snprintf(str,strLength,"Negative err!");
     return;
-  }
+  }*/
 
   //printf("val: %f, err: %f\n",val,err);
 
   double errc = err;
   double valc = val;
+  if(errc < 0){
+    errc *= -1.;
+  }
 
   //get the position of the first sig fig in the error
   int sigf = 0;
