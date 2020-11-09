@@ -83,7 +83,9 @@ void setSpOpenView(const char spOpened){
 
 //call this when manking a UI change to the spectrum drawing area
 void manualSpectrumAreaDraw(){
-  gtk_label_set_text(bottom_info_text,"Drag spectrum to pan, mouse wheel to zoom.");
+  if(rawdata.openedSp==1){
+    gtk_label_set_text(bottom_info_text,"Drag spectrum to pan, mouse wheel to zoom.");
+  }
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
 }
 
