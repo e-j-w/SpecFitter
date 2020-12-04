@@ -180,6 +180,8 @@ struct {
   float zoomLevel, zoomToLevel; //1.0 = zoomed out fully (on x axis)
   int autoScale; //0=don't autoscale y axis, 1=autoscale y axis
   int logScale; //0=draw in linear scale, 1=draw in log scale (y-axis)
+  unsigned char zoomingY; //whether the y scale is being zoomed
+  float scaleToLevelMax[MAX_DISP_SP], scaleToLevelMin[MAX_DISP_SP]; //the y scale values to zoom to
   float scaleLevelMax[MAX_DISP_SP], scaleLevelMin[MAX_DISP_SP]; //the y scale values, ie. the maximum and minimum values to show on the y axis
   int contractFactor; //the number of channels per bin (default=1)
   unsigned char multiplotMode; //0=no multiplot, 1=summed spectra, 2=overlay spectra (common scaling), 3=overlay spectra (independent scaling), 4=stacked view

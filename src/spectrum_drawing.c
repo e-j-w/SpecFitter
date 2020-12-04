@@ -229,7 +229,49 @@ void autoZoom(){
   //printf("lowerLimit: %i, upperLimit: %i, xChanFocus: %i, zoomLevel: %f\n",drawing.lowerLimit,drawing.upperLimit,drawing.xChanFocus, drawing.zoomLevel);
 }
 
+gboolean zoom_y_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gpointer user_data){
+  int i;
+  for(i=0;i<drawing.numMultiplotSp;i++){
+    if(drawing.scaleLevelMax[i] > drawing.scaleToLevelMax[i]){
+      drawing.scaleLevelMax[i] -= 0.2*(drawing.scaleLevelMax[i]-drawing.scaleToLevelMax[i]) + 0.1*fabs(drawing.scaleLevelMax[i]);
+      if(drawing.scaleLevelMax[i] <= drawing.scaleToLevelMax[i]){
+        drawing.scaleLevelMax[i] = drawing.scaleToLevelMax[i];
+      }
+    }
+    if(drawing.scaleLevelMin[i] < drawing.scaleToLevelMin[i]){
+      drawing.scaleLevelMin[i] += 0.2*(drawing.scaleToLevelMin[i]-drawing.scaleLevelMin[i]) + 0.1*fabs(drawing.scaleLevelMin[i]);
+      if(drawing.scaleLevelMin[i] >= drawing.scaleToLevelMin[i]){
+        drawing.scaleLevelMin[i] = drawing.scaleToLevelMin[i];
+      }
+    }
+    if(drawing.scaleLevelMax[i] < drawing.scaleToLevelMax[i]){
+      drawing.scaleLevelMax[i] += 0.2*(drawing.scaleToLevelMax[i]-drawing.scaleLevelMax[i]) + 0.1*fabs(drawing.scaleLevelMax[i]);
+      if(drawing.scaleLevelMax[i] >= drawing.scaleToLevelMax[i]){
+        drawing.scaleLevelMax[i] = drawing.scaleToLevelMax[i];
+      }
+    }
+    if(drawing.scaleLevelMin[i] > drawing.scaleToLevelMin[i]){
+      drawing.scaleLevelMin[i] -= 0.2*(drawing.scaleLevelMin[i]-drawing.scaleToLevelMin[i]) + 0.1*fabs(drawing.scaleLevelMin[i]);
+      if(drawing.scaleLevelMin[i] <= drawing.scaleToLevelMin[i]){
+        drawing.scaleLevelMin[i] = drawing.scaleToLevelMin[i];
+      }
+    }
+  }
+  for(i=0;i<drawing.numMultiplotSp;i++){
+    //printf("scaleMin: %f, scaleToMin: %f,   scaleMax: %f, scaleToMax: %f\n",drawing.scaleLevelMin[i],drawing.scaleToLevelMin[i],drawing.scaleLevelMax[i],drawing.scaleToLevelMax[i]);
+    if((drawing.scaleLevelMax[i] != drawing.scaleToLevelMax[i])||(drawing.scaleLevelMin[i] != drawing.scaleToLevelMin[i])){
+      gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+      return G_SOURCE_CONTINUE;
+    }
+  }
+  //printf("Finished y zoom.\n");
+  drawing.zoomingY = 0; //finished zooming
+  gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+  return G_SOURCE_REMOVE;
+}
+
 gboolean zoom_in_tick_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gpointer user_data){
+  //printf("Zooming x in\n");
   drawing.zoomLevel *= 1.15;
   if((drawing.zoomLevel > drawing.zoomToLevel)||(drawing.zoomLevel > 1024.0)){
     drawing.zoomLevel = drawing.zoomToLevel;
@@ -243,6 +285,7 @@ gboolean zoom_in_tick_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gp
 }
 
 gboolean zoom_out_tick_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gpointer user_data){
+  //printf("Zooming x out\n");
   drawing.zoomLevel *= 0.87;
   if((drawing.zoomLevel < drawing.zoomToLevel)||(drawing.zoomLevel < 1.0)){
     drawing.zoomLevel = drawing.zoomToLevel;
@@ -1203,22 +1246,50 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       case 4:
       case 3:
         for(i=0;i<drawing.numMultiplotSp;i++){
-          drawing.scaleLevelMax[i] = maxVal[i]*1.1;
-          drawing.scaleLevelMin[i] = minVal[i];
+          if(drawing.logScale){
+            drawing.scaleToLevelMax[i] = maxVal[i]*2.0;
+          }else{
+            drawing.scaleToLevelMax[i] = maxVal[i]*1.2;
+          }
+          drawing.scaleToLevelMin[i] = minVal[i];
         }
         break;
       case 2:
       case 1:
       case 0:
-        drawing.scaleLevelMax[0] = maxVal[0]*1.1;
-        drawing.scaleLevelMin[0] = minVal[0];
+        if(drawing.logScale){
+          drawing.scaleToLevelMax[0] = maxVal[0]*2.0;
+        }else{
+          drawing.scaleToLevelMax[0] = maxVal[0]*1.2;
+        }
+        drawing.scaleToLevelMin[0] = minVal[0];
         break;
       default:
         break;
     }
+    if(guiglobals.useZoomAnimations){
+      for(i=0;i<drawing.numMultiplotSp;i++){
+        if(drawing.scaleLevelMax[i]==drawing.scaleLevelMin[i]){
+          drawing.scaleLevelMax[i] = drawing.scaleToLevelMax[i];
+          drawing.scaleLevelMin[i] = drawing.scaleToLevelMin[i];
+        }else if((drawing.scaleLevelMax[i] != drawing.scaleToLevelMax[i])||(drawing.scaleLevelMin[i] != drawing.scaleToLevelMin[i])){
+          if(drawing.zoomingY == 0){
+            //printf("Starting y zoom.\n");
+            drawing.zoomingY = 1;
+            gtk_widget_add_tick_callback(GTK_WIDGET(spectrum_drawing_area), zoom_y_callback, NULL, NULL);
+            break;
+          }
+        }
+      }
+    }else{
+      for(i=0;i<drawing.numMultiplotSp;i++){
+        drawing.scaleLevelMax[i] = drawing.scaleToLevelMax[i];
+        drawing.scaleLevelMin[i] = drawing.scaleToLevelMin[i];
+      }
+    }
   }
   //printf("maxVal = %f, minVal = %f\n",maxVal[0],minVal[0]);
-
+  
   //interpolate (ie. limit the number of bins drawn) in the next step, 
   //to help drawing performance
   int maxDrawBins;
@@ -1440,7 +1511,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     drawXAxisTick(i, cr, width, height, plotFontSize, xorigin, yorigin);
   }
   cairo_stroke(cr);
-  
+
   //draw y axis ticks
   int numTickPerSp;
   float yTickDist, yTick;
@@ -1619,7 +1690,6 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         cairo_stroke(cr);
       }
     }
-
     //draw peak position indicators
     if((guiglobals.fittingSp >= 2)&&(guiglobals.fittingSp < 6)){
       //put markers at guessed positions

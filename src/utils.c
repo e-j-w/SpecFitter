@@ -140,7 +140,7 @@ int getNSigf(const double val, const double oomVal){
   int sigf = 0;
   double valc = val;
 
-  //printf("val: %f\n",val);
+  //printf("val: %f, oomVal: %f\n",val, oomVal);
 
   if(oomVal <= 1.){
     printf("Invalid order-of-magnitude value (%f), what are you doing?!\n",oomVal);
@@ -157,7 +157,7 @@ int getNSigf(const double val, const double oomVal){
       sigf++;
     }
   }else if(val < 1){
-    while(val < 1.){
+    while(valc < 1.){
       valc *= oomVal;
       sigf--;
     }
