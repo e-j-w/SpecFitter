@@ -2041,6 +2041,7 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(spectrum_drawing_area), "scroll-event", G_CALLBACK(on_spectrum_scroll), NULL);
   g_signal_connect(G_OBJECT(spectrum_drawing_area), "motion-notify-event", G_CALLBACK(on_spectrum_cursor_motion), NULL);
   g_signal_connect(G_OBJECT(spectrum_drawing_area), "button-press-event", G_CALLBACK(on_spectrum_click), NULL);
+  g_signal_connect(G_OBJECT(spectrum_drawing_area), "button-release-event", G_CALLBACK(on_spectrum_unclick), NULL);
   g_signal_connect(G_OBJECT(open_button), "clicked", G_CALLBACK(on_open_button_clicked), NULL);
   g_signal_connect(G_OBJECT(append_button), "clicked", G_CALLBACK(on_append_button_clicked), NULL);
   g_signal_connect(G_OBJECT(calibrate_button), "clicked", G_CALLBACK(on_calibrate_button_clicked), NULL);
@@ -2144,6 +2145,7 @@ void iniitalizeUIElements(){
   drawing.contractFactor = 1;
   drawing.autoScale = 1;
   drawing.logScale = 0;
+  drawing.zoomingYCtr = 0;
   calpar.calMode = 0;
   rawdata.dropEmptySpectra = 1;
   rawdata.numSpOpened = 0;
@@ -2169,6 +2171,7 @@ void iniitalizeUIElements(){
   guiglobals.deferSpSelChange = 0;
   guiglobals.deferToggleRow = 0;
   guiglobals.draggingSp = 0;
+  guiglobals.zoomingSpX = 0;
   guiglobals.drawSpCursor = -1; //disabled by default
   guiglobals.drawSpLabels = 1; //enabled by default
   guiglobals.drawSpComments = 1; //enabled by default

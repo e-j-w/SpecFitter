@@ -131,6 +131,7 @@ GdkPixbuf *appIcon, *spIconPixbuf, *spIconPixbufDark;
 //non-GTK GUI globals
 struct {
   char draggingSp; //0 if no drag motion, 1 if dragging
+  char zoomingSpX; //0 if no zoom motion, 1 if zooming
   int dragstartul, dragstartll; //click and drag position storage parameters
   float dragStartX; //start cursor position when dragging
   float cursorPosX, cursorPosY; //cursor position
@@ -180,7 +181,7 @@ struct {
   float zoomLevel, zoomToLevel; //1.0 = zoomed out fully (on x axis)
   int autoScale; //0=don't autoscale y axis, 1=autoscale y axis
   int logScale; //0=draw in linear scale, 1=draw in log scale (y-axis)
-  unsigned char zoomingY; //whether the y scale is being zoomed
+  unsigned int zoomingYCtr; //whether the y scale is being zoomed
   float scaleToLevelMax[MAX_DISP_SP], scaleToLevelMin[MAX_DISP_SP]; //the y scale values to zoom to
   float scaleLevelMax[MAX_DISP_SP], scaleLevelMin[MAX_DISP_SP]; //the y scale values, ie. the maximum and minimum values to show on the y axis
   int contractFactor; //the number of channels per bin (default=1)

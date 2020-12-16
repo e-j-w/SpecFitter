@@ -230,6 +230,11 @@ void autoZoom(){
 }
 
 gboolean zoom_y_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gpointer user_data){
+
+  if(drawing.zoomingYCtr == 0){
+    return G_SOURCE_REMOVE;
+  }
+
   int i;
   for(i=0;i<drawing.numMultiplotSp;i++){
     if(drawing.scaleLevelMax[i] > drawing.scaleToLevelMax[i]){
@@ -260,12 +265,13 @@ gboolean zoom_y_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gpointer
   for(i=0;i<drawing.numMultiplotSp;i++){
     //printf("scaleMin: %f, scaleToMin: %f,   scaleMax: %f, scaleToMax: %f\n",drawing.scaleLevelMin[i],drawing.scaleToLevelMin[i],drawing.scaleLevelMax[i],drawing.scaleToLevelMax[i]);
     if((drawing.scaleLevelMax[i] != drawing.scaleToLevelMax[i])||(drawing.scaleLevelMin[i] != drawing.scaleToLevelMin[i])){
+      drawing.zoomingYCtr++;
       gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
       return G_SOURCE_CONTINUE;
     }
   }
   //printf("Finished y zoom.\n");
-  drawing.zoomingY = 0; //finished zooming
+  drawing.zoomingYCtr = 0; //finished zooming
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
   return G_SOURCE_REMOVE;
 }
@@ -277,6 +283,7 @@ gboolean zoom_in_tick_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gp
     drawing.zoomLevel = drawing.zoomToLevel;
     gtk_range_set_value(GTK_RANGE(zoom_scale),log(drawing.zoomLevel)/log(2.));//base 2 log of zoom
     gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+    guiglobals.zoomingSpX = 0;
     return G_SOURCE_REMOVE;
   }
   gtk_range_set_value(GTK_RANGE(zoom_scale),log(drawing.zoomLevel)/log(2.));//base 2 log of zoom
@@ -291,6 +298,7 @@ gboolean zoom_out_tick_callback(GtkWidget *widget, GdkFrameClock *frame_clock, g
     drawing.zoomLevel = drawing.zoomToLevel;
     gtk_range_set_value(GTK_RANGE(zoom_scale),log(drawing.zoomLevel)/log(2.));//base 2 log of zoom
     gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+    guiglobals.zoomingSpX = 0;
     return G_SOURCE_REMOVE;
   }
   gtk_range_set_value(GTK_RANGE(zoom_scale),log(drawing.zoomLevel)/log(2.));//base 2 log of zoom
@@ -309,6 +317,7 @@ void on_zoom_in_x(){
     if(drawing.zoomToLevel > 1024.0)
       drawing.zoomToLevel = 1024.0;
     drawing.zoomFocusFrac = 0.5;
+    guiglobals.zoomingSpX = 1;
     gtk_widget_add_tick_callback(GTK_WIDGET(spectrum_drawing_area), zoom_in_tick_callback, NULL, NULL);
   }else{
     drawing.zoomLevel *= 2.0;
@@ -331,6 +340,7 @@ void on_zoom_out_x(){
       drawing.zoomToLevel = 1.0;
     drawing.xChanFocus = (drawing.upperLimit + drawing.lowerLimit)/2;
     drawing.zoomFocusFrac = 0.5;
+    guiglobals.zoomingSpX = 1;
     gtk_widget_add_tick_callback(GTK_WIDGET(spectrum_drawing_area), zoom_out_tick_callback, NULL, NULL);
   }else{
     drawing.zoomLevel *= 0.5;
@@ -365,10 +375,10 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
     // Determine GtkDrawingArea dimensions
     gdk_window_get_geometry (wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
     if(guiglobals.useZoomAnimations){
-      //check if we are already zooming
       drawing.zoomToLevel = drawing.zoomLevel * 2.0;
       drawing.xChanFocus = drawing.lowerLimit + (((e->x)-80.0)/(dasize.width-80.0))*(drawing.upperLimit - drawing.lowerLimit);
       drawing.zoomFocusFrac = (drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit);
+      guiglobals.zoomingSpX = 1;
       gtk_widget_add_tick_callback (widget, zoom_in_tick_callback, NULL, NULL);
     }else{
       drawing.xChanFocus = drawing.lowerLimit + (((e->x)-80.0)/(dasize.width-80.0))*(drawing.upperLimit - drawing.lowerLimit);
@@ -563,6 +573,13 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
   }
 }
 
+//take action when a mouse button is released
+void on_spectrum_unclick(GtkWidget *widget, GdkEventButton *event, gpointer data){
+  if(guiglobals.draggingSp == 1){
+    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+  }
+  guiglobals.draggingSp = 0;
+}
 
 void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data){
 
@@ -598,6 +615,9 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
     }
   }else{
     //no button press
+    if(guiglobals.draggingSp == 1){
+      gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+    }
     guiglobals.draggingSp = 0;
   }
 
@@ -1268,14 +1288,21 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         break;
     }
     if(guiglobals.useZoomAnimations){
+      if(drawing.zoomingYCtr > 200){
+        //reset zoom
+        for(i=0;i<drawing.numMultiplotSp;i++){
+          drawing.scaleLevelMax[i] = drawing.scaleToLevelMax[i];
+          drawing.scaleLevelMin[i] = drawing.scaleToLevelMin[i];
+        }
+      }
       for(i=0;i<drawing.numMultiplotSp;i++){
         if(drawing.scaleLevelMax[i]==drawing.scaleLevelMin[i]){
           drawing.scaleLevelMax[i] = drawing.scaleToLevelMax[i];
           drawing.scaleLevelMin[i] = drawing.scaleToLevelMin[i];
         }else if((drawing.scaleLevelMax[i] != drawing.scaleToLevelMax[i])||(drawing.scaleLevelMin[i] != drawing.scaleToLevelMin[i])){
-          if(drawing.zoomingY == 0){
+          if(drawing.zoomingYCtr == 0){
             //printf("Starting y zoom.\n");
-            drawing.zoomingY = 1;
+            drawing.zoomingYCtr = 1;
             gtk_widget_add_tick_callback(GTK_WIDGET(spectrum_drawing_area), zoom_y_callback, NULL, NULL);
             break;
           }
@@ -1292,7 +1319,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   
   //interpolate (ie. limit the number of bins drawn) in the next step, 
   //to help drawing performance
-  int maxDrawBins;
+  float maxDrawBins;
   switch(drawFast){
     case 1:
       maxDrawBins = width*1.5;
@@ -1304,10 +1331,22 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   }
    
   //printf("maximum bins to draw: %i\n",maxDrawBins);
-  int binSkipFactor = (drawing.upperLimit-drawing.lowerLimit)/(maxDrawBins);
-  if(binSkipFactor <= drawing.contractFactor)
+  float binSkipFactorF = (drawing.upperLimit-drawing.lowerLimit)/(maxDrawBins);
+  if(drawing.zoomLevel > 1.05){
+    if((guiglobals.draggingSp)||(guiglobals.zoomingSpX)||(drawing.zoomingYCtr>0 && drawing.zoomingYCtr<20)){
+      //optimize when dragging/zooming
+      binSkipFactorF *= 2;
+      if(drawing.multiplotMode>1){
+        binSkipFactorF *= drawing.numMultiplotSp;
+      }
+    }
+  }
+  int binSkipFactor = (int)binSkipFactorF;
+  if(binSkipFactor <= drawing.contractFactor){
     binSkipFactor = drawing.contractFactor;
-  //printf("binskipfactor: %i, contractFactor: %i\n",binSkipFactor,drawing.contractFactor);
+  }
+  //printf("default bins: %i, binskipfactor: %f, contractFactor: %i\n",drawing.upperLimit-drawing.lowerLimit,binSkipFactorF,drawing.contractFactor);
+  //printf("dragging: %i, zooming x: %i, zooming y: %i\n",guiglobals.draggingSp,guiglobals.zoomingSpX,drawing.zoomingYCtr);
   //for smooth scrolling of interpolated spectra, have the start bin always
   //be a multiple of the skip factor
   int startBin = 0 - (drawing.lowerLimit % binSkipFactor);

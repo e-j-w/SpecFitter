@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.1 
+<!-- Generated with glade 3.38.2 
 
 The MIT License (MIT)
 
@@ -1790,6 +1790,7 @@ and binning factors will be preserved.</property>
                 <property name="name">page0</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="vexpand">True</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">10</property>
                 <child>
@@ -1880,7 +1881,7 @@ and binning factors will be preserved.</property>
                                     <property name="max-width-chars">4</property>
                                     <property name="placeholder-text">1.00</property>
                                     <property name="adjustment">scale_adjustment</property>
-                                    <property name="climb-rate">0.1</property>
+                                    <property name="climb-rate">0.10</property>
                                     <property name="digits">2</property>
                                   </object>
                                   <attributes>
@@ -2000,6 +2001,7 @@ and binning factors will be preserved.</property>
                 <property name="name">page1</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="vexpand">True</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkBox" id="view_list_box">
@@ -2143,6 +2145,7 @@ They will then appear on this panel.</property>
                 <property name="name">page2</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="vexpand">True</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">10</property>
                 <child>
