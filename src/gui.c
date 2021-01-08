@@ -1872,9 +1872,65 @@ void toggle_cursor(){
   manualSpectrumAreaDraw();
 }
 
+//cycle between plotting modes for multiple spectra, argument determines cycle direction
+void cycle_multiplot_mode(int up){
+  if(rawdata.openedSp){
+    if((drawing.numMultiplotSp > 1)&&(drawing.multiplotMode>=1)){
+      if(up){
+        if(drawing.multiplotMode < 4){
+          drawing.multiplotMode++;
+        }else{
+          drawing.multiplotMode=1;
+        }
+      }else{
+        if(drawing.multiplotMode > 1){
+          drawing.multiplotMode--;
+        }else{
+          drawing.multiplotMode=4;
+        }
+      }
+      manualSpectrumAreaDraw();
+    }
+  }
+}
+//used for keyboard shortcuts
+void cycle_multiplot_mode_up(){
+  cycle_multiplot_mode(1);
+}
+void cycle_multiplot_mode_down(){
+  cycle_multiplot_mode(0);
+}
+//cycle between individual spectra/views, argument determines cycle direction
+void cycle_sp(int up){
+  int spNum = gtk_spin_button_get_value_as_int(spectrum_selector);
+  if(up){
+    if(spNum < (rawdata.numSpOpened+rawdata.numViews)){
+      spNum++;
+    }else{
+      spNum=1;
+    }
+  }else{
+    if(spNum > 1){
+      spNum--;
+    }else{
+      spNum=rawdata.numSpOpened+rawdata.numViews;
+    }
+  }
+  gtk_spin_button_set_value(spectrum_selector,(gdouble)spNum);
+}
+//used for keyboard shortcuts
+void cycle_sp_up(){
+  cycle_sp(1);
+}
+void cycle_sp_down(){
+  cycle_sp(0);
+}
 
 
 void iniitalizeUIElements(){
+
+  int i;
+
   //import UI layout and graphics data
   builder = gtk_builder_new_from_resource("/resources/jf3.glade"); //get UI layout from glade XML file
   gtk_builder_add_from_resource (builder, "/resources/shortcuts_window.ui", NULL);
@@ -2122,6 +2178,10 @@ void iniitalizeUIElements(){
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_equal, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_zoom_in_x), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_plus, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_zoom_in_x), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_minus, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_zoom_out_x), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_w, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(cycle_multiplot_mode_up), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_s, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(cycle_multiplot_mode_down), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_d, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(cycle_sp_up), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_a, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(cycle_sp_down), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_o, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_open_button_clicked), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_a, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_append_button_clicked), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_s, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_save_button_clicked), NULL, 0));
@@ -2137,8 +2197,10 @@ void iniitalizeUIElements(){
   rawdata.numFilesOpened = 0;
   drawing.lowerLimit = 0;
   drawing.upperLimit = S32K - 1;
-  drawing.scaleLevelMax[0] = 0.0;
-  drawing.scaleLevelMin[0] = 0.0;
+  for(i=0;i<MAX_DISP_SP;i++){
+    drawing.scaleLevelMax[i] = 0.0;
+    drawing.scaleLevelMin[i] = 0.0;
+  }
   drawing.xChanFocus = 0;
   drawing.zoomLevel = 1.0;
   drawing.zoomToLevel = 1.0;

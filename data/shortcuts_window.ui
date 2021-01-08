@@ -104,6 +104,34 @@
             <child>
               <object class="GtkShortcutsShortcut">
                 <property name="visible">1</property>
+                <property name="accelerator">W</property>
+                <property name="title" translatable="yes" context="shortcut window">Cycle plotting mode up (when a multi-spectrum view is displayed)</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="visible">1</property>
+                <property name="accelerator">S</property>
+                <property name="title" translatable="yes" context="shortcut window">Cycle plotting mode down (when a multi-spectrum view is displayed)</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="visible">1</property>
+                <property name="accelerator">A</property>
+                <property name="title" translatable="yes" context="shortcut window">Cycle displayed spectrum/view up</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="visible">1</property>
+                <property name="accelerator">D</property>
+                <property name="title" translatable="yes" context="shortcut window">Cycle displayed spectrum/view down</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="visible">1</property>
                 <property name="accelerator">plus</property>
                 <property name="title" translatable="yes" context="shortcut window">Zoom in view</property>
               </object>

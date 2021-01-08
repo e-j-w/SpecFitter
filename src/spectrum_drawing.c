@@ -1299,7 +1299,10 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         if(drawing.scaleLevelMax[i]==drawing.scaleLevelMin[i]){
           drawing.scaleLevelMax[i] = drawing.scaleToLevelMax[i];
           drawing.scaleLevelMin[i] = drawing.scaleToLevelMin[i];
-        }else if((drawing.scaleLevelMax[i] != drawing.scaleToLevelMax[i])||(drawing.scaleLevelMin[i] != drawing.scaleToLevelMin[i])){
+        }
+      }
+      for(i=0;i<drawing.numMultiplotSp;i++){
+        if((drawing.scaleLevelMax[i] != drawing.scaleToLevelMax[i])||(drawing.scaleLevelMin[i] != drawing.scaleToLevelMin[i])){
           if(drawing.zoomingYCtr == 0){
             //printf("Starting y zoom.\n");
             drawing.zoomingYCtr = 1;
@@ -1308,6 +1311,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           }
         }
       }
+
     }else{
       for(i=0;i<drawing.numMultiplotSp;i++){
         drawing.scaleLevelMax[i] = drawing.scaleToLevelMax[i];
@@ -1315,7 +1319,13 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       }
     }
   }
-  //printf("maxVal = %f, minVal = %f\n",maxVal[0],minVal[0]);
+  /*printf("mode: %i   ",drawing.multiplotMode);
+  for(i=0;i<drawing.numMultiplotSp;i++){
+    printf("i = %i, maxVal = %f, minVal = %f  ",i,maxVal[i],minVal[i]);
+    printf("scaleToMax = %f, scaleToMin = %f  ",drawing.scaleToLevelMax[i],drawing.scaleToLevelMin[i]);
+    printf("scaleMax = %f, scaleMin = %f  ",drawing.scaleLevelMax[i],drawing.scaleLevelMin[i]);
+  }
+  printf("\n");*/
   
   //interpolate (ie. limit the number of bins drawn) in the next step, 
   //to help drawing performance
