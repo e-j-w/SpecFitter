@@ -21,7 +21,6 @@ int main(int argc, char *argv[])
 {
   
   gtk_init(&argc, &argv); //initialize GTK
-
   iniitalizeUIElements(); //see gui.c
 
   //open a file if requested from the command line

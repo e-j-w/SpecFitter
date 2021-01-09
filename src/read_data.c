@@ -11,7 +11,7 @@
 //function reads an .jf3 file into a double array and returns the array
 int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp)
 {
-  int i,j;
+  unsigned int i,j;
   unsigned char ucharBuf, numSpec;
   unsigned int uintBuf;
   FILE *inp;
@@ -25,7 +25,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
   }
 
   if(fread(&ucharBuf, sizeof(unsigned char), 1, inp)!=1){fclose(inp); return 0;}
-  if(ucharBuf==0){
+  if(ucharBuf==1){
     //version 0 of file format
     if(fread(&ucharBuf, sizeof(unsigned char), 1, inp)!=1){fclose(inp); return 0;}
     numSpec = ucharBuf;
@@ -70,7 +70,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
             if(rawdata.chanCommentView[i] == 1){
               rawdata.chanCommentSp[i]+=startNumViews; //assign to the correct (appended) view
             }else{
-              rawdata.chanCommentSp[i]+=outHistStartSp; //assign to the correct (appended) spectrum
+              rawdata.chanCommentSp[i]+=(unsigned char)outHistStartSp; //assign to the correct (appended) spectrum
             }
             //printf("Comment %i went to sp %i\n",i,rawdata.chanCommentSp[i]+1);
             if(fread(&rawdata.chanCommentCh[i],sizeof(rawdata.chanCommentCh[i]), 1, inp)!=1){fclose(inp); return 0;}
@@ -89,7 +89,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
       if(fread(&uintBuf, sizeof(unsigned int), 1, inp)!=1){fclose(inp); return 0;}
       if(outHistStartSp == 0){
         //no comments exist already
-        rawdata.numViews = uintBuf;
+        rawdata.numViews = (unsigned char)uintBuf;
         for(i=0;i<rawdata.numViews;i++){
           if(i<MAXNVIEWS){
             memset(rawdata.viewScaleFactor[i],0,sizeof(rawdata.viewScaleFactor[i]));
@@ -97,7 +97,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
             if(fread(&rawdata.viewMultiplotMode[i],sizeof(unsigned char),1,inp)!=1){fclose(inp); return 0;}
             if(fread(&rawdata.viewNumMultiplotSp[i],sizeof(int),1,inp)!=1){fclose(inp); return 0;}
             for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
-              if(fread(&rawdata.viewMultiPlots[i][j],sizeof(int),1,inp)!=1){fclose(inp); return 0;}
+              if(fread(&rawdata.viewMultiPlots[i][j],sizeof(unsigned char),1,inp)!=1){fclose(inp); return 0;}
             }
             for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
               if((rawdata.viewMultiPlots[i][j]>=0)&&(rawdata.viewMultiPlots[i][j]<NSPECT)){
@@ -115,7 +115,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
             if(fread(&rawdata.viewMultiplotMode[i],sizeof(unsigned char),1,inp)!=1){fclose(inp); return 0;}
             if(fread(&rawdata.viewNumMultiplotSp[i],sizeof(int),1,inp)!=1){fclose(inp); return 0;}
             for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
-              if(fread(&rawdata.viewMultiPlots[i][j],sizeof(int),1,inp)!=1){fclose(inp); return 0;}
+              if(fread(&rawdata.viewMultiPlots[i][j],sizeof(unsigned char),1,inp)!=1){fclose(inp); return 0;}
             }
             for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
               if((rawdata.viewMultiPlots[i][j]>=0)&&(rawdata.viewMultiPlots[i][j]<NSPECT)){
@@ -133,7 +133,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
             }
           }
         }
-        rawdata.numViews += uintBuf;
+        rawdata.numViews += (unsigned char)uintBuf;
         if(rawdata.numViews > MAXNVIEWS){
           printf("WARNING: over-imported views.  Truncating.\n");
           rawdata.numViews = MAXNVIEWS;
@@ -145,7 +145,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
       //read spectra
       signed char scharBuf;
       char doneSp;
-      int spInd;
+      unsigned int spInd;
       float val;
       for(i=0;i<numSpec;i++){
         
@@ -166,10 +166,10 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
             for(j=0;j<scharBuf;j++){
               outHist[i+outHistStartSp][spInd+j] = (double)val;
             }
-            spInd += scharBuf;
+            spInd += (unsigned int)scharBuf;
           }else{
             //non-duplicated entries
-            int numEntr = abs(scharBuf);
+            unsigned int numEntr = abs(scharBuf);
             for(j=0;j<numEntr;j++){
               if(fread(&val,sizeof(float), 1, inp)!=1){fclose(inp); return 0;} //read in value
               outHist[i+outHistStartSp][spInd+j] = (double)val;
@@ -203,7 +203,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 //function reads an .mca file into a double array and returns the number of spectra read in
 int readMCA(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp)
 {
-  int i, j;
+  unsigned int i, j;
   int tmpHist[S32K];
   FILE *inp;
 
@@ -215,7 +215,7 @@ int readMCA(const char *filename, double outHist[NSPECT][S32K], const unsigned i
   }
 
   //get the number of spectra in the .mca file
-  int numSpec = S32K;
+  unsigned int numSpec = S32K;
   for (i = 0; i < numSpec; i++)
     if (fread(tmpHist, S32K * sizeof(int), 1, inp) != 1)
     {
@@ -249,13 +249,13 @@ int readMCA(const char *filename, double outHist[NSPECT][S32K], const unsigned i
   }
 
   fclose(inp);
-  return numSpec;
+  return (int)numSpec;
 }
 
 //function reads an .fmca file into a double array and returns the number of spectra read in
 int readFMCA(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp)
 {
-  int i, j;
+  unsigned int i, j;
   float tmpHist[S32K];
   FILE *inp;
 
@@ -267,7 +267,7 @@ int readFMCA(const char *filename, double outHist[NSPECT][S32K], const unsigned 
   }
 
   //get the number of spectra in the .fmca file
-  int numSpec = S32K;
+  unsigned int numSpec = S32K;
   for (i = 0; i < numSpec; i++)
     if (fread(tmpHist, S32K * sizeof(float), 1, inp) != 1)
     {
@@ -301,13 +301,13 @@ int readFMCA(const char *filename, double outHist[NSPECT][S32K], const unsigned 
   }
 
   fclose(inp);
-  return numSpec;
+  return (int)numSpec;
 }
 
 //function reads an .spe file into a double array and returns the array
-int readSPE(const char *filename, double outHist[NSPECT][S32K], int outHistStartSp)
+int readSPE(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp)
 {
-  int i;
+  unsigned int i;
   float inpHist[4096];
   FILE *inp;
 
@@ -331,10 +331,10 @@ int readSPE(const char *filename, double outHist[NSPECT][S32K], int outHistStart
     fclose(inp);
     return 0;
   }
-  int numElementsRead = fread(inpHist, sizeof(float), 4096, inp);
+  unsigned int numElementsRead = (unsigned int)fread(inpHist, sizeof(float), 4096, inp);
   if(numElementsRead < 1){
     printf("ERROR: Cannot read spectrum from the .spe file: %s\n", filename);
-    printf("fread code: %i\n",numElementsRead);
+    printf("fread code: %u\n",numElementsRead);
     printf("Verify that the format of the file is correct.\n");
     fclose(inp);
     return 0;
@@ -362,8 +362,8 @@ int readSPE(const char *filename, double outHist[NSPECT][S32K], int outHistStart
 
 int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp)
 {
-  int i,j;
-  int numElementsRead = 0;
+  unsigned int i,j;
+  unsigned int numElementsRead = 0;
   char str[1024], str2[1024];
   char *tok;
   FILE *inp;
@@ -427,12 +427,12 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
                       rawdata.chanCommentView[rawdata.numChComments] = (unsigned char)atoi(tok);
                       tok = strtok(NULL," ");
                       if(tok!=NULL){
-                        rawdata.chanCommentSp[rawdata.numChComments] = (char)atoi(tok);
+                        rawdata.chanCommentSp[rawdata.numChComments] = (unsigned char)atoi(tok);
                         if(outHistStartSp > 0){
                           if(rawdata.chanCommentView[rawdata.numChComments] == 1){
                             rawdata.chanCommentSp[rawdata.numChComments]+=startNumViews; //assign to the correct (appended) view
                           }else{
-                            rawdata.chanCommentSp[rawdata.numChComments]+=outHistStartSp; //assign to the correct (appended) spectrum
+                            rawdata.chanCommentSp[rawdata.numChComments]+=(unsigned char)outHistStartSp; //assign to the correct (appended) spectrum
                           }
                         }
                         tok = strtok(NULL," ");
@@ -440,7 +440,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
                           rawdata.chanCommentCh[rawdata.numChComments] = atoi(tok);
                           tok = strtok(NULL," ");
                           if(tok!=NULL){
-                            rawdata.chanCommentVal[rawdata.numChComments] = atof(tok);
+                            rawdata.chanCommentVal[rawdata.numChComments] = (float)atof(tok);
                             tok = strtok(NULL,""); //get the rest of the string
                             if(tok!=NULL){
                               strncpy(rawdata.chanComment[rawdata.numChComments],tok,sizeof(rawdata.chanComment[rawdata.numChComments])-1);
@@ -455,7 +455,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
                 }else if(strcmp(tok,"TITLE")==0){
                   tok = strtok(NULL," ");
                   if(tok!=NULL){
-                    int spID = atoi(tok) - 1 + outHistStartSp;
+                    int spID = atoi(tok) - 1 + (int)outHistStartSp;
                     if((spID >= 0)&&(spID < NSPECT)){
                       tok = strtok(NULL,""); //get the rest of the string
                       if(tok!=NULL){
@@ -487,7 +487,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
                                       for(i=0;i<rawdata.viewNumMultiplotSp[rawdata.numViews];i++){
                                         tok = strtok(NULL," ");
                                         if(tok!=NULL){
-                                          rawdata.viewMultiPlots[rawdata.numViews][i] = atoi(tok);
+                                          rawdata.viewMultiPlots[rawdata.numViews][i] = (unsigned char)atoi(tok);
                                         }
                                       }
                                       if(fgets(str,256,inp)!=NULL){ //get an entire line
@@ -588,9 +588,9 @@ int readROOT(const char *filename, double outHist[NSPECT][S32K], const unsigned 
 
   char *tok;
   char histType = 0; //0=no hist, 1=TH1F,TH1D,TH1I
-  int histNum=0;
+  unsigned int histNum=0;
   int ind;
-  float val;
+  double val;
   char *str = malloc(1024);
   char *histName = malloc(256);
   strncpy(histName,"",256);
@@ -604,7 +604,7 @@ int readROOT(const char *filename, double outHist[NSPECT][S32K], const unsigned 
         if(tok!=NULL){
           if(histType>0){
             if(outHistStartSp+histNum<=NSPECT){
-              if((strncmp(tok,histName,256)==0)&&(histNum>0)){
+              if(strncmp(tok,histName,256)==0){
                 if(histType==1){
                   //parse TH1F
                   tok = strtok (NULL," *->(),");
@@ -656,11 +656,11 @@ int readROOT(const char *filename, double outHist[NSPECT][S32K], const unsigned 
   fclose(inp);
   free(histName);
   free(str);
-  return histNum;
+  return (int)histNum;
 }
 
 //reads a file containing spectrum data into an array
-//returns the number of spectra read (0 if reading fails)
+//returns the number of spectra read (0 if reading fails, -1 if too many files)
 int readSpectrumDataFile(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp)
 {
   int numSpec = 0;
@@ -684,14 +684,18 @@ int readSpectrumDataFile(const char *filename, double outHist[NSPECT][S32K], con
     return 0;
   }
 
+  if((numSpec==-1)||(((int)outHistStartSp+numSpec)>=NSPECT)){
+    return -1; //too many spectra opened
+  }
+
   if(numSpec >= 0){
-    printf("Opened file: %s, number of spectra read in: %i\n", filename, numSpec);
+    printf("Opened file: %s, number of spectra read in: %u\n", filename, numSpec);
 
     //discard empty spectra
     if(rawdata.dropEmptySpectra){
-      int i;
+      unsigned int i;
       int checkedSpCount = 0;
-      int passedSpCount = 0;
+      unsigned int passedSpCount = 0;
       int passed = 0;
       while(checkedSpCount < numSpec){
         passed = 0;
@@ -711,9 +715,10 @@ int readSpectrumDataFile(const char *filename, double outHist[NSPECT][S32K], con
         }
         checkedSpCount++;
       }
-      if((numSpec-passedSpCount)>0)
-        printf("Dropped %i empty spectra.\n",numSpec-passedSpCount);
-      return passedSpCount;
+      int dropCount = numSpec-(int)passedSpCount;
+      if(dropCount>0)
+        printf("Dropped %i empty spectra.\n",dropCount);
+      return (int)passedSpCount;
     }
   }
 

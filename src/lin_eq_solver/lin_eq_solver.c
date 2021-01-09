@@ -4,7 +4,7 @@ int solve_lin_eq(lin_eq_type *lin_eq, int weighted)
 {
 
   int i,j;//iterators
-  int n=lin_eq->dim;//dimension of the matrix (assume square)
+  const unsigned int n=lin_eq->dim;//dimension of the matrix (assume square)
 
   if(n > MAX_DIM)
     {
@@ -38,7 +38,7 @@ int get_inv(lin_eq_type *lin_eq)
 {
 
   int i,j,k,l;//iterators
-  int n=lin_eq->dim;//dimension of the matrix (assume square) 
+  const unsigned int n=lin_eq->dim;//dimension of the matrix (assume square) 
   long double s;//storage variable
 
   //allocate the identity matrix to be transformed to the inverse

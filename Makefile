@@ -2,7 +2,7 @@ GLIB_COMPILE_RESOURCES = `pkg-config --variable=glib_compile_resources gio-2.0`
 
 RESOURCES = $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir=./data --generate-dependencies data/jf3.gresource.xml)
 
-CFLAGS = -I. -I./src/lin_eq_solver -O2 -Wall -Wshadow -Wunreachable-code -Wpointer-arith -Wcast-align -Wformat-security -Wstack-protector -std=c99
+CFLAGS = -I. -I./src/lin_eq_solver -O2 -Wall -Wshadow -Wunreachable-code -Wpointer-arith -Wcast-align -Wformat-security -Wstack-protector -Wconversion -std=c99
 
 all: lin_eq_solver jf3-resources.c jf3
 

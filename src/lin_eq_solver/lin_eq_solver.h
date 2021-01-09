@@ -13,7 +13,7 @@ typedef struct
   long double matrix[MAX_DIM][MAX_DIM];
   long double mat_weights[MAX_DIM][MAX_DIM];
   long double vector[MAX_DIM];
-  int dim;
+  unsigned int dim;
   //properties determined by the solver
   long double inv_matrix[MAX_DIM][MAX_DIM];//inverse of matrix specified above
   long double solution[MAX_DIM];

@@ -96,36 +96,36 @@ gboolean print_fit_results(){
 
   int length = 0;
   if(calpar.calMode == 1){
-    getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[0]),getCalWidth(fitpar.fitParErr[0]),fitParStr[0],50,1,guiglobals.roundErrors);
-    getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[1]),getCalWidth(fitpar.fitParErr[1]),fitParStr[1],50,1,guiglobals.roundErrors);
-    getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[2]),getCalWidth(fitpar.fitParErr[2]),fitParStr[2],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[0]),getCalWidth((double)fitpar.fitParErr[0]),fitParStr[0],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[1]),getCalWidth((double)fitpar.fitParErr[1]),fitParStr[1],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[2]),getCalWidth((double)fitpar.fitParErr[2]),fitParStr[2],50,1,guiglobals.roundErrors);
   }else{
-    getFormattedValAndUncertainty(fitpar.fitParVal[0],fitpar.fitParErr[0],fitParStr[0],50,1,guiglobals.roundErrors);
-    getFormattedValAndUncertainty(fitpar.fitParVal[1],fitpar.fitParErr[1],fitParStr[1],50,1,guiglobals.roundErrors);
-    getFormattedValAndUncertainty(fitpar.fitParVal[2],fitpar.fitParErr[2],fitParStr[2],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty((double)fitpar.fitParVal[0],(double)fitpar.fitParErr[0],fitParStr[0],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty((double)fitpar.fitParVal[1],(double)fitpar.fitParErr[1],fitParStr[1],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty((double)fitpar.fitParVal[2],(double)fitpar.fitParErr[2],fitParStr[2],50,1,guiglobals.roundErrors);
   }
-  length += snprintf(fitResStr+length,strSize-length,"Chisq/NDF: %f\n\nBackground\nA: %s, B: %s, C: %s\n\n",getFitChisq(fitpar.fitType)/(1.0*fitpar.ndf),fitParStr[0],fitParStr[1],fitParStr[2]);
+  length += snprintf(fitResStr+length,(long unsigned int)(strSize-length),"Chisq/NDF: %f\n\nBackground\nA: %s, B: %s, C: %s\n\n",getFitChisq(fitpar.fitType)/(1.0*fitpar.ndf),fitParStr[0],fitParStr[1],fitParStr[2]);
   if(fitpar.fitType == 1){
     if(calpar.calMode == 1){
-      getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[3]),getCalWidth(fitpar.fitParErr[3]),fitParStr[0],50,1,guiglobals.roundErrors);
-      getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[4]),getCalWidth(fitpar.fitParErr[4]),fitParStr[1],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[3]),getCalWidth((double)fitpar.fitParErr[3]),fitParStr[0],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[4]),getCalWidth((double)fitpar.fitParErr[4]),fitParStr[1],50,1,guiglobals.roundErrors);
     }else{
-      getFormattedValAndUncertainty(fitpar.fitParVal[3],fitpar.fitParErr[3],fitParStr[0],50,1,guiglobals.roundErrors);
-      getFormattedValAndUncertainty(fitpar.fitParVal[4],fitpar.fitParErr[4],fitParStr[1],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty((double)fitpar.fitParVal[3],(double)fitpar.fitParErr[3],fitParStr[0],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty((double)fitpar.fitParVal[4],(double)fitpar.fitParErr[4],fitParStr[1],50,1,guiglobals.roundErrors);
     }
-    length += snprintf(fitResStr+length,strSize-length,"R: %s, Beta (skewness): %s\n\n",fitParStr[0],fitParStr[1]);
+    length += snprintf(fitResStr+length,(long unsigned int)(strSize-length),"R: %s, Beta (skewness): %s\n\n",fitParStr[0],fitParStr[1]);
   }
-  length += snprintf(fitResStr+length,strSize-length,"Peaks");
+  length += snprintf(fitResStr+length,(long unsigned int)(strSize-length),"Peaks");
   for(i=0;i<fitpar.numFitPeaks;i++){
     getFormattedValAndUncertainty(evalPeakArea(i,fitpar.fitType),evalPeakAreaErr(i,fitpar.fitType),fitParStr[0],50,1,guiglobals.roundErrors);
     if(calpar.calMode == 1){
-      getFormattedValAndUncertainty(getCalVal(fitpar.fitParVal[7+(3*i)]),getCalWidth(fitpar.fitParErr[7+(3*i)]),fitParStr[1],50,1,guiglobals.roundErrors);
-      getFormattedValAndUncertainty(2.35482*getCalWidth(fitpar.fitParVal[8+(3*i)]),2.35482*getCalWidth(fitpar.fitParErr[8+(3*i)]),fitParStr[2],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[7+(3*i)]),getCalWidth((double)fitpar.fitParErr[7+(3*i)]),fitParStr[1],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty(2.35482*getCalWidth((double)fitpar.fitParVal[8+(3*i)]),2.35482*getCalWidth((double)fitpar.fitParErr[8+(3*i)]),fitParStr[2],50,1,guiglobals.roundErrors);
     }else{
-      getFormattedValAndUncertainty(fitpar.fitParVal[7+(3*i)],fitpar.fitParErr[7+(3*i)],fitParStr[1],50,1,guiglobals.roundErrors);
-      getFormattedValAndUncertainty(2.35482*fitpar.fitParVal[8+(3*i)],2.35482*fitpar.fitParErr[8+(3*i)],fitParStr[2],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty((double)fitpar.fitParVal[7+(3*i)],(double)fitpar.fitParErr[7+(3*i)],fitParStr[1],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty(2.35482*(double)fitpar.fitParVal[8+(3*i)],2.35482*(double)fitpar.fitParErr[8+(3*i)],fitParStr[2],50,1,guiglobals.roundErrors);
     }
-    int len = snprintf(fitResStr+length,strSize-length,"\nPeak %i Area: %s, Centroid: %s, FWHM: %s",i+1,fitParStr[0],fitParStr[1],fitParStr[2]);
+    int len = snprintf(fitResStr+length,(long unsigned int)(strSize-length),"\nPeak %i Area: %s, Centroid: %s, FWHM: %s",i+1,fitParStr[0],fitParStr[1],fitParStr[2]);
     if((len < 0)||(len >= strSize-length)){
       break;
     }
@@ -144,7 +144,7 @@ gboolean print_fit_results(){
       //break;
     default:
       //print to the console
-      length += snprintf(fitResStr+length,strSize-length,"\n");
+      length += snprintf(fitResStr+length,(long unsigned int)(strSize-length),"\n");
       printf("%s",fitResStr);
       break;
   }
@@ -158,19 +158,19 @@ double getFWHM(double chan, double widthF, double widthG, double widthH){
 }
 
 //get the value of the fitted gaussian term for a given x value
-long double evalGaussTerm(int peakNum, double xval){
+long double evalGaussTerm(int peakNum, long double xval){
   long double evalG;
   if(fitpar.fixRelativeWidths){
-    evalG = expl(-0.5* pow((xval-fitpar.fitParVal[7+(3*peakNum)]),2.0)/(pow(fitpar.fitParVal[8]*fitpar.relWidths[peakNum],2.0)));
+    evalG = expl(-0.5* powl((xval-fitpar.fitParVal[7+(3*peakNum)]),2.0)/(powl(fitpar.fitParVal[8]*fitpar.relWidths[peakNum],2.0)));
   }else{
-    evalG = expl(-0.5* pow((xval-fitpar.fitParVal[7+(3*peakNum)]),2.0)/(pow(fitpar.fitParVal[8+(3*peakNum)],2.0)));
+    evalG = expl(-0.5* powl((xval-fitpar.fitParVal[7+(3*peakNum)]),2.0)/(powl(fitpar.fitParVal[8+(3*peakNum)],2.0)));
   }
   //printf("peakNum: %i, xval: %f, pos: %f, width: %f, eval: %f\n",peakNum,xval,fitpar.fitParVal[7+(3*peakNum)],fitpar.fitParVal[8+(3*peakNum)],evalG);
   return evalG;
 }
 
 //get the value of the fitted skewed gaussian term for a given x value
-long double evalSkewedGaussTerm(const int peakNum, const double xval){
+long double evalSkewedGaussTerm(const int peakNum, const long double xval){
   long double evalG;
   if(fitpar.fixRelativeWidths){
     evalG = expl((xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4]) * erfcl( (xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]) + (fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.41421356*fitpar.fitParVal[4]) ) ;
@@ -183,7 +183,7 @@ long double evalSkewedGaussTerm(const int peakNum, const double xval){
 
 //evaluate the derivative of a gaussian peak term, needed for non-linear fits 
 //derPar: 0=amplitude, 1=centroid, 2=width, 3=R, 4=beta
-long double evalGaussTermDerivative(const int peakNum, const double xval, const int derPar){
+long double evalGaussTermDerivative(const int peakNum, const long double xval, const int derPar){
   long double evalGDer = evalGaussTerm(peakNum,xval);
   switch (derPar){
     /*case 4:
@@ -220,7 +220,7 @@ long double evalGaussTermDerivative(const int peakNum, const double xval, const 
 
 //evaluate the derivative of a skewed gaussian peak term, needed for non-linear fits 
 //derPar: 0=amplitude, 1=centroid, 2=width, 3=R, 4=beta
-long double evalSkewedGaussTermDerivative(const int peakNum, const double xval, const int derPar){
+long double evalSkewedGaussTermDerivative(const int peakNum, const long double xval, const int derPar){
   long double evalGDer = 1.0;
   long double evalGDerT2;
   switch (derPar){
@@ -271,7 +271,7 @@ long double evalSkewedGaussTermDerivative(const int peakNum, const double xval, 
   return evalGDer;
 }
 
-long double evalAllTermDerivative(const int peakNum, const double xval, const int derPar, const int fitType){
+long double evalAllTermDerivative(const int peakNum, const long double xval, const int derPar, const int fitType){
   long double val = evalGaussTermDerivative(peakNum,xval,derPar);
   if(fitType == 1){
     val += evalSkewedGaussTermDerivative(peakNum,xval,derPar);
@@ -307,13 +307,15 @@ long double evalFitOnePeak(const long double xval, const int peak, const int fit
 
 double evalSymGaussArea(const int peakNum){
   //use Guassian integral
-  return fitpar.fitParVal[6+(3*peakNum)]*(1.0 - fitpar.fitParVal[3])*fitpar.fitParVal[8+(3*peakNum)]*sqrt(2.0*G_PI)/(1.0*drawing.contractFactor);
+  long double area = fitpar.fitParVal[6+(3*peakNum)]*(1.0 - fitpar.fitParVal[3])*fitpar.fitParVal[8+(3*peakNum)]*sqrt(2.0*G_PI)/(1.0*drawing.contractFactor);
+  return (double)area;
 }
 
 double evalSkewedGaussArea(const int peakNum){
   //use definite integral of skewed Gaussian wrt x, taken
   //from -inf to inf (which collapses erf and erfc terms)
-  return fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]*fitpar.fitParVal[4]*expl(-2.0*fitpar.fitParVal[8+(3*peakNum)]*fitpar.fitParVal[8+(3*peakNum)]/(4.0*fitpar.fitParVal[4]*fitpar.fitParVal[4]));
+  long double area = fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]*fitpar.fitParVal[4]*expl(-2.0*fitpar.fitParVal[8+(3*peakNum)]*fitpar.fitParVal[8+(3*peakNum)]/(4.0*fitpar.fitParVal[4]*fitpar.fitParVal[4]));
+  return (double)area;
 }
 
 double evalPeakArea(const int peakNum, const int fitType){
@@ -326,33 +328,33 @@ double evalPeakArea(const int peakNum, const int fitType){
 
 double evalPeakAreaErr(int peakNum, const int fitType){
   //propagate uncertainty through the expression in the function evalSymGaussArea()
-  double err = (fitpar.fitParErr[6+(3*peakNum)]/fitpar.fitParVal[6+(3*peakNum)])*(fitpar.fitParErr[6+(3*peakNum)]/fitpar.fitParVal[6+(3*peakNum)]);
+  long double err = (fitpar.fitParErr[6+(3*peakNum)]/fitpar.fitParVal[6+(3*peakNum)])*(fitpar.fitParErr[6+(3*peakNum)]/fitpar.fitParVal[6+(3*peakNum)]);
   err += (fitpar.fitParErr[8+(3*peakNum)]/fitpar.fitParVal[8+(3*peakNum)])*(fitpar.fitParErr[8+(3*peakNum)]/fitpar.fitParVal[8+(3*peakNum)]);
   err += (fitpar.fitParErr[3]/(1.0 - fitpar.fitParVal[3]))*(fitpar.fitParErr[3]/(1.0 - fitpar.fitParVal[3]));
-  err = sqrt(err);
+  err = sqrtl(err);
   err = err*evalSymGaussArea(peakNum);
   if(fitType == 1){
     //propagate uncertainty through the expression in the function evalSkewedGaussArea()
-    double errsk = (fitpar.fitParErr[8+(3*peakNum)]/fitpar.fitParVal[8+(3*peakNum)])*(fitpar.fitParErr[8+(3*peakNum)]/fitpar.fitParVal[8+(3*peakNum)]);
+    long double errsk = (fitpar.fitParErr[8+(3*peakNum)]/fitpar.fitParVal[8+(3*peakNum)])*(fitpar.fitParErr[8+(3*peakNum)]/fitpar.fitParVal[8+(3*peakNum)]);
     errsk += (fitpar.fitParErr[4]/fitpar.fitParVal[4])*(fitpar.fitParErr[4]/fitpar.fitParVal[4]);
     errsk *= fitpar.fitParVal[8+(3*peakNum)]*fitpar.fitParVal[8+(3*peakNum)]/fitpar.fitParVal[4]*fitpar.fitParVal[4];
     errsk *= 0.5; //abs(constant) in the exponential term of evalSkewedGaussArea()
     errsk += (fitpar.fitParErr[6+(3*peakNum)]/fitpar.fitParVal[6+(3*peakNum)])*(fitpar.fitParErr[6+(3*peakNum)]/fitpar.fitParVal[6+(3*peakNum)]);
     errsk += (fitpar.fitParErr[3]/fitpar.fitParVal[3])*(fitpar.fitParErr[3]/fitpar.fitParVal[3]);
     errsk += (fitpar.fitParErr[4]/fitpar.fitParVal[4])*(fitpar.fitParErr[4]/fitpar.fitParVal[4]);
-    errsk = sqrt(errsk);
+    errsk = sqrtl(errsk);
     errsk = errsk*evalSkewedGaussArea(peakNum);
     //add all errors in quadrature
-    err = sqrt(err*err + errsk*errsk);
+    err = sqrtl(err*err + errsk*errsk);
   }
-  return err;
+  return (double)err;
 }
 
 //function returns chisq evaluated for the current fit
 double getFitChisq(const int fitType){
   int i,j;
-  double chisq = 0.;
-  double f;
+  long double chisq = 0.;
+  long double f;
   double yval,xval;
   for (i=fitpar.fitStartCh;i<=fitpar.fitEndCh;i+=drawing.contractFactor){
     xval = i;
@@ -380,11 +382,11 @@ double getFitChisq(const int fitType){
     }*/
     //pearson chisq
     if(f!=0.)
-      chisq += (f-yval)*(f-yval)/fabs(f);
+      chisq += (f-yval)*(f-yval)/fabsl(f);
     //printf("yval = %f, f = %f, chisq = %f\n",yval,f,chisq);
     //getc(stdin);
   }
-  return chisq;
+  return (double)chisq;
 }
 
 unsigned char getParameterErrors(lin_eq_type *linEq){
@@ -684,15 +686,15 @@ int areParsValid(const int fitType){
     if(fitpar.fitParVal[7+(3*i)] > fitpar.fitEndCh){
       return 0;
     }
-    if(fabs(fitpar.fitParVal[7+(3*i)] - fitpar.fitPeakInitGuess[i]) > (fitRange)/2.){
+    if(fabsl(fitpar.fitParVal[7+(3*i)] - fitpar.fitPeakInitGuess[i]) > (fitRange)/2.){
       return 0;
     }
-    if(fabs(fitpar.fitParVal[8+(3*i)]) > (fitRange)/2.){
+    if(fabsl(fitpar.fitParVal[8+(3*i)]) > (fitRange)/2.){
       return 0;
     }else if(fitpar.fitParVal[8+(3*i)] <= 0.){
       return 0; //cannot have 0 or negative width
     }
-    if(getSpBinVal(0,fitpar.fitPeakInitGuess[i]) > 0){
+    if(getSpBinVal(0,(int)fitpar.fitPeakInitGuess[i]) > 0){
       if(fitpar.fitParVal[6+(3*i)] < 0.){
         return 0;
       }
@@ -794,7 +796,7 @@ int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFra
         //assign parameter values
         for(i=0;i<linEq->dim;i++){
           if(fitpar.fixPar[i] == 0){
-            if((fitpar.fitParVal[i]!=0.)&&(fabs(linEq->solution[i]/fitpar.fitParVal[i]) > convergenceFrac)){
+            if((fitpar.fitParVal[i]!=0.)&&(fabsl(linEq->solution[i]/fitpar.fitParVal[i]) > convergenceFrac)){
               //printf("frac %i: %f\n",i,fabs(linEq->solution[i]/fitpar.fitParVal[i]));
               conv=0;
             }
@@ -805,7 +807,7 @@ int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFra
 
         if(fitpar.fixRelativeWidths){
           for(i=0;i<fitpar.numFitPeaks;i++){
-            if((fitpar.fitParVal[8+(3*i)]!=0.)&&(fabs(fitpar.relWidths[i]*linEq->solution[8]/fitpar.fitParVal[8+(3*i)]) > convergenceFrac)){
+            if((fitpar.fitParVal[8+(3*i)]!=0.)&&(fabsl(fitpar.relWidths[i]*linEq->solution[8]/fitpar.fitParVal[8+(3*i)]) > convergenceFrac)){
               conv=0;
             }
             fitpar.fitParVal[8+(3*i)] += fitpar.relWidths[i]*linEq->solution[8];
@@ -874,7 +876,7 @@ void performGausFit(){
   fitpar.fixPar[4] = 1; //fix unused parameter at zero
 
   //do non-linearized fit
-  int numNLIterTry = 50;
+  unsigned int numNLIterTry = 50;
   int numNLIter = nonLinearizedGausFit(numNLIterTry, 0.001, &linEq,0);
   if(numNLIter >= numNLIterTry){
     //printf("Fit did not converge after %i iterations.  Continuing...\n",numNLIter);
@@ -944,7 +946,7 @@ void performGausFit(){
   //make sure widths are positive
   for(i=0;i<fitpar.numFitPeaks;i++){
     if(fitpar.fitParVal[8+(3*i)] < 0.){
-      fitpar.fitParVal[8+(3*i)] = fabs(fitpar.fitParVal[8+(3*i)]);
+      fitpar.fitParVal[8+(3*i)] = fabsl(fitpar.fitParVal[8+(3*i)]);
     }
   }
   
@@ -968,8 +970,8 @@ long double widthGuess(const double centroidCh, const double widthInit){
   int scanPastLength = 10;
   int i,j,ctr;
   float lowWindowVal, highWindowVal, filterVal;
-  float minFilterVal = BIG_NUMBER;
-  float maxFilterVal = -1.0*BIG_NUMBER;
+  float minFilterVal = (float)BIG_NUMBER;
+  float maxFilterVal = -1.0f*(float)BIG_NUMBER;
   float minChVal = -1; //negative value indicates bound not found yet
   float maxChVal = -1; //negative value indicates bound not found yet
 
@@ -979,12 +981,12 @@ long double widthGuess(const double centroidCh, const double widthInit){
     lowWindowVal = 0.;
     highWindowVal = 0.;
     for(j=0;j<windowSize;j++){
-      lowWindowVal += getSpBinVal(0,centroidCh+(drawing.contractFactor*(i + j)));
-      highWindowVal += getSpBinVal(0,centroidCh+(drawing.contractFactor*(i + j + windowSize)));
+      lowWindowVal += getSpBinVal(0,(int)centroidCh+(drawing.contractFactor*(i + j)));
+      highWindowVal += getSpBinVal(0,(int)centroidCh+(drawing.contractFactor*(i + j + windowSize)));
     }
     filterVal = highWindowVal - lowWindowVal;
     if(filterVal < minFilterVal){
-      minChVal = centroidCh+(drawing.contractFactor*i);
+      minChVal = (float)(centroidCh+(drawing.contractFactor*i));
       minFilterVal = filterVal;
       ctr=0;
     }else{
@@ -1007,12 +1009,12 @@ long double widthGuess(const double centroidCh, const double widthInit){
     lowWindowVal = 0.;
     highWindowVal = 0.;
     for(j=0;j<windowSize;j++){
-      lowWindowVal += getSpBinVal(0,centroidCh+(drawing.contractFactor*(i - j - windowSize)));
-      highWindowVal += getSpBinVal(0,centroidCh+(drawing.contractFactor*(i - j)));
+      lowWindowVal += getSpBinVal(0,(int)centroidCh+(drawing.contractFactor*(i - j - windowSize)));
+      highWindowVal += getSpBinVal(0,(int)centroidCh+(drawing.contractFactor*(i - j)));
     }
     filterVal = highWindowVal - lowWindowVal;
     if(filterVal > maxFilterVal){
-      maxChVal = centroidCh+(drawing.contractFactor*i);
+      maxChVal = (float)(centroidCh+(drawing.contractFactor*i));
       maxFilterVal = filterVal;
       ctr=0;
     }else{
@@ -1071,8 +1073,8 @@ float centroidGuess(const float centroidInit){
   int halfSearchLength = 10;
   int i,j;
   float lowWindowVal, highWindowVal, filterVal;
-  float minFilterVal = BIG_NUMBER;
-  float maxFilterVal = -1.0*BIG_NUMBER;
+  float minFilterVal = (float)BIG_NUMBER;
+  float maxFilterVal = -1.0f*(float)BIG_NUMBER;
   float minCentroidVal = centroidInit;
   float maxCentroidVal = centroidInit;
   float centroidVal = centroidInit;
@@ -1082,38 +1084,40 @@ float centroidGuess(const float centroidInit){
     lowWindowVal = 0.;
     highWindowVal = 0.;
     for(j=0;j<windowSize;j++){
-      lowWindowVal += getSpBinVal(0,centroidInit+(drawing.contractFactor*(i - halfSearchLength + j)));
-      highWindowVal += getSpBinVal(0,centroidInit+(drawing.contractFactor*(i - halfSearchLength + j + windowSize)));
+      lowWindowVal += getSpBinVal(0,(int)centroidInit+(drawing.contractFactor*(i - halfSearchLength + j)));
+      highWindowVal += getSpBinVal(0,(int)centroidInit+(drawing.contractFactor*(i - halfSearchLength + j + windowSize)));
     }
     filterVal = highWindowVal - lowWindowVal;
     if(filterVal < minFilterVal){
-      minCentroidVal = i;
+      minCentroidVal = (float)i;
       minFilterVal = filterVal;
     }
     if(filterVal > maxFilterVal){
-      maxCentroidVal = i;
+      maxCentroidVal = (float)i;
       maxFilterVal = filterVal;
     }
+    //printf("centroidVal: %i, filterVal: %f\n",i,filterVal);
   }
+  //printf("minCentroidVal: %f, maxCentroidVal: %f\n",minCentroidVal,maxCentroidVal);
 
   //then get slope closest to zero between the maximum positive and negative slopes
-  minFilterVal = BIG_NUMBER;
+  minFilterVal = (float)BIG_NUMBER;
   if(minCentroidVal > maxCentroidVal){
     //swap values so that minCentroidVal is the smaller of the two
     float swapVal = minCentroidVal;
     minCentroidVal = maxCentroidVal;
     maxCentroidVal = swapVal;
   }
-  for(i=minCentroidVal; i<=maxCentroidVal; i++){
+  for(i=(int)minCentroidVal; i<=(int)maxCentroidVal; i++){
     lowWindowVal = 0.;
     highWindowVal = 0.;
     for(j=0;j<windowSize;j++){
-      lowWindowVal += getSpBinVal(0,centroidInit+(drawing.contractFactor*(i - halfSearchLength + j)));
-      highWindowVal += getSpBinVal(0,centroidInit+(drawing.contractFactor*(i - halfSearchLength + j + windowSize)));
+      lowWindowVal += getSpBinVal(0,(int)centroidInit+(drawing.contractFactor*(i - halfSearchLength + j)));
+      highWindowVal += getSpBinVal(0,(int)centroidInit+(drawing.contractFactor*(i - halfSearchLength + j + windowSize)));
     }
     filterVal = fabsf(highWindowVal - lowWindowVal);
     if(filterVal < minFilterVal){
-      centroidVal = centroidInit - halfSearchLength + i + windowSize;
+      centroidVal = centroidInit + (float)(i + windowSize - halfSearchLength);
       minFilterVal = filterVal;
     }
   }
@@ -1136,7 +1140,7 @@ int isCentroidNearOthers(const int centInd, const float dist){
 
 int startGausFit(){
   
-  fitpar.ndf = (int)((fitpar.fitEndCh - fitpar.fitStartCh)/(1.0*drawing.contractFactor)) - (3+(3*fitpar.numFitPeaks));
+  fitpar.ndf = (int)((fitpar.fitEndCh - fitpar.fitStartCh)/(1.0*drawing.contractFactor)) - (3+(3*(int)fitpar.numFitPeaks));
   if(fitpar.ndf <= 0){
     printf("Not enough degrees of freedom to fit!\n");
     return 0;
@@ -1158,7 +1162,7 @@ int startGausFit(){
 
   //assign initial guesses for background
   fitpar.fitParVal[0] = (getSpBinVal(0,fitpar.fitStartCh) + getSpBinVal(0,fitpar.fitEndCh))/2.0;
-  fitpar.fitParVal[1] = (getSpBinVal(0,fitpar.fitEndCh) - getSpBinVal(0,fitpar.fitStartCh))/(fitpar.fitEndCh - fitpar.fitStartCh);
+  fitpar.fitParVal[1] = (getSpBinVal(0,fitpar.fitEndCh) - getSpBinVal(0,fitpar.fitStartCh))/(float)(fitpar.fitEndCh - fitpar.fitStartCh);
   fitpar.fitParVal[2] = 0.0;
 
   //assign initial guesses for non-linear params
@@ -1166,7 +1170,7 @@ int startGausFit(){
     if(isCentroidNearOthers(i,10.0)==0){
       fitpar.fitPeakInitGuess[i] = centroidGuess(fitpar.fitPeakInitGuess[i]); //guess peak positions
     }
-    fitpar.fitParVal[6+(3*i)] = getSpBinVal(0,fitpar.fitPeakInitGuess[i]) - fitpar.fitParVal[0] - fitpar.fitParVal[1]*fitpar.fitPeakInitGuess[i];
+    fitpar.fitParVal[6+(3*i)] = getSpBinVal(0,(int)fitpar.fitPeakInitGuess[i]) - fitpar.fitParVal[0] - fitpar.fitParVal[1]*fitpar.fitPeakInitGuess[i];
     fitpar.fitParVal[7+(3*i)] = fitpar.fitPeakInitGuess[i];
   }
 

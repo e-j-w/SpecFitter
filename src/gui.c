@@ -356,7 +356,7 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button)
     if(spNum >= 0){
       //handle drawing individual spectra
       if(spNum < rawdata.numSpOpened){
-        drawing.multiPlots[0] = spNum;
+        drawing.multiPlots[0] = (unsigned char)spNum;
         drawing.multiplotMode = 0;//unset multiplot, if it is being used
         drawing.numMultiplotSp = 1;//unset multiplot
         drawing.scaleFactor[spNum] = 1.0; //reset any scaling from custom views
@@ -439,7 +439,7 @@ void openSingleFile(char *filename, int append){
     //select the first non-empty spectrum by default
     int sel = getFirstNonemptySpectrum(rawdata.numSpOpened);
     if(sel >=0){
-      drawing.multiPlots[0] = sel;
+      drawing.multiPlots[0] = (unsigned char)sel;
       drawing.multiplotMode = 0; //file just opened, disable multiplot
       setSpOpenView(1);
       //set the range of selectable spectra values
@@ -527,7 +527,7 @@ void on_open_button_clicked(GtkButton *b)
         //select the first non-empty spectrum by default
         int sel = getFirstNonemptySpectrum(rawdata.numSpOpened);
         if(sel >=0){
-          drawing.multiPlots[0] = sel;
+          drawing.multiPlots[0] = (unsigned char)sel;
           drawing.multiplotMode = 0; //files just opened, disable multiplot
           guiglobals.fittingSp = 0; //files just opened, reset fit state
           setSpOpenView(1);
@@ -1285,7 +1285,7 @@ void on_multiplot_make_view_button_clicked(GtkButton *b)
     gtk_tree_model_get(model,&iter,1,&val,3,&spInd,-1); //get whether the spectrum is selected and the spectrum index
     if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
       if(val==TRUE){
-        rawdata.viewMultiPlots[rawdata.numViews][selectedSpCount]=spInd;
+        rawdata.viewMultiPlots[rawdata.numViews][selectedSpCount]=(unsigned char)spInd;
         selectedSpCount++;
       }
     }
@@ -1358,10 +1358,12 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
     readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
     while (readingTreeModel){
       gtk_tree_model_get(model,&iter,1,&val,3,&spInd,-1); //get whether the spectrum is selected and the spectrum index
-      if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
-        if(val==TRUE){
-          drawing.multiPlots[selectedSpCount]=spInd;
-          selectedSpCount++;
+      if(spInd>=0){
+        if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
+          if(val==TRUE){
+            drawing.multiPlots[selectedSpCount]=(unsigned char)spInd;
+            selectedSpCount++;
+          }
         }
       }
       readingTreeModel = gtk_tree_model_iter_next (model, &iter);
@@ -1621,7 +1623,7 @@ void on_sum_all_button_clicked(GtkButton *b)
     return;
   }
 
-  int i;
+  unsigned char i;
   drawing.multiplotMode = 1;//sum spectra
   drawing.numMultiplotSp = rawdata.numSpOpened;
   if(drawing.numMultiplotSp > NSPECT)
@@ -2207,7 +2209,10 @@ void iniitalizeUIElements(){
   drawing.contractFactor = 1;
   drawing.autoScale = 1;
   drawing.logScale = 0;
-  drawing.zoomingYCtr = 0;
+  drawing.zoomingSpX = 0;
+  drawing.zoomingSpY = 0;
+  drawing.zoomXLastFrameTime = 0;
+  drawing.zoomYLastFrameTime = 0;
   calpar.calMode = 0;
   rawdata.dropEmptySpectra = 1;
   rawdata.numSpOpened = 0;
@@ -2233,7 +2238,6 @@ void iniitalizeUIElements(){
   guiglobals.deferSpSelChange = 0;
   guiglobals.deferToggleRow = 0;
   guiglobals.draggingSp = 0;
-  guiglobals.zoomingSpX = 0;
   guiglobals.drawSpCursor = -1; //disabled by default
   guiglobals.drawSpLabels = 1; //enabled by default
   guiglobals.drawSpComments = 1; //enabled by default
@@ -2264,4 +2268,9 @@ void iniitalizeUIElements(){
   gtk_window_set_default_icon(appIcon);
   gtk_window_set_icon(window,appIcon);
   gtk_about_dialog_set_logo(about_dialog, appIcon);
+
+  //setup frame clock, for timing animations
+  gtk_widget_realize(GTK_WIDGET(window));
+  frameClock = gtk_widget_get_frame_clock(GTK_WIDGET(window));
+
 }

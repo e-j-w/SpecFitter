@@ -127,17 +127,18 @@ GtkWindow *help_window;
 GtkBuilder *builder;
 //custom icons
 GdkPixbuf *appIcon, *spIconPixbuf, *spIconPixbufDark;
+//timing
+GdkFrameClock *frameClock;
 
 //non-GTK GUI globals
 struct {
   char draggingSp; //0 if no drag motion, 1 if dragging
-  char zoomingSpX; //0 if no zoom motion, 1 if zooming
   int dragstartul, dragstartll; //click and drag position storage parameters
   float dragStartX; //start cursor position when dragging
   float cursorPosX, cursorPosY; //cursor position
   char drawSpCursor; //0 = don't draw vertical cursor on spectrum, 1=draw, -1=drawing disabled
-  char drawSpLabels; //0 = don't draw labels, 1 = draw labels
-  char drawSpComments; //0 = don't draw comments, 1 = draw comments
+  unsigned char drawSpLabels; //0 = don't draw labels, 1 = draw labels
+  unsigned char drawSpComments; //0 = don't draw comments, 1 = draw comments
   char fittingSp; //0=not fitting, 1=selecting limits, 2=selecting peaks, 3=fitting, 4=refining fit, 5=fitted (display fit)
   int deferSpSelChange;
   int deferToggleRow;
@@ -162,11 +163,11 @@ struct {
   unsigned char viewMultiplotMode[MAXNVIEWS]; //multiplot mode for each saved view
   int viewNumMultiplotSp[MAXNVIEWS]; //number of spectra to show for each saved view
   double viewScaleFactor[MAXNVIEWS][NSPECT]; //scaling factors for each spectrum in each saved view
-  int viewMultiPlots[MAXNVIEWS][NSPECT]; //indices of all the spectra to show for each saved view
+  unsigned char viewMultiPlots[MAXNVIEWS][NSPECT]; //indices of all the spectra to show for each saved view
   unsigned char numViews; //number of views that have been saved
   char chanComment[NCHCOM][256]; //channel comment text
   unsigned char chanCommentView[NCHCOM]; //0=comment is on spectrum, 1=comment is on view
-  char chanCommentSp[NCHCOM]; //spectrum/view number at which channel comments are displayed
+  unsigned char chanCommentSp[NCHCOM]; //spectrum/view number at which channel comments are displayed
   int chanCommentCh[NCHCOM]; //channels at which channel comments are displayed
   float chanCommentVal[NCHCOM]; //y-values at which channel comments are displayed
   unsigned int numChComments; //number of comments which have been placed
@@ -181,14 +182,16 @@ struct {
   float zoomLevel, zoomToLevel; //1.0 = zoomed out fully (on x axis)
   int autoScale; //0=don't autoscale y axis, 1=autoscale y axis
   int logScale; //0=draw in linear scale, 1=draw in log scale (y-axis)
-  unsigned int zoomingYCtr; //whether the y scale is being zoomed
+  char zoomingSpX, zoomingSpY; //0 if no zoom motion, 1 if zooming
+  gint64 zoomXStartFrameTime, zoomYStartFrameTime; //the frames at which the x and y-scale zooms were started
+  gint64 zoomXLastFrameTime, zoomYLastFrameTime; //the most recent frames during the x and y-scale zooms
   float scaleToLevelMax[MAX_DISP_SP], scaleToLevelMin[MAX_DISP_SP]; //the y scale values to zoom to
   float scaleLevelMax[MAX_DISP_SP], scaleLevelMin[MAX_DISP_SP]; //the y scale values, ie. the maximum and minimum values to show on the y axis
   int contractFactor; //the number of channels per bin (default=1)
   unsigned char multiplotMode; //0=no multiplot, 1=summed spectra, 2=overlay spectra (common scaling), 3=overlay spectra (independent scaling), 4=stacked view
   int numMultiplotSp; //number of spectra to show in multiplot mode
   double scaleFactor[NSPECT]; //scaling factors for each spectrum
-  int multiPlots[NSPECT]; //indices of all the spectra to show in multiplot mode
+  unsigned char multiPlots[NSPECT]; //indices of all the spectra to show in multiplot mode
   int displayedView; //-1 if no view is being displayed, -2 if temporary view dispalyed, otherwise the index of the displayed view
   float spColors[MAX_DISP_SP*3];
   signed char highlightedPeak; //the peak to highlight when drawing spectra, -1=don't highlight
@@ -212,7 +215,7 @@ struct {
   unsigned int numFitPeaks; //number of peaks to fit
   unsigned char fixRelativeWidths; //0=don't fix width, 1=fix widths
   unsigned char weightMode; //0=weight using data (properly weighting for background subtraction), 1=weight using fit, 2=no weights
-  double relWidths[MAX_FIT_PK]; //relative width factors
+  long double relWidths[MAX_FIT_PK]; //relative width factors
   unsigned char errFound; //whether or not paramter errors have been found
   unsigned char fitType; //0=Gaussian, 1=skewed Gaussian
   //fit parameters: 

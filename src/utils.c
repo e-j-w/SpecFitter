@@ -4,7 +4,7 @@
 
 //get a formatted string with a value and its uncertainty 
 //if roundErr=1, error will be properly rounded using the '20 rule' for reporting uncertainties
-void getFormattedValAndUncertainty(const double val, const double err, char *str, const int strLength, const int showErr, const int roundErr){
+void getFormattedValAndUncertainty(const double val, const double err, char *str, const long unsigned int strLength, const int showErr, const int roundErr){
 
   /*if(err < 0){
     //invalid error
@@ -83,7 +83,7 @@ void getFormattedValAndUncertainty(const double val, const double err, char *str
 
 }
 
-void getFormattedYAxisVal(const double val, const double axisMinVal, const double axisMaxVal, char *str, const int strLength){
+void getFormattedYAxisVal(const double val, const double axisMinVal, const double axisMaxVal, char *str, const long unsigned int strLength){
 
   if(val == 0){
     snprintf(str,strLength,"0");

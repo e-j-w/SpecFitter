@@ -212,7 +212,7 @@ float getSpBinValRaw(const int spNumRaw, const int bin, const double scaleFactor
   float val = 0.;
   for(i=0;i<contractFactor;i++){
     if((bin+i) < S32K){
-      val += scaleFactor*rawdata.hist[spNumRaw][bin+i];
+      val += (float)(scaleFactor*rawdata.hist[spNumRaw][bin+i]);
     }
   }
   return val;
@@ -235,11 +235,11 @@ float getSpBinValOrWeight(const int dispSpNum, const int bin, const int getWeigh
       for(j=0;j<drawing.contractFactor;j++){
         if(getWeight){
           for(k=0;k<drawing.numMultiplotSp;k++){
-            val += drawing.scaleFactor[drawing.multiPlots[k]]*drawing.scaleFactor[drawing.multiPlots[k]]*fabs(rawdata.hist[drawing.multiPlots[k]][bin+j]);
+            val += (float)(drawing.scaleFactor[drawing.multiPlots[k]]*drawing.scaleFactor[drawing.multiPlots[k]]*fabs(rawdata.hist[drawing.multiPlots[k]][bin+j]));
           }
         }else{
           for(k=0;k<drawing.numMultiplotSp;k++){
-            val += drawing.scaleFactor[drawing.multiPlots[k]]*rawdata.hist[drawing.multiPlots[k]][bin+j];
+            val += (float)(drawing.scaleFactor[drawing.multiPlots[k]]*rawdata.hist[drawing.multiPlots[k]][bin+j]);
           }
         }
       }

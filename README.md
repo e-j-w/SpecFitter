@@ -1,6 +1,6 @@
 # **jf3**
 
-**A spectroscopy tool in GTK3**
+**A spectroscopy tool in GTK**
 
 ## Description
 
