@@ -22,7 +22,7 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
 
   //printf("Number of spectra to write: %i\n",rawdata.numSpOpened);
 
-  ucharBuf = 1; //file version number
+  ucharBuf = 2; //file format version number
   fwrite(&ucharBuf,sizeof(unsigned char),1,out);
   ucharBuf = rawdata.numSpOpened; //number of spectra to write
   fwrite(&ucharBuf,sizeof(unsigned char),1,out);
@@ -47,7 +47,7 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
   for(i=0;i<rawdata.numViews;i++){
     fwrite(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,out);
     fwrite(&rawdata.viewMultiplotMode[i],sizeof(unsigned char),1,out);
-    fwrite(&rawdata.viewNumMultiplotSp[i],sizeof(int),1,out);
+    fwrite(&rawdata.viewNumMultiplotSp[i],sizeof(unsigned char),1,out);
     for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
       fwrite(&rawdata.viewMultiPlots[i][j],sizeof(unsigned char),1,out);
     }
@@ -343,7 +343,7 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
         }
         fprintf(out,"\nVIEWSCALE ");
         for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
-          if((rawdata.viewMultiPlots[i][j]>=0)&&(rawdata.viewMultiPlots[i][j]<NSPECT)){
+          if(rawdata.viewMultiPlots[i][j]<NSPECT){
             fprintf(out," %0.3f", rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]]);
           }
         }

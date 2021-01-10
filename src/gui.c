@@ -1277,7 +1277,7 @@ void on_multiplot_make_view_button_clicked(GtkButton *b)
   gboolean readingTreeModel;
   gboolean val = FALSE;
   int spInd = 0;
-  int selectedSpCount = 0;
+  unsigned char selectedSpCount = 0;
   GtkTreeModel *model = gtk_tree_view_get_model(multiplot_tree_view);
   readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
   while (readingTreeModel)
@@ -1353,7 +1353,7 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
   if(pageNum==0){
     //plot spectrum data
     int spInd = 0;
-    int selectedSpCount = 0;
+    unsigned char selectedSpCount = 0;
     model = gtk_tree_view_get_model(multiplot_tree_view);
     readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
     while (readingTreeModel){
@@ -1882,15 +1882,16 @@ void cycle_multiplot_mode(int up){
         if(drawing.multiplotMode < 4){
           drawing.multiplotMode++;
         }else{
-          drawing.multiplotMode=1;
+          drawing.multiplotMode = 1;
         }
       }else{
         if(drawing.multiplotMode > 1){
           drawing.multiplotMode--;
         }else{
-          drawing.multiplotMode=4;
+          drawing.multiplotMode = 4;
         }
       }
+      guiglobals.fittingSp = 0; //reset fit state
       manualSpectrumAreaDraw();
     }
   }

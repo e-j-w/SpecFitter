@@ -482,7 +482,7 @@ int setupFitSums(lin_eq_type *linEq, const double flambda, const int fitType){
   long double widthDerSum = 0.;
   int peakNum, peakNum2, parNum, parNum2;
 
-  linEq->dim = 6 + (3*fitpar.numFitPeaks);
+  linEq->dim = 6 + (3*(unsigned int)fitpar.numFitPeaks);
 
   for(i=fitpar.fitStartCh;i<=fitpar.fitEndCh;i+=drawing.contractFactor){
 

@@ -652,16 +652,16 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
     signed char peakToHighlight = -1;
     if(guiglobals.fittingSp == 6){
       //check if the cursor is over a peak
-      signed char i;
+      unsigned char i;
       for(i=0;i<fitpar.numFitPeaks;i++){
         if(cursorChan > (fitpar.fitParVal[7+(3*i)] - 2.*fitpar.fitParVal[8+(3*i)])){
           if(cursorChan < (fitpar.fitParVal[7+(3*i)] + 2.*fitpar.fitParVal[8+(3*i)])){
             if(peakToHighlight == -1){
-              peakToHighlight = i;
+              peakToHighlight = (signed char)i;
             }else{
               //highlight whichever peak is closer to the cursor
               if(fabsl(cursorChan - fitpar.fitParVal[7+(3*i)]) < fabsl(cursorChan - fitpar.fitParVal[7+(3*drawing.highlightedPeak)])){
-                peakToHighlight = i;
+                peakToHighlight = (signed char)i;
               }
             }
           }
@@ -1290,6 +1290,15 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         }
         break;
       case 2:
+        for(i=0;i<drawing.numMultiplotSp;i++){
+          if(drawing.logScale){
+            drawing.scaleToLevelMax[i] = maxVal[0]*2.0f;
+          }else{
+            drawing.scaleToLevelMax[i] = maxVal[0]*1.2f;
+          }
+          drawing.scaleToLevelMin[i] = minVal[0];
+        }
+        break;
       case 1:
       case 0:
         if(drawing.logScale){

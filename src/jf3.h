@@ -161,7 +161,7 @@ struct {
   unsigned char numFilesOpened; //number of files containing spectra opened
   char viewComment[MAXNVIEWS][256]; //view description/comment
   unsigned char viewMultiplotMode[MAXNVIEWS]; //multiplot mode for each saved view
-  int viewNumMultiplotSp[MAXNVIEWS]; //number of spectra to show for each saved view
+  unsigned char viewNumMultiplotSp[MAXNVIEWS]; //number of spectra to show for each saved view
   double viewScaleFactor[MAXNVIEWS][NSPECT]; //scaling factors for each spectrum in each saved view
   unsigned char viewMultiPlots[MAXNVIEWS][NSPECT]; //indices of all the spectra to show for each saved view
   unsigned char numViews; //number of views that have been saved
@@ -189,7 +189,7 @@ struct {
   float scaleLevelMax[MAX_DISP_SP], scaleLevelMin[MAX_DISP_SP]; //the y scale values, ie. the maximum and minimum values to show on the y axis
   int contractFactor; //the number of channels per bin (default=1)
   unsigned char multiplotMode; //0=no multiplot, 1=summed spectra, 2=overlay spectra (common scaling), 3=overlay spectra (independent scaling), 4=stacked view
-  int numMultiplotSp; //number of spectra to show in multiplot mode
+  unsigned char numMultiplotSp; //number of spectra to show in multiplot mode
   double scaleFactor[NSPECT]; //scaling factors for each spectrum
   unsigned char multiPlots[NSPECT]; //indices of all the spectra to show in multiplot mode
   int displayedView; //-1 if no view is being displayed, -2 if temporary view dispalyed, otherwise the index of the displayed view
@@ -212,7 +212,7 @@ struct {
   int ndf; //DOF for fit
   float fitPeakInitGuess[MAX_FIT_PK]; //initial guess of peak positions, in channels
   double widthFGH[3]; //F,G,H parameters used to evaluate widths
-  unsigned int numFitPeaks; //number of peaks to fit
+  unsigned char numFitPeaks; //number of peaks to fit
   unsigned char fixRelativeWidths; //0=don't fix width, 1=fix widths
   unsigned char weightMode; //0=weight using data (properly weighting for background subtraction), 1=weight using fit, 2=no weights
   long double relWidths[MAX_FIT_PK]; //relative width factors

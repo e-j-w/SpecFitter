@@ -25,8 +25,8 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
   }
 
   if(fread(&ucharBuf, sizeof(unsigned char), 1, inp)!=1){fclose(inp); return 0;}
-  if(ucharBuf==1){
-    //version 0 of file format
+  if(ucharBuf==2){
+    //version 2 of file format
     if(fread(&ucharBuf, sizeof(unsigned char), 1, inp)!=1){fclose(inp); return 0;}
     numSpec = ucharBuf;
     if(numSpec > 0){
@@ -95,12 +95,12 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
             memset(rawdata.viewScaleFactor[i],0,sizeof(rawdata.viewScaleFactor[i]));
             if(fread(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,inp)!=1){fclose(inp); return 0;}
             if(fread(&rawdata.viewMultiplotMode[i],sizeof(unsigned char),1,inp)!=1){fclose(inp); return 0;}
-            if(fread(&rawdata.viewNumMultiplotSp[i],sizeof(int),1,inp)!=1){fclose(inp); return 0;}
+            if(fread(&rawdata.viewNumMultiplotSp[i],sizeof(unsigned char),1,inp)!=1){fclose(inp); return 0;}
             for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
               if(fread(&rawdata.viewMultiPlots[i][j],sizeof(unsigned char),1,inp)!=1){fclose(inp); return 0;}
             }
             for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
-              if((rawdata.viewMultiPlots[i][j]>=0)&&(rawdata.viewMultiPlots[i][j]<NSPECT)){
+              if(rawdata.viewMultiPlots[i][j]<NSPECT){
                 if(fread(&rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]],sizeof(double),1,inp)!=1){fclose(inp); return 0;}
               }
             }
@@ -113,12 +113,12 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
             memset(rawdata.viewScaleFactor[i],0,sizeof(rawdata.viewScaleFactor[i]));
             if(fread(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,inp)!=1){fclose(inp); return 0;}
             if(fread(&rawdata.viewMultiplotMode[i],sizeof(unsigned char),1,inp)!=1){fclose(inp); return 0;}
-            if(fread(&rawdata.viewNumMultiplotSp[i],sizeof(int),1,inp)!=1){fclose(inp); return 0;}
+            if(fread(&rawdata.viewNumMultiplotSp[i],sizeof(unsigned char),1,inp)!=1){fclose(inp); return 0;}
             for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
               if(fread(&rawdata.viewMultiPlots[i][j],sizeof(unsigned char),1,inp)!=1){fclose(inp); return 0;}
             }
             for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
-              if((rawdata.viewMultiPlots[i][j]>=0)&&(rawdata.viewMultiPlots[i][j]<NSPECT)){
+              if(rawdata.viewMultiPlots[i][j]<NSPECT){
                 if(fread(&rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]],sizeof(double),1,inp)!=1){fclose(inp); return 0;}
               }
             }
@@ -479,7 +479,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
                               rawdata.viewMultiplotMode[rawdata.numViews] = (unsigned char)atoi(tok);
                               tok = strtok(NULL," ");
                               if(tok!=NULL){
-                                rawdata.viewNumMultiplotSp[rawdata.numViews] = atoi(tok);
+                                rawdata.viewNumMultiplotSp[rawdata.numViews] = (unsigned char)atoi(tok);
                                 if(fgets(str,256,inp)!=NULL){ //get an entire line
                                   tok = strtok(str," ");
                                   if(tok!=NULL){
@@ -495,7 +495,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
                                         if(tok!=NULL){
                                           if(strcmp(tok,"VIEWSCALE")==0){
                                             for(i=0;i<rawdata.viewNumMultiplotSp[rawdata.numViews];i++){
-                                              if((rawdata.viewMultiPlots[rawdata.numViews][i]>=0)&&(rawdata.viewMultiPlots[rawdata.numViews][i]<NSPECT)){
+                                              if(rawdata.viewMultiPlots[rawdata.numViews][i]<NSPECT){
                                                 tok = strtok(NULL," ");
                                                 if(tok!=NULL){
                                                   rawdata.viewScaleFactor[rawdata.numViews][rawdata.viewMultiPlots[rawdata.numViews][i]] = atof(tok);
