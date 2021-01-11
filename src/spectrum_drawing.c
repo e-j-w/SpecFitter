@@ -477,9 +477,10 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
             guiglobals.commentEditInd = getCommentAtCursor(event->x, event->y, 80.0, 40.0);
             if((guiglobals.commentEditInd >= 0)&&(guiglobals.commentEditInd < NCHCOM)){
               gtk_widget_set_sensitive(GTK_WIDGET(remove_comment_button),TRUE);
+              gtk_widget_set_visible(GTK_WIDGET(remove_comment_button),TRUE);
               gtk_entry_set_text(comment_entry, rawdata.chanComment[guiglobals.commentEditInd]);
               gtk_button_set_label(comment_ok_button,"Apply");
-              gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),TRUE);
+              gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
             }else{
               if(rawdata.numChComments >= NCHCOM){
                 printf("Cannot add any more comments.\n");
@@ -514,6 +515,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
               }else{
                 printf("WARNING: undefined view state, not displaying edit window.\n");
               }
+              gtk_widget_set_visible(GTK_WIDGET(remove_comment_button),FALSE);
               gtk_entry_set_text(comment_entry, "");
               gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
             }
@@ -529,9 +531,10 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
             guiglobals.commentEditInd = getCommentAtCursor(event->x, event->y, 80.0, 40.0);
             if((guiglobals.commentEditInd >= 0)&&(guiglobals.commentEditInd < NCHCOM)){
               gtk_widget_set_sensitive(GTK_WIDGET(remove_comment_button),TRUE);
+              gtk_widget_set_visible(GTK_WIDGET(remove_comment_button),TRUE);
               gtk_entry_set_text(comment_entry, rawdata.chanComment[guiglobals.commentEditInd]);
               gtk_button_set_label(comment_ok_button,"Apply");
-              gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),TRUE);
+              gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
             }else{
               if(rawdata.numChComments >= NCHCOM){
                 printf("Cannot add any more comments.\n");
@@ -572,6 +575,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
               }else{
                 printf("WARNING: undefined view state, not displaying edit window.\n");
               }
+              gtk_widget_set_visible(GTK_WIDGET(remove_comment_button),FALSE);
               gtk_entry_set_text(comment_entry, "");
               gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
             }
@@ -677,94 +681,100 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
     }
 
     //print info on the status bar
-    char statusBarLabel[256];
-    char *statusBarLabelp = statusBarLabel;
-    char binValStr[50];
-    //char *binValStrp = binValStr;
-    float binVal;
-    int i;
-    switch(drawing.highlightedPeak){
-      case -1:
-        //print cursor position on status bar
-        switch(drawing.multiplotMode){
-          case 4:
-          case 3:
-          case 2:
-            //multiple visible plots
-            if(calpar.calMode == 1){
-              int cursorChanEnd = cursorChanRounded + drawing.contractFactor;
-              float cal_lowerChanLimit = (float)(getCalVal(cursorChanRounded));
-              float cal_upperChanLimit = (float)(getCalVal(cursorChanEnd));
-              statusBarLabelp += snprintf(statusBarLabelp,50,"%s: %0.1f - %0.1f, Values:", calpar.calUnit, cal_lowerChanLimit, cal_upperChanLimit);
-            }else{
-              if(drawing.contractFactor <= 1){
-                statusBarLabelp += snprintf(statusBarLabel,50,"Channel: %i, Values:",cursorChanRounded);
+    if(drawing.highlightedComment>=0){
+      //show the comment in the status bar
+      gtk_label_set_text(bottom_info_text,rawdata.chanComment[drawing.highlightedComment]);
+    }else{
+      //show the default status bar info
+      char statusBarLabel[256];
+      char *statusBarLabelp = statusBarLabel;
+      char binValStr[50];
+      //char *binValStrp = binValStr;
+      float binVal;
+      int i;
+      switch(drawing.highlightedPeak){
+        case -1:
+          //print cursor position on status bar
+          switch(drawing.multiplotMode){
+            case 4:
+            case 3:
+            case 2:
+              //multiple visible plots
+              if(calpar.calMode == 1){
+                int cursorChanEnd = cursorChanRounded + drawing.contractFactor;
+                float cal_lowerChanLimit = (float)(getCalVal(cursorChanRounded));
+                float cal_upperChanLimit = (float)(getCalVal(cursorChanEnd));
+                statusBarLabelp += snprintf(statusBarLabelp,50,"%s: %0.1f - %0.1f, Values:", calpar.calUnit, cal_lowerChanLimit, cal_upperChanLimit);
               }else{
-                statusBarLabelp += snprintf(statusBarLabel,256,"Channels: %i - %i, Values:",cursorChanRounded, cursorChanRounded + drawing.contractFactor - 1);
+                if(drawing.contractFactor <= 1){
+                  statusBarLabelp += snprintf(statusBarLabel,50,"Channel: %i, Values:",cursorChanRounded);
+                }else{
+                  statusBarLabelp += snprintf(statusBarLabel,256,"Channels: %i - %i, Values:",cursorChanRounded, cursorChanRounded + drawing.contractFactor - 1);
+                }
               }
-            }
-            for(i=0;i<(drawing.numMultiplotSp-1);i++){
-              binVal = getDispSpBinVal(i,cursorChanRounded-drawing.lowerLimit);
+              for(i=0;i<(drawing.numMultiplotSp-1);i++){
+                binVal = getDispSpBinVal(i,cursorChanRounded-drawing.lowerLimit);
+                getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,guiglobals.showBinErrors,guiglobals.roundErrors);
+                statusBarLabelp += snprintf(statusBarLabelp,17," %s,", binValStr);
+              }
+              binVal = getDispSpBinVal(drawing.numMultiplotSp-1,cursorChanRounded-drawing.lowerLimit);
               getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,guiglobals.showBinErrors,guiglobals.roundErrors);
-              statusBarLabelp += snprintf(statusBarLabelp,17," %s,", binValStr);
-            }
-            binVal = getDispSpBinVal(drawing.numMultiplotSp-1,cursorChanRounded-drawing.lowerLimit);
-            getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,guiglobals.showBinErrors,guiglobals.roundErrors);
-            binValStr[15] = '\0'; //truncate string (staying safe with sprintf, working around compiler warning when using snprintf instead)
-            statusBarLabelp += sprintf(statusBarLabelp," %s", binValStr);
-            break;
-          case 1:
-          case 0:
-          default:
-            //single plot
-            binVal = getDispSpBinVal(0,cursorChanRounded-drawing.lowerLimit);
-            getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,guiglobals.showBinErrors,guiglobals.roundErrors);
-            if(calpar.calMode == 1){
-              int cursorChanEnd = cursorChanRounded + drawing.contractFactor;
-              float cal_lowerChanLimit = (float)(getCalVal(cursorChanRounded));
-              float cal_upperChanLimit = (float)(getCalVal(cursorChanEnd));
-              snprintf(statusBarLabel,256,"%s: %0.1f to %0.1f, Value: %s", calpar.calUnit,cal_lowerChanLimit,cal_upperChanLimit,binValStr);
-            }else{
-              if(drawing.contractFactor <= 1){
-                snprintf(statusBarLabel,256,"Channel: %i, Value: %s",cursorChanRounded,binValStr);
+              binValStr[15] = '\0'; //truncate string (staying safe with sprintf, working around compiler warning when using snprintf instead)
+              statusBarLabelp += sprintf(statusBarLabelp," %s", binValStr);
+              break;
+            case 1:
+            case 0:
+            default:
+              //single plot
+              binVal = getDispSpBinVal(0,cursorChanRounded-drawing.lowerLimit);
+              getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,guiglobals.showBinErrors,guiglobals.roundErrors);
+              if(calpar.calMode == 1){
+                int cursorChanEnd = cursorChanRounded + drawing.contractFactor;
+                float cal_lowerChanLimit = (float)(getCalVal(cursorChanRounded));
+                float cal_upperChanLimit = (float)(getCalVal(cursorChanEnd));
+                snprintf(statusBarLabel,256,"%s: %0.1f to %0.1f, Value: %s", calpar.calUnit,cal_lowerChanLimit,cal_upperChanLimit,binValStr);
               }else{
-                snprintf(statusBarLabel,256,"Channels: %i to %i, Value: %s",cursorChanRounded,cursorChanRounded + drawing.contractFactor - 1,binValStr);
+                if(drawing.contractFactor <= 1){
+                  snprintf(statusBarLabel,256,"Channel: %i, Value: %s",cursorChanRounded,binValStr);
+                }else{
+                  snprintf(statusBarLabel,256,"Channels: %i to %i, Value: %s",cursorChanRounded,cursorChanRounded + drawing.contractFactor - 1,binValStr);
+                }
               }
+              break;
+          }
+          break;
+        default:
+          //print highlighted peak info
+          if(calpar.calMode == 1){
+            float calCentr = (float)(getCalVal((double)(fitpar.fitParVal[7+(3*drawing.highlightedPeak)])));
+            float calWidth = (float)(getCalWidth((double)(fitpar.fitParVal[8+(3*drawing.highlightedPeak)])));
+            if(fitpar.errFound){
+              float calCentrErr = (float)(getCalWidth((double)(fitpar.fitParErr[7+(3*drawing.highlightedPeak)])));
+              float calWidthErr = (float)(getCalWidth((double)(fitpar.fitParErr[8+(3*drawing.highlightedPeak)])));
+              char fitParStr[3][50];
+              getFormattedValAndUncertainty(evalPeakArea(drawing.highlightedPeak,fitpar.fitType),evalPeakAreaErr(drawing.highlightedPeak,fitpar.fitType),fitParStr[0],50,1,guiglobals.roundErrors);
+              getFormattedValAndUncertainty(calCentr,calCentrErr,fitParStr[1],50,1,guiglobals.roundErrors);
+              getFormattedValAndUncertainty(2.35482*calWidth,2.35482*calWidthErr,fitParStr[2],50,1,guiglobals.roundErrors);
+              snprintf(statusBarLabel,256,"Area: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
+            }else{
+              snprintf(statusBarLabel,256,"Area: %0.3f, Centroid: %0.3f, FWHM: %0.3f",evalPeakArea(drawing.highlightedPeak,fitpar.fitType),calCentr,2.35482*calWidth);
             }
-            break;
-        }
-        break;
-      default:
-        //print highlighted peak info
-        if(calpar.calMode == 1){
-          float calCentr = (float)(getCalVal((double)(fitpar.fitParVal[7+(3*drawing.highlightedPeak)])));
-          float calWidth = (float)(getCalWidth((double)(fitpar.fitParVal[8+(3*drawing.highlightedPeak)])));
-          if(fitpar.errFound){
-            float calCentrErr = (float)(getCalWidth((double)(fitpar.fitParErr[7+(3*drawing.highlightedPeak)])));
-            float calWidthErr = (float)(getCalWidth((double)(fitpar.fitParErr[8+(3*drawing.highlightedPeak)])));
-            char fitParStr[3][50];
-            getFormattedValAndUncertainty(evalPeakArea(drawing.highlightedPeak,fitpar.fitType),evalPeakAreaErr(drawing.highlightedPeak,fitpar.fitType),fitParStr[0],50,1,guiglobals.roundErrors);
-            getFormattedValAndUncertainty(calCentr,calCentrErr,fitParStr[1],50,1,guiglobals.roundErrors);
-            getFormattedValAndUncertainty(2.35482*calWidth,2.35482*calWidthErr,fitParStr[2],50,1,guiglobals.roundErrors);
-            snprintf(statusBarLabel,256,"Area: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
           }else{
-            snprintf(statusBarLabel,256,"Area: %0.3f, Centroid: %0.3f, FWHM: %0.3f",evalPeakArea(drawing.highlightedPeak,fitpar.fitType),calCentr,2.35482*calWidth);
+            if(fitpar.errFound){
+              char fitParStr[3][50];
+              getFormattedValAndUncertainty(evalPeakArea(drawing.highlightedPeak,fitpar.fitType),evalPeakAreaErr(drawing.highlightedPeak,fitpar.fitType),fitParStr[0],50,1,guiglobals.roundErrors);
+              getFormattedValAndUncertainty((double)(fitpar.fitParVal[7+(3*drawing.highlightedPeak)]),(double)(fitpar.fitParErr[7+(3*drawing.highlightedPeak)]),fitParStr[1],50,1,guiglobals.roundErrors);
+              getFormattedValAndUncertainty(2.35482*(double)(fitpar.fitParVal[8+(3*drawing.highlightedPeak)]),2.35482*(double)(fitpar.fitParErr[8+(3*drawing.highlightedPeak)]),fitParStr[2],50,1,guiglobals.roundErrors);
+              snprintf(statusBarLabel,256,"Area: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
+            }else{
+              snprintf(statusBarLabel,256,"Area: %0.3f, Centroid: %0.3Lf, FWHM: %0.3Lf",evalPeakArea(drawing.highlightedPeak,fitpar.fitType),fitpar.fitParVal[7+(3*drawing.highlightedPeak)],2.35482*fitpar.fitParVal[8+(3*drawing.highlightedPeak)]);
+            }
           }
-        }else{
-          if(fitpar.errFound){
-            char fitParStr[3][50];
-            getFormattedValAndUncertainty(evalPeakArea(drawing.highlightedPeak,fitpar.fitType),evalPeakAreaErr(drawing.highlightedPeak,fitpar.fitType),fitParStr[0],50,1,guiglobals.roundErrors);
-            getFormattedValAndUncertainty((double)(fitpar.fitParVal[7+(3*drawing.highlightedPeak)]),(double)(fitpar.fitParErr[7+(3*drawing.highlightedPeak)]),fitParStr[1],50,1,guiglobals.roundErrors);
-            getFormattedValAndUncertainty(2.35482*(double)(fitpar.fitParVal[8+(3*drawing.highlightedPeak)]),2.35482*(double)(fitpar.fitParErr[8+(3*drawing.highlightedPeak)]),fitParStr[2],50,1,guiglobals.roundErrors);
-            snprintf(statusBarLabel,256,"Area: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
-          }else{
-            snprintf(statusBarLabel,256,"Area: %0.3f, Centroid: %0.3Lf, FWHM: %0.3Lf",evalPeakArea(drawing.highlightedPeak,fitpar.fitType),fitpar.fitParVal[7+(3*drawing.highlightedPeak)],2.35482*fitpar.fitParVal[8+(3*drawing.highlightedPeak)]);
-          }
-        }
 
-        break;
+          break;
+      }
+      gtk_label_set_text(bottom_info_text,statusBarLabel);
     }
-    gtk_label_set_text(bottom_info_text,statusBarLabel);
 
     //draw cursor on plot (expensive, requires redraw of plot itself)
     if((guiglobals.draggingSp == 0)&&(guiglobals.drawSpCursor != -1)){

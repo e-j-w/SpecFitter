@@ -1071,10 +1071,19 @@ void on_remove_calibration_button_clicked(GtkButton *b)
 
 void on_comment_entry_changed(GtkEntry *entry, gpointer user_data)
 {
+
   int len = gtk_entry_get_text_length(entry);
   if(len==0){
     gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
   }else{
+    if(guiglobals.commentEditInd>=0){
+      const gchar *entryText;
+      entryText = gtk_entry_get_text(entry);
+      if(strncmp(entryText,rawdata.chanComment[guiglobals.commentEditInd],256)==0){
+        gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
+        return;
+      }
+    }
     gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),TRUE);
   }
 }
@@ -1113,6 +1122,12 @@ void on_comment_ok_button_clicked(GtkButton *b)
     gtk_widget_hide(GTK_WIDGET(comment_window)); //close the comment window
     manualSpectrumAreaDraw(); //redraw the spectrum
   }
+}
+void on_comment_cancel()
+{
+  //handle escape button shortcut
+  gtk_widget_hide(GTK_WIDGET(comment_window)); //close the comment window
+  manualSpectrumAreaDraw(); //redraw the spectrum
 }
 void on_remove_comment_button_clicked(GtkButton *b)
 {
@@ -2190,6 +2205,7 @@ void iniitalizeUIElements(){
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_s, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_save_button_clicked), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_q, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(gtk_main_quit), NULL, 0));
   gtk_accel_group_connect(comment_window_accelgroup, GDK_KEY_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_comment_ok_button_clicked), NULL, 0));
+  gtk_accel_group_connect(comment_window_accelgroup, GDK_KEY_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_comment_cancel), NULL, 0));
 
   //set attributes
   gtk_tree_view_column_add_attribute(multiplot_column2,multiplot_cr2, "active",1);
