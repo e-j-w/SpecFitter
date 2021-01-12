@@ -1069,29 +1069,117 @@ void on_remove_calibration_button_clicked(GtkButton *b)
 }
 
 
+//used for keyboard shortcut to rename the displayed view
+void on_rename_displayed_view()
+{
+  guiglobals.commentEditMode=1;
+  gtk_widget_set_visible(GTK_WIDGET(remove_comment_button),FALSE); //cannot delete view names
+
+  if(drawing.displayedView == -2){
+    if(rawdata.numViews < MAXNVIEWS){
+      gtk_window_set_title(comment_window,"Name View");
+      gtk_button_set_label(comment_ok_button,"Save View and Apply");
+      gtk_entry_set_text(comment_entry,"");
+    }else{
+      printf("Cannot name/create another view.\n");
+      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+      GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot rename and save view!");
+      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"This view must be saved in order to be renamed, however the maximum number of views has been reached.  Older views must be deleted first.");
+      gtk_dialog_run(GTK_DIALOG(message_dialog));
+      gtk_widget_destroy(message_dialog);
+      return;
+    }
+  }else if(drawing.displayedView == -1){
+    //showing a spectrum, not a view
+    gtk_window_set_title(comment_window,"Rename Spectrum");
+    gtk_button_set_label(comment_ok_button,"Apply");
+    gtk_entry_set_text(comment_entry,rawdata.histComment[drawing.multiPlots[0]]);
+  }else{
+    //showing a view
+    gtk_window_set_title(comment_window,"Rename View");
+    gtk_button_set_label(comment_ok_button,"Apply");
+    gtk_entry_set_text(comment_entry,rawdata.viewComment[drawing.displayedView]);
+  }
+
+  gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
+
+  //show the window to edit the title
+  gtk_window_present(comment_window);
+
+}
+
 void on_comment_entry_changed(GtkEntry *entry, gpointer user_data)
 {
-
   int len = gtk_entry_get_text_length(entry);
   if(len==0){
     gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
   }else{
-    if(guiglobals.commentEditInd>=0){
+    if(guiglobals.commentEditMode==0){
+      //editing spectrum/view channel comment
+      if(guiglobals.commentEditInd>=0){
+        const gchar *entryText;
+        entryText = gtk_entry_get_text(entry);
+        if(strncmp(entryText,rawdata.chanComment[guiglobals.commentEditInd],256)==0){
+          gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
+          return;
+        }
+      }
+      gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),TRUE);
+    }else if(guiglobals.commentEditMode==1){
+      //editing spectrum/view title
       const gchar *entryText;
       entryText = gtk_entry_get_text(entry);
-      if(strncmp(entryText,rawdata.chanComment[guiglobals.commentEditInd],256)==0){
-        gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
-        return;
+      if(drawing.displayedView == -1){
+        if(strncmp(entryText,rawdata.histComment[drawing.multiPlots[0]],256)==0){
+          gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
+          return;
+        }
+      }else{
+        if(strncmp(entryText,rawdata.viewComment[drawing.displayedView],256)==0){
+          gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
+          return;
+        }
       }
+      gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),TRUE);
     }
-    gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),TRUE);
+    
   }
 }
 void on_comment_ok_button_clicked(GtkButton *b)
 {
   if(strcmp(gtk_entry_get_text(comment_entry),"")!=0){
-    if(guiglobals.commentEditInd == -1){
-      //making a new comment
+    if(guiglobals.commentEditMode==0){
+      //editing spectrum/view channel comment
+      if(guiglobals.commentEditInd == -1){
+        //making a new comment
+        if(drawing.displayedView == -2){
+          if(rawdata.numViews < MAXNVIEWS){
+            //make a new view
+
+            drawing.displayedView = rawdata.numViews;
+
+            rawdata.viewMultiplotMode[rawdata.numViews] = drawing.multiplotMode;
+            rawdata.viewNumMultiplotSp[rawdata.numViews] = drawing.numMultiplotSp;
+            memcpy(&rawdata.viewScaleFactor[rawdata.numViews],&drawing.scaleFactor,sizeof(drawing.scaleFactor));
+            memcpy(&rawdata.viewMultiPlots[rawdata.numViews],&drawing.multiPlots,sizeof(drawing.multiPlots));
+
+            //setup default view name
+            char viewStr[256];
+            getViewStr(viewStr,256,rawdata.numViews);
+            memcpy(rawdata.viewComment[rawdata.numViews],viewStr,sizeof(viewStr));
+            rawdata.numViews++;
+          }
+        }
+        strncpy(rawdata.chanComment[(int)rawdata.numChComments],gtk_entry_get_text(comment_entry),256);
+        rawdata.numChComments++;
+      }else{
+        //editing an existing comment
+        if(guiglobals.commentEditInd < NCHCOM){
+          strncpy(rawdata.chanComment[guiglobals.commentEditInd],gtk_entry_get_text(comment_entry),256);
+        }
+      }
+    }else if(guiglobals.commentEditMode==1){
+      //editing spectrum/view title
       if(drawing.displayedView == -2){
         if(rawdata.numViews < MAXNVIEWS){
           //make a new view
@@ -1103,19 +1191,13 @@ void on_comment_ok_button_clicked(GtkButton *b)
           memcpy(&rawdata.viewScaleFactor[rawdata.numViews],&drawing.scaleFactor,sizeof(drawing.scaleFactor));
           memcpy(&rawdata.viewMultiPlots[rawdata.numViews],&drawing.multiPlots,sizeof(drawing.multiPlots));
 
-          //setup default view name
-          char viewStr[256];
-          getViewStr(viewStr,256,rawdata.numViews);
-          memcpy(rawdata.viewComment[rawdata.numViews],viewStr,sizeof(viewStr));
+          strncpy(rawdata.viewComment[rawdata.numViews],gtk_entry_get_text(comment_entry),256);
           rawdata.numViews++;
         }
-      }
-      strncpy(rawdata.chanComment[(int)rawdata.numChComments],gtk_entry_get_text(comment_entry),256);
-      rawdata.numChComments++;
-    }else{
-      //editing an existing comment
-      if(guiglobals.commentEditInd < NCHCOM){
-        strncpy(rawdata.chanComment[guiglobals.commentEditInd],gtk_entry_get_text(comment_entry),256);
+      }else if(drawing.displayedView == -1){
+        strncpy(rawdata.histComment[drawing.multiPlots[0]],gtk_entry_get_text(comment_entry),256);
+      }else{
+        strncpy(rawdata.viewComment[drawing.displayedView],gtk_entry_get_text(comment_entry),256);
       }
     }
 
@@ -2200,6 +2282,7 @@ void iniitalizeUIElements(){
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_s, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(cycle_multiplot_mode_down), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_d, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(cycle_sp_up), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_a, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(cycle_sp_down), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_r, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_rename_displayed_view), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_o, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_open_button_clicked), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_a, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_append_button_clicked), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_s, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_save_button_clicked), NULL, 0));

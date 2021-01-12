@@ -139,12 +139,13 @@ struct {
   char drawSpCursor; //0 = don't draw vertical cursor on spectrum, 1=draw, -1=drawing disabled
   unsigned char drawSpLabels; //0 = don't draw labels, 1 = draw labels
   unsigned char drawSpComments; //0 = don't draw comments, 1 = draw comments
-  char fittingSp; //0=not fitting, 1=selecting limits, 2=selecting peaks, 3=fitting, 4=refining fit, 5=fitted (display fit)
+  unsigned char fittingSp; //0=not fitting, 1=selecting limits, 2=selecting peaks, 3=fitting, 4=refining fit, 5=fitted (display fit)
   int deferSpSelChange;
   int deferToggleRow;
-  char showBinErrors; //0=don't show, 1=show
-  char roundErrors; //0=don't round, 1=round
-  char autoZoom; //0=don't autozoom, 1=autozoom
+  unsigned char showBinErrors; //0=don't show, 1=show
+  unsigned char roundErrors; //0=don't round, 1=round
+  unsigned char autoZoom; //0=don't autozoom, 1=autozoom
+  unsigned char commentEditMode; //0=editing comment, 1=editing view title
   int commentEditInd;
   char preferDarkTheme; //0=prefer light, 1=prefer dark
   char popupFitResults; //0=don't popup results after fit, 1=popup results

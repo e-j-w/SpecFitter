@@ -71,7 +71,14 @@
               <object class="GtkShortcutsShortcut">
                 <property name="visible">1</property>
                 <property name="accelerator">M</property>
-                <property name="title" translatable="yes" context="shortcut window">Manage (rename/delete) spectra</property>
+                <property name="title" translatable="yes" context="shortcut window">Manage (rename/delete) imported data</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="visible">1</property>
+                <property name="accelerator">R</property>
+                <property name="title" translatable="yes" context="shortcut window">Rename currently displayed spectrum/view</property>
               </object>
             </child>
             <child>

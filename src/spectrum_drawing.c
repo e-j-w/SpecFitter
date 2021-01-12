@@ -79,6 +79,7 @@ int getCommentAtCursor(const double cursorx, const double cursory, const double 
   if((cursorx > xorigin)&&(cursory < ((double)dasize.height - yorigin))){
     float cursorCh = getCursorChannel(cursorx, cursory, xorigin, yorigin);
     float cursorYVal = getCursorYVal(cursorx, cursory, xorigin, yorigin);
+    //printf("cursorCh: %f, cursorYVal: %f\n",cursorCh,cursorYVal);
     switch (drawing.multiplotMode)
     {
       case 1:
@@ -87,7 +88,7 @@ int getCommentAtCursor(const double cursorx, const double cursory, const double 
           if(rawdata.chanCommentView[i] == 1){
             if(rawdata.chanCommentSp[i] == drawing.displayedView){
               //check proximity to channel
-              if(fabsf((float)rawdata.chanCommentCh[i] - cursorCh) < (30.0f*(float)((drawing.upperLimit - drawing.lowerLimit)/dasize.width))){
+              if(fabsf((float)rawdata.chanCommentCh[i] - cursorCh) < (30.0f*((float)(drawing.upperLimit - drawing.lowerLimit)/(float)dasize.width))){
                 //check proximity to y-val
                 float chYVal = rawdata.chanCommentVal[i];
                 if(chYVal < drawing.scaleLevelMin[0]){
@@ -95,7 +96,7 @@ int getCommentAtCursor(const double cursorx, const double cursory, const double 
                 }else if(chYVal > drawing.scaleLevelMax[0]){
                   chYVal = drawing.scaleLevelMax[0];
                 }
-                if(fabs(chYVal - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/dasize.height)){
+                if(fabs(chYVal - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/(float)dasize.height)){
                   return i; //this comment is close
                 }
               }
@@ -110,7 +111,7 @@ int getCommentAtCursor(const double cursorx, const double cursory, const double 
             if(rawdata.chanCommentView[i] == 0){
               if(rawdata.chanCommentSp[i] == drawing.multiPlots[0]){
                 //check proximity to channel
-                if(fabsf((float)rawdata.chanCommentCh[i] - cursorCh) < (30.0f*(float)((drawing.upperLimit - drawing.lowerLimit)/dasize.width))){
+                if(fabsf((float)rawdata.chanCommentCh[i] - cursorCh) < (30.0f*((float)(drawing.upperLimit - drawing.lowerLimit)/(float)dasize.width))){
                   //check proximity to y-val
                   float chYVal = rawdata.chanCommentVal[i];
                   if(chYVal < drawing.scaleLevelMin[0]){
@@ -118,7 +119,7 @@ int getCommentAtCursor(const double cursorx, const double cursory, const double 
                   }else if(chYVal > drawing.scaleLevelMax[0]){
                     chYVal = drawing.scaleLevelMax[0];
                   }
-                  if(fabs(chYVal - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/dasize.height)){
+                  if(fabs(chYVal - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/(float)dasize.height)){
                     return i; //this comment is close
                   }
                 }
@@ -131,7 +132,7 @@ int getCommentAtCursor(const double cursorx, const double cursory, const double 
             if(rawdata.chanCommentView[i] == 1){
               if(rawdata.chanCommentSp[i] == drawing.displayedView){
                 //check proximity to channel
-                if(fabsf((float)rawdata.chanCommentCh[i] - cursorCh) < (30.0f*(float)((drawing.upperLimit - drawing.lowerLimit)/dasize.width))){
+                if(fabsf((float)rawdata.chanCommentCh[i] - cursorCh) < (30.0f*((float)(drawing.upperLimit - drawing.lowerLimit)/(float)dasize.width))){
                   //check proximity to y-val
                   float chYVal = rawdata.chanCommentVal[i];
                   if(chYVal < drawing.scaleLevelMin[0]){
@@ -139,7 +140,7 @@ int getCommentAtCursor(const double cursorx, const double cursory, const double 
                   }else if(chYVal > drawing.scaleLevelMax[0]){
                     chYVal = drawing.scaleLevelMax[0];
                   }
-                  if(fabs(chYVal - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/dasize.height)){
+                  if(fabs(chYVal - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/(float)dasize.height)){
                     return i; //this comment is close
                   }
                 }
@@ -422,7 +423,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
         //setup peak positions
         if(fitpar.numFitPeaks < MAX_FIT_PK){
           if((cursorChan >= fitpar.fitStartCh)&&(cursorChan <= fitpar.fitEndCh)){
-            fitpar.fitPeakInitGuess[fitpar.numFitPeaks] = cursorChan;
+            fitpar.fitPeakInitGuess[fitpar.numFitPeaks] = cursorChan - 0.5f;
             printf("Fitting peak at channel %f\n",fitpar.fitPeakInitGuess[fitpar.numFitPeaks]);
             gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),TRUE);
             fitpar.numFitPeaks++;
@@ -476,6 +477,8 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
             //offer option to create a new summed spectrum and comment on that
             guiglobals.commentEditInd = getCommentAtCursor(event->x, event->y, 80.0, 40.0);
             if((guiglobals.commentEditInd >= 0)&&(guiglobals.commentEditInd < NCHCOM)){
+              guiglobals.commentEditMode=0;
+              gtk_window_set_title(comment_window,"Edit Comment");
               gtk_widget_set_sensitive(GTK_WIDGET(remove_comment_button),TRUE);
               gtk_widget_set_visible(GTK_WIDGET(remove_comment_button),TRUE);
               gtk_entry_set_text(comment_entry, rawdata.chanComment[guiglobals.commentEditInd]);
@@ -487,8 +490,8 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
                 GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
                 GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot add comment!");
                 gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"The maximum number of comments has been reached.  Older comments must be deleted before more can be added.");
-                gtk_dialog_run (GTK_DIALOG (message_dialog));
-                gtk_widget_destroy (message_dialog);
+                gtk_dialog_run(GTK_DIALOG(message_dialog));
+                gtk_widget_destroy(message_dialog);
                 return;
               }
               gtk_widget_set_sensitive(GTK_WIDGET(remove_comment_button),FALSE);
@@ -506,8 +509,8 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
                   GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
                   GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot add comment!");
                   gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Adding a comment would require the current view to be saved, however the maximum number of custom views has been reached.  Older custom views must be deleted before more can be added.");
-                  gtk_dialog_run (GTK_DIALOG (message_dialog));
-                  gtk_widget_destroy (message_dialog);
+                  gtk_dialog_run(GTK_DIALOG(message_dialog));
+                  gtk_widget_destroy(message_dialog);
                   return;
                 }
                 rawdata.chanCommentSp[(int)rawdata.numChComments] = rawdata.numViews;
@@ -515,6 +518,8 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
               }else{
                 printf("WARNING: undefined view state, not displaying edit window.\n");
               }
+              guiglobals.commentEditMode=0;
+              gtk_window_set_title(comment_window,"Add Comment");
               gtk_widget_set_visible(GTK_WIDGET(remove_comment_button),FALSE);
               gtk_entry_set_text(comment_entry, "");
               gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
@@ -530,6 +535,8 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
             //printf("Double click on channel %f, value %f\n",cursorChan,cursorYVal);
             guiglobals.commentEditInd = getCommentAtCursor(event->x, event->y, 80.0, 40.0);
             if((guiglobals.commentEditInd >= 0)&&(guiglobals.commentEditInd < NCHCOM)){
+              guiglobals.commentEditMode=0;
+              gtk_window_set_title(comment_window,"Edit Comment");
               gtk_widget_set_sensitive(GTK_WIDGET(remove_comment_button),TRUE);
               gtk_widget_set_visible(GTK_WIDGET(remove_comment_button),TRUE);
               gtk_entry_set_text(comment_entry, rawdata.chanComment[guiglobals.commentEditInd]);
@@ -541,8 +548,8 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
                 GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
                 GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot add comment!");
                 gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"The maximum number of comments has been reached.  Older comments must be deleted before more can be added.");
-                gtk_dialog_run (GTK_DIALOG (message_dialog));
-                gtk_widget_destroy (message_dialog);
+                gtk_dialog_run(GTK_DIALOG(message_dialog));
+                gtk_widget_destroy(message_dialog);
                 return;
               }
               gtk_widget_set_sensitive(GTK_WIDGET(remove_comment_button),FALSE);
@@ -575,6 +582,8 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
               }else{
                 printf("WARNING: undefined view state, not displaying edit window.\n");
               }
+              guiglobals.commentEditMode=0;
+              gtk_window_set_title(comment_window,"Add Comment");
               gtk_widget_set_visible(GTK_WIDGET(remove_comment_button),FALSE);
               gtk_entry_set_text(comment_entry, "");
               gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);

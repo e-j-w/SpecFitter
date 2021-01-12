@@ -657,7 +657,6 @@ Author: Jonathan Williams
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
-                <property name="tooltip-text" translatable="yes">Save the comment as written.</property>
                 <property name="halign">end</property>
                 <style>
                   <class name="suggested-action"/>
