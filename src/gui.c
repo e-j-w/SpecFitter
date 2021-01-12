@@ -1072,6 +1072,11 @@ void on_remove_calibration_button_clicked(GtkButton *b)
 //used for keyboard shortcut to rename the displayed view
 void on_rename_displayed_view()
 {
+
+  if(rawdata.openedSp == 0){
+    return;
+  }
+
   guiglobals.commentEditMode=1;
   gtk_widget_set_visible(GTK_WIDGET(remove_comment_button),FALSE); //cannot delete view names
 
