@@ -162,13 +162,13 @@ int getCommentAtCursor(const double cursorx, const double cursory, const double 
 //the plotting limits are in UNCALIBRATED units ie. channels
 void setPlotLimits(){
   if(drawing.zoomLevel <= 1.0){
-      //set zoomed out
-      drawing.zoomLevel = 1.0;
-      drawing.lowerLimit = 0;
-      drawing.upperLimit = S32K - 1;
-      return;
+    //set zoomed out
+    drawing.zoomLevel = 1.0;
+    drawing.lowerLimit = 0;
+    drawing.upperLimit = S32K - 1;
+    return;
   }else if(drawing.zoomLevel > 1024.0){
-      drawing.zoomLevel = 1024.0; //set maximum zoom level
+    drawing.zoomLevel = 1024.0; //set maximum zoom level
   }
 
   if(drawing.zoomFocusFrac > 1.0){
@@ -182,18 +182,18 @@ void setPlotLimits(){
   drawing.lowerLimit = drawing.lowerLimit - (drawing.lowerLimit % drawing.contractFactor); //round to nearest multiple of contraction factor
   //clamp to lower limit of 0 if needed
   if(drawing.lowerLimit < 0){
-      drawing.lowerLimit = 0;
-      drawing.upperLimit = numChansToDisp - 1;
-      return;
+    drawing.lowerLimit = 0;
+    drawing.upperLimit = numChansToDisp - 1;
+    return;
   }
   drawing.upperLimit = drawing.xChanFocus + (int)(numChansToDisp*(1.0 - drawing.zoomFocusFrac));
   drawing.upperLimit = drawing.upperLimit - (drawing.upperLimit % drawing.contractFactor); //round to nearest multiple of contraction factor
   //clamp to upper limit of S32K-1 if needed
   if(drawing.upperLimit > (S32K-1)){
-      drawing.upperLimit=S32K-1;
-      drawing.lowerLimit=S32K-1-numChansToDisp;
-      return;
-    }
+    drawing.upperLimit=S32K-1;
+    drawing.lowerLimit=S32K-1-numChansToDisp;
+    return;
+  }
 }
 
 //zoom to the non-zero region of the spectrum
@@ -382,6 +382,26 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
   if((e->direction == 1)&&(drawing.zoomLevel > 1.0)){
     //printf("Scrolling down at %f %f!\n",e->x,e->y);
     on_zoom_out_x();
+    //handle zooming that follows cursor
+    GdkRectangle dasize;  // GtkDrawingArea size
+    GdkWindow *wwindow = gtk_widget_get_window(widget);
+    // Determine GtkDrawingArea dimensions
+    gdk_window_get_geometry (wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
+    if(guiglobals.useZoomAnimations){
+      drawing.zoomToLevel = drawing.zoomLevel * 0.5f;
+      drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-80.0)/(dasize.width-80.0)*(drawing.upperLimit - drawing.lowerLimit));
+      drawing.zoomFocusFrac = (float)((drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit));
+      drawing.zoomingSpX = 1;
+      drawing.zoomXLastFrameTime = gdk_frame_clock_get_frame_time(frameClock);
+      gtk_widget_add_tick_callback (widget, zoom_out_tick_callback, NULL, NULL);
+    }else{
+      drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-80.0)/(dasize.width-80.0)*(drawing.upperLimit - drawing.lowerLimit));
+      drawing.zoomLevel *= 0.5f;
+      drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-80.0)/(dasize.width-80.0)*(drawing.upperLimit - drawing.lowerLimit));
+      drawing.zoomFocusFrac = (float)((drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit));
+      gtk_range_set_value(GTK_RANGE(zoom_scale),log(drawing.zoomLevel)/log(2.));//base 2 log of zoom
+      gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+    }
   }else if((e->direction != 1)&&(drawing.zoomLevel < 1024.0)){
     //handle zooming that follows cursor
     //printf("Scrolling up at %f %f!\n",e->x,e->y);
