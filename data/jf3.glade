@@ -2700,6 +2700,22 @@ Weight by fit function - Weights are proportional to the fit function values det
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkCheckButton" id="spectrum_gridline_checkbutton">
+                    <property name="label" translatable="yes"> Draw grid lines on spectra</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">False</property>
+                    <property name="tooltip-text" translatable="yes">If checked, will grid lines on displayed spectra.</property>
+                    <property name="halign">start</property>
+                    <property name="draw-indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkCheckButton" id="animation_checkbutton">
                     <property name="label" translatable="yes"> Enable animations</property>
                     <property name="visible">True</property>
@@ -2712,7 +2728,7 @@ Weight by fit function - Weights are proportional to the fit function values det
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">3</property>
+                    <property name="position">4</property>
                   </packing>
                 </child>
                 <child>
@@ -2728,7 +2744,7 @@ Weight by fit function - Weights are proportional to the fit function values det
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">4</property>
+                    <property name="position">5</property>
                   </packing>
                 </child>
               </object>

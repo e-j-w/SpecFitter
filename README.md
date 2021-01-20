@@ -54,7 +54,7 @@ A spectrum viewer and fitter app, suitable for gamma-ray spectroscopy or similar
 
 #### Format support notes
 
-Some sample files that the program can open are available [here](https://mega.nz/#!yUtRBAYR!ATst0ngazksR-g-P-Qdsw2rd4lpHJXBpd6nJq6pW77I) (.zip archive).
+Some sample files that the program can open are available [here](https://mega.nz/file/TQ0zTSAI#CXHBjL0iwDrfpEiTfCJg-76U9gREPFbn__zE28ceCuE) (.zip archive).
 
 Conversion codes for some of the above data formats are available in the [FileConvTools](https://github.com/e-j-w/FileConvTools) repository.
 

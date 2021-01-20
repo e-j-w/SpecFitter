@@ -7,6 +7,7 @@ jf3-resources.c
 *.spe
 *.jf3
 *.png
+*.zip
 *.out
 *.o
 *.compiled

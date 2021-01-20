@@ -4,14 +4,21 @@
 //The main routine is drawSpectrum (near the bottom), helper 
 //subroutines are above it.
 
-//set the default text color, depending on the
+//set the default text color, depending on the theme
 void setTextColor(cairo_t *cr){
   if(guiglobals.preferDarkTheme){
-    cairo_set_source_rgb (cr, 0.7, 0.7, 0.7);
+    cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
   }else{
-    cairo_set_source_rgb (cr, 0.3, 0.3, 0.3);
+    cairo_set_source_rgb(cr, 0.3, 0.3, 0.3);
   }
-  
+}
+//set the default text color, depending on the theme
+void setGridLineColor(cairo_t *cr){
+  if(guiglobals.preferDarkTheme){
+    cairo_set_source_rgb(cr, 0.3, 0.3, 0.3);
+  }else{
+    cairo_set_source_rgb(cr, 0.8, 0.8, 0.8);
+  } 
 }
 
 //converts cursor position units to channel units on the displayed spectrum
@@ -921,8 +928,16 @@ void drawXAxisTick(const int axisVal, cairo_t *cr, const float width, const floa
   //printf("axis Val: %i, axisPos: %f\n",axisVal,axisPos);
   if(axisPos != (float)SMALL_NUMBER){
     //axis position is valid
-    cairo_move_to (cr, (int)axisPos, -yorigin);
-    cairo_line_to (cr, (int)axisPos, -yorigin*0.875);
+    cairo_move_to(cr, (int)axisPos, -yorigin);
+    cairo_line_to(cr, (int)axisPos, -yorigin*0.875);
+    if(guiglobals.drawGridLines){
+      cairo_stroke(cr);
+      setGridLineColor(cr);
+      cairo_move_to(cr, (int)axisPos, -yorigin*0.875);
+      cairo_line_to(cr, (int)axisPos, -height);
+      cairo_stroke(cr);
+      setTextColor(cr);
+    }
     char tickLabel[20];
     sprintf(tickLabel,"%i",axisVal); //set string for label
     cairo_text_extents_t extents; //get dimensions needed to center text labels
@@ -1018,8 +1033,16 @@ void drawYAxisTick(const float axisVal, const int multiplotSpNum, cairo_t *cr, c
   float axisPos = getAxisYPos(axisVal,multiplotSpNum,height,yorigin);
   if((axisPos <= 0) && (axisPos > (height)*-0.98)) {
     //axis position is valid (ie. on the plot, and not too close to the top of the plot so that it won't be cut off)
-    cairo_move_to (cr, xorigin*1.06, axisPos);
-    cairo_line_to (cr, xorigin*0.94, axisPos);
+    cairo_move_to(cr, xorigin*1.06, axisPos);
+    cairo_line_to(cr, xorigin*0.94, axisPos);
+    if(guiglobals.drawGridLines){
+      cairo_stroke(cr);
+      setGridLineColor(cr);
+      cairo_move_to(cr, xorigin*0.94, axisPos);
+      cairo_line_to(cr, width, axisPos);
+      cairo_stroke(cr);
+      setTextColor(cr);
+    }
     char tickLabel[20];
     getFormattedYAxisVal(axisVal, drawing.scaleLevelMin[multiplotSpNum], drawing.scaleLevelMax[multiplotSpNum], tickLabel, 20);
     
@@ -1151,57 +1174,28 @@ float getDistBetweenYAxisTicks(const float axisRange, const int numTicks){
 
 }
 
-float getDistBetweenXAxisTicks(const float axisRange){
-  //use custom values
-  if(axisRange > 20000){
-    return 5000;
-  }else if(axisRange > 10000){
-    return 2000;
-  }else if(axisRange > 5000){
-    return 1000;
-  }else if(axisRange > 3000){
-    return 500;
-  }else if(axisRange > 2000){
-    return 300;
-  }else if(axisRange > 1000){
-    return 200;
-  }else if(axisRange > 500){
-    return 100;
-  }else if(axisRange > 200){
-    return 50;
-  }else if(axisRange > 100){
-    return 20;
-  }else if(axisRange > 50){
-    return 10;
-  }else if(axisRange > 20){
-    return 5;
-  }else if(axisRange >= 0){
-    return 2;
-  }else if(axisRange > -20){
-    return -2;
-  }else if(axisRange > -50){
-    return -5;
-  }else if(axisRange > -100){
-    return -10;
-  }else if(axisRange > -200){
-    return -20;
-  }else if(axisRange > -500){
-    return -50;
-  }else if(axisRange > -1000){
-    return -100;
-  }else if(axisRange > -2000){
-    return -200;
-  }else if(axisRange > -3000){
-    return -300;
-  }else if(axisRange > -5000){
-    return -500;
-  }else if(axisRange > -10000){
-    return -1000;
-  }else if(axisRange > -20000){
-    return -2000;
+//provides the distance (in x axis units) between ticks on the x axis
+//axisRange: range of the x-axis being displayed (in x-axis units)
+//width: width of the displayed plot (in pixels)
+float getDistBetweenXAxisTicks(const float axisRange, const float width){
+
+  float tickDist = axisRange*200.0f/width; //ticks every 200px or so
+  //printf("tickDist: %f\n",tickDist);
+
+  if(tickDist > 5000){
+    tickDist = tickDist - fmodf(tickDist,5000.0f);
+  }else if(tickDist > 1000){
+    tickDist = tickDist - fmodf(tickDist,1000.0f);
+  }else if(tickDist > 100){
+    tickDist = tickDist - fmodf(tickDist,100.0f);
+  }else if(tickDist > 10){
+    tickDist = tickDist - fmodf(tickDist,10.0f);
   }else{
-    return -5000;
+    tickDist = tickDist - fmodf(tickDist,1.0f);
   }
+
+  return tickDist;
+
 }
 
 //get the x range of the plot in terms of x axis units, 
@@ -1618,7 +1612,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   cairo_scale(cr, 1.0, -1.0); //remove axis inversion, so that text is the right way up
 
   //draw x axis ticks
-  int tickDist = (int)(getDistBetweenXAxisTicks((float)(getPlotRangeXUnits())));
+  int tickDist = (int)(getDistBetweenXAxisTicks((float)(getPlotRangeXUnits()),width));
   for(i=0;abs(i)<S32K;i+=tickDist){
     drawXAxisTick(i, cr, width, height, plotFontSize, xorigin, yorigin);
   }
@@ -1699,7 +1693,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     case 0:
       //modes with a single scale
       setTextColor(cr);
-      numTickPerSp = (int)(height/(2.0f*yorigin)) + 1;
+      numTickPerSp = (int)(height/(4.0f*yorigin)) + 1;
       if(drawing.logScale){
         //numTickPerSp *= 2;
         int nsigf10 = 0;

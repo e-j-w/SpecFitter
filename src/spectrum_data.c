@@ -48,7 +48,7 @@ void deleteSpectrumOrView(const int spInd){
           i -= 1; //indices have shifted, reheck the current index
         }else if(rawdata.chanCommentSp[i] > spInd){
           //change to the new index for the spectrum
-          rawdata.chanCommentSp[i] -= 1;
+          rawdata.chanCommentSp[i] = (unsigned char)(rawdata.chanCommentSp[i]-1);
         }
       }
     }
@@ -75,7 +75,7 @@ void deleteSpectrumOrView(const int spInd){
               i -= 1; //indices have shifted, reheck the current index
             }else if(rawdata.chanCommentSp[i] > viewToDel){
               //change to the new index for the view
-              rawdata.chanCommentSp[i] -= 1;
+              rawdata.chanCommentSp[i] = (unsigned char)(rawdata.chanCommentSp[i]-1);
             }
           }
         }
@@ -89,7 +89,7 @@ void deleteSpectrumOrView(const int spInd){
           memcpy(&rawdata.viewMultiPlots[i],&rawdata.viewMultiPlots[i+1],sizeof(rawdata.viewMultiPlots[i]));
         }
         if(rawdata.numViews > 0){
-          rawdata.numViews -= 1;
+          rawdata.numViews = (unsigned char)(rawdata.numViews-1);
         }
       }else{
         deletingViews = 0;
@@ -100,7 +100,7 @@ void deleteSpectrumOrView(const int spInd){
     for(i=0;i<rawdata.numViews;i++){
       for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
         if(rawdata.viewMultiPlots[i][j] > spInd){
-          rawdata.viewMultiPlots[i][j] -= 1;
+          rawdata.viewMultiPlots[i][j] = (unsigned char)(rawdata.viewMultiPlots[i][j]-1);
         }
       }
       for(j=spInd;j<(rawdata.numSpOpened-1);j++){
@@ -114,7 +114,7 @@ void deleteSpectrumOrView(const int spInd){
       memcpy(&rawdata.histComment[i],&rawdata.histComment[i+1],sizeof(rawdata.histComment[i]));
     }
     if(rawdata.numSpOpened > 0){
-      rawdata.numSpOpened -= 1;
+      rawdata.numSpOpened = (unsigned char)(rawdata.numSpOpened-1);
     }
     if(rawdata.numSpOpened == 0){
       rawdata.openedSp = 0;
@@ -141,7 +141,7 @@ void deleteSpectrumOrView(const int spInd){
           i -= 1; //indices have shifted, reheck the current index
         }else if(rawdata.chanCommentSp[i] > viewInd){
           //change to the new index for the view
-          rawdata.chanCommentSp[i] -= 1;
+          rawdata.chanCommentSp[i] = (unsigned char)(rawdata.chanCommentSp[i]-1);
         }
       }
     }
@@ -155,7 +155,7 @@ void deleteSpectrumOrView(const int spInd){
       memcpy(&rawdata.viewMultiPlots[i],&rawdata.viewMultiPlots[i+1],sizeof(rawdata.viewMultiPlots[i]));
     }
     if(rawdata.numViews > 0){
-      rawdata.numViews -= 1;
+      rawdata.numViews = (unsigned char)(rawdata.numViews-1);
     }
 
   }

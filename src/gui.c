@@ -14,6 +14,7 @@ void showPreferences(int page){
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autozoom_checkbutton),guiglobals.autoZoom);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_label_checkbutton),guiglobals.drawSpLabels);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_comment_checkbutton),guiglobals.drawSpComments);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_gridline_checkbutton),guiglobals.drawGridLines);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(relative_widths_checkbutton),fitpar.fixRelativeWidths);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(popup_results_checkbutton),guiglobals.popupFitResults);
   gtk_combo_box_set_active(GTK_COMBO_BOX(peak_shape_combobox),fitpar.fitType);
@@ -435,7 +436,7 @@ void openSingleFile(char *filename, int append){
       //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
       drawing.scaleFactor[i] = 1.00;
     }
-    rawdata.numSpOpened += (unsigned char)numSp;
+    rawdata.numSpOpened = (unsigned char)(rawdata.numSpOpened+numSp);
     //select the first non-empty spectrum by default
     int sel = getFirstNonemptySpectrum(rawdata.numSpOpened);
     if(sel >=0){
@@ -453,6 +454,9 @@ void openSingleFile(char *filename, int append){
   }else if (numSp == -1){
     //too many files opened
     openErr = 3;
+  }else if (numSp == -2){
+    //improper file type
+    openErr = 4;
   }else{
     //improper file format
     openErr = 1;
@@ -469,6 +473,9 @@ void openSingleFile(char *filename, int append){
         break;
       case 3:
         snprintf(errMsg,256,"You are trying to open too many files at once.  Maximum number of individual spectra which may be imported is %i.",NSPECT);
+        break;
+      case 4:
+        snprintf(errMsg,256,"The file '%s' is not in a supported file format.",filename);
         break;
       default:
         snprintf(errMsg,256,"Data does not exist in file %s or is incorrectly formatted.",filename);
@@ -523,7 +530,7 @@ void on_open_button_clicked(GtkButton *b)
           //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
           drawing.scaleFactor[j] = 1.00;
         }
-        rawdata.numSpOpened += (unsigned char)numSp;
+        rawdata.numSpOpened = (unsigned char)(rawdata.numSpOpened+numSp);
         //select the first non-empty spectrum by default
         int sel = getFirstNonemptySpectrum(rawdata.numSpOpened);
         if(sel >=0){
@@ -545,6 +552,9 @@ void on_open_button_clicked(GtkButton *b)
         //too many files opened
         openErr = 3;
         break;
+      }else if (numSp == -2){
+        //improper file type
+        openErr = 4;
       }else{
         //improper file format
         openErr = 1;
@@ -563,6 +573,9 @@ void on_open_button_clicked(GtkButton *b)
           break;
         case 3:
           snprintf(errMsg,256,"You are trying to open too many files at once.  Maximum number of individual spectra which may be imported is %i.",NSPECT);
+          break;
+        case 4:
+          snprintf(errMsg,256,"The file '%s' is not in a supported file format.",filename);
           break;
         default:
           snprintf(errMsg,256,"Data does not exist in file %s or is incorrectly formatted.",filename);
@@ -636,7 +649,7 @@ void on_append_button_clicked(GtkButton *b)
           //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
           drawing.scaleFactor[j] = 1.00;
         }
-        rawdata.numSpOpened += (unsigned char)numSp;
+        rawdata.numSpOpened = (unsigned char)(rawdata.numSpOpened+numSp);
         setSpOpenView(1);
         gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened+rawdata.numViews);
         on_spectrum_selector_changed(spectrum_selector); //update displayed name if needed
@@ -644,6 +657,9 @@ void on_append_button_clicked(GtkButton *b)
         //too many files opened
         openErr = 3;
         break;
+      }else if (numSp == -2){
+        //improper file type
+        openErr = 4;
       }else{
         //improper file format
         openErr = 1;
@@ -663,6 +679,9 @@ void on_append_button_clicked(GtkButton *b)
         case 3:
           snprintf(errMsg,256,"You are trying to open too many files at once.  Maximum number of individual spectra which may be imported is %i.",NSPECT);
           break;
+        case 4:
+          snprintf(errMsg,256,"The file '%s' is not in a supported file format.",filename);
+          break;
         default:
           snprintf(errMsg,256,"Data does not exist in file %s or is incorrectly formatted.",filename);
           break;
@@ -671,7 +690,7 @@ void on_append_button_clicked(GtkButton *b)
       gtk_dialog_run (GTK_DIALOG (message_dialog));
       gtk_widget_destroy (message_dialog);
     }else{
-      rawdata.numFilesOpened += (unsigned char)g_slist_length(file_list);
+      rawdata.numFilesOpened = (unsigned char)(rawdata.numFilesOpened + g_slist_length(file_list));
       //set the title of the opened spectrum in the header bar
       if(rawdata.numFilesOpened > 1){
         char headerBarSub[256];
@@ -1872,6 +1891,14 @@ void on_toggle_spectrum_comment(GtkToggleButton *togglebutton, gpointer user_dat
     guiglobals.drawSpComments=0;
 }
 
+void on_toggle_spectrum_gridlines(GtkToggleButton *togglebutton, gpointer user_data)
+{
+  if(gtk_toggle_button_get_active(togglebutton))
+    guiglobals.drawGridLines=1;
+  else
+    guiglobals.drawGridLines=0;
+}
+
 void on_toggle_relative_widths(GtkToggleButton *togglebutton, gpointer user_data)
 {
   if(gtk_toggle_button_get_active(togglebutton))
@@ -2179,6 +2206,7 @@ void iniitalizeUIElements(){
   dark_theme_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "dark_theme_checkbutton"));
   spectrum_label_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "spectrum_label_checkbutton"));
   spectrum_comment_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "spectrum_comment_checkbutton"));
+  spectrum_gridline_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "spectrum_gridline_checkbutton"));
   relative_widths_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "relative_widths_checkbutton"));
   peak_shape_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "peak_shape_combobox"));
   weight_mode_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "weight_mode_combobox"));
@@ -2236,6 +2264,7 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(dark_theme_checkbutton), "toggled", G_CALLBACK(on_toggle_dark_theme), NULL);
   g_signal_connect(G_OBJECT(spectrum_label_checkbutton), "toggled", G_CALLBACK(on_toggle_spectrum_label), NULL);
   g_signal_connect(G_OBJECT(spectrum_comment_checkbutton), "toggled", G_CALLBACK(on_toggle_spectrum_comment), NULL);
+  g_signal_connect(G_OBJECT(spectrum_gridline_checkbutton), "toggled", G_CALLBACK(on_toggle_spectrum_gridlines), NULL);
   g_signal_connect(G_OBJECT(relative_widths_checkbutton), "toggled", G_CALLBACK(on_toggle_relative_widths), NULL);
   g_signal_connect(G_OBJECT(popup_results_checkbutton), "toggled", G_CALLBACK(on_toggle_popup_results), NULL);
   g_signal_connect(G_OBJECT(animation_checkbutton), "toggled", G_CALLBACK(on_toggle_animation), NULL);
@@ -2346,6 +2375,7 @@ void iniitalizeUIElements(){
   guiglobals.drawSpCursor = -1; //disabled by default
   guiglobals.drawSpLabels = 1; //enabled by default
   guiglobals.drawSpComments = 1; //enabled by default
+  guiglobals.drawGridLines = 1; //enabled by default
   guiglobals.showBinErrors = 1;
   guiglobals.roundErrors = 0;
   guiglobals.autoZoom = 1;

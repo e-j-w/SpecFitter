@@ -89,7 +89,7 @@ gboolean print_fit_results(){
 
   int i;
   const int strSize = 1024;
-  char *fitResStr = malloc(strSize);
+  char *fitResStr = malloc((size_t)strSize);
   char fitParStr[3][50];
   GtkDialogFlags flags; 
   GtkWidget *message_dialog;

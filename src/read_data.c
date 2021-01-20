@@ -68,9 +68,9 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
             if(fread(&rawdata.chanCommentView[i],sizeof(rawdata.chanCommentView[i]), 1, inp)!=1){fclose(inp); return 0;}
             if(fread(&rawdata.chanCommentSp[i],sizeof(rawdata.chanCommentSp[i]), 1, inp)!=1){fclose(inp); return 0;}
             if(rawdata.chanCommentView[i] == 1){
-              rawdata.chanCommentSp[i]+=startNumViews; //assign to the correct (appended) view
+              rawdata.chanCommentSp[i]=(unsigned char)(rawdata.chanCommentSp[i]+startNumViews); //assign to the correct (appended) view
             }else{
-              rawdata.chanCommentSp[i]+=(unsigned char)outHistStartSp; //assign to the correct (appended) spectrum
+              rawdata.chanCommentSp[i]=(unsigned char)(rawdata.chanCommentSp[i]+outHistStartSp); //assign to the correct (appended) spectrum
             }
             //printf("Comment %i went to sp %i\n",i,rawdata.chanCommentSp[i]+1);
             if(fread(&rawdata.chanCommentCh[i],sizeof(rawdata.chanCommentCh[i]), 1, inp)!=1){fclose(inp); return 0;}
@@ -133,7 +133,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
             }
           }
         }
-        rawdata.numViews += (unsigned char)uintBuf;
+        rawdata.numViews = (unsigned char)(rawdata.numViews+uintBuf);
         if(rawdata.numViews > MAXNVIEWS){
           printf("WARNING: over-imported views.  Truncating.\n");
           rawdata.numViews = MAXNVIEWS;
@@ -169,7 +169,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
             spInd += (unsigned int)scharBuf;
           }else{
             //non-duplicated entries
-            unsigned int numEntr = abs(scharBuf);
+            unsigned int numEntr = (unsigned int)abs(scharBuf);
             for(j=0;j<numEntr;j++){
               if(fread(&val,sizeof(float), 1, inp)!=1){fclose(inp); return 0;} //read in value
               outHist[i+outHistStartSp][spInd+j] = (double)val;
@@ -400,7 +400,6 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
               }
               numLineEntries--;
             }
-            //getc(stdin);
             if(numLineEntries > 0){
               if(numColumns == 0){
                 numColumns = numLineEntries;
@@ -430,9 +429,9 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
                         rawdata.chanCommentSp[rawdata.numChComments] = (unsigned char)atoi(tok);
                         if(outHistStartSp > 0){
                           if(rawdata.chanCommentView[rawdata.numChComments] == 1){
-                            rawdata.chanCommentSp[rawdata.numChComments]+=startNumViews; //assign to the correct (appended) view
+                            rawdata.chanCommentSp[rawdata.numChComments]=(unsigned char)(rawdata.chanCommentSp[rawdata.numChComments]+startNumViews); //assign to the correct (appended) view
                           }else{
-                            rawdata.chanCommentSp[rawdata.numChComments]+=(unsigned char)outHistStartSp; //assign to the correct (appended) spectrum
+                            rawdata.chanCommentSp[rawdata.numChComments]=(unsigned char)(rawdata.chanCommentSp[rawdata.numChComments]+outHistStartSp); //assign to the correct (appended) spectrum
                           }
                         }
                         tok = strtok(NULL," ");
@@ -502,7 +501,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
                                                 }
                                               }
                                             }
-                                            rawdata.numViews += 1;
+                                            rawdata.numViews = (unsigned char)(rawdata.numViews+1);
                                           }
                                         }
                                       }
@@ -666,6 +665,9 @@ int readSpectrumDataFile(const char *filename, double outHist[NSPECT][S32K], con
   int numSpec = 0;
 
   const char *dot = strrchr(filename, '.'); //get the file extension
+  if(dot==NULL){
+    return -2; //invalid file type
+  }
   if (strcmp(dot + 1, "mca") == 0)
     numSpec = readMCA(filename, outHist, outHistStartSp);
   else if (strcmp(dot + 1, "fmca") == 0)
@@ -680,8 +682,8 @@ int readSpectrumDataFile(const char *filename, double outHist[NSPECT][S32K], con
     numSpec = readJF3(filename, outHist, outHistStartSp);
   else{
     //printf("Improper format of input file: %s\n", filename);
-    //printf("Supported file formats are: integer array (.mca), float array (.fmca), or radware (.spe) files.\n");
-    return 0;
+    //printf("Supported file formats are: jf3 (.jf3), plaintext (.txt) integer array (.mca), float array (.fmca), radware (.spe), or ROOT macro (.C) files.\n");
+    return -2;
   }
 
   if((numSpec==-1)||(((int)outHistStartSp+numSpec)>=NSPECT)){

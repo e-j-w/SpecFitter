@@ -83,6 +83,13 @@ int readConfigFile(FILE *file)
           guiglobals.drawSpComments = 0;
         }
       }
+      if(strcmp(par,"draw_grid_lines") == 0){
+        if(strcmp(val,"yes") == 0){
+          guiglobals.drawGridLines = 1;
+        }else{
+          guiglobals.drawGridLines = 0;
+        }
+      }
       if(strcmp(par,"fix_relative_widths") == 0){
         if(strcmp(val,"yes") == 0){
           fitpar.fixRelativeWidths = 1;
@@ -197,6 +204,11 @@ int writeConfigFile(FILE *file)
     fprintf(file,"draw_sp_comments=yes\n");
   }else{
     fprintf(file,"draw_sp_comments=no\n");
+  }
+  if(guiglobals.drawGridLines == 1){
+    fprintf(file,"draw_grid_lines=yes\n");
+  }else{
+    fprintf(file,"draw_grid_lines=no\n");
   }
   if(guiglobals.autoZoom == 1){
     fprintf(file,"autozoom=yes\n");

@@ -112,7 +112,8 @@ GtkButton *export_image_save_button;
 GtkModelButton *preferences_button;
 GtkWindow *preferences_window;
 GtkNotebook *preferences_notebook;
-GtkCheckButton *discard_empty_checkbutton, *bin_errors_checkbutton, *round_errors_checkbutton, *dark_theme_checkbutton, *spectrum_label_checkbutton, *spectrum_comment_checkbutton, *autozoom_checkbutton;
+GtkCheckButton *discard_empty_checkbutton, *bin_errors_checkbutton, *round_errors_checkbutton, *dark_theme_checkbutton;
+GtkCheckButton *spectrum_label_checkbutton, *spectrum_comment_checkbutton, *spectrum_gridline_checkbutton, *autozoom_checkbutton;
 GtkCheckButton *relative_widths_checkbutton;
 GtkButton *preferences_apply_button;
 GtkComboBoxText *peak_shape_combobox, *weight_mode_combobox;
@@ -139,6 +140,7 @@ struct {
   char drawSpCursor; //0 = don't draw vertical cursor on spectrum, 1=draw, -1=drawing disabled
   unsigned char drawSpLabels; //0 = don't draw labels, 1 = draw labels
   unsigned char drawSpComments; //0 = don't draw comments, 1 = draw comments
+  unsigned char drawGridLines; //0 = don't draw grid lines on plot, 1 = draw grid lines
   unsigned char fittingSp; //0=not fitting, 1=selecting limits, 2=selecting peaks, 3=fitting, 4=refining fit, 5=fitted (display fit)
   int deferSpSelChange;
   int deferToggleRow;
