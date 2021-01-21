@@ -910,40 +910,49 @@ float getYPos(const float val, const int multiplotSpNum, const float height, con
 }
 
 //axis tick drawing
-float getAxisXPos(const int axisVal, const float width, const float xorigin){
-  int cal_lowerLimit = drawing.lowerLimit;
-  int cal_upperLimit = drawing.upperLimit;
+float getAxisXPos(const double axisVal, const float width, const float xorigin){
+  double cal_lowerLimit = (double)drawing.lowerLimit;
+  double cal_upperLimit = (double)drawing.upperLimit;
   if(calpar.calMode==1){
     //calibrate
-    cal_lowerLimit = (int)(getCalVal(drawing.lowerLimit));
-    cal_upperLimit = (int)(getCalVal(drawing.upperLimit));
+    cal_lowerLimit = getCalVal(drawing.lowerLimit);
+    cal_upperLimit = getCalVal(drawing.upperLimit);
   }
   if(((cal_upperLimit>cal_lowerLimit)&&((axisVal < cal_lowerLimit)||(axisVal >= cal_upperLimit))) || ((cal_lowerLimit>cal_upperLimit)&&((axisVal > cal_lowerLimit)||(axisVal <= cal_upperLimit))))
     return (float)SMALL_NUMBER; //value is off the visible axis
   
-  return xorigin + (width-xorigin)*(float)(axisVal - cal_lowerLimit)/(float)(cal_upperLimit - cal_lowerLimit);
+  return xorigin + (width-xorigin)*(float)((double)axisVal - cal_lowerLimit)/(float)(cal_upperLimit - cal_lowerLimit);
 }
-void drawXAxisTick(const int axisVal, cairo_t *cr, const float width, const float height, const double baseFontSize, const float xorigin, const float yorigin){
+void drawXAxisTick(const double axisVal, cairo_t *cr, const float width, const float height, const double baseFontSize, const unsigned char drawGridLines, const float xorigin, const float yorigin){
   float axisPos = getAxisXPos(axisVal,width,xorigin);
   //printf("axis Val: %i, axisPos: %f\n",axisVal,axisPos);
   if(axisPos != (float)SMALL_NUMBER){
     //axis position is valid
-    cairo_move_to(cr, (int)axisPos, -yorigin);
-    cairo_line_to(cr, (int)axisPos, -yorigin*0.875);
-    if(guiglobals.drawGridLines){
-      cairo_stroke(cr);
-      setGridLineColor(cr);
-      cairo_move_to(cr, (int)axisPos, -yorigin*0.875);
-      cairo_line_to(cr, (int)axisPos, -height);
-      cairo_stroke(cr);
-      setTextColor(cr);
+    setTextColor(cr);
+    cairo_move_to(cr, axisPos, -yorigin);
+    cairo_line_to(cr, axisPos, -yorigin*0.875);
+    if(drawGridLines){
+      //don't draw a gridline that overlaps the y-axis
+      if(axisPos > xorigin){
+        cairo_stroke(cr);
+        setGridLineColor(cr);
+        float yPos = -yorigin;
+        while(yPos > -height){
+          cairo_move_to(cr, axisPos, yPos);
+          yPos = yPos - 5.0f;
+          cairo_line_to(cr, axisPos, yPos);
+          yPos = yPos - 5.0f;
+        }
+        cairo_stroke(cr);
+        setTextColor(cr);
+      }
     }
     char tickLabel[20];
-    sprintf(tickLabel,"%i",axisVal); //set string for label
+    sprintf(tickLabel,"%.0f",axisVal); //set string for label
     cairo_text_extents_t extents; //get dimensions needed to center text labels
     cairo_text_extents(cr, tickLabel, &extents);
     cairo_set_font_size(cr, baseFontSize);
-    cairo_move_to(cr, (int)axisPos - extents.width/2., -yorigin*0.5);
+    cairo_move_to(cr, axisPos - extents.width/2., -yorigin*0.5);
     cairo_show_text(cr, tickLabel);
   }
 }
@@ -990,7 +999,7 @@ float getAxisYPos(const float axisVal, const int multiplotSpNum, const float hei
   //printf("height: %f, multiplotsp: %i, axisval: %f, posval: %f\n",height,multiplotSpNum,axisVal,posVal);
   return posVal;
 }
-void drawYAxisTick(const float axisVal, const int multiplotSpNum, cairo_t *cr, const float width, const float height, const double baseFontSize, const float xorigin, const float yorigin){
+void drawYAxisTick(const double axisVal, const int multiplotSpNum, cairo_t *cr, const float width, const float height, const double baseFontSize, const unsigned char drawGridLines, const float xorigin, const float yorigin){
   if((axisVal < drawing.scaleLevelMin[multiplotSpNum])||(axisVal >= drawing.scaleLevelMax[multiplotSpNum])){
     //printf("axisval:%f,scalemin:%f,scalemax:%f\n",axisVal,drawing.scaleLevelMin[multiplotSpNum],drawing.scaleLevelMax[multiplotSpNum]);
     return; //invalid axis value,
@@ -1030,18 +1039,27 @@ void drawYAxisTick(const float axisVal, const int multiplotSpNum, cairo_t *cr, c
     
   }
   
-  float axisPos = getAxisYPos(axisVal,multiplotSpNum,height,yorigin);
+  float axisPos = getAxisYPos((float)axisVal,multiplotSpNum,height,yorigin);
   if((axisPos <= 0) && (axisPos > (height)*-0.98)) {
     //axis position is valid (ie. on the plot, and not too close to the top of the plot so that it won't be cut off)
-    cairo_move_to(cr, xorigin*1.06, axisPos);
-    cairo_line_to(cr, xorigin*0.94, axisPos);
-    if(guiglobals.drawGridLines){
-      cairo_stroke(cr);
-      setGridLineColor(cr);
-      cairo_move_to(cr, xorigin*0.94, axisPos);
-      cairo_line_to(cr, width, axisPos);
-      cairo_stroke(cr);
-      setTextColor(cr);
+    setTextColor(cr);
+    cairo_move_to(cr, xorigin*1.06f, axisPos);
+    cairo_line_to(cr, xorigin*0.94f, axisPos);
+    if(drawGridLines){
+      //don't draw a gridline which overlaps with the x-axis
+      if(axisVal > drawing.scaleLevelMin[multiplotSpNum]){
+        cairo_stroke(cr);
+        setGridLineColor(cr);
+        float xPos = xorigin*1.06f + 5.0f;
+        while(xPos < width){
+          cairo_move_to(cr, xPos, axisPos);
+          xPos = xPos + 5.0f;
+          cairo_line_to(cr, xPos, axisPos);
+          xPos = xPos + 5.0f;
+        }
+        cairo_stroke(cr);
+        setTextColor(cr);
+      }
     }
     char tickLabel[20];
     getFormattedYAxisVal(axisVal, drawing.scaleLevelMin[multiplotSpNum], drawing.scaleLevelMax[multiplotSpNum], tickLabel, 20);
@@ -1177,21 +1195,21 @@ float getDistBetweenYAxisTicks(const float axisRange, const int numTicks){
 //provides the distance (in x axis units) between ticks on the x axis
 //axisRange: range of the x-axis being displayed (in x-axis units)
 //width: width of the displayed plot (in pixels)
-float getDistBetweenXAxisTicks(const float axisRange, const float width){
+double getDistBetweenXAxisTicks(const double axisRange, const float width){
 
-  float tickDist = axisRange*200.0f/width; //ticks every 200px or so
-  //printf("tickDist: %f\n",tickDist);
+  double tickDist = axisRange*200.0/width; //ticks every 200px or so
+  //printf("axisRange: %f, width: %f, tickDist: %f\n",axisRange,width,tickDist);
 
-  if(tickDist > 5000){
-    tickDist = tickDist - fmodf(tickDist,5000.0f);
-  }else if(tickDist > 1000){
-    tickDist = tickDist - fmodf(tickDist,1000.0f);
-  }else if(tickDist > 100){
-    tickDist = tickDist - fmodf(tickDist,100.0f);
-  }else if(tickDist > 10){
-    tickDist = tickDist - fmodf(tickDist,10.0f);
+  if(tickDist > 5000.0){
+    tickDist = tickDist - fmod(tickDist,5000.0);
+  }else if(tickDist > 1000.0){
+    tickDist = tickDist - fmod(tickDist,1000.0);
+  }else if(tickDist > 100.0){
+    tickDist = tickDist - fmod(tickDist,100.0);
+  }else if(tickDist > 10.0){
+    tickDist = tickDist - fmod(tickDist,10.0);
   }else{
-    tickDist = tickDist - fmodf(tickDist,1.0f);
+    tickDist = tickDist - fmod(tickDist,1.0);
   }
 
   return tickDist;
@@ -1200,13 +1218,14 @@ float getDistBetweenXAxisTicks(const float axisRange, const float width){
 
 //get the x range of the plot in terms of x axis units, 
 //taking into account whether or not a calibration is in use
-int getPlotRangeXUnits(){
-  int cal_lowerLimit = drawing.lowerLimit;
-  int cal_upperLimit = drawing.upperLimit;
+double getPlotRangeXUnits(){
+  double cal_lowerLimit = (double)drawing.lowerLimit;
+  double cal_upperLimit = (double)drawing.upperLimit;
   if(calpar.calMode==1){
     //calibrate
-    cal_lowerLimit = (int)(getCalVal(drawing.lowerLimit));
-    cal_upperLimit = (int)(getCalVal(drawing.upperLimit));
+    cal_lowerLimit = getCalVal(drawing.lowerLimit);
+    cal_upperLimit = getCalVal(drawing.upperLimit);
+    //printf("cal upperlimit: %f, cal lowerlim: %f\n",cal_upperLimit,cal_lowerLimit);
   }
   return cal_upperLimit - cal_lowerLimit;
 }
@@ -1217,7 +1236,7 @@ int getPlotRangeXUnits(){
 //showFit: 0=don't show, 1=show without highlighted peaks, 2=show with highlighted peaks
 //drawComments: 0=don't draw, 1=draw
 //drawFast: 0=don't interpolate, 1=interpolate (faster drawing, less accurate)
-void drawSpectrum(cairo_t *cr, const float width, const float height, const float scaleFactor, const unsigned char drawLabels, const unsigned char showFit, const unsigned char drawComments, const unsigned char drawFast){
+void drawSpectrum(cairo_t *cr, const float width, const float height, const float scaleFactor, const unsigned char drawLabels, const unsigned char drawGridLines, const unsigned char showFit, const unsigned char drawComments, const unsigned char drawFast){
 
   if(!rawdata.openedSp){
     return;
@@ -1244,16 +1263,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
 
   double plotFontSize = 13.5*scaleFactor;
 
-  //draw label(s) for the plot
-  if(drawLabels){
-    setTextColor(cr);
-    drawPlotLabel(cr, width, height, plotFontSize, yorigin); //draw plot label(s)
-    cairo_stroke(cr);
-  }
-
   // transform the coordinate system
   cairo_translate(cr, 0.0, height); //so that the origin is at the lower left
-  cairo_scale(cr, 1.0, -1.0); //so that positive y values go up
 
   setPlotLimits(); //setup the x range to plot over
 
@@ -1385,8 +1396,153 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     printf("scaleMax = %f, scaleMin = %f  ",drawing.scaleLevelMax[i],drawing.scaleLevelMin[i]);
   }
   printf("\n");*/
+
+  //draw x axis ticks and gridlines
+  double tickDist = getDistBetweenXAxisTicks(getPlotRangeXUnits(),width);
+  double maxXVal = getCalVal(S32K*1.0);
+  double di;
+  for(di=0;fabs(di)<maxXVal;di+=tickDist){
+    drawXAxisTick(di, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin);
+  }
+  for(di=0;fabs(di)<maxXVal;di-=tickDist){
+    drawXAxisTick(di, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin);
+  }
+  cairo_stroke(cr);
+
+  //draw y axis ticks and gridlines
+  int numTickPerSp;
+  float yTickDist, yTick;
+  switch(drawing.multiplotMode){
+    case 4:
+      //stacked
+      numTickPerSp = (int)((height)/(yorigin*(float)(drawing.numMultiplotSp)));
+      if(numTickPerSp < 2)
+        numTickPerSp = 2;
+      if(drawing.logScale){
+        for(i=0;i<drawing.numMultiplotSp;i++){
+          float rangeVal = drawing.scaleLevelMax[i] - drawing.scaleLevelMin[i];
+          if(rangeVal > drawing.scaleLevelMax[i])
+            rangeVal = drawing.scaleLevelMax[i];
+          int numTickUsed = 0;
+          if(rangeVal >= 1000.){
+            //logarithmic scale ticks in base-10
+            float tickVal = powf(10.0f,(float)(getNSigf(drawing.scaleLevelMax[i],10.0)));
+            while(numTickUsed < numTickPerSp){
+              drawYAxisTick(tickVal, i, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin);
+              tickVal /= 10.0f;
+              numTickUsed++;
+            }
+          }else{
+            //logarithmic scale ticks in base-2
+            float tickVal = powf(2.0f,(float)(getNSigf(drawing.scaleLevelMax[i],2.0)));
+            while(numTickUsed < numTickPerSp){
+              drawYAxisTick(tickVal, i, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin);
+              tickVal /= 2.0f;
+              numTickUsed++;
+            }
+          }
+        }
+      }else{
+        for(i=0;i<drawing.numMultiplotSp;i++){
+          yTickDist = getDistBetweenYAxisTicks(drawing.scaleLevelMax[i] - drawing.scaleLevelMin[i],numTickPerSp);
+          cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
+          for(yTick=0.;yTick<drawing.scaleLevelMax[i];yTick+=yTickDist){
+            drawYAxisTick(yTick, i, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin);
+          }
+          for(yTick=0.;yTick>drawing.scaleLevelMin[i];yTick-=yTickDist){
+            if(yTick != 0)
+              drawYAxisTick(yTick, i, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin);
+          }
+          //drawYAxisTick(0.0, i, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin); //always draw the zero label on the y axis
+          cairo_stroke(cr);
+          //draw the zero line if applicable
+          if((drawing.scaleLevelMin[i] < 0.0) && (drawing.scaleLevelMax[i] > 0.0)){
+            cairo_set_line_width(cr, 1.0*scaleFactor);
+            cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
+            cairo_move_to (cr, xorigin, getAxisYPos(0.0,i,height,yorigin));
+            cairo_line_to (cr, width, getAxisYPos(0.0,i,height,yorigin));
+            cairo_stroke(cr);
+          }
+        }
+      }
+      break;
+    case 3:
+      //overlay (independent scaling)
+      for(i=0;i<drawing.numMultiplotSp;i++){
+        float labelOffset = 0.4f*((float)i+1.0f)/((float)(drawing.numMultiplotSp)*1.0f);
+        cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
+        drawYAxisTick(drawing.scaleLevelMax[i]*(0.3f + labelOffset), i, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin); //draw one axis tick near the middle of the axis, per spectrum
+        drawYAxisTick(0.0, i, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin); //always draw the zero label on the y axis
+      }
+      break;
+    case 2:
+    case 1:
+    case 0:
+      //modes with a single scale
+      setTextColor(cr);
+      numTickPerSp = (int)(height/(4.0f*yorigin)) + 1;
+      if(drawing.logScale){
+        //numTickPerSp *= 2;
+        int nsigf10 = 0;
+        if(drawing.scaleLevelMin[0] <= 0)
+          nsigf10 = getNSigf(drawing.scaleLevelMax[0],10.0);
+        else
+          nsigf10 = getNSigf(drawing.scaleLevelMax[0],10.0) - getNSigf(drawing.scaleLevelMin[0],10.0);
+        int numTickUsed = 0;
+        //printf("nsigf10: %i\n",nsigf10);
+        if(nsigf10 >= 3){
+          //logarithmic scale ticks in base-10
+          float tickVal = powf(10.0f,(float)(getNSigf(drawing.scaleLevelMax[0],10.0)));
+          while(numTickUsed < numTickPerSp){
+            drawYAxisTick(tickVal, 0, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin);
+            tickVal /= 10.0f;
+            numTickUsed++;
+          }
+        }else{
+          //logarithmic scale ticks in base-2
+          float tickVal = powf(2.0f,(float)(getNSigf(drawing.scaleLevelMax[0],2.0)));
+          while(numTickUsed < numTickPerSp){
+            drawYAxisTick(tickVal, 0, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin);
+            tickVal /= 2.0f;
+            numTickUsed++;
+          }
+        }
+      }else{
+        yTickDist = getDistBetweenYAxisTicks(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0],numTickPerSp);
+        for(yTick=0.;yTick<drawing.scaleLevelMax[0];yTick+=yTickDist){
+          drawYAxisTick(yTick, 0, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin);
+        }
+        for(yTick=0.;yTick>drawing.scaleLevelMin[0];yTick-=yTickDist){
+          if(yTick != 0)
+            drawYAxisTick(yTick, 0, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin);
+        }
+        //printf("min: %f, max: %f, yTickDist: %f, numTickPerSp: %i\n",drawing.scaleLevelMin[0],drawing.scaleLevelMax[0],yTickDist,numTickPerSp);
+        //drawYAxisTick(0.0, 0, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin); //always draw the zero label on the y axis
+        cairo_stroke(cr);
+        //draw the zero line if applicable
+        if((drawing.scaleLevelMin[0] < 0.0) && (drawing.scaleLevelMax[0] > 0.0)){
+          cairo_set_line_width(cr, 1.0*scaleFactor);
+          cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
+          cairo_move_to (cr, xorigin, getAxisYPos(0.0,0,height,yorigin));
+          cairo_line_to (cr, width, getAxisYPos(0.0,0,height,yorigin));
+          cairo_stroke(cr);
+        }
+      }
+      break;
+    default:
+      break;
+  }
+
+  //draw label(s) for the plot
+  if(drawLabels){
+    cairo_translate(cr, 0.0, -height);
+    setTextColor(cr);
+    drawPlotLabel(cr, width, height, plotFontSize, yorigin); //draw plot label(s)
+    cairo_stroke(cr);
+    cairo_translate(cr, 0.0, height);
+  }
   
-  //interpolate (ie. limit the number of bins drawn) in the next step, 
+  //interpolate (ie. limit the number of bins drawn in the next step), 
   //to help drawing performance
   float maxDrawBins;
   switch(drawFast){
@@ -1421,6 +1577,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   //be a multiple of the skip factor
   int startBin = 0 - (drawing.lowerLimit % binSkipFactor);
 
+  cairo_scale(cr, 1.0, -1.0); //invert y-axis so that positive y values go up
+
   //draw the actual histogram
   switch(drawing.multiplotMode){
     case 4:
@@ -1438,9 +1596,9 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
               if(getDispSpBinVal(i, j+k) > drawing.scaleLevelMax[i]*0.8){
                 currentVal = getDispSpBinVal(i, j);
                 nextVal = getDispSpBinVal(i, j+k);
-                cairo_move_to (cr, getXPos(j,width,xorigin), getYPos(currentVal,i,height,yorigin));
-                cairo_line_to (cr, getXPos(j+k,width,xorigin), getYPos(currentVal,i,height,yorigin));
-                cairo_line_to (cr, getXPos(j+k,width,xorigin), getYPos(nextVal,i,height,yorigin));
+                cairo_move_to(cr, getXPos(j,width,xorigin), getYPos(currentVal,i,height,yorigin));
+                cairo_line_to(cr, getXPos(j+k,width,xorigin), getYPos(currentVal,i,height,yorigin));
+                cairo_line_to(cr, getXPos(j+k,width,xorigin), getYPos(nextVal,i,height,yorigin));
                 break;
               }
             }
@@ -1448,12 +1606,12 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
 
           currentVal = getDispSpBinVal(i, j);
           nextVal = getDispSpBinVal(i, j+binSkipFactor);
-          cairo_move_to (cr, getXPos(j,width,xorigin), getYPos(currentVal,i,height,yorigin));
-          cairo_line_to (cr, getXPos(j+binSkipFactor,width,xorigin), getYPos(currentVal,i,height,yorigin));
-          cairo_line_to (cr, getXPos(j+binSkipFactor,width,xorigin), getYPos(nextVal,i,height,yorigin));
+          cairo_move_to(cr, getXPos(j,width,xorigin), getYPos(currentVal,i,height,yorigin));
+          cairo_line_to(cr, getXPos(j+binSkipFactor,width,xorigin), getYPos(currentVal,i,height,yorigin));
+          cairo_line_to(cr, getXPos(j+binSkipFactor,width,xorigin), getYPos(nextVal,i,height,yorigin));
         }
         //choose color
-        cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
+        cairo_set_source_rgb(cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
         cairo_stroke(cr);
       }
       break;
@@ -1470,9 +1628,9 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
               if(getDispSpBinVal(i, j+k) > drawing.scaleLevelMax[0]*0.8){
                 currentVal = getDispSpBinVal(i, j);
                 nextVal = getDispSpBinVal(i, j+k);
-                cairo_move_to (cr, getXPos(j,width,xorigin), getYPos(currentVal,0,height,yorigin));
-                cairo_line_to (cr, getXPos(j+k,width,xorigin), getYPos(currentVal,0,height,yorigin));
-                cairo_line_to (cr, getXPos(j+k,width,xorigin), getYPos(nextVal,0,height,yorigin));
+                cairo_move_to(cr, getXPos(j,width,xorigin), getYPos(currentVal,0,height,yorigin));
+                cairo_line_to(cr, getXPos(j+k,width,xorigin), getYPos(currentVal,0,height,yorigin));
+                cairo_line_to(cr, getXPos(j+k,width,xorigin), getYPos(nextVal,0,height,yorigin));
                 break;
               }
             }
@@ -1480,12 +1638,12 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
 
           currentVal = getDispSpBinVal(i, j);
           nextVal = getDispSpBinVal(i, j+binSkipFactor);
-          cairo_move_to (cr, getXPos(j,width,xorigin), getYPos(currentVal,0,height,yorigin));
-          cairo_line_to (cr, getXPos(j+binSkipFactor,width,xorigin), getYPos(currentVal,0,height,yorigin));
-          cairo_line_to (cr, getXPos(j+binSkipFactor,width,xorigin), getYPos(nextVal,0,height,yorigin));
+          cairo_move_to(cr, getXPos(j,width,xorigin), getYPos(currentVal,0,height,yorigin));
+          cairo_line_to(cr, getXPos(j+binSkipFactor,width,xorigin), getYPos(currentVal,0,height,yorigin));
+          cairo_line_to(cr, getXPos(j+binSkipFactor,width,xorigin), getYPos(nextVal,0,height,yorigin));
         }
         //choose color
-        cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
+        cairo_set_source_rgb(cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
         cairo_stroke(cr);
       }
       break;
@@ -1502,9 +1660,9 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
             if(getDispSpBinVal(0, i+k) > drawing.scaleLevelMax[0]*0.8){
               currentVal = getDispSpBinVal(0, i);
               nextVal = getDispSpBinVal(0, i+k);
-              cairo_move_to (cr, getXPos(i,width,xorigin), getYPos(currentVal,0,height,yorigin));
-              cairo_line_to (cr, getXPos(i+k,width,xorigin), getYPos(currentVal,0,height,yorigin));
-              cairo_line_to (cr, getXPos(i+k,width,xorigin), getYPos(nextVal,0,height,yorigin));
+              cairo_move_to(cr, getXPos(i,width,xorigin), getYPos(currentVal,0,height,yorigin));
+              cairo_line_to(cr, getXPos(i+k,width,xorigin), getYPos(currentVal,0,height,yorigin));
+              cairo_line_to(cr, getXPos(i+k,width,xorigin), getYPos(nextVal,0,height,yorigin));
               break;
             }
           }
@@ -1513,11 +1671,11 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         currentVal = getDispSpBinVal(0, i);
         nextVal = getDispSpBinVal(0, i+binSkipFactor);
         //printf("Here! x=%f,y=%f,yorig=%f xclip=%f %f\n",getXPos(i,width), rawdata.hist[drawing.multiPlots[0]][drawing.lowerLimit+i],rawdata.hist[drawing.multiPlots[0]][drawing.lowerLimit+i],0,width);
-        cairo_move_to (cr, getXPos(i,width,xorigin), getYPos(currentVal,0,height,yorigin));
-        cairo_line_to (cr, getXPos(i+binSkipFactor,width,xorigin), getYPos(currentVal,0,height,yorigin));
-        cairo_line_to (cr, getXPos(i+binSkipFactor,width,xorigin), getYPos(nextVal,0,height,yorigin));
+        cairo_move_to(cr, getXPos(i,width,xorigin), getYPos(currentVal,0,height,yorigin));
+        cairo_line_to(cr, getXPos(i+binSkipFactor,width,xorigin), getYPos(currentVal,0,height,yorigin));
+        cairo_line_to(cr, getXPos(i+binSkipFactor,width,xorigin), getYPos(nextVal,0,height,yorigin));
       }
-      cairo_set_source_rgb (cr, drawing.spColors[0], drawing.spColors[1], drawing.spColors[2]);
+      cairo_set_source_rgb(cr, drawing.spColors[0], drawing.spColors[1], drawing.spColors[2]);
       cairo_stroke(cr);
       break;
     default:
@@ -1528,7 +1686,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   if((guiglobals.fittingSp == 6)&&(showFit>0)){
     if((drawing.lowerLimit < fitpar.fitEndCh)&&(drawing.upperLimit > fitpar.fitStartCh)){
       cairo_set_line_width(cr, 3.0*scaleFactor);
-      cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
+      cairo_set_source_rgb(cr, 0.5, 0.5, 0.5);
       float fitDrawX, nextFitDrawX, xpos, nextXpos;
       //draw each peak
       for(i=0;i<fitpar.numFitPeaks;i++){
@@ -1584,7 +1742,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     }
   }
 
-  // draw axis lines
+  //draw axis lines
   cairo_set_line_width(cr, 1.0*scaleFactor);
   setTextColor(cr);
   cairo_move_to (cr, xorigin, yorigin);
@@ -1610,141 +1768,6 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   cairo_stroke(cr);
   
   cairo_scale(cr, 1.0, -1.0); //remove axis inversion, so that text is the right way up
-
-  //draw x axis ticks
-  int tickDist = (int)(getDistBetweenXAxisTicks((float)(getPlotRangeXUnits()),width));
-  for(i=0;abs(i)<S32K;i+=tickDist){
-    drawXAxisTick(i, cr, width, height, plotFontSize, xorigin, yorigin);
-  }
-  for(i=0;abs(i)<S32K;i-=tickDist){
-    drawXAxisTick(i, cr, width, height, plotFontSize, xorigin, yorigin);
-  }
-  cairo_stroke(cr);
-
-  //draw y axis ticks
-  int numTickPerSp;
-  float yTickDist, yTick;
-  switch(drawing.multiplotMode){
-    case 4:
-      //stacked
-      numTickPerSp = (int)((height)/(yorigin*(float)(drawing.numMultiplotSp)));
-      if(numTickPerSp < 2)
-        numTickPerSp = 2;
-      if(drawing.logScale){
-        for(i=0;i<drawing.numMultiplotSp;i++){
-          float rangeVal = drawing.scaleLevelMax[i] - drawing.scaleLevelMin[i];
-          if(rangeVal > drawing.scaleLevelMax[i])
-            rangeVal = drawing.scaleLevelMax[i];
-          int numTickUsed = 0;
-          if(rangeVal >= 1000.){
-            //logarithmic scale ticks in base-10
-            float tickVal = powf(10.0f,(float)(getNSigf(drawing.scaleLevelMax[i],10.0)));
-            while(numTickUsed < numTickPerSp){
-              drawYAxisTick(tickVal, i, cr, width, height, plotFontSize, xorigin, yorigin);
-              tickVal /= 10.0f;
-              numTickUsed++;
-            }
-          }else{
-            //logarithmic scale ticks in base-2
-            float tickVal = powf(2.0f,(float)(getNSigf(drawing.scaleLevelMax[i],2.0)));
-            while(numTickUsed < numTickPerSp){
-              drawYAxisTick(tickVal, i, cr, width, height, plotFontSize, xorigin, yorigin);
-              tickVal /= 2.0f;
-              numTickUsed++;
-            }
-          }
-        }
-      }else{
-        for(i=0;i<drawing.numMultiplotSp;i++){
-          yTickDist = getDistBetweenYAxisTicks(drawing.scaleLevelMax[i] - drawing.scaleLevelMin[i],numTickPerSp);
-          cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
-          for(yTick=0.;yTick<drawing.scaleLevelMax[i];yTick+=yTickDist){
-            drawYAxisTick(yTick, i, cr, width, height, plotFontSize, xorigin, yorigin);
-          }
-          for(yTick=0.;yTick>drawing.scaleLevelMin[i];yTick-=yTickDist){
-            if(yTick != 0)
-              drawYAxisTick(yTick, i, cr, width, height, plotFontSize, xorigin, yorigin);
-          }
-          //drawYAxisTick(0.0, i, cr, width, height, plotFontSize, xorigin, yorigin); //always draw the zero label on the y axis
-          cairo_stroke(cr);
-          //draw the zero line if applicable
-          if((drawing.scaleLevelMin[i] < 0.0) && (drawing.scaleLevelMax[i] > 0.0)){
-            cairo_set_line_width(cr, 1.0*scaleFactor);
-            cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
-            cairo_move_to (cr, xorigin, getAxisYPos(0.0,i,height,yorigin));
-            cairo_line_to (cr, width, getAxisYPos(0.0,i,height,yorigin));
-            cairo_stroke(cr);
-          }
-        }
-      }
-      
-      break;
-    case 3:
-      //overlay (independent scaling)
-      for(i=0;i<drawing.numMultiplotSp;i++){
-        float labelOffset = 0.4f*((float)i+1.0f)/((float)(drawing.numMultiplotSp)*1.0f);
-        cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
-        drawYAxisTick(drawing.scaleLevelMax[i]*(0.3f + labelOffset), i, cr, width, height, plotFontSize, xorigin, yorigin); //draw one axis tick near the middle of the axis, per spectrum
-        drawYAxisTick(0.0, i, cr, width, height, plotFontSize, xorigin, yorigin); //always draw the zero label on the y axis
-      }
-      break;
-    case 2:
-    case 1:
-    case 0:
-      //modes with a single scale
-      setTextColor(cr);
-      numTickPerSp = (int)(height/(4.0f*yorigin)) + 1;
-      if(drawing.logScale){
-        //numTickPerSp *= 2;
-        int nsigf10 = 0;
-        if(drawing.scaleLevelMin[0] <= 0)
-          nsigf10 = getNSigf(drawing.scaleLevelMax[0],10.0);
-        else
-          nsigf10 = getNSigf(drawing.scaleLevelMax[0],10.0) - getNSigf(drawing.scaleLevelMin[0],10.0);
-        int numTickUsed = 0;
-        //printf("nsigf10: %i\n",nsigf10);
-        if(nsigf10 >= 3){
-          //logarithmic scale ticks in base-10
-          float tickVal = powf(10.0f,(float)(getNSigf(drawing.scaleLevelMax[0],10.0)));
-          while(numTickUsed < numTickPerSp){
-            drawYAxisTick(tickVal, 0, cr, width, height, plotFontSize, xorigin, yorigin);
-            tickVal /= 10.0f;
-            numTickUsed++;
-          }
-        }else{
-          //logarithmic scale ticks in base-2
-          float tickVal = powf(2.0f,(float)(getNSigf(drawing.scaleLevelMax[0],2.0)));
-          while(numTickUsed < numTickPerSp){
-            drawYAxisTick(tickVal, 0, cr, width, height, plotFontSize, xorigin, yorigin);
-            tickVal /= 2.0f;
-            numTickUsed++;
-          }
-        }
-      }else{
-        yTickDist = getDistBetweenYAxisTicks(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0],numTickPerSp);
-        for(yTick=0.;yTick<drawing.scaleLevelMax[0];yTick+=yTickDist){
-          drawYAxisTick(yTick, 0, cr, width, height, plotFontSize, xorigin, yorigin);
-        }
-        for(yTick=0.;yTick>drawing.scaleLevelMin[0];yTick-=yTickDist){
-          if(yTick != 0)
-            drawYAxisTick(yTick, 0, cr, width, height, plotFontSize, xorigin, yorigin);
-        }
-        //printf("min: %f, max: %f, yTickDist: %f, numTickPerSp: %i\n",drawing.scaleLevelMin[0],drawing.scaleLevelMax[0],yTickDist,numTickPerSp);
-        //drawYAxisTick(0.0, 0, cr, width, height, plotFontSize, xorigin, yorigin); //always draw the zero label on the y axis
-        cairo_stroke(cr);
-        //draw the zero line if applicable
-        if((drawing.scaleLevelMin[0] < 0.0) && (drawing.scaleLevelMax[0] > 0.0)){
-          cairo_set_line_width(cr, 1.0*scaleFactor);
-          cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
-          cairo_move_to (cr, xorigin, getAxisYPos(0.0,0,height,yorigin));
-          cairo_line_to (cr, width, getAxisYPos(0.0,0,height,yorigin));
-          cairo_stroke(cr);
-        }
-      }
-      break;
-    default:
-      break;
-  }
 
   //draw axis labels
   setTextColor(cr);
@@ -1972,5 +1995,5 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data){
   // Determine GtkDrawingArea dimensions
   gdk_window_get_geometry(wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
 
-  drawSpectrum(cr, (float)dasize.width, (float)dasize.height, 1.0, guiglobals.drawSpLabels, 2, guiglobals.drawSpComments, 1);
+  drawSpectrum(cr, (float)dasize.width, (float)dasize.height, 1.0, guiglobals.drawSpLabels, guiglobals.drawGridLines, 2, guiglobals.drawSpComments, 1);
 }

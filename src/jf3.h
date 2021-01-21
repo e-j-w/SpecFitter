@@ -105,7 +105,7 @@ GtkButton *export_options_save_button;
 //export image dialog
 GtkWindow *export_image_window;
 GtkSpinButton *export_h_res_spinbutton, *export_v_res_spinbutton;
-GtkCheckButton *export_image_label_checkbutton, *export_image_fit_checkbutton;
+GtkCheckButton *export_image_label_checkbutton, *export_image_fit_checkbutton, *export_image_gridline_checkbutton;
 GtkComboBoxText *export_axissize_combobox;
 GtkButton *export_image_save_button;
 //preferences dialog

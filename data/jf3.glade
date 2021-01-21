@@ -1012,9 +1012,9 @@ Author: Jonathan Williams
               <object class="GtkLabel" id="export_image_description_label">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">The currently displayed spectrum or custom view will be
-exported to an image file.  The displayed region, scaling
-and binning factors will be preserved.</property>
+                <property name="label" translatable="yes">The currently displayed spectrum or view will be exported
+to an image file.  The displayed region, scaling and
+binning factors will be preserved.</property>
                 <property name="justify">center</property>
                 <property name="wrap">True</property>
                 <attributes>
@@ -1035,7 +1035,7 @@ and binning factors will be preserved.</property>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="position">1</property>
               </packing>
             </child>
             <child>
@@ -1108,7 +1108,7 @@ and binning factors will be preserved.</property>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">3</property>
+                <property name="position">2</property>
               </packing>
             </child>
             <child>
@@ -1124,7 +1124,7 @@ and binning factors will be preserved.</property>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">4</property>
+                <property name="position">3</property>
               </packing>
             </child>
             <child>
@@ -1134,6 +1134,22 @@ and binning factors will be preserved.</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">False</property>
                 <property name="tooltip-text" translatable="yes">If checked, the exported image will contain any peak fits which are currently displayed.</property>
+                <property name="active">True</property>
+                <property name="draw-indicator">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="export_image_gridline_checkbutton">
+                <property name="label" translatable="yes"> Show grid lines</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">False</property>
+                <property name="tooltip-text" translatable="yes">If checked, the exported image will contain grid lines corresponding to x and y-axis values.</property>
                 <property name="active">True</property>
                 <property name="draw-indicator">True</property>
               </object>
@@ -2705,7 +2721,7 @@ Weight by fit function - Weights are proportional to the fit function values det
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">False</property>
-                    <property name="tooltip-text" translatable="yes">If checked, will grid lines on displayed spectra.</property>
+                    <property name="tooltip-text" translatable="yes">If checked, will draw grid lines on displayed spectra.</property>
                     <property name="halign">start</property>
                     <property name="draw-indicator">True</property>
                   </object>

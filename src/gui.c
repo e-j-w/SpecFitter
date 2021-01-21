@@ -910,6 +910,7 @@ void on_export_image_button_clicked(GtkButton *b){
   int inpAxisScale = gtk_combo_box_get_active(GTK_COMBO_BOX(export_axissize_combobox));
   unsigned char showFit = (unsigned char)gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_fit_checkbutton));
   unsigned char showLabels = (unsigned char)gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_label_checkbutton));
+  unsigned char showGridLines = (unsigned char)gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_gridline_checkbutton));
   int hres = gtk_spin_button_get_value_as_int(export_h_res_spinbutton);
   int vres = gtk_spin_button_get_value_as_int(export_v_res_spinbutton);
 
@@ -937,7 +938,7 @@ void on_export_image_button_clicked(GtkButton *b){
     cairo_surface_t *imgSurf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, hres, vres);
     cairo_t *cr = cairo_create(imgSurf);
     //draw the spectrum (don't interpolate between bins)
-    drawSpectrum(cr, (float)hres, (float)vres, scaleFactor, showLabels, showFit, 0, 0);
+    drawSpectrum(cr, (float)hres, (float)vres, scaleFactor, showLabels, showGridLines, showFit, 0, 0);
     //save the image file
     if(cairo_surface_write_to_png(imgSurf, fileName)!=CAIRO_STATUS_SUCCESS){
       saveErr=1;
@@ -2193,6 +2194,7 @@ void iniitalizeUIElements(){
   export_v_res_spinbutton = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "export_v_res_spinbutton"));
   export_image_label_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "export_image_label_checkbutton"));
   export_image_fit_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "export_image_fit_checkbutton"));
+  export_image_gridline_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "export_image_gridline_checkbutton"));
   export_axissize_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "export_axissize_combobox"));
   export_image_save_button = GTK_BUTTON(gtk_builder_get_object(builder, "export_image_save_button"));
 
