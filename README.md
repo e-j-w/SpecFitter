@@ -1,10 +1,6 @@
 # **jf3**
 
-**A spectroscopy tool in GTK**
-
-## Description
-
-A spectrum viewer and fitter app, suitable for gamma-ray spectroscopy or similar work.  Uses [GTK](https://www.gtk.org/) to provide smooth rendering and (hopefully) an easy to understand interface.  This is a hobby project, things should mostly work but all the typical disclaimers apply.
+A program for gamma-ray spectroscopy or similar data analysis.  Uses [GTK](https://www.gtk.org/) to provide smooth rendering and (hopefully) an easy to understand interface.  This is a hobby project, things should mostly work but all the typical disclaimers apply.
 
 ## Screenshot
 

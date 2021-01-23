@@ -1469,9 +1469,9 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     case 3:
       //overlay (independent scaling)
       for(i=0;i<drawing.numMultiplotSp;i++){
-        float labelOffset = 0.4f*((float)i+1.0f)/((float)(drawing.numMultiplotSp)*1.0f);
+        double labelOffset = 0.4*((double)i+1.0)/((double)(drawing.numMultiplotSp)*1.0);
         cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
-        drawYAxisTick(drawing.scaleLevelMax[i]*(0.3f + labelOffset), i, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin); //draw one axis tick near the middle of the axis, per spectrum
+        drawYAxisTick((double)drawing.scaleLevelMax[i]*(0.3 + labelOffset), i, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin); //draw one axis tick near the middle of the axis, per spectrum
         drawYAxisTick(0.0, i, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin); //always draw the zero label on the y axis
       }
       break;
