@@ -1,4 +1,4 @@
-/* J. Williams, 2020 */
+/* J. Williams, 2020-2021 */
 
 //This file contains routines for fitting displayed spectra.
 //The main fit routine is startGausFit (at the bottom), which

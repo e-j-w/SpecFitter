@@ -1,4 +1,4 @@
-/* J. Williams, 2020 */
+/* J. Williams, 2020-2021 */
 // jf3 - A spectrum viewer/analysis app using GTK3, for gamma-ray spectroscopy or similar
 
 //definitions and global variables
@@ -60,6 +60,7 @@ int main(int argc, char *argv[])
     configFile = fopen(dirPath, "w");
     if(configFile != NULL){
       writeConfigFile(configFile); //write the default configuration values
+      readConfigFile(configFile);
       fclose(configFile);
     }else{
       printf("WARNING: Unable to create configuration file, falling back to default values.\n");

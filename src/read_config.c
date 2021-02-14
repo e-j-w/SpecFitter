@@ -1,4 +1,4 @@
-/* J. Williams, 2020 */
+/* J. Williams, 2020-2021 */
 
 //read data from a config file
 int readConfigFile(FILE *file)
@@ -149,6 +149,12 @@ int readConfigFile(FILE *file)
 
     }
   }
+
+  //check for and correct invalid parameter values
+  if((calpar.calpar0 == 0.0)&&(calpar.calpar1 == 0.0)&&(calpar.calpar2 == 0.0)){
+    calpar.calpar1=1.0;
+  }
+
   return 1;
 }
 
@@ -166,7 +172,7 @@ int writeConfigFile(FILE *file)
   }else{
     fprintf(file,"calibrate=no\n");
     fprintf(file,"cal_parameter0=0.0\n");
-    fprintf(file,"cal_parameter1=0.0\n");
+    fprintf(file,"cal_parameter1=1.0\n");
     fprintf(file,"cal_parameter2=0.0\n");
     fprintf(file,"cal_unit=none\n");
   }

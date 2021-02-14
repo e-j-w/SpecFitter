@@ -1,4 +1,4 @@
-/* J. Williams, 2020 */
+/* J. Williams, 2020-2021 */
 
 //routine to write a .jf3 file
 //header containing: file format version number (unsigned char), number of spectra (unsigned char), label for each spactrum (each 256 element char array),

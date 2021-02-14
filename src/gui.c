@@ -1,4 +1,4 @@
-/* J. Williams, 2020 */
+/* J. Williams, 2020-2021 */
 
 //File contains routines and callbacks for dealing with GTK and
 //the various UI elements used in the program.  Initialization
@@ -1028,18 +1028,30 @@ void on_calibrate_button_clicked(GtkButton *b)
   gtk_window_present(calibrate_window); //show the window
 }
 
-void on_cal_par_activate (GtkEntry *entry, gpointer user_data){
+void on_cal_par_activate(GtkEntry *entry, gpointer user_data){
   const gchar *entryText;
   entryText = gtk_entry_get_text(cal_entry_const);
-  if(strtod(entryText,NULL)==0.){
+  if(entryText!=NULL){
+    if(strtod(entryText,NULL)==0.){
+      gtk_entry_set_text (cal_entry_const, "");
+    }
+  }else{
     gtk_entry_set_text (cal_entry_const, "");
   }
   entryText = gtk_entry_get_text(cal_entry_lin);
-  if(strtod(entryText,NULL)==0.){
+  if(entryText!=NULL){
+    if(strtod(entryText,NULL)==0.){
+      gtk_entry_set_text (cal_entry_lin, "");
+    }
+  }else{
     gtk_entry_set_text (cal_entry_lin, "");
   }
   entryText = gtk_entry_get_text(cal_entry_quad);
-  if(strtod(entryText,NULL)==0.){
+  if(entryText!=NULL){
+    if(strtod(entryText,NULL)==0.){
+      gtk_entry_set_text (cal_entry_quad, "");
+    }
+  }else{
     gtk_entry_set_text (cal_entry_quad, "");
   }
   g_free((gchar*)entryText);

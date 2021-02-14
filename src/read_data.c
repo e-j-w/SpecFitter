@@ -1,4 +1,4 @@
-/* J. Williams, 2020 */
+/* J. Williams, 2020-2021 */
 
 //File contains functions for reading spectra of various formats.
 //.jf3 - compressed multiple spectra, with titles and comments
