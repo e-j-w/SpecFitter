@@ -1013,12 +1013,24 @@ void on_calibrate_button_clicked(GtkButton *b)
 {
   if(calpar.calMode == 1){
     char str[256];
-    sprintf(str,"%.3f",calpar.calpar0);
-    gtk_entry_set_text(cal_entry_const,str);
-    sprintf(str,"%.3f",calpar.calpar1);
-    gtk_entry_set_text(cal_entry_lin,str);
-    sprintf(str,"%.3f",calpar.calpar2);
-    gtk_entry_set_text(cal_entry_quad,str);
+    if(calpar.calpar0!=0.0){
+      sprintf(str,"%.3f",calpar.calpar0);
+      gtk_entry_set_text(cal_entry_const,str);
+    }else{
+      gtk_entry_set_text(cal_entry_const,"");
+    }
+    if(calpar.calpar1!=0.0){
+      sprintf(str,"%.3f",calpar.calpar1);
+      gtk_entry_set_text(cal_entry_lin,str);
+    }else{
+      gtk_entry_set_text(cal_entry_lin,"");
+    }
+    if(calpar.calpar2!=0.0){
+      sprintf(str,"%.3f",calpar.calpar2);
+      gtk_entry_set_text(cal_entry_quad,str);
+    }else{
+      gtk_entry_set_text(cal_entry_quad,"");
+    }
     gtk_entry_set_text(cal_entry_unit,calpar.calUnit);
     gtk_entry_set_text(cal_entry_y_axis,calpar.calYUnit);
     gtk_widget_set_sensitive(GTK_WIDGET(remove_calibration_button),TRUE);
@@ -1026,35 +1038,6 @@ void on_calibrate_button_clicked(GtkButton *b)
     gtk_widget_set_sensitive(GTK_WIDGET(remove_calibration_button),FALSE);
   }
   gtk_window_present(calibrate_window); //show the window
-}
-
-void on_cal_par_activate(GtkEntry *entry, gpointer user_data){
-  const gchar *entryText;
-  entryText = gtk_entry_get_text(cal_entry_const);
-  if(entryText!=NULL){
-    if(strtod(entryText,NULL)==0.){
-      gtk_entry_set_text (cal_entry_const, "");
-    }
-  }else{
-    gtk_entry_set_text (cal_entry_const, "");
-  }
-  entryText = gtk_entry_get_text(cal_entry_lin);
-  if(entryText!=NULL){
-    if(strtod(entryText,NULL)==0.){
-      gtk_entry_set_text (cal_entry_lin, "");
-    }
-  }else{
-    gtk_entry_set_text (cal_entry_lin, "");
-  }
-  entryText = gtk_entry_get_text(cal_entry_quad);
-  if(entryText!=NULL){
-    if(strtod(entryText,NULL)==0.){
-      gtk_entry_set_text (cal_entry_quad, "");
-    }
-  }else{
-    gtk_entry_set_text (cal_entry_quad, "");
-  }
-  g_free((gchar*)entryText);
 }
 
 void on_calibrate_ok_button_clicked(GtkButton *b)
@@ -1068,21 +1051,23 @@ void on_calibrate_ok_button_clicked(GtkButton *b)
   if(strcmp(calpar.calYUnit,"")==0){
     strncpy(calpar.calYUnit,"Value",28);
   }
-  calpar.calpar0 = (float)strtod(gtk_entry_get_text(cal_entry_const),NULL);
-  calpar.calpar1 = (float)strtod(gtk_entry_get_text(cal_entry_lin),NULL);
-  calpar.calpar2 = (float)strtod(gtk_entry_get_text(cal_entry_quad),NULL);
-  if(!((calpar.calpar0 == 0.0)&&(calpar.calpar1==0.0)&&(calpar.calpar2==0.0))){
+  double constPar = strtod(gtk_entry_get_text(cal_entry_const),NULL);
+  double linPar =  strtod(gtk_entry_get_text(cal_entry_lin),NULL);
+  double quadPar = strtod(gtk_entry_get_text(cal_entry_quad),NULL);
+  if(!((linPar==0.0)&&(quadPar==0.0))){
     //not all calibration parameters are zero, calibration is valid
     calpar.calMode=1;
+    calpar.calpar0 = (float)constPar;
+    calpar.calpar1 = (float)linPar;
+    calpar.calpar2 = (float)quadPar;
     //printf("Calibration parameters: %f %f %f, drawing.calMode: %i, calpar.calUnit: %s\n",calpar.calpar0,calpar.calpar1,calpar.calpar2,drawing.calMode,drawing.calUnit);
     updateConfigFile();
     gtk_widget_hide(GTK_WIDGET(calibrate_window)); //close the calibration window
     manualSpectrumAreaDraw();
   }else{
-    calpar.calMode=0;
     GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
     GtkWidget *message_dialog = gtk_message_dialog_new(calibrate_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Invalid calibration!");
-    gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"At least one of the calibration parameters must be non-zero.");
+    gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"At least one of the linear or quadratic calibration parameters must be non-zero.");
     gtk_dialog_run(GTK_DIALOG(message_dialog));
     gtk_widget_destroy(message_dialog);
     //gtk_window_set_transient_for(message_dialog, calibrate_window); //center massage dialog on calibrate window
@@ -2286,9 +2271,6 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(preferences_apply_button), "clicked", G_CALLBACK(on_preferences_apply_button_clicked), NULL);
   g_signal_connect(G_OBJECT(preferences_button), "clicked", G_CALLBACK(on_preferences_button_clicked), NULL);
   gtk_widget_set_events(spectrum_drawing_area, gtk_widget_get_events(spectrum_drawing_area) | GDK_SCROLL_MASK | GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK); //allow mouse scrolling over the drawing area
-  g_signal_connect(G_OBJECT(cal_entry_const), "preedit-changed", G_CALLBACK(on_cal_par_activate), NULL);
-  g_signal_connect(G_OBJECT(cal_entry_lin), "preedit-changed", G_CALLBACK(on_cal_par_activate), NULL);
-  g_signal_connect(G_OBJECT(cal_entry_quad), "preedit-changed", G_CALLBACK(on_cal_par_activate), NULL);
   g_signal_connect(G_OBJECT(zoom_scale), "value-changed", G_CALLBACK(on_zoom_scale_changed), NULL);
   g_signal_connect(G_OBJECT(contract_scale), "value-changed", G_CALLBACK(on_contract_scale_changed), NULL);
   g_signal_connect(G_OBJECT(shortcuts_button), "clicked", G_CALLBACK(on_shortcuts_button_clicked), NULL);

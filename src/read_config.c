@@ -121,37 +121,39 @@ int readConfigFile(FILE *file)
           guiglobals.autoZoom = 0;
         }
       }
-      if(strcmp(par,"calibrate") == 0){
-        if(strcmp(val,"yes") == 0){
-          calpar.calMode = 1;
-        }else{
-          calpar.calMode = 0;
+
+      //read in calibration parameters, if a calibration has not already been applied
+      //(eg. by reading in a file with the calibration defined)
+      if(calpar.calMode==0){
+        if(strcmp(par,"calibrate") == 0){
+          if(strcmp(val,"yes") == 0){
+            calpar.calMode = 1;
+          }
+        }
+        if(strcmp(par,"cal_parameter0") == 0){
+          calpar.calpar0 = (float)atof(val);
+        }
+        if(strcmp(par,"cal_parameter1") == 0){
+          calpar.calpar1 = (float)atof(val);
+        }
+        if(strcmp(par,"cal_parameter2") == 0){
+          calpar.calpar2 = (float)atof(val);
+        }
+        if(strcmp(par,"cal_unit") == 0){
+          val[15] = '\0'; //truncate string
+          strcpy(calpar.calUnit,val);
+        }
+        if(strcmp(par,"cal_unit_y") == 0){
+          val[31] = '\0'; //truncate string
+          strcpy(calpar.calYUnit,val);
         }
       }
-      if(strcmp(par,"cal_parameter0") == 0){
-        calpar.calpar0 = (float)atof(val);
-      }
-      if(strcmp(par,"cal_parameter1") == 0){
-        calpar.calpar1 = (float)atof(val);
-      }
-      if(strcmp(par,"cal_parameter2") == 0){
-        calpar.calpar2 = (float)atof(val);
-      }
-      if(strcmp(par,"cal_unit") == 0){
-        val[15] = '\0'; //truncate string
-        strcpy(calpar.calUnit,val);
-      }
-      if(strcmp(par,"cal_unit_y") == 0){
-        val[31] = '\0'; //truncate string
-        strcpy(calpar.calYUnit,val);
-      }
       
-
     }
   }
 
   //check for and correct invalid parameter values
-  if((calpar.calpar0 == 0.0)&&(calpar.calpar1 == 0.0)&&(calpar.calpar2 == 0.0)){
+  if((calpar.calpar1 == 0.0)&&(calpar.calpar2 == 0.0)){
     calpar.calpar1=1.0;
   }
 

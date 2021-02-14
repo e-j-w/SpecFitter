@@ -46,6 +46,10 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 
       //read calibration parameters
       if(fread(&calpar, sizeof(calpar), 1, inp)!=1){fclose(inp); return 0;}
+      if((calpar.calpar1==0.0)&&(calpar.calpar2==0.0)){
+        //invalid calibration, fix parameters
+        calpar.calpar1=1.0;
+      }
 
       //read comments
       if(fread(&uintBuf, sizeof(unsigned int), 1, inp)!=1){fclose(inp); return 0;}
@@ -531,6 +535,10 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
                         }
                       }
                     }
+                  }
+                  if((calpar.calpar1==0.0)&&(calpar.calpar2==0.0)){
+                    //invalid calibration, fix parameters
+                    calpar.calpar1=1.0;
                   }
                 }else if(strcmp(tok,"CALXUNIT")==0){
                   tok = strtok(NULL,""); //get the rest of the string
