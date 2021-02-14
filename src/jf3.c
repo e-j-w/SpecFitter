@@ -55,13 +55,17 @@ int main(int argc, char *argv[])
   }
   FILE *configFile;
   strcat(dirPath,"/jf3.conf");
-  if ((configFile = fopen(dirPath, "r")) == NULL){ //open the config file
+  if((configFile = fopen(dirPath, "r")) == NULL){ //open the config file
     printf("Creating configuration file at: %s\n", dirPath);
     configFile = fopen(dirPath, "w");
     if(configFile != NULL){
       writeConfigFile(configFile); //write the default configuration values
-      readConfigFile(configFile,calpar.calMode);
       fclose(configFile);
+      if((configFile = fopen(dirPath, "r")) != NULL){ //open the config file
+        readConfigFile(configFile,calpar.calMode);
+      }else{
+        printf("ERROR: Could not read config file!\n");
+      }
     }else{
       printf("WARNING: Unable to create configuration file, falling back to default values.\n");
     }
