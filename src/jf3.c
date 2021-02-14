@@ -60,13 +60,13 @@ int main(int argc, char *argv[])
     configFile = fopen(dirPath, "w");
     if(configFile != NULL){
       writeConfigFile(configFile); //write the default configuration values
-      readConfigFile(configFile);
+      readConfigFile(configFile,calpar.calMode);
       fclose(configFile);
     }else{
       printf("WARNING: Unable to create configuration file, falling back to default values.\n");
     }
   }else{
-    readConfigFile(configFile);
+    readConfigFile(configFile,calpar.calMode);
     fclose(configFile);
   }
 

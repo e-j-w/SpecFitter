@@ -1078,7 +1078,9 @@ void on_calibrate_ok_button_clicked(GtkButton *b)
 void on_remove_calibration_button_clicked(GtkButton *b)
 {
   calpar.calMode=0;
-  //printf("Calibration parameters: %f %f %f, drawing.calMode: %i, calpar.calUnit: %s\n",calpar.calpar0,calpar.calpar1,calpar.calpar2,drawing.calMode,drawing.calUnit);
+  calpar.calpar0=0.0;
+  calpar.calpar1=1.0;
+  calpar.calpar2=0.0;
   updateConfigFile();
   gtk_widget_hide(GTK_WIDGET(calibrate_window)); //close the calibration window
   manualSpectrumAreaDraw();

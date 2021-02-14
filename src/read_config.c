@@ -1,7 +1,8 @@
 /* J. Williams, 2020-2021 */
 
 //read data from a config file
-int readConfigFile(FILE *file)
+//keepCalibration: 0=update the calibration, 1=don't change the calibration
+int readConfigFile(FILE *file, int keepCalibration)
 {
   char fullLine[256],par[256],val[256];
   char *tok;
@@ -124,7 +125,7 @@ int readConfigFile(FILE *file)
 
       //read in calibration parameters, if a calibration has not already been applied
       //(eg. by reading in a file with the calibration defined)
-      if(calpar.calMode==0){
+      if(keepCalibration == 0){
         if(strcmp(par,"calibrate") == 0){
           if(strcmp(val,"yes") == 0){
             calpar.calMode = 1;
@@ -148,7 +149,7 @@ int readConfigFile(FILE *file)
           strcpy(calpar.calYUnit,val);
         }
       }
-      
+
     }
   }
 
@@ -271,7 +272,7 @@ void updatePrefsFromConfigFile(){
   strcat(dirPath,"/.config/jf3/jf3.conf");
   FILE *configFile = fopen(dirPath, "r");
   if(configFile != NULL){
-    readConfigFile(configFile); //read the configuration values
+    readConfigFile(configFile,0); //read the configuration values
     fclose(configFile);
   }else{
     printf("WARNING: Unable to read preferences to configuration file.\n");
