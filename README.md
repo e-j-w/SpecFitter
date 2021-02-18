@@ -50,7 +50,7 @@ A program for gamma-ray spectroscopy or similar data analysis.  Uses [GTK](https
 
 #### Format support notes
 
-Some sample files that the program can open are available [here](https://mega.nz/file/TQ0zTSAI#CXHBjL0iwDrfpEiTfCJg-76U9gREPFbn__zE28ceCuE) (.zip archive).
+Some sample files that the program can open are available [here](https://raw.githubusercontent.com/e-j-w/e-j-w.github.io/master/media/jf3-sample-files.zip) (.zip archive).
 
 Conversion codes for some of the above data formats are available in the [FileConvTools](https://github.com/e-j-w/FileConvTools) repository.
 

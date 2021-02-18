@@ -1042,14 +1042,20 @@ void drawYAxisTick(const double axisVal, const int multiplotSpNum, cairo_t *cr, 
   float axisPos = getAxisYPos((float)axisVal,multiplotSpNum,height,yorigin);
   if((axisPos <= 0) && (axisPos > (height)*-0.98)) {
     //axis position is valid (ie. on the plot, and not too close to the top of the plot so that it won't be cut off)
-    setTextColor(cr);
+    if(drawing.multiplotMode!=3){
+      //default colours used, unless in independent scaling mode
+      setTextColor(cr);
+    }
     cairo_move_to(cr, xorigin*1.06f, axisPos);
     cairo_line_to(cr, xorigin*0.94f, axisPos);
     if(drawGridLines){
       //don't draw a gridline which overlaps with the x-axis
       if(axisVal > drawing.scaleLevelMin[multiplotSpNum]){
         cairo_stroke(cr);
-        setGridLineColor(cr);
+        if(drawing.multiplotMode!=3){
+          //default colours used, unless in independent scaling mode
+          setGridLineColor(cr);
+        }
         float xPos = xorigin*1.06f + 5.0f;
         while(xPos < width){
           cairo_move_to(cr, xPos, axisPos);
@@ -1058,7 +1064,10 @@ void drawYAxisTick(const double axisVal, const int multiplotSpNum, cairo_t *cr, 
           xPos = xPos + 5.0f;
         }
         cairo_stroke(cr);
-        setTextColor(cr);
+        if(drawing.multiplotMode!=3){
+          //default colours used, unless in independent scaling mode
+          setTextColor(cr);
+        }
       }
     }
     char tickLabel[20];

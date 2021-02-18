@@ -2356,7 +2356,7 @@ void iniitalizeUIElements(){
   drawing.highlightedComment = -1;
   drawing.spColors[0] = 220/255.f; drawing.spColors[1] = 50/255.f; drawing.spColors[2] = 47/255.f;      //RGB values for color 1 (solarized red)
   drawing.spColors[3] = 38/255.f; drawing.spColors[4] = 139/255.f; drawing.spColors[5] = 210/255.f;     //RGB values for color 2 (solarized blue)
-  drawing.spColors[6] = 0.0f; drawing.spColors[7] = 0.8f; drawing.spColors[8] = 0.0f;                   //RGB values for color 3
+  drawing.spColors[6] = 0.0f; drawing.spColors[7] = 0.7f; drawing.spColors[8] = 0.0f;                   //RGB values for color 3
   drawing.spColors[9] = 0.8f; drawing.spColors[10] = 0.0f; drawing.spColors[11] = 0.8f;                 //RGB values for color 4
   drawing.spColors[12] = 0.7f; drawing.spColors[13] = 0.4f; drawing.spColors[14] = 0.0f;                //RGB values for color 5
   drawing.spColors[15] = 42/255.f; drawing.spColors[16] = 161/255.f; drawing.spColors[17] = 152/255.f;  //RGB values for color 6 (solarized cyan)

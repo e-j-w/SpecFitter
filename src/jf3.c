@@ -65,6 +65,7 @@ int main(int argc, char *argv[])
         readConfigFile(configFile,calpar.calMode);
       }else{
         printf("ERROR: Could not read config file!\n");
+        return 0;
       }
     }else{
       printf("WARNING: Unable to create configuration file, falling back to default values.\n");
