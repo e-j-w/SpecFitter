@@ -1697,10 +1697,14 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       cairo_set_line_width(cr, 3.0*scaleFactor);
       cairo_set_source_rgb(cr, 0.5, 0.5, 0.5);
       float fitDrawX, nextFitDrawX, xpos, nextXpos;
+      float fitSkipFactor = 0.5f*(float)(binSkipFactor*fitpar.numFitPeaks);
+      if(fitSkipFactor <= 0.0f){
+        fitSkipFactor = 0.5f;
+      }
       //draw each peak
       for(i=0;i<fitpar.numFitPeaks;i++){
-        for(fitDrawX=(float)(fitpar.fitStartCh); fitDrawX<=(float)(fitpar.fitEndCh); fitDrawX+= 0.5f){
-          nextFitDrawX = fitDrawX + 0.5f;
+        for(fitDrawX=(float)(fitpar.fitStartCh); fitDrawX<=(float)(fitpar.fitEndCh); fitDrawX+= fitSkipFactor){
+          nextFitDrawX = fitDrawX + fitSkipFactor;
           xpos = getXPosFromCh(fitDrawX,width,1,xorigin);
           nextXpos = getXPosFromCh(nextFitDrawX,width,1,xorigin);
           if((xpos > 0)&&(nextXpos > 0)){
@@ -1710,8 +1714,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         }
       }
       //draw background
-      for(fitDrawX=(float)(fitpar.fitStartCh); fitDrawX<=(float)(fitpar.fitEndCh); fitDrawX+= 0.5f){
-        nextFitDrawX = fitDrawX + 0.5f;
+      for(fitDrawX=(float)(fitpar.fitStartCh); fitDrawX<=(float)(fitpar.fitEndCh); fitDrawX+= fitSkipFactor){
+        nextFitDrawX = fitDrawX + fitSkipFactor;
         xpos = getXPosFromCh(fitDrawX,width,1,xorigin);
         nextXpos = getXPosFromCh(nextFitDrawX,width,1,xorigin);
         if((xpos > 0)&&(nextXpos > 0)){
@@ -1723,8 +1727,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       //draw sum of peaks
       if(fitpar.numFitPeaks > 1){
         cairo_set_line_width(cr, 2.0*scaleFactor);
-        for(fitDrawX=(float)(fitpar.fitStartCh); fitDrawX<=(float)(fitpar.fitEndCh); fitDrawX+= 0.5f){
-          nextFitDrawX = fitDrawX + 0.5f;
+        for(fitDrawX=(float)(fitpar.fitStartCh); fitDrawX<=(float)(fitpar.fitEndCh); fitDrawX+= fitSkipFactor){
+          nextFitDrawX = fitDrawX + fitSkipFactor;
           xpos = getXPosFromCh(fitDrawX,width,1,xorigin);
           nextXpos = getXPosFromCh(nextFitDrawX,width,1,xorigin);
           if((xpos > 0)&&(nextXpos > 0)){
@@ -1737,8 +1741,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       //draw highlighed peak
       if((drawing.highlightedPeak >= 0)&&(drawing.highlightedPeak <= fitpar.numFitPeaks)&&(showFit>1)){
         cairo_set_line_width(cr, 6.0*scaleFactor);
-        for(fitDrawX=floorf((float)(fitpar.fitParVal[7+(3*drawing.highlightedPeak)] - 3.*fitpar.fitParVal[8+(3*drawing.highlightedPeak)]));  fitDrawX<=floorf((float)(fitpar.fitParVal[7+(3*drawing.highlightedPeak)] + 3.*fitpar.fitParVal[8+(3*drawing.highlightedPeak)])); fitDrawX+= 0.5f){
-          nextFitDrawX = fitDrawX + 0.5f;
+        for(fitDrawX=floorf((float)(fitpar.fitParVal[7+(3*drawing.highlightedPeak)] - 3.*fitpar.fitParVal[8+(3*drawing.highlightedPeak)]));  fitDrawX<=floorf((float)(fitpar.fitParVal[7+(3*drawing.highlightedPeak)] + 3.*fitpar.fitParVal[8+(3*drawing.highlightedPeak)])); fitDrawX+= fitSkipFactor){
+          nextFitDrawX = fitDrawX + fitSkipFactor;
           xpos = getXPosFromCh(fitDrawX,width,1,xorigin);
           nextXpos = getXPosFromCh(nextFitDrawX,width,1,xorigin);
           if((xpos > 0)&&(nextXpos > 0)){
