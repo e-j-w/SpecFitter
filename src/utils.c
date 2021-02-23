@@ -90,7 +90,7 @@ void getFormattedYAxisVal(const double val, const double axisMinVal, const doubl
     return;
   }
 
-  if((axisMaxVal - axisMinVal) >= 15){
+  if((axisMaxVal - axisMinVal) > 2.0){
     //large axis range
     if(fabs(val) < 100000){
       //print value rounded to nearest integer
@@ -110,7 +110,7 @@ void getFormattedYAxisVal(const double val, const double axisMinVal, const doubl
         snprintf(str,strLength,"%0.0fe%i",valc,sigf);
       }
     }    
-  }else if((axisMaxVal - axisMinVal) >= 1.5){
+  }else if((axisMaxVal - axisMinVal) >= 0.5){
     //small axis range, use one decimal place
     snprintf(str,strLength,"%0.1f",val);
   }else{
@@ -126,7 +126,7 @@ void getFormattedYAxisVal(const double val, const double axisMinVal, const doubl
     }else{
       double valc = val;
       int sigf = 0;
-      while(fabs(valc) < 1.0){
+      while(fabs(valc) < 0.1){
         valc *= 10;
         sigf++;
       }

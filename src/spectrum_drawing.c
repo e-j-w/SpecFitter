@@ -396,16 +396,23 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
     gdk_window_get_geometry (wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
     if(guiglobals.useZoomAnimations){
       drawing.zoomToLevel = drawing.zoomLevel * 0.5f;
-      drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-80.0)/(dasize.width-80.0)*(drawing.upperLimit - drawing.lowerLimit));
-      drawing.zoomFocusFrac = (float)((drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit));
+      if((drawing.upperLimit - drawing.lowerLimit)>0){
+        drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-80.0)/(dasize.width-80.0)*(drawing.upperLimit - drawing.lowerLimit));
+        drawing.zoomFocusFrac = (float)((drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit));
+      }else{
+        drawing.zoomFocusFrac = 0.5f;
+      }
       drawing.zoomingSpX = 1;
       drawing.zoomXLastFrameTime = gdk_frame_clock_get_frame_time(frameClock);
       gtk_widget_add_tick_callback (widget, zoom_out_tick_callback, NULL, NULL);
     }else{
-      drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-80.0)/(dasize.width-80.0)*(drawing.upperLimit - drawing.lowerLimit));
+      if((drawing.upperLimit - drawing.lowerLimit)>0){
+        drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-80.0)/(dasize.width-80.0)*(drawing.upperLimit - drawing.lowerLimit));
+        drawing.zoomFocusFrac = (float)((drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit));
+      }else{
+        drawing.zoomFocusFrac = 0.5f;
+      }
       drawing.zoomLevel *= 0.5f;
-      drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-80.0)/(dasize.width-80.0)*(drawing.upperLimit - drawing.lowerLimit));
-      drawing.zoomFocusFrac = (float)((drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit));
       gtk_range_set_value(GTK_RANGE(zoom_scale),log(drawing.zoomLevel)/log(2.));//base 2 log of zoom
       gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
     }
@@ -418,16 +425,23 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
     gdk_window_get_geometry (wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
     if(guiglobals.useZoomAnimations){
       drawing.zoomToLevel = drawing.zoomLevel * 2.0f;
-      drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-80.0)/(dasize.width-80.0)*(drawing.upperLimit - drawing.lowerLimit));
-      drawing.zoomFocusFrac = (float)((drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit));
+      if((drawing.upperLimit - drawing.lowerLimit)>0){
+        drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-80.0)/(dasize.width-80.0)*(drawing.upperLimit - drawing.lowerLimit));
+        drawing.zoomFocusFrac = (float)((drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit));
+      }else{
+        drawing.zoomFocusFrac = 0.5f;
+      }
       drawing.zoomingSpX = 1;
       drawing.zoomXLastFrameTime = gdk_frame_clock_get_frame_time(frameClock);
       gtk_widget_add_tick_callback (widget, zoom_in_tick_callback, NULL, NULL);
     }else{
-      drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-80.0)/(dasize.width-80.0)*(drawing.upperLimit - drawing.lowerLimit));
+      if((drawing.upperLimit - drawing.lowerLimit)>0){
+        drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-80.0)/(dasize.width-80.0)*(drawing.upperLimit - drawing.lowerLimit));
+        drawing.zoomFocusFrac = (float)((drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit));
+      }else{
+        drawing.zoomFocusFrac = 0.5f;
+      }
       drawing.zoomLevel *= 2.0f;
-      drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-80.0)/(dasize.width-80.0)*(drawing.upperLimit - drawing.lowerLimit));
-      drawing.zoomFocusFrac = (float)((drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit));
       gtk_range_set_value(GTK_RANGE(zoom_scale),log(drawing.zoomLevel)/log(2.));//base 2 log of zoom
       gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
     }
@@ -1197,7 +1211,11 @@ float getDistBetweenYAxisTicks(const float axisRange, const int numTicks){
   }
   //printf("2 - axisRange: %f, sigf: %i, trialDist: %f, trialNumTicks: %i, numTicks: %i\n",axisRange,sigf,trialDist,trialNumTicks,numTicks);
 
-  return ceilf(trialDist);
+  if(trialDist > 0.0f){
+    return ceilf(trialDist);
+  }else{
+    return 1.0f; //a non-zero return value is assumed
+  }
 
 }
 
@@ -1221,7 +1239,12 @@ double getDistBetweenXAxisTicks(const double axisRange, const float width){
     tickDist = tickDist - fmod(tickDist,1.0);
   }
 
-  return tickDist;
+  if(tickDist > 0.0){
+    return tickDist;
+  }else{
+    return 1.0; //a non-zero return value is assumed
+  }
+  
 
 }
 
@@ -1579,6 +1602,9 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   int binSkipFactor = (int)binSkipFactorF;
   if(binSkipFactor <= drawing.contractFactor){
     binSkipFactor = drawing.contractFactor;
+  }
+  if(binSkipFactor <= 0){
+    binSkipFactor = 1;
   }
   //printf("default bins: %i, binskipfactor: %f, contractFactor: %i\n",drawing.upperLimit-drawing.lowerLimit,binSkipFactorF,drawing.contractFactor);
   //printf("dragging: %i, zooming x: %i, zooming y: %i\n",guiglobals.draggingSp,drawing.zoomingSpX,drawing.zoomingSpY);
