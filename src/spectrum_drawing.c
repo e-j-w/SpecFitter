@@ -386,7 +386,24 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
     return;
   }
 
-  if((e->direction == 1)&&(drawing.zoomLevel > 1.0)){
+  //get scroll direction
+  int scrollDir = GDK_SCROLL_UP;
+  //printf("direction: %i, delta_y: %f\n",e->direction,e->delta_y);
+  if((e->direction == GDK_SCROLL_UP)||(e->direction == GDK_SCROLL_DOWN)){
+    scrollDir = e->direction;
+  }else if(e->direction == GDK_SCROLL_SMOOTH){
+    if(e->delta_y>0.0){
+      scrollDir = GDK_SCROLL_DOWN;
+    }else if(e->delta_y<0.0){
+      scrollDir = GDK_SCROLL_UP;
+    }else{
+      return;
+    }
+  }else{
+    return;
+  }
+
+  if((scrollDir == GDK_SCROLL_DOWN)&&(drawing.zoomLevel > 1.0)){
     //printf("Scrolling down at %f %f!\n",e->x,e->y);
     on_zoom_out_x();
     //handle zooming that follows cursor
@@ -416,7 +433,7 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
       gtk_range_set_value(GTK_RANGE(zoom_scale),log(drawing.zoomLevel)/log(2.));//base 2 log of zoom
       gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
     }
-  }else if((e->direction != 1)&&(drawing.zoomLevel < 1024.0)){
+  }else if((scrollDir != GDK_SCROLL_DOWN)&&(drawing.zoomLevel < 1024.0)){
     //handle zooming that follows cursor
     //printf("Scrolling up at %f %f!\n",e->x,e->y);
     GdkRectangle dasize;  // GtkDrawingArea size

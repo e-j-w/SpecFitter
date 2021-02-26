@@ -2272,7 +2272,7 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(autozoom_checkbutton), "toggled", G_CALLBACK(on_toggle_autozoom), NULL);
   g_signal_connect(G_OBJECT(preferences_apply_button), "clicked", G_CALLBACK(on_preferences_apply_button_clicked), NULL);
   g_signal_connect(G_OBJECT(preferences_button), "clicked", G_CALLBACK(on_preferences_button_clicked), NULL);
-  gtk_widget_set_events(spectrum_drawing_area, gtk_widget_get_events(spectrum_drawing_area) | GDK_SCROLL_MASK | GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK); //allow mouse scrolling over the drawing area
+  gtk_widget_set_events(spectrum_drawing_area, gtk_widget_get_events(spectrum_drawing_area) | GDK_SCROLL_MASK | GDK_SMOOTH_SCROLL_MASK | GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK); //allow mouse scrolling over the drawing area
   g_signal_connect(G_OBJECT(zoom_scale), "value-changed", G_CALLBACK(on_zoom_scale_changed), NULL);
   g_signal_connect(G_OBJECT(contract_scale), "value-changed", G_CALLBACK(on_contract_scale_changed), NULL);
   g_signal_connect(G_OBJECT(shortcuts_button), "clicked", G_CALLBACK(on_shortcuts_button_clicked), NULL);
