@@ -1,10 +1,10 @@
-# **jf3**
+# **SpecFitter**
 
 A program for gamma-ray spectroscopy or similar data analysis.  Uses [GTK](https://www.gtk.org/) to provide smooth rendering and (hopefully) an easy to understand interface.  This is a hobby project, things should mostly work but all the typical disclaimers apply.
 
 ## Screenshot
 
-![jf3 user interface screenshot](https://raw.githubusercontent.com/e-j-w/e-j-w.github.io/master/media/jf3.png "jf3 user interface")
+![SpecFitter user interface screenshot](https://raw.githubusercontent.com/e-j-w/e-j-w.github.io/master/media/specfitter.png "SpecFitter user interface")
 
 ## Features
 
@@ -50,7 +50,7 @@ A program for gamma-ray spectroscopy or similar data analysis.  Uses [GTK](https
 
 #### Format support notes
 
-Some sample files that the program can open are available [here](https://raw.githubusercontent.com/e-j-w/e-j-w.github.io/master/media/jf3-sample-files.zip) (.zip archive).
+Some sample files that the program can open are available [here](https://raw.githubusercontent.com/e-j-w/e-j-w.github.io/master/media/specfitter-sample-files.zip) (.zip archive).
 
 Conversion codes for some of the above data formats are available in the [FileConvTools](https://github.com/e-j-w/FileConvTools) repository.
 
@@ -58,7 +58,7 @@ Conversion codes for some of the above data formats are available in the [FileCo
 
 ### Compatibility
 
-This program has been tested on CentOS 7, Ubuntu 18.04/20.04, and Arch Linux (as of February 2021) under the GNOME desktop environment.  It should work on any Linux distro that satisfies the listed build dependencies.  It may be possible to build this on other platforms where GTK is [available](https://www.gtk.org/docs/installations/), but that hasn't been tested.
+This program has been tested on CentOS 7, Ubuntu 18.04/20.04, and Arch Linux (as of October 2021) under the GNOME desktop environment.  It should work on any Linux distro that satisfies the listed build dependencies.  It may be possible to build this on other platforms where GTK is [available](https://www.gtk.org/docs/installations/), but that hasn't been tested.
 
 ### Build dependencies
 
@@ -91,16 +91,16 @@ A Makefile is provided, build the program using:
 
 ```make``` 
 
-The resulting `jf3` executable can be run directly from the command line or your file manager.  Optionally, the program can be installed for all users with:
+The resulting `specfitter` executable can be run directly from the command line or your file manager.  Optionally, the program can be installed for all users with:
 
 ```sudo make install```
 
-This will place the `jf3` binary in `/usr/bin`, a data-type definition file in `/usr/share/mime/packages` (to allow opening compatible files directly from the file manager), and a desktop entry file in `/usr/share/applications` (for desktop environment integration).  These changes can be undone with:
+This will place the `specfitter` binary in `/usr/bin`, a data-type definition file in `/usr/share/mime/packages` (to allow opening compatible files directly from the file manager), and a desktop entry file in `/usr/share/applications` (for desktop environment integration).  These changes can be undone with:
 
 ```sudo make uninstall```
 
 ## Usage tips
 
-* Preferences are stored in a plaintext configuration file on a per-user basis at `$HOME/.config/jf3/jf3.conf`.
-* When running the program from the command line, it is possible to automatically open files by specifying the filename(s) as arguments (eg. `jf3 /path/to/file1 /path/to/file2`).
+* Preferences are stored in a plaintext configuration file on a per-user basis at `$HOME/.config/specfitter/specfitter.conf`.
+* When running the program from the command line, it is possible to automatically open files by specifying the filename(s) as arguments (eg. `specfitter /path/to/file1 /path/to/file2`).
 * After fitting a spectrum, the onscreen fit can be cleared using the right mouse button.

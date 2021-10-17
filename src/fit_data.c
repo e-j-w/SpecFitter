@@ -12,7 +12,7 @@ extern double getFitChisq(const int fitType);
 //update the gui state while/after fitting
 gboolean update_gui_fit_state(){
   switch(guiglobals.fittingSp){
-    case 6:
+    case FITSTATE_FITCOMPLETE:
       gtk_widget_set_sensitive(GTK_WIDGET(open_button),TRUE);
       if(rawdata.openedSp)
         gtk_widget_set_sensitive(GTK_WIDGET(append_button),TRUE);
@@ -25,25 +25,25 @@ gboolean update_gui_fit_state(){
       gtk_revealer_set_reveal_child(revealer_info_panel, FALSE);
       gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw to show the fit
       break;
-    case 5:
+    case FITSTATE_REFININGFIT2:
       gtk_label_set_text(revealer_info_label,"Further refining fit...");
       gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
       break;
-    case 4:
+    case FITSTATE_REFININGFIT:
       gtk_label_set_text(revealer_info_label,"Refining fit...");
       gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
       break;
-    case 3:
+    case FITSTATE_FITTING:
       gtk_label_set_text(revealer_info_label,"Fitting...");
       gtk_widget_show(GTK_WIDGET(fit_spinner));
       gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
       gtk_widget_set_sensitive(GTK_WIDGET(contract_scale),FALSE);
       gtk_revealer_set_reveal_child(revealer_info_panel, TRUE);
       break;
-    case 2:
+    case FITSTATE_SETTINGPEAKS:
       gtk_label_set_text(revealer_info_label,"Right-click at approximate peak positions.");
       break;
-    case 1:
+    case FITSTATE_SETTINGLIMITS:
       gtk_widget_set_sensitive(GTK_WIDGET(open_button),FALSE);
       gtk_widget_set_sensitive(GTK_WIDGET(append_button),FALSE);
       gtk_widget_set_sensitive(GTK_WIDGET(fit_button),FALSE);
@@ -53,7 +53,7 @@ gboolean update_gui_fit_state(){
       gtk_label_set_text(revealer_info_label,"Right-click to set fit region lower and upper bounds.");
       gtk_revealer_set_reveal_child(revealer_info_panel, TRUE);
       break;
-    case 0:
+    case FITSTATE_NOTFITTING:
     default:
       gtk_widget_set_sensitive(GTK_WIDGET(open_button),TRUE);
       if(rawdata.openedSp)
@@ -489,12 +489,17 @@ int setupFitSums(lin_eq_type *linEq, const double flambda, const int fitType){
     xval = (long double)(i);
     ydiff = getSpBinVal(0,i) - evalFit(xval,fitType);
 
-    if(fitpar.weightMode == 0){
-      weight = getSpBinFitWeight(0,i);
-    }else if(fitpar.weightMode == 1){
-      weight = evalFit(xval,fitType);
-    }else{
-      weight = 1.;
+    switch(fitpar.weightMode){
+      case FITWEIGHT_DATA:
+        weight = getSpBinFitWeight(0,i);
+        break;
+      case FITWEIGHT_FIT:
+        weight = evalFit(xval,fitType);
+        break;
+      case FITWEIGHT_NONE:
+      default:
+        weight = 1.; //no weighting
+        break;
     }
 
     if(weight < 0.){
@@ -880,7 +885,7 @@ void performGausFit(){
   int numNLIter = nonLinearizedGausFit(numNLIterTry, 0.001, &linEq,0);
   if(numNLIter >= numNLIterTry){
     //printf("Fit did not converge after %i iterations.  Continuing...\n",numNLIter);
-    guiglobals.fittingSp = 4;
+    guiglobals.fittingSp = FITSTATE_REFININGFIT;
     g_idle_add(update_gui_fit_state,NULL);
     numNLIterTry = 100;
     numNLIter = nonLinearizedGausFit(numNLIterTry, 0.001, &linEq,0);
@@ -893,7 +898,7 @@ void performGausFit(){
     //fitpar.errFound = getParameterErrors(&linEq);
   }else if(numNLIter < numNLIterTry){
     printf("WARNING: failed fit, iteration %i.\n",numNLIter);
-    guiglobals.fittingSp = 0;
+    guiglobals.fittingSp = FITSTATE_NOTFITTING;
     g_idle_add(update_gui_fit_state,NULL);
     g_idle_add(print_fit_error,NULL);
     return;
@@ -901,7 +906,7 @@ void performGausFit(){
 
   //for skewed Guassian, allow R and beta to vary
   if(fitpar.fitType == 1){
-    guiglobals.fittingSp = 5;
+    guiglobals.fittingSp = FITSTATE_REFININGFIT2;
     g_idle_add(update_gui_fit_state,NULL);
     fitpar.fitParVal[3] = 0.05;
     fitpar.fitParVal[4] = fitpar.fitParVal[8] / 2.0;
@@ -914,7 +919,7 @@ void performGausFit(){
       printf("Non-linear fit converged.\n");
     }else if(numNLIter < numNLIterTry){
       printf("WARNING: failed fit, iteration %i.\n",numNLIter);
-      guiglobals.fittingSp = 0;
+      guiglobals.fittingSp = FITSTATE_NOTFITTING;
       g_idle_add(update_gui_fit_state,NULL);
       g_idle_add(print_fit_error,NULL);
       return;
@@ -950,7 +955,7 @@ void performGausFit(){
     }
   }
   
-  guiglobals.fittingSp = 6;
+  guiglobals.fittingSp = FITSTATE_FITCOMPLETE;
   g_idle_add(update_gui_fit_state,NULL);
   g_idle_add(print_fit_results,NULL);
 
@@ -1146,7 +1151,7 @@ int startGausFit(){
     return 0;
   }
 
-  guiglobals.fittingSp = 3;
+  guiglobals.fittingSp = FITSTATE_FITTING;
   g_idle_add(update_gui_fit_state,NULL);
 
   int i;
@@ -1194,12 +1199,17 @@ int startGausFit(){
     }
   }
 
-  if(fitpar.weightMode == 0){
-    printf("Weighting using data.\n");
-  }else if(fitpar.weightMode == 1){
-    printf("Weighting using fit function.\n");
-  }else{
-    printf("No weighting for fit.\n");
+  switch(fitpar.weightMode){
+    case FITWEIGHT_DATA:
+      printf("Weighting using data.\n");
+      break;
+    case FITWEIGHT_FIT:
+      printf("Weighting using fit function.\n");
+      break;
+    case FITWEIGHT_NONE:
+    default:
+      printf("No weighting for fit.\n");
+      break;
   }
 
   fitpar.fitParVal[5] = 0.0; //unused parameter

@@ -230,7 +230,7 @@ float getSpBinValOrWeight(const int dispSpNum, const int bin, const int getWeigh
   float val = 0.;
 
   switch(drawing.multiplotMode){
-    case 1:
+    case MULTIPLOT_SUMMED:
       //sum spectra
       for(j=0;j<drawing.contractFactor;j++){
         if(getWeight){
@@ -244,13 +244,13 @@ float getSpBinValOrWeight(const int dispSpNum, const int bin, const int getWeigh
         }
       }
       break;
-    case 4:
+    case MULTIPLOT_STACKED:
       //stacked
-    case 3:
+    case MULTIPLOT_OVERLAY_INDEPENDENT:
       //overlay (independent scaling)
-    case 2:
+    case MULTIPLOT_OVERLAY_COMMON:
       //overlay (common scaling)
-    case 0:
+    case MULTIPLOT_NONE:
       //no multiplot
       val = getSpBinValRaw(drawing.multiPlots[dispSpNum],bin,drawing.scaleFactor[drawing.multiPlots[dispSpNum]],drawing.contractFactor);
       break;

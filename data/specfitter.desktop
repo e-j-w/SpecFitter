@@ -1,11 +1,11 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name[en_CA]=jf3
-Name[en_US]=jf3
-Name=jf3
-GenericName=Spectrum Viewer
-Exec=/usr/bin/jf3
+Name[en_CA]=SpecFitter
+Name[en_US]=SpecFitter
+Name=SpecFitter
+GenericName=Spectrum Fitter
+Exec=/usr/bin/specfitter
 MimeType=application/x-spectrum-jf3;application/x-spectrum-spe;application/x-spectrum-mca;application/x-spectrum-fmca;text/plain;
-Icon=jf3-application-icon
+Icon=specfitter-application-icon
 Categories=Utility;

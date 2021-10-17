@@ -1,9 +1,9 @@
 /* J. Williams, 2020-2021 */
-// jf3 - A spectrum viewer/analysis app using GTK3, for gamma-ray spectroscopy or similar
+// SpecFitter - A spectrum viewer/analysis app using GTK3, for gamma-ray spectroscopy or similar
 
 //definitions and global variables
-#include "jf3.h"
-#include "jf3-resources.c"
+#include "specfitter.h"
+#include "specfitter-resources.c"
 
 //routines
 #include "utils.c" //standalone utility functions
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
   char dirPath[256];
   strcpy(dirPath,"");
   strcat(dirPath,getenv("HOME"));
-  strcat(dirPath,"/.config/jf3");
+  strcat(dirPath,"/.config/specfitter");
   struct stat st = {0};
   if (stat(dirPath, &st) == -1) {
     //config directory doesn't exist, make it
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     printf("Setup configuration file directory: %s\n",dirPath);
   }
   FILE *configFile;
-  strcat(dirPath,"/jf3.conf");
+  strcat(dirPath,"/specfitter.conf");
   if((configFile = fopen(dirPath, "r")) == NULL){ //open the config file
     printf("Creating configuration file at: %s\n", dirPath);
     configFile = fopen(dirPath, "w");

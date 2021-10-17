@@ -141,7 +141,7 @@ struct {
   unsigned char drawSpLabels; //0 = don't draw labels, 1 = draw labels
   unsigned char drawSpComments; //0 = don't draw comments, 1 = draw comments
   unsigned char drawGridLines; //0 = don't draw grid lines on plot, 1 = draw grid lines
-  unsigned char fittingSp; //0=not fitting, 1=selecting limits, 2=selecting peaks, 3=fitting, 4=refining fit, 5=fitted (display fit)
+  unsigned char fittingSp; //uses values from fit_state_enum: 0=not fitting, 1=selecting limits, 2=selecting peaks, 3=fitting, 4,5=refining fit, 6=fitted (display fit)
   int deferSpSelChange;
   int deferToggleRow;
   unsigned char showBinErrors; //0=don't show, 1=show
@@ -163,7 +163,7 @@ struct {
   unsigned char numSpOpened; //number of spectra in the opened file(s)
   unsigned char numFilesOpened; //number of files containing spectra opened
   char viewComment[MAXNVIEWS][256]; //view description/comment
-  unsigned char viewMultiplotMode[MAXNVIEWS]; //multiplot mode for each saved view
+  unsigned char viewMultiplotMode[MAXNVIEWS]; //multiplot mode for each saved view, uses values from multiplot_mode_enum
   unsigned char viewNumMultiplotSp[MAXNVIEWS]; //number of spectra to show for each saved view
   double viewScaleFactor[MAXNVIEWS][NSPECT]; //scaling factors for each spectrum in each saved view
   unsigned char viewMultiPlots[MAXNVIEWS][NSPECT]; //indices of all the spectra to show for each saved view
@@ -191,11 +191,11 @@ struct {
   float scaleToLevelMax[MAX_DISP_SP], scaleToLevelMin[MAX_DISP_SP]; //the y scale values to zoom to
   float scaleLevelMax[MAX_DISP_SP], scaleLevelMin[MAX_DISP_SP]; //the y scale values, ie. the maximum and minimum values to show on the y axis
   int contractFactor; //the number of channels per bin (default=1)
-  unsigned char multiplotMode; //0=no multiplot, 1=summed spectra, 2=overlay spectra (common scaling), 3=overlay spectra (independent scaling), 4=stacked view
+  unsigned char multiplotMode; //uses values from multiplot_mode_enum: 0=no multiplot, 1=summed spectra, 2=overlay spectra (common scaling), 3=overlay spectra (independent scaling), 4=stacked view
   unsigned char numMultiplotSp; //number of spectra to show in multiplot mode
   double scaleFactor[NSPECT]; //scaling factors for each spectrum
   unsigned char multiPlots[NSPECT]; //indices of all the spectra to show in multiplot mode
-  int displayedView; //-1 if no view is being displayed, -2 if temporary view dispalyed, otherwise the index of the displayed view
+  int displayedView; //-1 if no view is being displayed, -2 if temporary view displayed, otherwise the index of the displayed view
   float spColors[MAX_DISP_SP*3];
   signed char highlightedPeak; //the peak to highlight when drawing spectra, -1=don't highlight
   signed char highlightedComment; //the comment to highlight when drawing spectra, -1=don't highlight
@@ -217,7 +217,7 @@ struct {
   double widthFGH[3]; //F,G,H parameters used to evaluate widths
   unsigned char numFitPeaks; //number of peaks to fit
   unsigned char fixRelativeWidths; //0=don't fix width, 1=fix widths
-  unsigned char weightMode; //0=weight using data (properly weighting for background subtraction), 1=weight using fit, 2=no weights
+  uint8_t weightMode; //uses values from fit_weight_mode_enum: 0=weight using data (properly weighting for background subtraction), 1=weight using fit, 2=no weights
   long double relWidths[MAX_FIT_PK]; //relative width factors
   unsigned char errFound; //whether or not paramter errors have been found
   unsigned char fitType; //0=Gaussian, 1=skewed Gaussian
@@ -234,3 +234,6 @@ struct {
   unsigned char fixPar[6+(3*MAX_FIT_PK)]; //0=don't fix parameter, 1=fix at current value, 2=fix at relative value
 } fitpar;
 
+enum fit_weight_mode_enum{FITWEIGHT_DATA, FITWEIGHT_FIT, FITWEIGHT_NONE, FITWEIGHT_ENUM_LENGTH};
+enum fit_state_enum{FITSTATE_NOTFITTING, FITSTATE_SETTINGLIMITS, FITSTATE_SETTINGPEAKS, FITSTATE_FITTING, FITSTATE_REFININGFIT, FITSTATE_REFININGFIT2, FITSTATE_FITCOMPLETE, FITSTATE_ENUM_LENGTH};
+enum multiplot_mode_enum{MULTIPLOT_NONE, MULTIPLOT_SUMMED, MULTIPLOT_OVERLAY_COMMON, MULTIPLOT_OVERLAY_INDEPENDENT, MULTIPLOT_STACKED, MULTIPLOT_ENUM_LENGTH};

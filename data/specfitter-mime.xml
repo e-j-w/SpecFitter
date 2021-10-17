@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
     <mime-type type="application/x-spectrum-jf3">
-        <comment>jf3 spectrum data file</comment>
+        <comment>SpecFitter session data file</comment>
         <icon name="application-x-spectrum-jf3"/>
         <glob-deleteall/>
         <glob pattern="*.jf3"/>

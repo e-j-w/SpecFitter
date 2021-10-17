@@ -93,18 +93,17 @@ void manualSpectrumAreaDraw(){
 void getViewStr(char *viewStr, const unsigned int strSize, const int viewNum){
   if(viewNum == -1){
     //generating string for temporary view
-    switch (drawing.multiplotMode)
-    {
-      case 4:
+    switch(drawing.multiplotMode){
+      case MULTIPLOT_STACKED:
         //stack view
         snprintf(viewStr,strSize,"Stacked view of %i spectra",drawing.numMultiplotSp);
         break;
-      case 3:
-      case 2:
+      case MULTIPLOT_OVERLAY_INDEPENDENT:
+      case MULTIPLOT_OVERLAY_COMMON:
         //overlay
         snprintf(viewStr,strSize,"Overlay view of %i spectra",drawing.numMultiplotSp);
         break;
-      case 1:
+      case MULTIPLOT_SUMMED:
         //summed view
         snprintf(viewStr,strSize,"Summed view of %i spectra",drawing.numMultiplotSp);
         break;
@@ -115,18 +114,17 @@ void getViewStr(char *viewStr, const unsigned int strSize, const int viewNum){
     }
   }else if((viewNum < rawdata.numViews+1)&&(viewNum<MAXNVIEWS)){ //+1 in this condition needed to allow generating new view names
     //generating string for saved custom view
-    switch (rawdata.viewMultiplotMode[viewNum])
-    {
-      case 4:
+    switch(rawdata.viewMultiplotMode[viewNum]){
+      case MULTIPLOT_STACKED:
         //stack view
         snprintf(viewStr,strSize,"Stacked view of %i spectra",rawdata.viewNumMultiplotSp[viewNum]);
         break;
-      case 3:
-      case 2:
+      case MULTIPLOT_OVERLAY_INDEPENDENT:
+      case MULTIPLOT_OVERLAY_COMMON:
         //overlay
         snprintf(viewStr,strSize,"Overlay view of %i spectra",rawdata.viewNumMultiplotSp[viewNum]);
         break;
-      case 1:
+      case MULTIPLOT_SUMMED:
         //summed view
         snprintf(viewStr,strSize,"Summed view of %i spectra",rawdata.viewNumMultiplotSp[viewNum]);
         break;
@@ -171,8 +169,7 @@ void on_view_tree_selection_changed(GtkTreeSelection *treeselection){
 
 void on_multiplot_manage_stack_switcher_changed(){
   unsigned char pageNum = getMultiplotStackPage();
-  switch (pageNum)
-  {
+  switch(pageNum){
     case 2:
       gtk_stack_set_visible_child(multiplot_manage_button_stack,GTK_WIDGET(manage_delete_button));
       break;
@@ -358,7 +355,7 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button)
       //handle drawing individual spectra
       if(spNum < rawdata.numSpOpened){
         drawing.multiPlots[0] = (unsigned char)spNum;
-        drawing.multiplotMode = 0;//unset multiplot, if it is being used
+        drawing.multiplotMode = MULTIPLOT_NONE;//unset multiplot, if it is being used
         drawing.numMultiplotSp = 1;//unset multiplot
         drawing.scaleFactor[spNum] = 1.0; //reset any scaling from custom views
         drawing.displayedView = -1;
@@ -377,15 +374,14 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button)
 
         gtk_label_set_text(display_spectrumname_label,rawdata.viewComment[viewNum]);
 
-        switch(drawing.multiplotMode)
-        {
-          case 4:
-          case 3:
-          case 2:
+        switch(drawing.multiplotMode){
+          case MULTIPLOT_STACKED:
+          case MULTIPLOT_OVERLAY_INDEPENDENT:
+          case MULTIPLOT_OVERLAY_COMMON:
             gtk_widget_set_sensitive(GTK_WIDGET(fit_button),FALSE);
             break;
-          case 1:
-          case 0:
+          case MULTIPLOT_SUMMED:
+          case MULTIPLOT_NONE:
             gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
           default:
             break;
@@ -397,8 +393,8 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button)
     gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened+rawdata.numViews);
 
     //clear fit if necessary
-    if(guiglobals.fittingSp == 6){
-      guiglobals.fittingSp = 0;
+    if(guiglobals.fittingSp == FITSTATE_FITCOMPLETE){
+      guiglobals.fittingSp = FITSTATE_NOTFITTING;
       //update widgets
       update_gui_fit_state();
     }
@@ -441,7 +437,7 @@ void openSingleFile(char *filename, int append){
     int sel = getFirstNonemptySpectrum(rawdata.numSpOpened);
     if(sel >=0){
       drawing.multiPlots[0] = (unsigned char)sel;
-      drawing.multiplotMode = 0; //file just opened, disable multiplot
+      drawing.multiplotMode = MULTIPLOT_NONE; //file just opened, disable multiplot
       setSpOpenView(1);
       //set the range of selectable spectra values
       gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);
@@ -466,8 +462,7 @@ void openSingleFile(char *filename, int append){
     GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
     GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error opening spectrum data!");
     char errMsg[256];
-    switch (openErr)
-    {
+    switch(openErr){
       case 2:
         snprintf(errMsg,256,"All spectrum data in file %s is empty.",filename);
         break;
@@ -535,8 +530,8 @@ void on_open_button_clicked(GtkButton *b)
         int sel = getFirstNonemptySpectrum(rawdata.numSpOpened);
         if(sel >=0){
           drawing.multiPlots[0] = (unsigned char)sel;
-          drawing.multiplotMode = 0; //files just opened, disable multiplot
-          guiglobals.fittingSp = 0; //files just opened, reset fit state
+          drawing.multiplotMode = MULTIPLOT_NONE; //files just opened, disable multiplot
+          guiglobals.fittingSp = FITSTATE_NOTFITTING; //files just opened, reset fit state
           setSpOpenView(1);
           //set the range of selectable spectra values
           gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);
@@ -566,8 +561,7 @@ void on_open_button_clicked(GtkButton *b)
       GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
       GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error opening spectrum data!");
       char errMsg[256];
-      switch (openErr)
-      {
+      switch(openErr){
         case 2:
           snprintf(errMsg,256,"All spectrum data in file %s is empty.",filename);
           break;
@@ -671,8 +665,7 @@ void on_append_button_clicked(GtkButton *b)
       GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
       GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error opening spectrum data!");
       char errMsg[256];
-      switch (openErr)
-      {
+      switch(openErr){
         case 2:
           snprintf(errMsg,256,"All spectrum data in file %s is empty.",filename);
           break;
@@ -721,7 +714,7 @@ void on_save_button_clicked(GtkButton *b)
   gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
   gtk_file_chooser_set_do_overwrite_confirmation(file_save_dialog, TRUE);
   file_filter = gtk_file_filter_new();
-  gtk_file_filter_set_name(file_filter,"jf3 sessions (.jf3)");
+  gtk_file_filter_set_name(file_filter,"SpecFitter sessions (.jf3)");
   gtk_file_filter_add_pattern(file_filter,"*.jf3");
   gtk_file_chooser_add_filter(file_save_dialog,file_filter);
 
@@ -742,8 +735,7 @@ void on_save_button_clicked(GtkButton *b)
       GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
       GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error saving spectrum data!");
       char errMsg[512];
-      switch (saveErr)
-      {
+      switch(saveErr){
         case 1:
           snprintf(errMsg,512,"Error writing to file %s.",fileName);
           break;
@@ -803,8 +795,7 @@ void on_save_radware_button_clicked(GtkButton *b){
 
 void on_export_mode_combobox_changed (GtkComboBox *widget, gpointer user_data){
   int exportMode = gtk_combo_box_get_active(GTK_COMBO_BOX(export_mode_combobox));
-  switch (exportMode)
-  {
+  switch(exportMode){
     case 0:
       if(guiglobals.exportFileType == 0){
         gtk_revealer_set_reveal_child(export_options_revealer, FALSE);
@@ -871,8 +862,7 @@ void on_export_save_button_clicked(GtkButton *b){
       GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
       GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error exporting spectrum data!");
       char errMsg[256];
-      switch (saveErr)
-      {
+      switch(saveErr){
         case 2:
           snprintf(errMsg,256,"Error processing spectrum data.");
           break;
@@ -951,8 +941,7 @@ void on_export_image_button_clicked(GtkButton *b){
       GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
       GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error saving image file!");
       char errMsg[256];
-      switch (saveErr)
-      {
+      switch(saveErr){
         case 1:
           snprintf(errMsg,256,"Error writing to file.");
           break;
@@ -996,7 +985,7 @@ void on_zoom_scale_changed(GtkRange *range, gpointer user_data){
 void on_contract_scale_changed(GtkRange *range, gpointer user_data){
   int oldContractFactor = drawing.contractFactor;
   drawing.contractFactor = (int)gtk_range_get_value(range); //modify the contraction factor
-  if(guiglobals.fittingSp == 6){
+  if(guiglobals.fittingSp == FITSTATE_FITCOMPLETE){
     int i;
     //rescale fit (optimization - don't refit)
     for(i=0;i<fitpar.numFitPeaks;i++){
@@ -1431,7 +1420,7 @@ void on_multiplot_make_view_button_clicked(GtkButton *b)
   }else{
     //set drawing mode for view
     if(rawdata.viewNumMultiplotSp[rawdata.numViews] == 1){
-      rawdata.viewMultiplotMode[rawdata.numViews] = 0;
+      rawdata.viewMultiplotMode[rawdata.numViews] = MULTIPLOT_NONE;
     }else{
       rawdata.viewMultiplotMode[rawdata.numViews]++; //value of 0 means no multiplot
     }
@@ -1502,7 +1491,7 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errStr);
 
       //reset default values, in case the multiplot window is closed
-      drawing.multiplotMode = 0;
+      drawing.multiplotMode = MULTIPLOT_NONE;
       drawing.multiPlots[0] = 0; 
       drawing.numMultiplotSp = 1;
       gtk_spin_button_set_value(spectrum_selector, drawing.multiPlots[0]+1);
@@ -1513,7 +1502,7 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
 
       //set drawing mode
       if(drawing.numMultiplotSp == 1){
-        drawing.multiplotMode = 0;
+        drawing.multiplotMode = MULTIPLOT_NONE;
       }else{
         drawing.multiplotMode++; //value of 0 means no multiplot
       }
@@ -1534,7 +1523,7 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
         printf("%i ",drawing.multiPlots[i]);
       }
       printf(", multiplot mode: %i\n",drawing.multiplotMode);
-      if(drawing.multiplotMode > 1){
+      if(drawing.multiplotMode > MULTIPLOT_SUMMED){
         //multiple spectra displayed simultaneously, cannot fit
         gtk_widget_set_sensitive(GTK_WIDGET(fit_button),FALSE);
       }else{
@@ -1565,9 +1554,9 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
   }
 
   //handle fitting
-  if(drawing.multiplotMode > 1){
-    guiglobals.fittingSp = 0; //clear any fits being displayed
-  }else if(guiglobals.fittingSp == 6){
+  if(drawing.multiplotMode > MULTIPLOT_SUMMED){
+    guiglobals.fittingSp = FITSTATE_NOTFITTING; //clear any fits being displayed
+  }else if(guiglobals.fittingSp == FITSTATE_FITCOMPLETE){
     startGausFit(); //refit
   }
   
@@ -1704,11 +1693,11 @@ void on_manage_delete_button_clicked(GtkButton *b)
 
   if(deletedSpCounter>0){
     //reset to default drawing view
-    drawing.multiplotMode = 0;
+    drawing.multiplotMode = MULTIPLOT_NONE;
     drawing.multiPlots[0] = 0;
     drawing.scaleFactor[0] = 1.0;
     gtk_spin_button_set_value(spectrum_selector, drawing.multiPlots[0]+1);
-    guiglobals.fittingSp = 0; //clear any fits being displayed
+    guiglobals.fittingSp = FITSTATE_NOTFITTING; //clear any fits being displayed
       
     if(rawdata.numSpOpened <= 0){
       setSpOpenView(0); //no spectra available
@@ -1745,7 +1734,7 @@ void on_sum_all_button_clicked(GtkButton *b)
   }
 
   unsigned char i;
-  drawing.multiplotMode = 1;//sum spectra
+  drawing.multiplotMode = MULTIPLOT_SUMMED;//sum spectra
   drawing.numMultiplotSp = rawdata.numSpOpened;
   if(drawing.numMultiplotSp > NSPECT)
     drawing.numMultiplotSp = NSPECT;
@@ -1765,8 +1754,8 @@ void on_sum_all_button_clicked(GtkButton *b)
   gtk_label_set_text(display_spectrumname_label,viewStr);
 
   //clear fit if necessary
-  if(guiglobals.fittingSp == 6){
-    guiglobals.fittingSp = 0;
+  if(guiglobals.fittingSp == FITSTATE_FITCOMPLETE){
+    guiglobals.fittingSp = FITSTATE_NOTFITTING;
     //update widgets
     update_gui_fit_state();
   }
@@ -1782,13 +1771,11 @@ void on_fit_button_clicked(GtkButton *b)
   //spectrum must be open to fit
   if(rawdata.openedSp){
     //cannot be already fitting
-    if((guiglobals.fittingSp == 0)||(guiglobals.fittingSp == 6)){
+    if((guiglobals.fittingSp == FITSTATE_NOTFITTING)||(guiglobals.fittingSp == FITSTATE_FITCOMPLETE)){
       //must be displaying only a single spectrum
-      if(drawing.multiplotMode < 2){
-
+      if(drawing.multiplotMode < MULTIPLOT_OVERLAY_COMMON){
         //safe to fit
-      
-        guiglobals.fittingSp = 1;
+        guiglobals.fittingSp = FITSTATE_SETTINGLIMITS;
         memset(fitpar.fitParVal,0,sizeof(fitpar.fitParVal));
         //set default values
         fitpar.fitStartCh = -1;
@@ -1820,7 +1807,7 @@ void on_fit_fit_button_clicked(GtkButton *b)
 
 void on_fit_cancel_button_clicked(GtkButton *b)
 {
-  guiglobals.fittingSp = 0;
+  guiglobals.fittingSp = FITSTATE_NOTFITTING;
   //update widgets
   update_gui_fit_state();
 }
@@ -2006,21 +1993,21 @@ void toggle_cursor(){
 //cycle between plotting modes for multiple spectra, argument determines cycle direction
 void cycle_multiplot_mode(int up){
   if(rawdata.openedSp){
-    if((drawing.numMultiplotSp > 1)&&(drawing.multiplotMode>=1)){
+    if((drawing.numMultiplotSp > 1)&&(drawing.multiplotMode>=MULTIPLOT_SUMMED)){
       if(up){
-        if(drawing.multiplotMode < 4){
+        if(drawing.multiplotMode < MULTIPLOT_STACKED){
           drawing.multiplotMode++;
         }else{
-          drawing.multiplotMode = 1;
+          drawing.multiplotMode = MULTIPLOT_SUMMED;
         }
       }else{
-        if(drawing.multiplotMode > 1){
+        if(drawing.multiplotMode > MULTIPLOT_SUMMED){
           drawing.multiplotMode--;
         }else{
-          drawing.multiplotMode = 4;
+          drawing.multiplotMode = MULTIPLOT_STACKED;
         }
       }
-      guiglobals.fittingSp = 0; //reset fit state
+      guiglobals.fittingSp = FITSTATE_NOTFITTING; //reset fit state
       manualSpectrumAreaDraw();
     }
   }
@@ -2064,9 +2051,9 @@ void iniitalizeUIElements(){
   int i;
 
   //import UI layout and graphics data
-  builder = gtk_builder_new_from_resource("/resources/jf3.glade"); //get UI layout from glade XML file
+  builder = gtk_builder_new_from_resource("/resources/specfitter.glade"); //get UI layout from glade XML file
   gtk_builder_add_from_resource (builder, "/resources/shortcuts_window.ui", NULL);
-  appIcon = gdk_pixbuf_new_from_resource("/resources/jf3-application-icon.svg", NULL);
+  appIcon = gdk_pixbuf_new_from_resource("/resources/specfitter-application-icon.svg", NULL);
   spIconPixbuf = gdk_pixbuf_new_from_resource("/resources/icon-spectrum-symbolic", NULL);
   spIconPixbufDark = gdk_pixbuf_new_from_resource("/resources/icon-spectrum-symbolic-dark", NULL);
 
@@ -2350,7 +2337,7 @@ void iniitalizeUIElements(){
   rawdata.numSpOpened = 0;
   rawdata.numChComments = 0;
   drawing.displayedView = -1;
-  drawing.multiplotMode = 0;
+  drawing.multiplotMode = MULTIPLOT_NONE;
   drawing.numMultiplotSp = 1;
   drawing.highlightedPeak = -1;
   drawing.highlightedComment = -1;
@@ -2366,7 +2353,7 @@ void iniitalizeUIElements(){
   drawing.spColors[27] = 181/255.f; drawing.spColors[28] = 137/255.f; drawing.spColors[29] = 0.0f;      //RGB values for color 10 (solarized yellow)
   drawing.spColors[30] = 0.5f; drawing.spColors[31] = 0.5f; drawing.spColors[32] = 0.5f;                //RGB values for color 11
   drawing.spColors[33] = 0.7f; drawing.spColors[34] = 0.0f; drawing.spColors[35] = 0.3f;                //RGB values for color 12
-  guiglobals.fittingSp = 0;
+  guiglobals.fittingSp = FITSTATE_NOTFITTING;
   guiglobals.deferSpSelChange = 0;
   guiglobals.deferToggleRow = 0;
   guiglobals.draggingSp = 0;

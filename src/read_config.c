@@ -106,12 +106,12 @@ int readConfigFile(FILE *file, int keepCalibration)
         }
       }
       if(strcmp(par,"fit_weight_mode") == 0){
-        unsigned char ucVal = (unsigned char)atoi(val);
+        uint8_t ucVal = (uint8_t)atoi(val);
         if(ucVal <= 2)
           fitpar.weightMode = ucVal;
       }
       if(strcmp(par,"fit_type") == 0){
-        unsigned char ucVal = (unsigned char)atoi(val);
+        uint8_t ucVal = (uint8_t)atoi(val);
         if(ucVal <= 1)
           fitpar.fitType = ucVal;
       }
@@ -164,7 +164,7 @@ int readConfigFile(FILE *file, int keepCalibration)
 //write current settings to a config file
 int writeConfigFile(FILE *file)
 {
-  fprintf(file,"# This is a config file for jf3.\n");
+  fprintf(file,"# This is a config file for SpecFitter.\n");
   if(calpar.calMode == 1){
     fprintf(file,"calibrate=yes\n");
     fprintf(file,"cal_parameter0=%f\n",calpar.calpar0);
@@ -239,12 +239,8 @@ int writeConfigFile(FILE *file)
   }else if(fitpar.fitType == 1){
     fprintf(file,"fit_type=1\n");
   }
-  if(fitpar.weightMode == 0){
-    fprintf(file,"fit_weight_mode=0\n");
-  }else if(fitpar.weightMode == 1){
-    fprintf(file,"fit_weight_mode=1\n");
-  }else if(fitpar.weightMode == 2){
-    fprintf(file,"fit_weight_mode=2\n");
+  if(fitpar.weightMode < FITWEIGHT_ENUM_LENGTH){
+    fprintf(file,"fit_weight_mode=%u\n",fitpar.weightMode);
   }
 
   return 1;
@@ -255,7 +251,7 @@ void updateConfigFile(){
   char dirPath[256];
   strcpy(dirPath,"");
   strcat(dirPath,getenv("HOME"));
-  strcat(dirPath,"/.config/jf3/jf3.conf");
+  strcat(dirPath,"/.config/specfitter/specfitter.conf");
   FILE *configFile = fopen(dirPath, "w");
   if(configFile != NULL){
     writeConfigFile(configFile); //write the default configuration values
@@ -269,7 +265,7 @@ void updatePrefsFromConfigFile(){
   char dirPath[256];
   strcpy(dirPath,"");
   strcat(dirPath,getenv("HOME"));
-  strcat(dirPath,"/.config/jf3/jf3.conf");
+  strcat(dirPath,"/.config/specfitter/specfitter.conf");
   FILE *configFile = fopen(dirPath, "r");
   if(configFile != NULL){
     readConfigFile(configFile,0); //read the configuration values

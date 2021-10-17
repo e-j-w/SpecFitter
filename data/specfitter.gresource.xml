@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/resources">
-    <file preprocess="xml-stripblanks">jf3.glade</file>
+    <file preprocess="xml-stripblanks">specfitter.glade</file>
     <file preprocess="xml-stripblanks">shortcuts_window.ui</file>
-    <file>jf3-application-icon.svg</file>
+    <file>specfitter-application-icon.svg</file>
     <file alias="icon-spectrum-symbolic">icon-spectrum-symbolic.svg</file>
     <file alias="icon-spectrum-symbolic-dark">icon-spectrum-symbolic-dark.svg</file>
   </gresource>
