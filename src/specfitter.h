@@ -1,4 +1,4 @@
-/* J. Williams, 2020-2021 */
+/* © J. Williams, 2020-2021 */
 
 #include <stdlib.h>
 #include <string.h>
@@ -217,11 +217,11 @@ struct {
   double widthFGH[3]; //F,G,H parameters used to evaluate widths
   unsigned char numFitPeaks; //number of peaks to fit
   unsigned char fixRelativeWidths; //0=don't fix width, 1=fix widths
-  uint8_t weightMode; //uses values from fit_weight_mode_enum: 0=weight using data (properly weighting for background subtraction), 1=weight using fit, 2=no weights
+  unsigned char weightMode; //uses values from fit_weight_mode_enum: 0=weight using data (properly weighting for background subtraction), 1=weight using fit, 2=no weights
   long double relWidths[MAX_FIT_PK]; //relative width factors
   unsigned char errFound; //whether or not paramter errors have been found
   unsigned char fitType; //0=Gaussian, 1=skewed Gaussian
-  //fit parameters: 
+  //fit parameters (indices defined in fit_par_enum): 
   //0, 1, 2       : quadratic background
   //3             : R (ratio of symmetric and skewed Gaussians, range 0 to 1)
   //4             : beta (skewness)
@@ -235,5 +235,6 @@ struct {
 } fitpar;
 
 enum fit_weight_mode_enum{FITWEIGHT_DATA, FITWEIGHT_FIT, FITWEIGHT_NONE, FITWEIGHT_ENUM_LENGTH};
+enum fit_par_enum{FITPAR_BGCONST,FITPAR_BGLIN,FITPAR_BGQUAD,FITPAR_R,FITPAR_BETA,FITPAR_RESERVED1,FITPAR_AMP1,FITPAR_POS1,FITPAR_WIDTH1,FITPAR_ENUM_LENGTH};
 enum fit_state_enum{FITSTATE_NOTFITTING, FITSTATE_SETTINGLIMITS, FITSTATE_SETTINGPEAKS, FITSTATE_FITTING, FITSTATE_REFININGFIT, FITSTATE_REFININGFIT2, FITSTATE_FITCOMPLETE, FITSTATE_ENUM_LENGTH};
 enum multiplot_mode_enum{MULTIPLOT_NONE, MULTIPLOT_SUMMED, MULTIPLOT_OVERLAY_COMMON, MULTIPLOT_OVERLAY_INDEPENDENT, MULTIPLOT_STACKED, MULTIPLOT_ENUM_LENGTH};

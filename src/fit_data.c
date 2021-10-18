@@ -1,4 +1,4 @@
-/* J. Williams, 2020-2021 */
+/* © J. Williams, 2020-2021 */
 
 //This file contains routines for fitting displayed spectra.
 //The main fit routine is startGausFit (at the bottom), which
@@ -96,22 +96,22 @@ gboolean print_fit_results(){
 
   int length = 0;
   if(calpar.calMode == 1){
-    getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[0]),getCalWidth((double)fitpar.fitParErr[0]),fitParStr[0],50,1,guiglobals.roundErrors);
-    getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[1]),getCalWidth((double)fitpar.fitParErr[1]),fitParStr[1],50,1,guiglobals.roundErrors);
-    getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[2]),getCalWidth((double)fitpar.fitParErr[2]),fitParStr[2],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BGCONST]),getCalWidth((double)fitpar.fitParErr[FITPAR_BGCONST]),fitParStr[0],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BGLIN]),getCalWidth((double)fitpar.fitParErr[FITPAR_BGLIN]),fitParStr[1],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BGQUAD]),getCalWidth((double)fitpar.fitParErr[FITPAR_BGQUAD]),fitParStr[2],50,1,guiglobals.roundErrors);
   }else{
-    getFormattedValAndUncertainty((double)fitpar.fitParVal[0],(double)fitpar.fitParErr[0],fitParStr[0],50,1,guiglobals.roundErrors);
-    getFormattedValAndUncertainty((double)fitpar.fitParVal[1],(double)fitpar.fitParErr[1],fitParStr[1],50,1,guiglobals.roundErrors);
-    getFormattedValAndUncertainty((double)fitpar.fitParVal[2],(double)fitpar.fitParErr[2],fitParStr[2],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BGCONST],(double)fitpar.fitParErr[FITPAR_BGCONST],fitParStr[0],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BGLIN],(double)fitpar.fitParErr[FITPAR_BGLIN],fitParStr[1],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BGQUAD],(double)fitpar.fitParErr[FITPAR_BGQUAD],fitParStr[2],50,1,guiglobals.roundErrors);
   }
   length += snprintf(fitResStr+length,(long unsigned int)(strSize-length),"Chisq/NDF: %f\n\nBackground\nA: %s, B: %s, C: %s\n\n",getFitChisq(fitpar.fitType)/(1.0*fitpar.ndf),fitParStr[0],fitParStr[1],fitParStr[2]);
   if(fitpar.fitType == 1){
     if(calpar.calMode == 1){
-      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[3]),getCalWidth((double)fitpar.fitParErr[3]),fitParStr[0],50,1,guiglobals.roundErrors);
-      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[4]),getCalWidth((double)fitpar.fitParErr[4]),fitParStr[1],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_R]),getCalWidth((double)fitpar.fitParErr[FITPAR_R]),fitParStr[0],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BETA]),getCalWidth((double)fitpar.fitParErr[FITPAR_BETA]),fitParStr[1],50,1,guiglobals.roundErrors);
     }else{
-      getFormattedValAndUncertainty((double)fitpar.fitParVal[3],(double)fitpar.fitParErr[3],fitParStr[0],50,1,guiglobals.roundErrors);
-      getFormattedValAndUncertainty((double)fitpar.fitParVal[4],(double)fitpar.fitParErr[4],fitParStr[1],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_R],(double)fitpar.fitParErr[FITPAR_R],fitParStr[0],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BETA],(double)fitpar.fitParErr[FITPAR_BETA],fitParStr[1],50,1,guiglobals.roundErrors);
     }
     length += snprintf(fitResStr+length,(long unsigned int)(strSize-length),"R: %s, Beta (skewness): %s\n\n",fitParStr[0],fitParStr[1]);
   }
@@ -119,11 +119,11 @@ gboolean print_fit_results(){
   for(i=0;i<fitpar.numFitPeaks;i++){
     getFormattedValAndUncertainty(evalPeakArea(i,fitpar.fitType),evalPeakAreaErr(i,fitpar.fitType),fitParStr[0],50,1,guiglobals.roundErrors);
     if(calpar.calMode == 1){
-      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[7+(3*i)]),getCalWidth((double)fitpar.fitParErr[7+(3*i)]),fitParStr[1],50,1,guiglobals.roundErrors);
-      getFormattedValAndUncertainty(2.35482*getCalWidth((double)fitpar.fitParVal[8+(3*i)]),2.35482*getCalWidth((double)fitpar.fitParErr[8+(3*i)]),fitParStr[2],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_POS1+(3*i)]),getCalWidth((double)fitpar.fitParErr[FITPAR_POS1+(3*i)]),fitParStr[1],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty(2.35482*getCalWidth((double)fitpar.fitParVal[FITPAR_WIDTH1+(3*i)]),2.35482*getCalWidth((double)fitpar.fitParErr[FITPAR_WIDTH1+(3*i)]),fitParStr[2],50,1,guiglobals.roundErrors);
     }else{
-      getFormattedValAndUncertainty((double)fitpar.fitParVal[7+(3*i)],(double)fitpar.fitParErr[7+(3*i)],fitParStr[1],50,1,guiglobals.roundErrors);
-      getFormattedValAndUncertainty(2.35482*(double)fitpar.fitParVal[8+(3*i)],2.35482*(double)fitpar.fitParErr[8+(3*i)],fitParStr[2],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_POS1+(3*i)],(double)fitpar.fitParErr[FITPAR_POS1+(3*i)],fitParStr[1],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty(2.35482*(double)fitpar.fitParVal[FITPAR_WIDTH1+(3*i)],2.35482*(double)fitpar.fitParErr[FITPAR_WIDTH1+(3*i)],fitParStr[2],50,1,guiglobals.roundErrors);
     }
     int len = snprintf(fitResStr+length,(long unsigned int)(strSize-length),"\nPeak %i Area: %s, Centroid: %s, FWHM: %s",i+1,fitParStr[0],fitParStr[1],fitParStr[2]);
     if((len < 0)||(len >= strSize-length)){
@@ -161,11 +161,11 @@ double getFWHM(double chan, double widthF, double widthG, double widthH){
 long double evalGaussTerm(int peakNum, long double xval){
   long double evalG;
   if(fitpar.fixRelativeWidths){
-    evalG = expl(-0.5* powl((xval-fitpar.fitParVal[7+(3*peakNum)]),2.0)/(powl(fitpar.fitParVal[8]*fitpar.relWidths[peakNum],2.0)));
+    evalG = expl(-0.5* powl((xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)]),2.0)/(powl(fitpar.fitParVal[FITPAR_WIDTH1]*fitpar.relWidths[peakNum],2.0)));
   }else{
-    evalG = expl(-0.5* powl((xval-fitpar.fitParVal[7+(3*peakNum)]),2.0)/(powl(fitpar.fitParVal[8+(3*peakNum)],2.0)));
+    evalG = expl(-0.5* powl((xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)]),2.0)/(powl(fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)],2.0)));
   }
-  //printf("peakNum: %i, xval: %f, pos: %f, width: %f, eval: %f\n",peakNum,xval,fitpar.fitParVal[7+(3*peakNum)],fitpar.fitParVal[8+(3*peakNum)],evalG);
+  //printf("peakNum: %i, xval: %f, pos: %f, width: %f, eval: %f\n",peakNum,xval,fitpar.fitParVal[FITPAR_POS1+(3*peakNum)],fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)],evalG);
   return evalG;
 }
 
@@ -173,11 +173,11 @@ long double evalGaussTerm(int peakNum, long double xval){
 long double evalSkewedGaussTerm(const int peakNum, const long double xval){
   long double evalG;
   if(fitpar.fixRelativeWidths){
-    evalG = expl((xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4]) * erfcl( (xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]) + (fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.41421356*fitpar.fitParVal[4]) ) ;
+    evalG = expl((xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/fitpar.fitParVal[FITPAR_BETA]) * erfcl( (xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/(1.41421356*fitpar.fitParVal[FITPAR_WIDTH1]*fitpar.relWidths[peakNum]) + (fitpar.fitParVal[FITPAR_WIDTH1]*fitpar.relWidths[peakNum])/(1.41421356*fitpar.fitParVal[FITPAR_BETA]) ) ;
   }else{
-    evalG = expl((xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4]) * erfcl( (xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8+(3*peakNum)]) + fitpar.fitParVal[8+(3*peakNum)]/(1.41421356*fitpar.fitParVal[4]) ) ;
+    evalG = expl((xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/fitpar.fitParVal[FITPAR_BETA]) * erfcl( (xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/(1.41421356*fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)]) + fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)]/(1.41421356*fitpar.fitParVal[FITPAR_BETA]) ) ;
   }
-  //printf("peakNum: %i, xval: %f, pos: %f, width: %f, eval: %f\n",peakNum,xval,fitpar.fitParVal[7+(3*peakNum)],fitpar.fitParVal[8+(3*peakNum)],evalG);
+  //printf("peakNum: %i, xval: %f, pos: %f, width: %f, eval: %f\n",peakNum,xval,fitpar.fitParVal[FITPAR_POS1+(3*peakNum)],fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)],evalG);
   return evalG;
 }
 
@@ -190,26 +190,26 @@ long double evalGaussTermDerivative(const int peakNum, const long double xval, c
       evalGDer *= 0.0; //no skewness in symmetric Gaussian
       break;*/
     case 3:
-      evalGDer *= -1.0*fitpar.fitParVal[6+(3*peakNum)];
+      evalGDer *= -1.0*fitpar.fitParVal[FITPAR_AMP1+(3*peakNum)];
       break;
     case 2:
-      evalGDer *= fitpar.fitParVal[6+(3*peakNum)]*(1.0 - fitpar.fitParVal[3]);
+      evalGDer *= fitpar.fitParVal[FITPAR_AMP1+(3*peakNum)]*(1.0 - fitpar.fitParVal[FITPAR_R]);
       if(fitpar.fixRelativeWidths){
-        evalGDer *= powl((xval-fitpar.fitParVal[7+(3*peakNum)]),2.0)/(powl(fitpar.fitParVal[8],3.0)*powl(fitpar.relWidths[peakNum],2.0));
+        evalGDer *= powl((xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)]),2.0)/(powl(fitpar.fitParVal[FITPAR_WIDTH1],3.0)*powl(fitpar.relWidths[peakNum],2.0));
       }else{
-        evalGDer *= powl((xval-fitpar.fitParVal[7+(3*peakNum)]),2.0)/powl(fitpar.fitParVal[8+(3*peakNum)],3.0);
+        evalGDer *= powl((xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)]),2.0)/powl(fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)],3.0);
       }
       break;
     case 1:
-      evalGDer *= fitpar.fitParVal[6+(3*peakNum)]*(1.0 - fitpar.fitParVal[3]);
+      evalGDer *= fitpar.fitParVal[FITPAR_AMP1+(3*peakNum)]*(1.0 - fitpar.fitParVal[FITPAR_R]);
       if(fitpar.fixRelativeWidths){
-        evalGDer *= (xval-fitpar.fitParVal[7+(3*peakNum)])/powl(fitpar.fitParVal[8]*fitpar.relWidths[peakNum],2.0);
+        evalGDer *= (xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/powl(fitpar.fitParVal[FITPAR_WIDTH1]*fitpar.relWidths[peakNum],2.0);
       }else{
-        evalGDer *= (xval-fitpar.fitParVal[7+(3*peakNum)])/powl(fitpar.fitParVal[8+(3*peakNum)],2.0);
+        evalGDer *= (xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/powl(fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)],2.0);
       }
       break;
     case 0:
-      evalGDer *= (1.0 - fitpar.fitParVal[3]);
+      evalGDer *= (1.0 - fitpar.fitParVal[FITPAR_R]);
       break;
     default:
       printf("WARNING: invalid Gaussian derivative parameter (%i).\n",derPar);
@@ -225,44 +225,44 @@ long double evalSkewedGaussTermDerivative(const int peakNum, const long double x
   long double evalGDerT2;
   switch (derPar){
     case 4:
-      evalGDer = fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]*(xval-fitpar.fitParVal[7+(3*peakNum)])*evalSkewedGaussTerm(peakNum,xval)/(fitpar.fitParVal[4]*fitpar.fitParVal[4]);
-      evalGDerT2 = 2.0*fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]/(2.5066*fitpar.fitParVal[4]*fitpar.fitParVal[4]);
+      evalGDer = fitpar.fitParVal[FITPAR_AMP1+(3*peakNum)]*fitpar.fitParVal[FITPAR_R]*(xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])*evalSkewedGaussTerm(peakNum,xval)/(fitpar.fitParVal[FITPAR_BETA]*fitpar.fitParVal[FITPAR_BETA]);
+      evalGDerT2 = 2.0*fitpar.fitParVal[FITPAR_AMP1+(3*peakNum)]*fitpar.fitParVal[FITPAR_R]/(2.5066*fitpar.fitParVal[FITPAR_BETA]*fitpar.fitParVal[FITPAR_BETA]);
       if(fitpar.fixRelativeWidths){
-        evalGDerT2 *= expl( ((xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4]) - powl( ((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8]*fitpar.relWidths[peakNum])) + ((fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.41421356*fitpar.fitParVal[4])),2.0) ) ;
-        evalGDerT2 *= fitpar.fitParVal[8]*fitpar.relWidths[peakNum];
+        evalGDerT2 *= expl( ((xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/fitpar.fitParVal[FITPAR_BETA]) - powl( ((xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/(1.41421356*fitpar.fitParVal[FITPAR_WIDTH1]*fitpar.relWidths[peakNum])) + ((fitpar.fitParVal[FITPAR_WIDTH1]*fitpar.relWidths[peakNum])/(1.41421356*fitpar.fitParVal[FITPAR_BETA])),2.0) ) ;
+        evalGDerT2 *= fitpar.fitParVal[FITPAR_WIDTH1]*fitpar.relWidths[peakNum];
       }else{
-        evalGDerT2 *= expl( ((xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4]) - powl( ((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8+(3*peakNum)])) + ((fitpar.fitParVal[8+(3*peakNum)])/(1.41421356*fitpar.fitParVal[4])),2.0) ) ;
-        evalGDerT2 *= fitpar.fitParVal[8+(3*peakNum)];
+        evalGDerT2 *= expl( ((xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/fitpar.fitParVal[FITPAR_BETA]) - powl( ((xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/(1.41421356*fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)])) + ((fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)])/(1.41421356*fitpar.fitParVal[FITPAR_BETA])),2.0) ) ;
+        evalGDerT2 *= fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)];
       }
       evalGDer = evalGDerT2 - evalGDer;
       break;
     case 3:
-      evalGDer = fitpar.fitParVal[6+(3*peakNum)]*evalSkewedGaussTerm(peakNum,xval);
+      evalGDer = fitpar.fitParVal[FITPAR_AMP1+(3*peakNum)]*evalSkewedGaussTerm(peakNum,xval);
       break;
     case 2:
-      evalGDer = -2.0*fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]/1.7725;
+      evalGDer = -2.0*fitpar.fitParVal[FITPAR_AMP1+(3*peakNum)]*fitpar.fitParVal[FITPAR_R]/1.7725;
       if(fitpar.fixRelativeWidths){
-        evalGDer *= expl( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - powl((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]) + (fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.41421356*fitpar.fitParVal[4]),2.0) ) ;
-        evalGDer *= ( (1.0/(1.41421356*fitpar.fitParVal[4])) - (xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]) );
+        evalGDer *= expl( (xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/fitpar.fitParVal[FITPAR_BETA] - powl((xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/(1.41421356*fitpar.fitParVal[FITPAR_WIDTH1]*fitpar.relWidths[peakNum]) + (fitpar.fitParVal[FITPAR_WIDTH1]*fitpar.relWidths[peakNum])/(1.41421356*fitpar.fitParVal[FITPAR_BETA]),2.0) ) ;
+        evalGDer *= ( (1.0/(1.41421356*fitpar.fitParVal[FITPAR_BETA])) - (xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/(1.41421356*fitpar.fitParVal[FITPAR_WIDTH1]*fitpar.relWidths[peakNum]*fitpar.fitParVal[FITPAR_WIDTH1]*fitpar.relWidths[peakNum]) );
       }else{
-        evalGDer *= expl( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - powl((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8+(3*peakNum)]) + (fitpar.fitParVal[8+(3*peakNum)])/(1.41421356*fitpar.fitParVal[4]),2.0) ) ;
-        evalGDer *= ( (1.0/(1.41421356*fitpar.fitParVal[4])) - (xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8+(3*peakNum)]*fitpar.fitParVal[8+(3*peakNum)]) );
+        evalGDer *= expl( (xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/fitpar.fitParVal[FITPAR_BETA] - powl((xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/(1.41421356*fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)]) + (fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)])/(1.41421356*fitpar.fitParVal[FITPAR_BETA]),2.0) ) ;
+        evalGDer *= ( (1.0/(1.41421356*fitpar.fitParVal[FITPAR_BETA])) - (xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/(1.41421356*fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)]*fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)]) );
       }
       break;
     case 1:
-      evalGDer = fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]*evalSkewedGaussTerm(peakNum,xval)/fitpar.fitParVal[4];
-      evalGDerT2 = 2.0*fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]/2.5066;
+      evalGDer = fitpar.fitParVal[FITPAR_AMP1+(3*peakNum)]*fitpar.fitParVal[FITPAR_R]*evalSkewedGaussTerm(peakNum,xval)/fitpar.fitParVal[FITPAR_BETA];
+      evalGDerT2 = 2.0*fitpar.fitParVal[FITPAR_AMP1+(3*peakNum)]*fitpar.fitParVal[FITPAR_R]/2.5066;
       if(fitpar.fixRelativeWidths){
-        evalGDerT2 *= expl( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - powl((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8]*fitpar.relWidths[peakNum]) + (fitpar.fitParVal[8]*fitpar.relWidths[peakNum])/(1.41421356*fitpar.fitParVal[4]),2.0) ) ;
-        evalGDerT2 = evalGDerT2/(fitpar.fitParVal[8]*fitpar.relWidths[peakNum]);
+        evalGDerT2 *= expl( (xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/fitpar.fitParVal[FITPAR_BETA] - powl((xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/(1.41421356*fitpar.fitParVal[FITPAR_WIDTH1]*fitpar.relWidths[peakNum]) + (fitpar.fitParVal[FITPAR_WIDTH1]*fitpar.relWidths[peakNum])/(1.41421356*fitpar.fitParVal[FITPAR_BETA]),2.0) ) ;
+        evalGDerT2 = evalGDerT2/(fitpar.fitParVal[FITPAR_WIDTH1]*fitpar.relWidths[peakNum]);
       }else{
-        evalGDerT2 *= expl( (xval-fitpar.fitParVal[7+(3*peakNum)])/fitpar.fitParVal[4] - powl((xval-fitpar.fitParVal[7+(3*peakNum)])/(1.41421356*fitpar.fitParVal[8+(3*peakNum)]) + (fitpar.fitParVal[8+(3*peakNum)])/(1.41421356*fitpar.fitParVal[4]),2.0) ) ;
-        evalGDerT2 = evalGDerT2/fitpar.fitParVal[8+(3*peakNum)];
+        evalGDerT2 *= expl( (xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/fitpar.fitParVal[FITPAR_BETA] - powl((xval-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/(1.41421356*fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)]) + (fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)])/(1.41421356*fitpar.fitParVal[FITPAR_BETA]),2.0) ) ;
+        evalGDerT2 = evalGDerT2/fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)];
       }
       evalGDer = evalGDerT2 - evalGDer;
       break;
     case 0:
-      evalGDer = fitpar.fitParVal[3]*evalSkewedGaussTerm(peakNum,xval);
+      evalGDer = fitpar.fitParVal[FITPAR_R]*evalSkewedGaussTerm(peakNum,xval);
       break;
     default:
       printf("WARNING: invalid skewed Gaussian derivative parameter (%i).\n",derPar);
@@ -280,16 +280,16 @@ long double evalAllTermDerivative(const int peakNum, const long double xval, con
 }
 
 long double evalFitBG(const long double xval){
-  return fitpar.fitParVal[0] + xval*fitpar.fitParVal[1] + xval*xval*fitpar.fitParVal[2];
+  return fitpar.fitParVal[FITPAR_BGCONST] + xval*fitpar.fitParVal[FITPAR_BGLIN] + xval*xval*fitpar.fitParVal[FITPAR_BGQUAD];
 }
 
 long double evalFit(const long double xval, const int fitType){
   int i;
   long double val = evalFitBG(xval);
   for(i=0;i<fitpar.numFitPeaks;i++){
-    val += fitpar.fitParVal[6+(3*i)]*(1.0 - fitpar.fitParVal[3])*evalGaussTerm(i,xval);
+    val += fitpar.fitParVal[FITPAR_AMP1+(3*i)]*(1.0 - fitpar.fitParVal[FITPAR_R])*evalGaussTerm(i,xval);
     if(fitType == 1){
-      val += fitpar.fitParVal[6+(3*i)]*fitpar.fitParVal[3]*evalSkewedGaussTerm(i,xval);
+      val += fitpar.fitParVal[FITPAR_AMP1+(3*i)]*fitpar.fitParVal[FITPAR_R]*evalSkewedGaussTerm(i,xval);
     }
   }
   return val;
@@ -299,22 +299,22 @@ long double evalFitOnePeak(const long double xval, const int peak, const int fit
   if(peak>=fitpar.numFitPeaks)
     return 0.0;
   long double val = evalFitBG(xval);
-  val += fitpar.fitParVal[6+(3*peak)]*(1.0 - fitpar.fitParVal[3])*evalGaussTerm(peak,xval);
+  val += fitpar.fitParVal[FITPAR_AMP1+(3*peak)]*(1.0 - fitpar.fitParVal[FITPAR_R])*evalGaussTerm(peak,xval);
   if(fitType == 1)
-    val += fitpar.fitParVal[6+(3*peak)]*fitpar.fitParVal[3]*evalSkewedGaussTerm(peak,xval);
+    val += fitpar.fitParVal[FITPAR_AMP1+(3*peak)]*fitpar.fitParVal[FITPAR_R]*evalSkewedGaussTerm(peak,xval);
   return val;
 }
 
 double evalSymGaussArea(const int peakNum){
   //use Guassian integral
-  long double area = fitpar.fitParVal[6+(3*peakNum)]*(1.0 - fitpar.fitParVal[3])*fitpar.fitParVal[8+(3*peakNum)]*sqrt(2.0*G_PI)/(1.0*drawing.contractFactor);
+  long double area = fitpar.fitParVal[FITPAR_AMP1+(3*peakNum)]*(1.0 - fitpar.fitParVal[FITPAR_R])*fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)]*sqrt(2.0*G_PI)/(1.0*drawing.contractFactor);
   return (double)area;
 }
 
 double evalSkewedGaussArea(const int peakNum){
   //use definite integral of skewed Gaussian wrt x, taken
   //from -inf to inf (which collapses erf and erfc terms)
-  long double area = fitpar.fitParVal[6+(3*peakNum)]*fitpar.fitParVal[3]*fitpar.fitParVal[4]*expl(-2.0*fitpar.fitParVal[8+(3*peakNum)]*fitpar.fitParVal[8+(3*peakNum)]/(4.0*fitpar.fitParVal[4]*fitpar.fitParVal[4]));
+  long double area = fitpar.fitParVal[FITPAR_AMP1+(3*peakNum)]*fitpar.fitParVal[FITPAR_R]*fitpar.fitParVal[FITPAR_BETA]*expl(-2.0*fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)]*fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)]/(4.0*fitpar.fitParVal[FITPAR_BETA]*fitpar.fitParVal[FITPAR_BETA]));
   return (double)area;
 }
 
@@ -328,20 +328,20 @@ double evalPeakArea(const int peakNum, const int fitType){
 
 double evalPeakAreaErr(int peakNum, const int fitType){
   //propagate uncertainty through the expression in the function evalSymGaussArea()
-  long double err = (fitpar.fitParErr[6+(3*peakNum)]/fitpar.fitParVal[6+(3*peakNum)])*(fitpar.fitParErr[6+(3*peakNum)]/fitpar.fitParVal[6+(3*peakNum)]);
-  err += (fitpar.fitParErr[8+(3*peakNum)]/fitpar.fitParVal[8+(3*peakNum)])*(fitpar.fitParErr[8+(3*peakNum)]/fitpar.fitParVal[8+(3*peakNum)]);
-  err += (fitpar.fitParErr[3]/(1.0 - fitpar.fitParVal[3]))*(fitpar.fitParErr[3]/(1.0 - fitpar.fitParVal[3]));
+  long double err = (fitpar.fitParErr[FITPAR_AMP1+(3*peakNum)]/fitpar.fitParVal[FITPAR_AMP1+(3*peakNum)])*(fitpar.fitParErr[FITPAR_AMP1+(3*peakNum)]/fitpar.fitParVal[FITPAR_AMP1+(3*peakNum)]);
+  err += (fitpar.fitParErr[FITPAR_WIDTH1+(3*peakNum)]/fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)])*(fitpar.fitParErr[FITPAR_WIDTH1+(3*peakNum)]/fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)]);
+  err += (fitpar.fitParErr[FITPAR_R]/(1.0 - fitpar.fitParVal[FITPAR_R]))*(fitpar.fitParErr[FITPAR_R]/(1.0 - fitpar.fitParVal[FITPAR_R]));
   err = sqrtl(err);
   err = err*evalSymGaussArea(peakNum);
   if(fitType == 1){
     //propagate uncertainty through the expression in the function evalSkewedGaussArea()
-    long double errsk = (fitpar.fitParErr[8+(3*peakNum)]/fitpar.fitParVal[8+(3*peakNum)])*(fitpar.fitParErr[8+(3*peakNum)]/fitpar.fitParVal[8+(3*peakNum)]);
-    errsk += (fitpar.fitParErr[4]/fitpar.fitParVal[4])*(fitpar.fitParErr[4]/fitpar.fitParVal[4]);
-    errsk *= fitpar.fitParVal[8+(3*peakNum)]*fitpar.fitParVal[8+(3*peakNum)]/fitpar.fitParVal[4]*fitpar.fitParVal[4];
+    long double errsk = (fitpar.fitParErr[FITPAR_WIDTH1+(3*peakNum)]/fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)])*(fitpar.fitParErr[FITPAR_WIDTH1+(3*peakNum)]/fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)]);
+    errsk += (fitpar.fitParErr[FITPAR_BETA]/fitpar.fitParVal[FITPAR_BETA])*(fitpar.fitParErr[FITPAR_BETA]/fitpar.fitParVal[FITPAR_BETA]);
+    errsk *= fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)]*fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)]/fitpar.fitParVal[FITPAR_BETA]*fitpar.fitParVal[FITPAR_BETA];
     errsk *= 0.5; //abs(constant) in the exponential term of evalSkewedGaussArea()
-    errsk += (fitpar.fitParErr[6+(3*peakNum)]/fitpar.fitParVal[6+(3*peakNum)])*(fitpar.fitParErr[6+(3*peakNum)]/fitpar.fitParVal[6+(3*peakNum)]);
-    errsk += (fitpar.fitParErr[3]/fitpar.fitParVal[3])*(fitpar.fitParErr[3]/fitpar.fitParVal[3]);
-    errsk += (fitpar.fitParErr[4]/fitpar.fitParVal[4])*(fitpar.fitParErr[4]/fitpar.fitParVal[4]);
+    errsk += (fitpar.fitParErr[FITPAR_AMP1+(3*peakNum)]/fitpar.fitParVal[FITPAR_AMP1+(3*peakNum)])*(fitpar.fitParErr[FITPAR_AMP1+(3*peakNum)]/fitpar.fitParVal[FITPAR_AMP1+(3*peakNum)]);
+    errsk += (fitpar.fitParErr[FITPAR_R]/fitpar.fitParVal[FITPAR_R])*(fitpar.fitParErr[FITPAR_R]/fitpar.fitParVal[FITPAR_R]);
+    errsk += (fitpar.fitParErr[FITPAR_BETA]/fitpar.fitParVal[FITPAR_BETA])*(fitpar.fitParErr[FITPAR_BETA]/fitpar.fitParVal[FITPAR_BETA]);
     errsk = sqrtl(errsk);
     errsk = errsk*evalSkewedGaussArea(peakNum);
     //add all errors in quadrature
@@ -360,12 +360,12 @@ double getFitChisq(const int fitType){
     xval = i;
     yval = getSpBinVal(0,i);
     //background term
-    f = fitpar.fitParVal[0] + fitpar.fitParVal[1]*xval + fitpar.fitParVal[2]*xval*xval;
+    f = fitpar.fitParVal[FITPAR_BGCONST] + fitpar.fitParVal[FITPAR_BGLIN]*xval + fitpar.fitParVal[FITPAR_BGQUAD]*xval*xval;
     //gaussian(s)
     for(j=0;j<fitpar.numFitPeaks;j++){
-      f += fitpar.fitParVal[6+(3*j)]*(1.0 - fitpar.fitParVal[3])*evalGaussTerm(j,xval);
+      f += fitpar.fitParVal[FITPAR_AMP1+(3*j)]*(1.0 - fitpar.fitParVal[FITPAR_R])*evalGaussTerm(j,xval);
       if(fitType == 1){
-        f += fitpar.fitParVal[6+(3*j)]*fitpar.fitParVal[3]*evalSkewedGaussTerm(j,xval);
+        f += fitpar.fitParVal[FITPAR_AMP1+(3*j)]*fitpar.fitParVal[FITPAR_R]*evalSkewedGaussTerm(j,xval);
       }
         
     }
@@ -408,7 +408,7 @@ unsigned char getParameterErrors(lin_eq_type *linEq){
 
   if(fitpar.fixRelativeWidths){ 
     for(i=1;i<fitpar.numFitPeaks;i++){
-      fitpar.fitParErr[8+(3*i)] = fitpar.relWidths[i]*sqrtl(fabsl(linEq->inv_matrix[8][8]*linEq->mat_weights[8][8]));
+      fitpar.fitParErr[FITPAR_WIDTH1+(3*i)] = fitpar.relWidths[i]*sqrtl(fabsl(linEq->inv_matrix[8][8]*linEq->mat_weights[8][8]));
     }
   }
 
@@ -418,13 +418,13 @@ unsigned char getParameterErrors(lin_eq_type *linEq){
   for(i=0;i<fitpar.numFitPeaks;i++){
     //Cramer–Rao lower bound variances
     //(see https://en.wikipedia.org/wiki/Gaussian_function#Gaussian_profile_estimation for an explanation)
-    long double aCRLB = fabsl(3.0*fitpar.fitParVal[6+(3*i)]/(2.0*sqrt(2.0*G_PI)*fitpar.fitParVal[8+(3*i)]));
-    long double pCRLB = fabsl(fitpar.fitParVal[8+(3*i)]/(sqrt(2.0*G_PI)*fitpar.fitParVal[6+(3*i)]));
-    long double wCRLB = fabsl(fitpar.fitParVal[8+(3*i)]/(2.0*sqrt(2.0*G_PI)*fitpar.fitParVal[6+(3*i)]));
+    long double aCRLB = fabsl(3.0*fitpar.fitParVal[FITPAR_AMP1+(3*i)]/(2.0*sqrt(2.0*G_PI)*fitpar.fitParVal[FITPAR_WIDTH1+(3*i)]));
+    long double pCRLB = fabsl(fitpar.fitParVal[FITPAR_WIDTH1+(3*i)]/(sqrt(2.0*G_PI)*fitpar.fitParVal[FITPAR_AMP1+(3*i)]));
+    long double wCRLB = fabsl(fitpar.fitParVal[FITPAR_WIDTH1+(3*i)]/(2.0*sqrt(2.0*G_PI)*fitpar.fitParVal[FITPAR_AMP1+(3*i)]));
 
-    fitpar.fitParErr[6+(3*i)] = sqrtl(fitpar.fitParErr[6+(3*i)]*fitpar.fitParErr[6+(3*i)] + aCRLB);
-    fitpar.fitParErr[7+(3*i)] = sqrtl(fitpar.fitParErr[7+(3*i)]*fitpar.fitParErr[7+(3*i)] + pCRLB);
-    fitpar.fitParErr[8+(3*i)] = sqrtl(fitpar.fitParErr[8+(3*i)]*fitpar.fitParErr[8+(3*i)] + wCRLB);
+    fitpar.fitParErr[FITPAR_AMP1+(3*i)] = sqrtl(fitpar.fitParErr[FITPAR_AMP1+(3*i)]*fitpar.fitParErr[FITPAR_AMP1+(3*i)] + aCRLB);
+    fitpar.fitParErr[FITPAR_POS1+(3*i)] = sqrtl(fitpar.fitParErr[FITPAR_POS1+(3*i)]*fitpar.fitParErr[FITPAR_POS1+(3*i)] + pCRLB);
+    fitpar.fitParErr[FITPAR_WIDTH1+(3*i)] = sqrtl(fitpar.fitParErr[FITPAR_WIDTH1+(3*i)]*fitpar.fitParErr[FITPAR_WIDTH1+(3*i)] + wCRLB);
   }
 
   return 1;
@@ -685,44 +685,44 @@ int areParsValid(const int fitType){
   int fitRange = fitpar.fitEndCh - fitpar.fitStartCh;
   for(i=0;i<fitpar.numFitPeaks;i+=3){
     
-    if(fitpar.fitParVal[7+(3*i)] < fitpar.fitStartCh){
+    if(fitpar.fitParVal[FITPAR_POS1+(3*i)] < fitpar.fitStartCh){
       return 0;
     }
-    if(fitpar.fitParVal[7+(3*i)] > fitpar.fitEndCh){
+    if(fitpar.fitParVal[FITPAR_POS1+(3*i)] > fitpar.fitEndCh){
       return 0;
     }
-    if(fabsl(fitpar.fitParVal[7+(3*i)] - fitpar.fitPeakInitGuess[i]) > (fitRange)/2.){
+    if(fabsl(fitpar.fitParVal[FITPAR_POS1+(3*i)] - fitpar.fitPeakInitGuess[i]) > (fitRange)/2.){
       return 0;
     }
-    if(fabsl(fitpar.fitParVal[8+(3*i)]) > (fitRange)/2.){
+    if(fabsl(fitpar.fitParVal[FITPAR_WIDTH1+(3*i)]) > (fitRange)/2.){
       return 0;
-    }else if(fitpar.fitParVal[8+(3*i)] <= 0.){
+    }else if(fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] <= 0.){
       return 0; //cannot have 0 or negative width
     }
     if(getSpBinVal(0,(int)fitpar.fitPeakInitGuess[i]) > 0){
-      if(fitpar.fitParVal[6+(3*i)] < 0.){
+      if(fitpar.fitParVal[FITPAR_AMP1+(3*i)] < 0.){
         return 0;
       }
     }else{
-      if(fitpar.fitParVal[6+(3*i)] > 0.){
+      if(fitpar.fitParVal[FITPAR_AMP1+(3*i)] > 0.){
         return 0;
       }
     }
   }
   if(fitType == 1){
-    if(fitpar.fixPar[3]==0){
-      if(fitpar.fitParVal[3]!=fitpar.fitParVal[3]){
+    if(fitpar.fixPar[FITPAR_R]==0){
+      if(fitpar.fitParVal[FITPAR_R]!=fitpar.fitParVal[FITPAR_R]){
         return 0;
       }
-      if((fitpar.fitParVal[3] < -1.0)||(fitpar.fitParVal[3] > 1.0)){
+      if((fitpar.fitParVal[FITPAR_R] < -1.0)||(fitpar.fitParVal[FITPAR_R] > 1.0)){
         return 0;
       }
     }
-    if(fitpar.fixPar[4]==0){
-      if(fitpar.fitParVal[4]!=fitpar.fitParVal[4]){
+    if(fitpar.fixPar[FITPAR_BETA]==0){
+      if(fitpar.fitParVal[FITPAR_BETA]!=fitpar.fitParVal[FITPAR_BETA]){
         return 0;
       }
-      if(fitpar.fitParVal[4] < 0.0){
+      if(fitpar.fitParVal[FITPAR_BETA] < 0.0){
         return 0;
       }
 
@@ -751,9 +751,9 @@ int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFra
     iterStartChisq = getFitChisq(fitType);
     memcpy(prevFitParVal,fitpar.fitParVal,sizeof(fitpar.fitParVal));
 
-    /*printf("\nFit iteration %i - A: %Lf, B: %Lf, C: %Lf\n",iterCurrent, fitpar.fitParVal[0],fitpar.fitParVal[1],fitpar.fitParVal[2]);
+    /*printf("\nFit iteration %i - A: %Lf, B: %Lf, C: %Lf\n",iterCurrent, fitpar.fitParVal[FITPAR_BGCONST],fitpar.fitParVal[FITPAR_BGLIN],fitpar.fitParVal[FITPAR_BGQUAD]);
     for(i=0;i<fitpar.numFitPeaks;i++){
-      printf("A%i: %Lf, P%i: %Lf, W%i: %Lf\n",i+1,fitpar.fitParVal[6+(3*i)],i+1,fitpar.fitParVal[7+(3*i)],i+1,fitpar.fitParVal[8+(3*i)]);
+      printf("A%i: %Lf, P%i: %Lf, W%i: %Lf\n",i+1,fitpar.fitParVal[FITPAR_AMP1+(3*i)],i+1,fitpar.fitParVal[FITPAR_POS1+(3*i)],i+1,fitpar.fitParVal[FITPAR_WIDTH1+(3*i)]);
     }
     printf("chisq: %f\n",iterStartChisq);
     printf("\n");*/
@@ -812,11 +812,11 @@ int nonLinearizedGausFit(const unsigned int numIter, const double convergenceFra
 
         if(fitpar.fixRelativeWidths){
           for(i=0;i<fitpar.numFitPeaks;i++){
-            if((fitpar.fitParVal[8+(3*i)]!=0.)&&(fabsl(fitpar.relWidths[i]*linEq->solution[8]/fitpar.fitParVal[8+(3*i)]) > convergenceFrac)){
+            if((fitpar.fitParVal[FITPAR_WIDTH1+(3*i)]!=0.)&&(fabsl(fitpar.relWidths[i]*linEq->solution[8]/fitpar.fitParVal[FITPAR_WIDTH1+(3*i)]) > convergenceFrac)){
               conv=0;
             }
-            fitpar.fitParVal[8+(3*i)] += fitpar.relWidths[i]*linEq->solution[8];
-            //printf("par %i: %f\n",6+i,fitpar.fitParVal[6+i]);
+            fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] += fitpar.relWidths[i]*linEq->solution[8];
+            //printf("par %i: %f\n",6+i,fitpar.fitParVal[FITPAR_AMP1+i]);
           }
         }
 
@@ -875,10 +875,10 @@ void performGausFit(){
   lin_eq_type linEq;
 
   //initially fix skew parameters (first fit symmetric shape, then vary these after)
-  fitpar.fitParVal[3] = 0.0; //unused in this fit
-  fitpar.fitParVal[4] = 0.0; //unused in this fit
-  fitpar.fixPar[3] = 1; //fix unused parameter at zero
-  fitpar.fixPar[4] = 1; //fix unused parameter at zero
+  fitpar.fitParVal[FITPAR_R] = 0.0; //unused in this fit
+  fitpar.fitParVal[FITPAR_BETA] = 0.0; //unused in this fit
+  fitpar.fixPar[FITPAR_R] = 1; //fix unused parameter at zero
+  fitpar.fixPar[FITPAR_BETA] = 1; //fix unused parameter at zero
 
   //do non-linearized fit
   unsigned int numNLIterTry = 50;
@@ -908,10 +908,10 @@ void performGausFit(){
   if(fitpar.fitType == 1){
     guiglobals.fittingSp = FITSTATE_REFININGFIT2;
     g_idle_add(update_gui_fit_state,NULL);
-    fitpar.fitParVal[3] = 0.05;
-    fitpar.fitParVal[4] = fitpar.fitParVal[8] / 2.0;
-    fitpar.fixPar[3] = 0; //unfix the R parameter
-    fitpar.fixPar[4] = 0; //unfix the beta parameter
+    fitpar.fitParVal[FITPAR_R] = 0.05;
+    fitpar.fitParVal[FITPAR_BETA] = fitpar.fitParVal[FITPAR_WIDTH1] / 2.0;
+    fitpar.fixPar[FITPAR_R] = 0; //unfix the R parameter
+    fitpar.fixPar[FITPAR_BETA] = 0; //unfix the beta parameter
     numNLIterTry = 100;
     numNLIter = nonLinearizedGausFit(numNLIterTry, 0.001, &linEq, fitpar.fitType);
 
@@ -950,8 +950,8 @@ void performGausFit(){
 
   //make sure widths are positive
   for(i=0;i<fitpar.numFitPeaks;i++){
-    if(fitpar.fitParVal[8+(3*i)] < 0.){
-      fitpar.fitParVal[8+(3*i)] = fabsl(fitpar.fitParVal[8+(3*i)]);
+    if(fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] < 0.){
+      fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] = fabsl(fitpar.fitParVal[FITPAR_WIDTH1+(3*i)]);
     }
   }
   
@@ -1166,36 +1166,36 @@ int startGausFit(){
   fitpar.widthFGH[2] = 0.;
 
   //assign initial guesses for background
-  fitpar.fitParVal[0] = (getSpBinVal(0,fitpar.fitStartCh) + getSpBinVal(0,fitpar.fitEndCh))/2.0;
-  fitpar.fitParVal[1] = (getSpBinVal(0,fitpar.fitEndCh) - getSpBinVal(0,fitpar.fitStartCh))/(float)(fitpar.fitEndCh - fitpar.fitStartCh);
-  fitpar.fitParVal[2] = 0.0;
+  fitpar.fitParVal[FITPAR_BGCONST] = (getSpBinVal(0,fitpar.fitStartCh) + getSpBinVal(0,fitpar.fitEndCh))/2.0;
+  fitpar.fitParVal[FITPAR_BGLIN] = (getSpBinVal(0,fitpar.fitEndCh) - getSpBinVal(0,fitpar.fitStartCh))/(float)(fitpar.fitEndCh - fitpar.fitStartCh);
+  fitpar.fitParVal[FITPAR_BGQUAD] = 0.0;
 
   //assign initial guesses for non-linear params
   for(i=0;i<fitpar.numFitPeaks;i++){
     if(isCentroidNearOthers(i,10.0)==0){
       fitpar.fitPeakInitGuess[i] = centroidGuess(fitpar.fitPeakInitGuess[i]); //guess peak positions
     }
-    fitpar.fitParVal[6+(3*i)] = getSpBinVal(0,(int)fitpar.fitPeakInitGuess[i]) - fitpar.fitParVal[0] - fitpar.fitParVal[1]*fitpar.fitPeakInitGuess[i];
-    fitpar.fitParVal[7+(3*i)] = fitpar.fitPeakInitGuess[i];
+    fitpar.fitParVal[FITPAR_AMP1+(3*i)] = getSpBinVal(0,(int)fitpar.fitPeakInitGuess[i]) - fitpar.fitParVal[FITPAR_BGCONST] - fitpar.fitParVal[FITPAR_BGLIN]*fitpar.fitPeakInitGuess[i];
+    fitpar.fitParVal[FITPAR_POS1+(3*i)] = fitpar.fitPeakInitGuess[i];
   }
 
   //fix relative widths if required
   if(fitpar.fixRelativeWidths){
     printf("Fitting with relative peak widths fixed.\n");
     double firstWidthInitGuess = getFWHM(fitpar.fitPeakInitGuess[0],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482;
-    fitpar.fitParVal[8] = widthGuess(fitpar.fitPeakInitGuess[0],firstWidthInitGuess);
-    //printf("width guess: %f\n",fitpar.fitParVal[8]);
+    fitpar.fitParVal[FITPAR_WIDTH1] = widthGuess(fitpar.fitPeakInitGuess[0],firstWidthInitGuess);
+    //printf("width guess: %f\n",fitpar.fitParVal[FITPAR_WIDTH1]);
     for(i=1;i<fitpar.numFitPeaks;i++){
-      fitpar.fitParVal[8+(3*i)] = fitpar.fitParVal[8]*(getFWHM(fitpar.fitPeakInitGuess[i],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482)/firstWidthInitGuess;
-      fitpar.fixPar[8+(3*i)] = 2; //mark these parameters as fixed relative
+      fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] = fitpar.fitParVal[FITPAR_WIDTH1]*(getFWHM(fitpar.fitPeakInitGuess[i],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482)/firstWidthInitGuess;
+      fitpar.fixPar[FITPAR_WIDTH1+(3*i)] = 2; //mark these parameters as fixed relative
     }
     for(i=0;i<fitpar.numFitPeaks;i++){
-      fitpar.relWidths[i] = fitpar.fitParVal[8+(3*i)]/fitpar.fitParVal[8];
+      fitpar.relWidths[i] = fitpar.fitParVal[FITPAR_WIDTH1+(3*i)]/fitpar.fitParVal[FITPAR_WIDTH1];
       //printf("Rel width %i: %f\n",i+1,fitpar.relWidths[i]);
     }
   }else{
     for(i=0;i<fitpar.numFitPeaks;i++){
-      fitpar.fitParVal[8+(3*i)] = widthGuess(fitpar.fitPeakInitGuess[i],getFWHM(fitpar.fitPeakInitGuess[i],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482);
+      fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] = widthGuess(fitpar.fitPeakInitGuess[i],getFWHM(fitpar.fitPeakInitGuess[i],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482);
     }
   }
 
@@ -1212,10 +1212,10 @@ int startGausFit(){
       break;
   }
 
-  fitpar.fitParVal[5] = 0.0; //unused parameter
-  fitpar.fixPar[5] = 1; //fix unused parameter at zero
+  fitpar.fitParVal[FITPAR_RESERVED1] = 0.0; //unused parameter
+  fitpar.fixPar[FITPAR_RESERVED1] = 1; //fix unused parameter at zero
   
-  //printf("Initial guesses: %f %f %f %f %f %f %f %f\n",fitpar.fitParVal[0],fitpar.fitParVal[1],fitpar.fitParVal[2],fitpar.fitParVal[3],fitpar.fitParVal[4],fitpar.fitParVal[6],fitpar.fitParVal[7],fitpar.fitParVal[8]);
+  //printf("Initial guesses: %f %f %f %f %f %f %f %f\n",fitpar.fitParVal[FITPAR_BGCONST],fitpar.fitParVal[FITPAR_BGLIN],fitpar.fitParVal[FITPAR_BGQUAD],fitpar.fitParVal[FITPAR_R],fitpar.fitParVal[FITPAR_BETA],fitpar.fitParVal[FITPAR_AMP1],fitpar.fitParVal[FITPAR_POS1],fitpar.fitParVal[FITPAR_WIDTH1]);
 
   if (g_thread_try_new("fit_thread", performGausFitThreaded, NULL, NULL) == NULL){
     printf("WARNING: Couldn't initialize thread for fit, will try on the main thread.\n");

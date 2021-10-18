@@ -1,4 +1,4 @@
-/* J. Williams, 2020-2021 */
+/* © J. Williams, 2020-2021 */
 
 //read data from a config file
 //keepCalibration: 0=update the calibration, 1=don't change the calibration
@@ -106,12 +106,12 @@ int readConfigFile(FILE *file, int keepCalibration)
         }
       }
       if(strcmp(par,"fit_weight_mode") == 0){
-        uint8_t ucVal = (uint8_t)atoi(val);
+        unsigned char ucVal = (unsigned char)atoi(val);
         if(ucVal <= 2)
           fitpar.weightMode = ucVal;
       }
       if(strcmp(par,"fit_type") == 0){
-        uint8_t ucVal = (uint8_t)atoi(val);
+        unsigned char ucVal = (unsigned char)atoi(val);
         if(ucVal <= 1)
           fitpar.fitType = ucVal;
       }

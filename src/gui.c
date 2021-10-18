@@ -1,4 +1,4 @@
-/* J. Williams, 2020-2021 */
+/* © J. Williams, 2020-2021 */
 
 //File contains routines and callbacks for dealing with GTK and
 //the various UI elements used in the program.  Initialization
@@ -989,7 +989,7 @@ void on_contract_scale_changed(GtkRange *range, gpointer user_data){
     int i;
     //rescale fit (optimization - don't refit)
     for(i=0;i<fitpar.numFitPeaks;i++){
-      fitpar.fitParVal[6+(3*i)] *= 1.0*drawing.contractFactor/oldContractFactor;
+      fitpar.fitParVal[FITPAR_AMP1+(3*i)] *= 1.0*drawing.contractFactor/oldContractFactor;
     }
     for(i=0;i<3;i++){
       fitpar.fitParVal[i] *= 1.0*drawing.contractFactor/oldContractFactor;
@@ -1909,6 +1909,12 @@ void on_preferences_button_clicked(GtkButton *b)
 
 void on_preferences_apply_button_clicked(GtkButton *b)
 {
+  if(fitpar.fitType != (unsigned char)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox))){
+    if(guiglobals.fittingSp == FITSTATE_FITCOMPLETE){
+      //the fit type was changed, clear the fit
+      guiglobals.fittingSp = FITSTATE_NOTFITTING;
+    }
+  }
   fitpar.fitType = (unsigned char)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox));
   fitpar.weightMode = (unsigned char)gtk_combo_box_get_active(GTK_COMBO_BOX(weight_mode_combobox));
   updateConfigFile();

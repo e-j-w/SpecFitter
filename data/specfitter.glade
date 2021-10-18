@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.2 
+<!-- Generated with glade 3.22.1 
 
 The MIT License (MIT)
 
@@ -35,12 +35,12 @@ Author: Jonathan Williams
   <!-- interface-authors Jonathan Williams -->
   <object class="GtkMenu">
     <property name="visible">True</property>
-    <property name="can-focus">False</property>
+    <property name="can_focus">False</property>
   </object>
   <object class="GtkImage" id="add_image">
     <property name="visible">True</property>
-    <property name="can-focus">False</property>
-    <property name="icon-name">list-add-symbolic</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">list-add-symbolic</property>
   </object>
   <object class="GtkAccelGroup" id="comment_window_accelgroup"/>
   <object class="GtkEntryCompletion" id="commententrycompletion"/>
@@ -48,23 +48,23 @@ Author: Jonathan Williams
     <property name="lower">1</property>
     <property name="upper">101</property>
     <property name="value">1</property>
-    <property name="step-increment">1</property>
-    <property name="page-increment">10</property>
-    <property name="page-size">1</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <property name="page_size">1</property>
   </object>
   <object class="GtkEntryCompletion" id="entrycompletion1"/>
   <object class="GtkEntryCompletion" id="entrycompletion2"/>
   <object class="GtkAdjustment" id="export_image_h_res_adjustment">
     <property name="lower">600</property>
     <property name="upper">10000</property>
-    <property name="step-increment">1</property>
-    <property name="page-increment">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">100</property>
   </object>
   <object class="GtkAdjustment" id="export_image_v_res_adjustment">
     <property name="lower">400</property>
     <property name="upper">10000</property>
-    <property name="step-increment">1</property>
-    <property name="page-increment">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">100</property>
   </object>
   <object class="GtkAccelGroup" id="main_window_accelgroup"/>
   <object class="GtkListStore" id="manage_liststore">
@@ -91,25 +91,25 @@ Author: Jonathan Williams
   </object>
   <object class="GtkAdjustment" id="pan_adjustment">
     <property name="upper">100</property>
-    <property name="step-increment">0.01</property>
-    <property name="page-increment">10</property>
+    <property name="step_increment">0.01</property>
+    <property name="page_increment">10</property>
   </object>
   <object class="GtkAdjustment" id="scale_adjustment">
     <property name="lower">-100</property>
     <property name="upper">100</property>
     <property name="value">1</property>
-    <property name="step-increment">0.01</property>
-    <property name="page-increment">10</property>
+    <property name="step_increment">0.01</property>
+    <property name="page_increment">10</property>
   </object>
   <object class="GtkAdjustment" id="spectrum_selector_adjustment">
     <property name="upper">100</property>
-    <property name="step-increment">1</property>
-    <property name="page-increment">10</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
   </object>
   <object class="GtkImage" id="undo_image">
     <property name="visible">True</property>
-    <property name="can-focus">False</property>
-    <property name="icon-name">edit-undo-symbolic</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">edit-undo-symbolic</property>
   </object>
   <object class="GtkListStore" id="view_liststore">
     <columns>
@@ -121,32 +121,35 @@ Author: Jonathan Williams
   </object>
   <object class="GtkAdjustment" id="zoom_adjustment">
     <property name="upper">10</property>
-    <property name="step-increment">1</property>
-    <property name="page-increment">1</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">1</property>
   </object>
   <object class="GtkAboutDialog" id="about_dialog">
-    <property name="can-focus">False</property>
+    <property name="can_focus">False</property>
     <property name="modal">True</property>
-    <property name="type-hint">dialog</property>
-    <property name="attached-to">window</property>
-    <property name="program-name">SpecFitter</property>
+    <property name="type_hint">dialog</property>
+    <property name="attached_to">window</property>
+    <property name="program_name">SpecFitter</property>
     <property name="copyright" translatable="yes">© 2020-2021 Jonathan Williams</property>
     <property name="comments" translatable="yes">A GTK-based spectroscopy tool.</property>
-    <property name="website">https://github.com/e-j-w/jf3</property>
-    <property name="website-label" translatable="yes">Source Repository</property>
+    <property name="website">https://github.com/e-j-w/specfitter</property>
+    <property name="website_label" translatable="yes">Source Repository</property>
     <property name="authors">Jonathan Williams</property>
     <property name="artists">Jonathan Williams</property>
     <property name="logo">specfitter-application-icon.svg</property>
-    <property name="license-type">gpl-3-0</property>
+    <property name="license_type">gpl-3-0</property>
+    <child>
+      <placeholder/>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox">
-        <property name="can-focus">False</property>
+        <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
           <object class="GtkButtonBox">
-            <property name="can-focus">False</property>
-            <property name="layout-style">end</property>
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
             <child>
               <placeholder/>
             </child>
@@ -161,40 +164,43 @@ Author: Jonathan Williams
     </child>
   </object>
   <object class="GtkWindow" id="calibration_window">
-    <property name="can-focus">False</property>
+    <property name="can_focus">False</property>
     <property name="title" translatable="yes">Calibration Settings</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
-    <property name="window-position">center-always</property>
-    <property name="type-hint">dialog</property>
+    <property name="window_position">center-always</property>
+    <property name="type_hint">dialog</property>
     <property name="gravity">center</property>
-    <property name="attached-to">window</property>
+    <property name="attached_to">window</property>
+    <child>
+      <placeholder/>
+    </child>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="margin-start">10</property>
-        <property name="margin-end">10</property>
-        <property name="margin-top">10</property>
-        <property name="margin-bottom">10</property>
+        <property name="can_focus">False</property>
+        <property name="margin_start">10</property>
+        <property name="margin_end">10</property>
+        <property name="margin_top">10</property>
+        <property name="margin_bottom">10</property>
         <property name="orientation">vertical</property>
         <property name="spacing">10</property>
         <child>
           <object class="GtkBox" id="tab1_box">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="halign">center</property>
                 <property name="spacing">10</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Calibration units:</property>
                     <attributes>
                       <attribute name="weight" value="bold"/>
@@ -209,10 +215,10 @@ Author: Jonathan Williams
                 <child>
                   <object class="GtkEntry" id="calibration_unit_entry">
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="tooltip-text" translatable="yes">The units that will be displayed after calibrating the spectrum.</property>
-                    <property name="max-length">12</property>
-                    <property name="placeholder-text" translatable="yes">Enter units...</property>
+                    <property name="can_focus">True</property>
+                    <property name="tooltip_text" translatable="yes">The units that will be displayed after calibrating the spectrum.</property>
+                    <property name="max_length">12</property>
+                    <property name="placeholder_text" translatable="yes">Enter units...</property>
                     <property name="completion">entrycompletion1</property>
                   </object>
                   <packing>
@@ -224,7 +230,7 @@ Author: Jonathan Williams
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="label" translatable="yes">(eg. 'keV')</property>
                     <attributes>
                       <attribute name="style" value="italic"/>
@@ -246,7 +252,7 @@ Author: Jonathan Williams
             <child>
               <object class="GtkSeparator">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -257,13 +263,13 @@ Author: Jonathan Williams
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">10</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="halign">center</property>
                     <property name="label" translatable="yes">Enter calibration parameter values:</property>
                     <attributes>
@@ -279,20 +285,20 @@ Author: Jonathan Williams
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="halign">center</property>
                     <property name="spacing">10</property>
                     <child>
                       <object class="GtkEntry" id="cal_entry_const">
                         <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="tooltip-text" translatable="yes">The constant calibration parameter.</property>
-                        <property name="max-length">50</property>
-                        <property name="width-chars">10</property>
-                        <property name="truncate-multiline">True</property>
-                        <property name="caps-lock-warning">False</property>
-                        <property name="placeholder-text" translatable="yes">0.0</property>
-                        <property name="input-purpose">number</property>
+                        <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">The constant calibration parameter.</property>
+                        <property name="max_length">50</property>
+                        <property name="width_chars">10</property>
+                        <property name="truncate_multiline">True</property>
+                        <property name="caps_lock_warning">False</property>
+                        <property name="placeholder_text" translatable="yes">0.0</property>
+                        <property name="input_purpose">number</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -302,9 +308,9 @@ Author: Jonathan Williams
                     </child>
                     <child>
                       <object class="GtkLabel">
-                        <property name="width-request">120</property>
+                        <property name="width_request">120</property>
                         <property name="visible">True</property>
-                        <property name="can-focus">False</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">+</property>
                       </object>
                       <packing>
@@ -323,20 +329,20 @@ Author: Jonathan Williams
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="halign">center</property>
                     <property name="spacing">10</property>
                     <child>
                       <object class="GtkEntry" id="cal_entry_lin">
                         <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="tooltip-text" translatable="yes">The linear calibration parameter.</property>
-                        <property name="max-length">50</property>
-                        <property name="width-chars">10</property>
-                        <property name="truncate-multiline">True</property>
-                        <property name="caps-lock-warning">False</property>
-                        <property name="placeholder-text" translatable="yes">0.0</property>
-                        <property name="input-purpose">number</property>
+                        <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">The linear calibration parameter.</property>
+                        <property name="max_length">50</property>
+                        <property name="width_chars">10</property>
+                        <property name="truncate_multiline">True</property>
+                        <property name="caps_lock_warning">False</property>
+                        <property name="placeholder_text" translatable="yes">0.0</property>
+                        <property name="input_purpose">number</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -346,9 +352,9 @@ Author: Jonathan Williams
                     </child>
                     <child>
                       <object class="GtkLabel">
-                        <property name="width-request">120</property>
+                        <property name="width_request">120</property>
                         <property name="visible">True</property>
-                        <property name="can-focus">False</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">× (channel)  +</property>
                       </object>
                       <packing>
@@ -367,20 +373,20 @@ Author: Jonathan Williams
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="halign">center</property>
                     <property name="spacing">10</property>
                     <child>
                       <object class="GtkEntry" id="cal_entry_quad">
                         <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="tooltip-text" translatable="yes">The quadratic calibration parameter.</property>
-                        <property name="max-length">50</property>
-                        <property name="width-chars">10</property>
-                        <property name="truncate-multiline">True</property>
-                        <property name="caps-lock-warning">False</property>
-                        <property name="placeholder-text" translatable="yes">0.0</property>
-                        <property name="input-purpose">number</property>
+                        <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">The quadratic calibration parameter.</property>
+                        <property name="max_length">50</property>
+                        <property name="width_chars">10</property>
+                        <property name="truncate_multiline">True</property>
+                        <property name="caps_lock_warning">False</property>
+                        <property name="placeholder_text" translatable="yes">0.0</property>
+                        <property name="input_purpose">number</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -390,9 +396,9 @@ Author: Jonathan Williams
                     </child>
                     <child>
                       <object class="GtkLabel">
-                        <property name="width-request">120</property>
+                        <property name="width_request">120</property>
                         <property name="visible">True</property>
-                        <property name="can-focus">False</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">× (channel)²</property>
                       </object>
                       <packing>
@@ -418,7 +424,7 @@ Author: Jonathan Williams
             <child>
               <object class="GtkSeparator">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -429,13 +435,13 @@ Author: Jonathan Williams
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="halign">center</property>
                 <property name="spacing">10</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Y-axis label:</property>
                     <attributes>
                       <attribute name="weight" value="bold"/>
@@ -450,10 +456,10 @@ Author: Jonathan Williams
                 <child>
                   <object class="GtkEntry" id="y_axis_entry">
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="tooltip-text" translatable="yes">The units that will be displayed on the y-axis.</property>
-                    <property name="max-length">28</property>
-                    <property name="placeholder-text" translatable="yes">Enter label...</property>
+                    <property name="can_focus">True</property>
+                    <property name="tooltip_text" translatable="yes">The units that will be displayed on the y-axis.</property>
+                    <property name="max_length">28</property>
+                    <property name="placeholder_text" translatable="yes">Enter label...</property>
                     <property name="completion">entrycompletion2</property>
                   </object>
                   <packing>
@@ -465,7 +471,7 @@ Author: Jonathan Williams
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="label" translatable="yes">(eg. 'Counts')</property>
                     <attributes>
                       <attribute name="style" value="italic"/>
@@ -487,7 +493,7 @@ Author: Jonathan Williams
             <child>
               <object class="GtkSeparator">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -505,20 +511,20 @@ Author: Jonathan Williams
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
             <property name="hexpand">True</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkButton" id="remove_calibration_button">
                 <property name="label" translatable="yes"> Undo Calibration</property>
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <property name="tooltip-text" translatable="yes">Remove an existing calibration, and revert to displaying data uncalibrated.</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Remove an existing calibration, and revert to displaying data uncalibrated.</property>
                 <property name="halign">end</property>
                 <property name="hexpand">False</property>
                 <property name="image">undo_image</property>
-                <property name="always-show-image">True</property>
+                <property name="always_show_image">True</property>
                 <style>
                   <class name="destructive-action"/>
                 </style>
@@ -532,12 +538,12 @@ Author: Jonathan Williams
             <child>
               <object class="GtkButton" id="options_ok_button">
                 <property name="label">Apply</property>
-                <property name="width-request">100</property>
-                <property name="height-request">40</property>
+                <property name="width_request">100</property>
+                <property name="height_request">40</property>
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <property name="tooltip-text" translatable="yes">Apply all changes and return.</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Apply all changes and return.</property>
                 <property name="halign">end</property>
                 <style>
                   <class name="suggested-action"/>
@@ -546,7 +552,7 @@ Author: Jonathan Williams
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="pack-type">end</property>
+                <property name="pack_type">end</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -561,43 +567,46 @@ Author: Jonathan Williams
     </child>
   </object>
   <object class="GtkWindow" id="comment_window">
-    <property name="can-focus">False</property>
+    <property name="can_focus">False</property>
     <property name="title" translatable="yes">Add or Edit Comment</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
-    <property name="window-position">center-always</property>
-    <property name="type-hint">dialog</property>
+    <property name="window_position">center-always</property>
+    <property name="type_hint">dialog</property>
     <property name="gravity">center</property>
-    <property name="attached-to">window</property>
+    <property name="attached_to">window</property>
     <accel-groups>
       <group name="comment_window_accelgroup"/>
     </accel-groups>
     <child>
+      <placeholder/>
+    </child>
+    <child>
       <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="margin-start">10</property>
-        <property name="margin-end">10</property>
-        <property name="margin-top">10</property>
-        <property name="margin-bottom">10</property>
+        <property name="can_focus">False</property>
+        <property name="margin_start">10</property>
+        <property name="margin_end">10</property>
+        <property name="margin_top">10</property>
+        <property name="margin_bottom">10</property>
         <property name="orientation">vertical</property>
         <property name="spacing">10</property>
         <child>
           <object class="GtkBox" id="tab1_box1">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkEntry" id="comment_entry">
-                <property name="width-request">400</property>
+                <property name="width_request">400</property>
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
+                <property name="can_focus">True</property>
                 <property name="halign">start</property>
                 <property name="valign">start</property>
-                <property name="max-length">255</property>
-                <property name="caps-lock-warning">False</property>
-                <property name="placeholder-text" translatable="yes">Enter text...</property>
+                <property name="max_length">255</property>
+                <property name="caps_lock_warning">False</property>
+                <property name="placeholder_text" translatable="yes">Enter text...</property>
                 <property name="completion">commententrycompletion</property>
               </object>
               <packing>
@@ -609,7 +618,7 @@ Author: Jonathan Williams
             <child>
               <object class="GtkSeparator">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -627,16 +636,16 @@ Author: Jonathan Williams
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
             <property name="hexpand">True</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkButton" id="remove_comment_button">
                 <property name="label" translatable="yes">Delete Comment</property>
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <property name="tooltip-text" translatable="yes">Delete the comment.  Cannot be undone.</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Delete the comment.  Cannot be undone.</property>
                 <property name="halign">end</property>
                 <property name="hexpand">False</property>
                 <style>
@@ -652,11 +661,11 @@ Author: Jonathan Williams
             <child>
               <object class="GtkButton" id="comment_ok_button">
                 <property name="label">Apply</property>
-                <property name="width-request">100</property>
-                <property name="height-request">40</property>
+                <property name="width_request">100</property>
+                <property name="height_request">40</property>
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
                 <property name="halign">end</property>
                 <style>
                   <class name="suggested-action"/>
@@ -665,7 +674,7 @@ Author: Jonathan Williams
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="pack-type">end</property>
+                <property name="pack_type">end</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -680,41 +689,41 @@ Author: Jonathan Williams
     </child>
   </object>
   <object class="GtkPopover" id="display_popover">
-    <property name="can-focus">False</property>
-    <property name="relative-to">display_button</property>
+    <property name="can_focus">False</property>
+    <property name="relative_to">display_button</property>
     <property name="position">bottom</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="margin-start">10</property>
-        <property name="margin-end">10</property>
-        <property name="margin-top">10</property>
-        <property name="margin-bottom">10</property>
+        <property name="can_focus">False</property>
+        <property name="margin_start">10</property>
+        <property name="margin_end">10</property>
+        <property name="margin_top">10</property>
+        <property name="margin_bottom">10</property>
         <property name="orientation">vertical</property>
         <property name="spacing">10</property>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="hexpand">True</property>
                 <property name="spacing">6</property>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="tooltip-text" translatable="yes">Select the spectrum to display.</property>
+                    <property name="can_focus">False</property>
+                    <property name="tooltip_text" translatable="yes">Select the spectrum to display.</property>
                     <property name="spacing">10</property>
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
-                        <property name="can-focus">False</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Display View:</property>
                       </object>
                       <packing>
@@ -726,18 +735,18 @@ Author: Jonathan Williams
                     <child>
                       <object class="GtkButtonBox">
                         <property name="visible">True</property>
-                        <property name="can-focus">False</property>
+                        <property name="can_focus">False</property>
                         <property name="homogeneous">True</property>
-                        <property name="layout-style">expand</property>
+                        <property name="layout_style">expand</property>
                         <child>
                           <object class="GtkSpinButton" id="spectrumselector">
                             <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="max-length">3</property>
+                            <property name="can_focus">True</property>
+                            <property name="max_length">3</property>
                             <property name="text" translatable="yes">0</property>
-                            <property name="input-purpose">digits</property>
+                            <property name="input_purpose">digits</property>
                             <property name="adjustment">spectrum_selector_adjustment</property>
-                            <property name="snap-to-ticks">True</property>
+                            <property name="snap_to_ticks">True</property>
                             <property name="numeric">True</property>
                             <property name="wrap">True</property>
                           </object>
@@ -751,9 +760,9 @@ Author: Jonathan Williams
                           <object class="GtkButton" id="sum_all_button">
                             <property name="label" translatable="yes">Sum All</property>
                             <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="receives-default">True</property>
-                            <property name="tooltip-text" translatable="yes">Show the sum of all imported spectra.</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">Show the sum of all imported spectra.</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -778,7 +787,7 @@ Author: Jonathan Williams
                 <child>
                   <object class="GtkSeparator">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -790,9 +799,9 @@ Author: Jonathan Williams
                   <object class="GtkButton" id="multiplot_button">
                     <property name="label" translatable="yes">Advanced...</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
-                    <property name="tooltip-text" translatable="yes">Advanced plotting options - set scaling options, plot multiple spectra from the opened file(s) at once.</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Advanced plotting options - set scaling options, plot multiple spectra from the opened file(s) at once.</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -810,7 +819,7 @@ Author: Jonathan Williams
             <child>
               <object class="GtkLabel" id="display_spectrumname_label">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Spectrum name goes here</property>
                 <property name="ellipsize">end</property>
                 <attributes>
@@ -833,7 +842,7 @@ Author: Jonathan Williams
         <child>
           <object class="GtkSeparator">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -844,19 +853,19 @@ Author: Jonathan Williams
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
             <property name="halign">center</property>
             <property name="spacing">6</property>
             <child>
               <object class="GtkCheckButton" id="autoscalebutton">
                 <property name="label" translatable="yes"> Vertical Autoscale</property>
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">False</property>
-                <property name="tooltip-text" translatable="yes">If checked, the displayed spectrum will be automatically scaled on the vertical axis to fit visible features.</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">If checked, the displayed spectrum will be automatically scaled on the vertical axis to fit visible features.</property>
                 <property name="halign">start</property>
                 <property name="active">True</property>
-                <property name="draw-indicator">True</property>
+                <property name="draw_indicator">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -867,7 +876,7 @@ Author: Jonathan Williams
             <child>
               <object class="GtkSeparator">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -879,11 +888,11 @@ Author: Jonathan Williams
               <object class="GtkCheckButton" id="logscalebutton">
                 <property name="label" translatable="yes"> Logarithmic Scale</property>
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">False</property>
-                <property name="tooltip-text" translatable="yes">If checked, will display the y-axis in logarithmic scale (omitting negative values).</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">If checked, will display the y-axis in logarithmic scale (omitting negative values).</property>
                 <property name="halign">start</property>
-                <property name="draw-indicator">True</property>
+                <property name="draw_indicator">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -894,7 +903,7 @@ Author: Jonathan Williams
             <child>
               <object class="GtkSeparator">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -906,10 +915,10 @@ Author: Jonathan Williams
               <object class="GtkCheckButton" id="cursordrawbutton">
                 <property name="label" translatable="yes"> Show Cursor</property>
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">False</property>
-                <property name="tooltip-text" translatable="yes">If checked, will show a vertical cursor on the plot indicating the mouse position.</property>
-                <property name="draw-indicator">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">If checked, will show a vertical cursor on the plot indicating the mouse position.</property>
+                <property name="draw_indicator">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -927,7 +936,7 @@ Author: Jonathan Williams
         <child>
           <object class="GtkSeparator">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -938,14 +947,14 @@ Author: Jonathan Williams
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="tooltip-text" translatable="yes">Change the rebinning factor of the spectrum (number of channels per bin).</property>
+            <property name="can_focus">False</property>
+            <property name="tooltip_text" translatable="yes">Change the rebinning factor of the spectrum (number of channels per bin).</property>
             <property name="halign">center</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Channels / Bin</property>
               </object>
               <packing>
@@ -956,16 +965,16 @@ Author: Jonathan Williams
             </child>
             <child>
               <object class="GtkScale" id="contract_scale">
-                <property name="width-request">260</property>
+                <property name="width_request">260</property>
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
+                <property name="can_focus">True</property>
                 <property name="halign">start</property>
                 <property name="hexpand">True</property>
                 <property name="adjustment">contract_adjustment</property>
-                <property name="show-fill-level">True</property>
-                <property name="round-digits">0</property>
+                <property name="show_fill_level">True</property>
+                <property name="round_digits">0</property>
                 <property name="digits">0</property>
-                <property name="value-pos">right</property>
+                <property name="value_pos">right</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -984,34 +993,37 @@ Author: Jonathan Williams
     </child>
   </object>
   <object class="GtkWindow" id="export_image_window">
-    <property name="can-focus">False</property>
+    <property name="can_focus">False</property>
     <property name="title" translatable="yes">Image Export Settings</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
-    <property name="window-position">center-always</property>
-    <property name="type-hint">dialog</property>
+    <property name="window_position">center-always</property>
+    <property name="type_hint">dialog</property>
     <property name="gravity">center</property>
-    <property name="attached-to">window</property>
+    <property name="attached_to">window</property>
+    <child>
+      <placeholder/>
+    </child>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="margin-start">10</property>
-        <property name="margin-end">10</property>
-        <property name="margin-top">10</property>
-        <property name="margin-bottom">10</property>
+        <property name="can_focus">False</property>
+        <property name="margin_start">10</property>
+        <property name="margin_end">10</property>
+        <property name="margin_top">10</property>
+        <property name="margin_bottom">10</property>
         <property name="orientation">vertical</property>
         <property name="spacing">10</property>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkLabel" id="export_image_description_label">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">The currently displayed spectrum or view will be exported
 to an image file.  The displayed region, scaling and
 binning factors will be preserved.</property>
@@ -1030,7 +1042,7 @@ binning factors will be preserved.</property>
             <child>
               <object class="GtkSeparator">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1041,12 +1053,12 @@ binning factors will be preserved.</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="spacing">10</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Image resolution:</property>
                   </object>
                   <packing>
@@ -1058,12 +1070,12 @@ binning factors will be preserved.</property>
                 <child>
                   <object class="GtkSpinButton" id="export_h_res_spinbutton">
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="tooltip-text" translatable="yes">The horizontal resolution of the exported image.</property>
-                    <property name="width-chars">5</property>
-                    <property name="input-purpose">alpha</property>
+                    <property name="can_focus">True</property>
+                    <property name="tooltip_text" translatable="yes">The horizontal resolution of the exported image.</property>
+                    <property name="width_chars">5</property>
+                    <property name="input_purpose">alpha</property>
                     <property name="adjustment">export_image_h_res_adjustment</property>
-                    <property name="climb-rate">1</property>
+                    <property name="climb_rate">1</property>
                     <property name="numeric">True</property>
                     <property name="value">1200</property>
                   </object>
@@ -1076,7 +1088,7 @@ binning factors will be preserved.</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="label" translatable="yes">×</property>
                   </object>
                   <packing>
@@ -1088,13 +1100,13 @@ binning factors will be preserved.</property>
                 <child>
                   <object class="GtkSpinButton" id="export_v_res_spinbutton">
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="tooltip-text" translatable="yes">The vertical resolution of the exported image.</property>
-                    <property name="width-chars">5</property>
+                    <property name="can_focus">True</property>
+                    <property name="tooltip_text" translatable="yes">The vertical resolution of the exported image.</property>
+                    <property name="width_chars">5</property>
                     <property name="text" translatable="yes">1200</property>
-                    <property name="input-purpose">alpha</property>
+                    <property name="input_purpose">alpha</property>
                     <property name="adjustment">export_image_v_res_adjustment</property>
-                    <property name="climb-rate">1</property>
+                    <property name="climb_rate">1</property>
                     <property name="numeric">True</property>
                     <property name="value">800</property>
                   </object>
@@ -1115,11 +1127,11 @@ binning factors will be preserved.</property>
               <object class="GtkCheckButton" id="export_image_label_checkbutton">
                 <property name="label" translatable="yes"> Show histogram name labels</property>
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">False</property>
-                <property name="tooltip-text" translatable="yes">If checked, the exported image will include name labels for individual histograms.</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">If checked, the exported image will include name labels for individual histograms.</property>
                 <property name="active">True</property>
-                <property name="draw-indicator">True</property>
+                <property name="draw_indicator">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1131,11 +1143,11 @@ binning factors will be preserved.</property>
               <object class="GtkCheckButton" id="export_image_fit_checkbutton">
                 <property name="label" translatable="yes"> Show fit(s)</property>
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">False</property>
-                <property name="tooltip-text" translatable="yes">If checked, the exported image will contain any peak fits which are currently displayed.</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">If checked, the exported image will contain any peak fits which are currently displayed.</property>
                 <property name="active">True</property>
-                <property name="draw-indicator">True</property>
+                <property name="draw_indicator">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1147,11 +1159,11 @@ binning factors will be preserved.</property>
               <object class="GtkCheckButton" id="export_image_gridline_checkbutton">
                 <property name="label" translatable="yes"> Show grid lines</property>
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">False</property>
-                <property name="tooltip-text" translatable="yes">If checked, the exported image will contain grid lines corresponding to x and y-axis values.</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">If checked, the exported image will contain grid lines corresponding to x and y-axis values.</property>
                 <property name="active">True</property>
-                <property name="draw-indicator">True</property>
+                <property name="draw_indicator">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1162,13 +1174,13 @@ binning factors will be preserved.</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="tooltip-text" translatable="yes">Set the size of axis and tick labels.  Larger sizes may be more legible when printed.</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">Set the size of axis and tick labels.  Larger sizes may be more legible when printed.</property>
                 <property name="spacing">10</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Axis and tick label size:</property>
                   </object>
                   <packing>
@@ -1180,7 +1192,7 @@ binning factors will be preserved.</property>
                 <child>
                   <object class="GtkComboBoxText" id="export_axissize_combobox">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="active">1</property>
                     <items>
                       <item translatable="yes">Small</item>
@@ -1204,7 +1216,7 @@ binning factors will be preserved.</property>
             <child>
               <object class="GtkSeparator">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1222,18 +1234,18 @@ binning factors will be preserved.</property>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
             <property name="hexpand">True</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkButton" id="export_image_save_button">
                 <property name="label">Export Image</property>
-                <property name="width-request">100</property>
-                <property name="height-request">40</property>
+                <property name="width_request">100</property>
+                <property name="height_request">40</property>
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <property name="tooltip-text" translatable="yes">Apply all changes and return.</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Apply all changes and return.</property>
                 <property name="halign">end</property>
                 <style>
                   <class name="suggested-action"/>
@@ -1242,7 +1254,7 @@ binning factors will be preserved.</property>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="pack-type">end</property>
+                <property name="pack_type">end</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -1257,40 +1269,43 @@ binning factors will be preserved.</property>
     </child>
   </object>
   <object class="GtkWindow" id="export_options_window">
-    <property name="can-focus">False</property>
+    <property name="can_focus">False</property>
     <property name="title" translatable="yes">Data Export Settings</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
-    <property name="window-position">center-always</property>
-    <property name="type-hint">dialog</property>
+    <property name="window_position">center-always</property>
+    <property name="type_hint">dialog</property>
     <property name="gravity">center</property>
-    <property name="attached-to">window</property>
+    <property name="attached_to">window</property>
+    <child>
+      <placeholder/>
+    </child>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="margin-start">10</property>
-        <property name="margin-end">10</property>
-        <property name="margin-top">10</property>
-        <property name="margin-bottom">10</property>
+        <property name="can_focus">False</property>
+        <property name="margin_start">10</property>
+        <property name="margin_end">10</property>
+        <property name="margin_top">10</property>
+        <property name="margin_bottom">10</property>
         <property name="orientation">vertical</property>
         <property name="spacing">10</property>
         <child>
           <object class="GtkBox" id="tab1_box2">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="halign">center</property>
                 <property name="spacing">10</property>
                 <child>
                   <object class="GtkLabel" id="export_description_label">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Export to .spe format:</property>
                     <attributes>
                       <attribute name="weight" value="bold"/>
@@ -1305,7 +1320,7 @@ binning factors will be preserved.</property>
                 <child>
                   <object class="GtkComboBoxText" id="export_mode_combobox">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="active">0</property>
                     <items>
                       <item translatable="yes">All spectra (separate files)</item>
@@ -1327,18 +1342,18 @@ binning factors will be preserved.</property>
             <child>
               <object class="GtkRevealer" id="export_options_revealer">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="transition-type">slide-up</property>
-                <property name="reveal-child">True</property>
+                <property name="can_focus">False</property>
+                <property name="transition_type">slide-up</property>
+                <property name="reveal_child">True</property>
                 <child>
                   <object class="GtkCheckButton" id="export_rebin_checkbutton">
                     <property name="label" translatable="yes"> Apply rebin and scaling factors to exported data</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="tooltip-text" translatable="yes">If checked, the rebin and scaling factors set in the display menu will be applied to exported spectra (ie. the spectra will be exported as drawn, rather than as originally imported).</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">If checked, the rebin and scaling factors set in the display menu will be applied to exported spectra (ie. the spectra will be exported as drawn, rather than as originally imported).</property>
                     <property name="active">True</property>
-                    <property name="draw-indicator">True</property>
+                    <property name="draw_indicator">True</property>
                   </object>
                 </child>
               </object>
@@ -1351,7 +1366,7 @@ binning factors will be preserved.</property>
             <child>
               <object class="GtkLabel" id="export_note_label">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">NOTE: Exported data will be truncated to the first 4096 bins.</property>
                 <attributes>
                   <attribute name="style" value="italic"/>
@@ -1366,7 +1381,7 @@ binning factors will be preserved.</property>
             <child>
               <object class="GtkSeparator">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1384,18 +1399,18 @@ binning factors will be preserved.</property>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
             <property name="hexpand">True</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkButton" id="export_options_save_button">
                 <property name="label">Export</property>
-                <property name="width-request">100</property>
-                <property name="height-request">40</property>
+                <property name="width_request">100</property>
+                <property name="height_request">40</property>
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <property name="tooltip-text" translatable="yes">Apply all changes and return.</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Apply all changes and return.</property>
                 <property name="halign">end</property>
                 <style>
                   <class name="suggested-action"/>
@@ -1404,7 +1419,7 @@ binning factors will be preserved.</property>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="pack-type">end</property>
+                <property name="pack_type">end</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -1419,29 +1434,32 @@ binning factors will be preserved.</property>
     </child>
   </object>
   <object class="GtkWindow" id="help_window">
-    <property name="width-request">400</property>
-    <property name="can-focus">False</property>
+    <property name="width_request">400</property>
+    <property name="can_focus">False</property>
     <property name="title" translatable="yes">Help</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
-    <property name="window-position">center-always</property>
-    <property name="type-hint">dialog</property>
+    <property name="window_position">center-always</property>
+    <property name="type_hint">dialog</property>
     <property name="gravity">center</property>
-    <property name="attached-to">window</property>
+    <property name="attached_to">window</property>
+    <child>
+      <placeholder/>
+    </child>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="margin-start">20</property>
-        <property name="margin-end">20</property>
-        <property name="margin-top">20</property>
-        <property name="margin-bottom">20</property>
+        <property name="can_focus">False</property>
+        <property name="margin_start">20</property>
+        <property name="margin_end">20</property>
+        <property name="margin_top">20</property>
+        <property name="margin_bottom">20</property>
         <property name="orientation">vertical</property>
         <property name="spacing">10</property>
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="label" translatable="yes">Getting Started</property>
             <attributes>
@@ -1457,7 +1475,7 @@ binning factors will be preserved.</property>
         <child>
           <object class="GtkSeparator">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1468,13 +1486,13 @@ binning factors will be preserved.</property>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Start by opening spectra/histograms using the</property>
               </object>
               <packing>
@@ -1486,10 +1504,10 @@ binning factors will be preserved.</property>
             <child>
               <object class="GtkButton" id="open_button1">
                 <property name="label" translatable="yes">Open...</property>
-                <property name="width-request">80</property>
+                <property name="width_request">80</property>
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="receives-default">True</property>
+                <property name="can_focus">False</property>
+                <property name="receives_default">True</property>
                 <property name="halign">start</property>
               </object>
               <packing>
@@ -1501,7 +1519,7 @@ binning factors will be preserved.</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">button at the top-left.</property>
               </object>
               <packing>
@@ -1520,13 +1538,13 @@ binning factors will be preserved.</property>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Additional spectra/histograms can be appended to the session using the</property>
               </object>
               <packing>
@@ -1538,16 +1556,16 @@ binning factors will be preserved.</property>
             <child>
               <object class="GtkButton" id="append_button1">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="receives-default">True</property>
+                <property name="can_focus">False</property>
+                <property name="receives_default">True</property>
                 <property name="halign">start</property>
                 <child>
                   <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="halign">start</property>
-                    <property name="icon-name">list-add-symbolic</property>
+                    <property name="icon_name">list-add-symbolic</property>
                   </object>
                 </child>
               </object>
@@ -1560,7 +1578,7 @@ binning factors will be preserved.</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">button.</property>
               </object>
               <packing>
@@ -1579,13 +1597,13 @@ binning factors will be preserved.</property>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">The displayed data can be changed using the</property>
               </object>
               <packing>
@@ -1597,15 +1615,15 @@ binning factors will be preserved.</property>
             <child>
               <object class="GtkButton">
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
                 <property name="halign">start</property>
                 <child>
                   <object class="GtkImage" id="display_button_icon1">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="halign">start</property>
-                    <property name="icon-name">document-edit-symbolic</property>
+                    <property name="icon_name">document-edit-symbolic</property>
                   </object>
                 </child>
               </object>
@@ -1618,7 +1636,7 @@ binning factors will be preserved.</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">menu at the top-right.</property>
               </object>
               <packing>
@@ -1637,13 +1655,13 @@ binning factors will be preserved.</property>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Different spectra/histograms can be displayed together or summed using the</property>
               </object>
               <packing>
@@ -1662,15 +1680,15 @@ binning factors will be preserved.</property>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkButton" id="multiplot_button1">
                 <property name="label" translatable="yes">Advanced...</property>
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="receives-default">True</property>
+                <property name="can_focus">False</property>
+                <property name="receives_default">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1681,7 +1699,7 @@ binning factors will be preserved.</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">options in the</property>
               </object>
               <packing>
@@ -1693,15 +1711,15 @@ binning factors will be preserved.</property>
             <child>
               <object class="GtkButton">
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
                 <property name="halign">start</property>
                 <child>
                   <object class="GtkImage" id="display_button_icon2">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="halign">start</property>
-                    <property name="icon-name">document-edit-symbolic</property>
+                    <property name="icon_name">document-edit-symbolic</property>
                   </object>
                 </child>
               </object>
@@ -1714,7 +1732,7 @@ binning factors will be preserved.</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">menu.</property>
               </object>
               <packing>
@@ -1733,9 +1751,9 @@ binning factors will be preserved.</property>
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
             <property name="halign">start</property>
-            <property name="margin-top">10</property>
+            <property name="margin_top">10</property>
             <property name="label" translatable="yes">Tips &amp; Tricks</property>
             <attributes>
               <attribute name="weight" value="bold"/>
@@ -1750,7 +1768,7 @@ binning factors will be preserved.</property>
         <child>
           <object class="GtkSeparator">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1761,7 +1779,7 @@ binning factors will be preserved.</property>
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="label" translatable="yes">- The mouse wheel can be used to zoom into or out of the displayed spectrum or 
   histogram.  The zoom focus follows the mouse cursor.
@@ -1778,40 +1796,43 @@ binning factors will be preserved.</property>
     </child>
   </object>
   <object class="GtkWindow" id="multiplot_manage_window">
-    <property name="can-focus">False</property>
+    <property name="can_focus">False</property>
     <property name="title" translatable="yes">Advanced Plotting</property>
     <property name="modal">True</property>
-    <property name="window-position">center-always</property>
-    <property name="type-hint">dialog</property>
+    <property name="window_position">center-always</property>
+    <property name="type_hint">dialog</property>
     <property name="gravity">center</property>
-    <property name="attached-to">window</property>
+    <property name="attached_to">window</property>
+    <child>
+      <placeholder/>
+    </child>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="margin-start">10</property>
-        <property name="margin-end">10</property>
-        <property name="margin-top">10</property>
-        <property name="margin-bottom">10</property>
+        <property name="can_focus">False</property>
+        <property name="margin_start">10</property>
+        <property name="margin_end">10</property>
+        <property name="margin_top">10</property>
+        <property name="margin_bottom">10</property>
         <property name="orientation">vertical</property>
         <property name="spacing">10</property>
         <child>
           <object class="GtkStack" id="multiplot_manage_stack">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="transition-type">crossfade</property>
+            <property name="can_focus">False</property>
+            <property name="transition_type">crossfade</property>
             <child>
               <object class="GtkBox" id="multiplot_box">
                 <property name="name">page0</property>
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="vexpand">True</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">10</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="halign">start</property>
                     <property name="label" translatable="yes">Select spectra to plot:</property>
                     <attributes>
@@ -1827,24 +1848,24 @@ binning factors will be preserved.</property>
                 <child>
                   <object class="GtkScrolledWindow">
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="hscrollbar-policy">never</property>
-                    <property name="shadow-type">in</property>
-                    <property name="min-content-height">200</property>
+                    <property name="can_focus">True</property>
+                    <property name="hscrollbar_policy">never</property>
+                    <property name="shadow_type">in</property>
+                    <property name="min_content_height">200</property>
                     <child>
                       <object class="GtkViewport">
                         <property name="visible">True</property>
-                        <property name="can-focus">False</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <object class="GtkTreeView" id="multiplot_tree_view">
-                            <property name="width-request">500</property>
-                            <property name="height-request">100</property>
+                            <property name="width_request">500</property>
+                            <property name="height_request">100</property>
                             <property name="visible">True</property>
-                            <property name="can-focus">True</property>
+                            <property name="can_focus">True</property>
                             <property name="model">multiplot_liststore</property>
-                            <property name="search-column">0</property>
-                            <property name="enable-grid-lines">horizontal</property>
-                            <property name="activate-on-single-click">True</property>
+                            <property name="search_column">0</property>
+                            <property name="enable_grid_lines">horizontal</property>
+                            <property name="activate_on_single_click">True</property>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection">
                                 <property name="mode">multiple</property>
@@ -1856,8 +1877,8 @@ binning factors will be preserved.</property>
                                 <property name="title" translatable="yes">Spectrum Name</property>
                                 <property name="expand">True</property>
                                 <property name="clickable">True</property>
-                                <property name="sort-indicator">True</property>
-                                <property name="sort-column-id">0</property>
+                                <property name="sort_indicator">True</property>
+                                <property name="sort_column_id">0</property>
                                 <child>
                                   <object class="GtkCellRendererText" id="multiplot_cr1"/>
                                   <attributes>
@@ -1870,8 +1891,8 @@ binning factors will be preserved.</property>
                               <object class="GtkTreeViewColumn" id="multiplot_column2">
                                 <property name="spacing">6</property>
                                 <property name="sizing">fixed</property>
-                                <property name="fixed-width">80</property>
-                                <property name="max-width">80</property>
+                                <property name="fixed_width">80</property>
+                                <property name="max_width">80</property>
                                 <property name="title" translatable="yes">Plot?</property>
                                 <property name="alignment">0.5</property>
                                 <child>
@@ -1882,8 +1903,8 @@ binning factors will be preserved.</property>
                             <child>
                               <object class="GtkTreeViewColumn" id="multiplot_column3">
                                 <property name="spacing">6</property>
-                                <property name="fixed-width">120</property>
-                                <property name="min-width">120</property>
+                                <property name="fixed_width">120</property>
+                                <property name="min_width">120</property>
                                 <property name="title" translatable="yes">Scale Factor</property>
                                 <child>
                                   <object class="GtkCellRendererSpin" id="multiplot_cr3">
@@ -1892,11 +1913,11 @@ binning factors will be preserved.</property>
                                     <property name="ypad">6</property>
                                     <property name="alignment">center</property>
                                     <property name="editable">True</property>
-                                    <property name="width-chars">4</property>
-                                    <property name="max-width-chars">4</property>
-                                    <property name="placeholder-text">1.00</property>
+                                    <property name="width_chars">4</property>
+                                    <property name="max_width_chars">4</property>
+                                    <property name="placeholder_text">1.00</property>
                                     <property name="adjustment">scale_adjustment</property>
-                                    <property name="climb-rate">0.10</property>
+                                    <property name="climb_rate">0.10000000000000001</property>
                                     <property name="digits">2</property>
                                   </object>
                                   <attributes>
@@ -1919,17 +1940,17 @@ binning factors will be preserved.</property>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="spacing">10</property>
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can-focus">False</property>
+                        <property name="can_focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can-focus">False</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">Select plotting mode:</property>
                             <attributes>
                               <attribute name="weight" value="bold"/>
@@ -1944,7 +1965,7 @@ binning factors will be preserved.</property>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can-focus">False</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">(for multiple spectra)</property>
                             <attributes>
                               <attribute name="style" value="italic"/>
@@ -1966,7 +1987,7 @@ binning factors will be preserved.</property>
                     <child>
                       <object class="GtkComboBoxText" id="multiplot_mode_combobox">
                         <property name="visible">True</property>
-                        <property name="can-focus">False</property>
+                        <property name="can_focus">False</property>
                         <property name="active">0</property>
                         <items>
                           <item translatable="yes">Sum Spectra</item>
@@ -1985,11 +2006,11 @@ binning factors will be preserved.</property>
                       <object class="GtkButton" id="multiplot_make_view_button">
                         <property name="label" translatable="yes">Save as view...</property>
                         <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="receives-default">True</property>
-                        <property name="tooltip-text" translatable="yes">Save the selected view, so that it can be recalled later.</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Save the selected view, so that it can be recalled later.</property>
                         <property name="image">add_image</property>
-                        <property name="always-show-image">True</property>
+                        <property name="always_show_image">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -2001,7 +2022,7 @@ binning factors will be preserved.</property>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="pack-type">end</property>
+                    <property name="pack_type">end</property>
                     <property name="position">3</property>
                   </packing>
                 </child>
@@ -2015,19 +2036,19 @@ binning factors will be preserved.</property>
               <object class="GtkBox" id="view_box">
                 <property name="name">page1</property>
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="vexpand">True</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkBox" id="view_list_box">
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="vexpand">True</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">10</property>
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
-                        <property name="can-focus">False</property>
+                        <property name="can_focus">False</property>
                         <property name="halign">start</property>
                         <property name="label" translatable="yes">Select a custom view to plot:</property>
                         <attributes>
@@ -2043,23 +2064,23 @@ binning factors will be preserved.</property>
                     <child>
                       <object class="GtkScrolledWindow">
                         <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="hscrollbar-policy">never</property>
-                        <property name="shadow-type">in</property>
-                        <property name="min-content-height">200</property>
+                        <property name="can_focus">True</property>
+                        <property name="hscrollbar_policy">never</property>
+                        <property name="shadow_type">in</property>
+                        <property name="min_content_height">200</property>
                         <child>
                           <object class="GtkViewport">
                             <property name="visible">True</property>
-                            <property name="can-focus">False</property>
+                            <property name="can_focus">False</property>
                             <child>
                               <object class="GtkTreeView" id="view_tree_view">
-                                <property name="width-request">500</property>
-                                <property name="height-request">100</property>
+                                <property name="width_request">500</property>
+                                <property name="height_request">100</property>
                                 <property name="visible">True</property>
-                                <property name="can-focus">True</property>
+                                <property name="can_focus">True</property>
                                 <property name="model">view_liststore</property>
-                                <property name="search-column">0</property>
-                                <property name="enable-grid-lines">horizontal</property>
+                                <property name="search_column">0</property>
+                                <property name="enable_grid_lines">horizontal</property>
                                 <child internal-child="selection">
                                   <object class="GtkTreeSelection"/>
                                 </child>
@@ -2069,8 +2090,8 @@ binning factors will be preserved.</property>
                                     <property name="title" translatable="yes">View Name</property>
                                     <property name="expand">True</property>
                                     <property name="clickable">True</property>
-                                    <property name="sort-indicator">True</property>
-                                    <property name="sort-column-id">0</property>
+                                    <property name="sort_indicator">True</property>
+                                    <property name="sort_column_id">0</property>
                                     <child>
                                       <object class="GtkCellRendererText" id="view_cr1">
                                         <property name="height">40</property>
@@ -2101,9 +2122,9 @@ binning factors will be preserved.</property>
                 </child>
                 <child>
                   <object class="GtkBox" id="no_view_box">
-                    <property name="height-request">200</property>
+                    <property name="height_request">200</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="halign">center</property>
                     <property name="valign">center</property>
                     <property name="orientation">vertical</property>
@@ -2111,7 +2132,7 @@ binning factors will be preserved.</property>
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
-                        <property name="can-focus">False</property>
+                        <property name="can_focus">False</property>
                         <property name="valign">end</property>
                         <property name="label" translatable="yes">No Custom Views Created</property>
                         <attributes>
@@ -2128,7 +2149,7 @@ binning factors will be preserved.</property>
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
-                        <property name="can-focus">False</property>
+                        <property name="can_focus">False</property>
                         <property name="valign">start</property>
                         <property name="label" translatable="yes">Create custom views of multiple spectra using the 
 'Save as view...' button in the Spectra panel.
@@ -2159,14 +2180,14 @@ They will then appear on this panel.</property>
               <object class="GtkBox" id="manage_box">
                 <property name="name">page2</property>
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="vexpand">True</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">10</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="halign">start</property>
                     <property name="label" translatable="yes">Rename or remove spectra/views from this session:</property>
                     <attributes>
@@ -2182,24 +2203,24 @@ They will then appear on this panel.</property>
                 <child>
                   <object class="GtkScrolledWindow">
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="hscrollbar-policy">never</property>
-                    <property name="shadow-type">in</property>
-                    <property name="min-content-height">200</property>
+                    <property name="can_focus">True</property>
+                    <property name="hscrollbar_policy">never</property>
+                    <property name="shadow_type">in</property>
+                    <property name="min_content_height">200</property>
                     <child>
                       <object class="GtkViewport">
                         <property name="visible">True</property>
-                        <property name="can-focus">False</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <object class="GtkTreeView" id="manage_tree_view">
-                            <property name="width-request">500</property>
-                            <property name="height-request">100</property>
+                            <property name="width_request">500</property>
+                            <property name="height_request">100</property>
                             <property name="visible">True</property>
-                            <property name="can-focus">True</property>
+                            <property name="can_focus">True</property>
                             <property name="model">manage_liststore</property>
-                            <property name="search-column">0</property>
-                            <property name="enable-grid-lines">horizontal</property>
-                            <property name="activate-on-single-click">True</property>
+                            <property name="search_column">0</property>
+                            <property name="enable_grid_lines">horizontal</property>
+                            <property name="activate_on_single_click">True</property>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection">
                                 <property name="mode">multiple</property>
@@ -2211,8 +2232,8 @@ They will then appear on this panel.</property>
                                 <property name="title" translatable="yes">Spectrum or View Name (double click name to edit)</property>
                                 <property name="expand">True</property>
                                 <property name="clickable">True</property>
-                                <property name="sort-indicator">True</property>
-                                <property name="sort-column-id">0</property>
+                                <property name="sort_indicator">True</property>
+                                <property name="sort_column_id">0</property>
                                 <child>
                                   <object class="GtkCellRendererText" id="manage_cr1">
                                     <property name="editable">True</property>
@@ -2227,7 +2248,7 @@ They will then appear on this panel.</property>
                               <object class="GtkTreeViewColumn" id="manage_column2">
                                 <property name="spacing">6</property>
                                 <property name="sizing">autosize</property>
-                                <property name="max-width">200</property>
+                                <property name="max_width">200</property>
                                 <property name="title" translatable="yes">Remove?</property>
                                 <property name="alignment">0.5</property>
                                 <child>
@@ -2267,7 +2288,7 @@ They will then appear on this panel.</property>
         <child>
           <object class="GtkSeparator">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -2278,22 +2299,22 @@ They will then appear on this panel.</property>
         <child>
           <object class="GtkBox" id="multiplot_manage_bottom_box">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkStack" id="multiplot_manage_button_stack">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="transition-type">crossfade</property>
+                <property name="can_focus">False</property>
+                <property name="transition_type">crossfade</property>
                 <child>
                   <object class="GtkButton" id="multiplot_ok_button">
                     <property name="label">Plot</property>
-                    <property name="width-request">100</property>
-                    <property name="height-request">40</property>
+                    <property name="width_request">100</property>
+                    <property name="height_request">40</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
-                    <property name="tooltip-text" translatable="yes">Plot the selected spectra.</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Plot the selected spectra.</property>
                     <property name="halign">end</property>
                     <style>
                       <class name="suggested-action"/>
@@ -2307,11 +2328,11 @@ They will then appear on this panel.</property>
                 <child>
                   <object class="GtkButton" id="manage_delete_button">
                     <property name="label" translatable="yes">Remove selected</property>
-                    <property name="height-request">40</property>
+                    <property name="height_request">40</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
-                    <property name="tooltip-text" translatable="yes">Remove the selected spectra/views from the current session.</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Remove the selected spectra/views from the current session.</property>
                     <style>
                       <class name="destructive-action"/>
                     </style>
@@ -2326,15 +2347,15 @@ They will then appear on this panel.</property>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="pack-type">end</property>
+                <property name="pack_type">end</property>
                 <property name="position">0</property>
               </packing>
             </child>
             <child>
               <object class="GtkStackSwitcher" id="multiplot_manage_stack_switcher">
-                <property name="height-request">20</property>
+                <property name="height_request">20</property>
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="valign">center</property>
                 <property name="stack">multiplot_manage_stack</property>
               </object>
@@ -2355,40 +2376,43 @@ They will then appear on this panel.</property>
     </child>
   </object>
   <object class="GtkWindow" id="preferences_window">
-    <property name="width-request">400</property>
-    <property name="can-focus">False</property>
+    <property name="width_request">400</property>
+    <property name="can_focus">False</property>
     <property name="title" translatable="yes">Preferences</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
-    <property name="window-position">center-always</property>
-    <property name="type-hint">dialog</property>
+    <property name="window_position">center-always</property>
+    <property name="type_hint">dialog</property>
     <property name="gravity">center</property>
-    <property name="attached-to">window</property>
+    <property name="attached_to">window</property>
+    <child>
+      <placeholder/>
+    </child>
     <child>
       <object class="GtkBox">
-        <property name="width-request">400</property>
+        <property name="width_request">400</property>
         <property name="visible">True</property>
-        <property name="can-focus">False</property>
+        <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">10</property>
         <child>
           <object class="GtkNotebook" id="preferences_notebook">
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
+            <property name="can_focus">True</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="margin-start">10</property>
-                <property name="margin-end">10</property>
-                <property name="margin-top">10</property>
-                <property name="margin-bottom">10</property>
+                <property name="can_focus">False</property>
+                <property name="margin_start">10</property>
+                <property name="margin_end">10</property>
+                <property name="margin_top">10</property>
+                <property name="margin_bottom">10</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">10</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="halign">start</property>
                     <property name="label" translatable="yes">Data</property>
                     <attributes>
@@ -2406,11 +2430,11 @@ They will then appear on this panel.</property>
                     <property name="label" translatable="yes"> Discard empty spectra on import</property>
                     <property name="name">drop_empty_checkbox</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="tooltip-text" translatable="yes">If checked, empty spectra will be automatically disarded from any opened file(s).</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">If checked, empty spectra will be automatically disarded from any opened file(s).</property>
                     <property name="halign">start</property>
-                    <property name="draw-indicator">True</property>
+                    <property name="draw_indicator">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2422,11 +2446,11 @@ They will then appear on this panel.</property>
                   <object class="GtkCheckButton" id="autozoom_checkbutton">
                     <property name="label" translatable="yes"> Automatically zoom when opening spectra</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="tooltip-text" translatable="yes">If checked, will automatically zoom into the region containing data the first time spectrum data is opened.</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">If checked, will automatically zoom into the region containing data the first time spectrum data is opened.</property>
                     <property name="halign">start</property>
-                    <property name="draw-indicator">True</property>
+                    <property name="draw_indicator">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2438,11 +2462,11 @@ They will then appear on this panel.</property>
                   <object class="GtkCheckButton" id="bin_errors_checkbutton">
                     <property name="label" translatable="yes"> Show bin value uncertainties</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="tooltip-text" translatable="yes">If checked, will show uncertainties for bin values, and round both the value and uncertainty to the appropriate numer of significant figures.</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">If checked, will show uncertainties for bin values, and round both the value and uncertainty to the appropriate numer of significant figures.</property>
                     <property name="halign">start</property>
-                    <property name="draw-indicator">True</property>
+                    <property name="draw_indicator">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2454,11 +2478,11 @@ They will then appear on this panel.</property>
                   <object class="GtkCheckButton" id="round_errors_checkbutton">
                     <property name="label" translatable="yes"> Round uncertainty values to 10% precision</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="tooltip-text" translatable="yes">If checked, will assume that uncertainty values are known to within 10% and round to the appropriate number of significant figures (eg. an uncertainty of 241 becomes 200, 184 becomes 180).</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">If checked, will assume that uncertainty values are known to within 10% and round to the appropriate number of significant figures (eg. an uncertainty of 241 becomes 200, 184 becomes 180).</property>
                     <property name="halign">start</property>
-                    <property name="draw-indicator">True</property>
+                    <property name="draw_indicator">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2471,27 +2495,27 @@ They will then appear on this panel.</property>
             <child type="tab">
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Data</property>
               </object>
               <packing>
-                <property name="tab-fill">False</property>
+                <property name="tab_fill">False</property>
               </packing>
             </child>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="margin-start">10</property>
-                <property name="margin-end">10</property>
-                <property name="margin-top">10</property>
-                <property name="margin-bottom">10</property>
+                <property name="can_focus">False</property>
+                <property name="margin_start">10</property>
+                <property name="margin_end">10</property>
+                <property name="margin_top">10</property>
+                <property name="margin_bottom">10</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">10</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="halign">start</property>
                     <property name="label" translatable="yes">Fit Parameters</property>
                     <attributes>
@@ -2507,15 +2531,15 @@ They will then appear on this panel.</property>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="tooltip-text" translatable="yes">Set the shape of the peaks used in the fit.
+                    <property name="can_focus">False</property>
+                    <property name="tooltip_text" translatable="yes">Set the shape of the peaks used in the fit.
 Symmetric - Guassian peak shape.
 Skewed - Shape is the sum of two Guassian shapes, one of them convoluted with an exponential tail on the low-energy side (can represent incomplete charge collection in a detector).</property>
                     <property name="spacing">10</property>
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
-                        <property name="can-focus">False</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Peak shape</property>
                       </object>
                       <packing>
@@ -2527,7 +2551,7 @@ Skewed - Shape is the sum of two Guassian shapes, one of them convoluted with an
                     <child>
                       <object class="GtkComboBoxText" id="peak_shape_combobox">
                         <property name="visible">True</property>
-                        <property name="can-focus">False</property>
+                        <property name="can_focus">False</property>
                         <property name="active">0</property>
                         <items>
                           <item id="&lt;Enter ID&gt;" translatable="yes">Symmetric</item>
@@ -2552,11 +2576,11 @@ Skewed - Shape is the sum of two Guassian shapes, one of them convoluted with an
                     <property name="label" translatable="yes"> Fix relative peak widths</property>
                     <property name="name">drop_empty_checkbox</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="tooltip-text" translatable="yes">If checked, will force peak widths to follow a quadratic relationship with the channel number when more than one peak is fit.  Recommended for gamma-ray spectroscopy.</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">If checked, will force peak widths to follow a quadratic relationship with the channel number when more than one peak is fit.  Recommended for gamma-ray spectroscopy.</property>
                     <property name="halign">start</property>
-                    <property name="draw-indicator">True</property>
+                    <property name="draw_indicator">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2567,15 +2591,15 @@ Skewed - Shape is the sum of two Guassian shapes, one of them convoluted with an
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="tooltip-text" translatable="yes">Set the technique used for weighting individual channels in the fit.
+                    <property name="can_focus">False</property>
+                    <property name="tooltip_text" translatable="yes">Set the technique used for weighting individual channels in the fit.
 Weight by scaled data - Weights are proportional to the data value, taking into account the effects of scaling for summed or subtracted spectra.
 Weight by fit function - Weights are proportional to the fit function values determined during each fit iteration.</property>
                     <property name="spacing">10</property>
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
-                        <property name="can-focus">False</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Fit weighting mode</property>
                       </object>
                       <packing>
@@ -2587,7 +2611,7 @@ Weight by fit function - Weights are proportional to the fit function values det
                     <child>
                       <object class="GtkComboBoxText" id="weight_mode_combobox">
                         <property name="visible">True</property>
-                        <property name="can-focus">False</property>
+                        <property name="can_focus">False</property>
                         <property name="active">0</property>
                         <items>
                           <item id="&lt;Enter ID&gt;" translatable="yes">Weight by scaled data</item>
@@ -2611,7 +2635,7 @@ Weight by fit function - Weights are proportional to the fit function values det
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="halign">start</property>
                     <property name="label" translatable="yes">Fit Display</property>
                     <attributes>
@@ -2629,11 +2653,11 @@ Weight by fit function - Weights are proportional to the fit function values det
                     <property name="label" translatable="yes">Popup results when finished fitting</property>
                     <property name="name">drop_empty_checkbox</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="tooltip-text" translatable="yes">If checked, will show fit results in a popup dialog.  Fit results for a given peak can also be seen in the status bar by moving the cursor over that peak.</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">If checked, will show fit results in a popup dialog.  Fit results for a given peak can also be seen in the status bar by moving the cursor over that peak.</property>
                     <property name="halign">start</property>
-                    <property name="draw-indicator">True</property>
+                    <property name="draw_indicator">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2649,28 +2673,28 @@ Weight by fit function - Weights are proportional to the fit function values det
             <child type="tab">
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Fitting</property>
               </object>
               <packing>
                 <property name="position">1</property>
-                <property name="tab-fill">False</property>
+                <property name="tab_fill">False</property>
               </packing>
             </child>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="margin-start">10</property>
-                <property name="margin-end">10</property>
-                <property name="margin-top">10</property>
-                <property name="margin-bottom">10</property>
+                <property name="can_focus">False</property>
+                <property name="margin_start">10</property>
+                <property name="margin_end">10</property>
+                <property name="margin_top">10</property>
+                <property name="margin_bottom">10</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">10</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="halign">start</property>
                     <property name="label" translatable="yes">Look &amp; Feel</property>
                     <attributes>
@@ -2687,11 +2711,11 @@ Weight by fit function - Weights are proportional to the fit function values det
                   <object class="GtkCheckButton" id="spectrum_label_checkbutton">
                     <property name="label" translatable="yes"> Draw descriptive labels for spectra</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="tooltip-text" translatable="yes">If checked, will draw text labels identifying the displayed spectra.</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">If checked, will draw text labels identifying the displayed spectra.</property>
                     <property name="halign">start</property>
-                    <property name="draw-indicator">True</property>
+                    <property name="draw_indicator">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2703,11 +2727,11 @@ Weight by fit function - Weights are proportional to the fit function values det
                   <object class="GtkCheckButton" id="spectrum_comment_checkbutton">
                     <property name="label" translatable="yes"> Draw comments on spectra</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="tooltip-text" translatable="yes">If checked, will draw comments which have been written for the displayed spectra.</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">If checked, will draw comments which have been written for the displayed spectra.</property>
                     <property name="halign">start</property>
-                    <property name="draw-indicator">True</property>
+                    <property name="draw_indicator">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2719,11 +2743,11 @@ Weight by fit function - Weights are proportional to the fit function values det
                   <object class="GtkCheckButton" id="spectrum_gridline_checkbutton">
                     <property name="label" translatable="yes"> Draw grid lines on spectra</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="tooltip-text" translatable="yes">If checked, will draw grid lines on displayed spectra.</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">If checked, will draw grid lines on displayed spectra.</property>
                     <property name="halign">start</property>
-                    <property name="draw-indicator">True</property>
+                    <property name="draw_indicator">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2735,11 +2759,11 @@ Weight by fit function - Weights are proportional to the fit function values det
                   <object class="GtkCheckButton" id="animation_checkbutton">
                     <property name="label" translatable="yes"> Enable animations</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="tooltip-text" translatable="yes">If checked, animations will be enabled for drawing spectra.  Disable if low latency is preferred.</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">If checked, animations will be enabled for drawing spectra.  Disable if low latency is preferred.</property>
                     <property name="halign">start</property>
-                    <property name="draw-indicator">True</property>
+                    <property name="draw_indicator">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2751,11 +2775,11 @@ Weight by fit function - Weights are proportional to the fit function values det
                   <object class="GtkCheckButton" id="dark_theme_checkbutton">
                     <property name="label" translatable="yes"> Prefer dark theme</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="tooltip-text" translatable="yes">If checked, will use the dark GTK theme variant if available.</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">If checked, will use the dark GTK theme variant if available.</property>
                     <property name="halign">start</property>
-                    <property name="draw-indicator">True</property>
+                    <property name="draw_indicator">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2771,12 +2795,12 @@ Weight by fit function - Weights are proportional to the fit function values det
             <child type="tab">
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Look &amp; Feel</property>
               </object>
               <packing>
                 <property name="position">2</property>
-                <property name="tab-fill">False</property>
+                <property name="tab_fill">False</property>
               </packing>
             </child>
           </object>
@@ -2789,26 +2813,26 @@ Weight by fit function - Weights are proportional to the fit function values det
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="margin-start">10</property>
-            <property name="margin-end">10</property>
-            <property name="margin-bottom">10</property>
+            <property name="can_focus">False</property>
+            <property name="margin_start">10</property>
+            <property name="margin_end">10</property>
+            <property name="margin_bottom">10</property>
             <property name="orientation">vertical</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="halign">end</property>
                 <property name="spacing">10</property>
                 <child>
                   <object class="GtkButton" id="preferences_apply_button">
                     <property name="label">Apply</property>
-                    <property name="width-request">100</property>
-                    <property name="height-request">40</property>
+                    <property name="width_request">100</property>
+                    <property name="height_request">40</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
                     <property name="halign">end</property>
                   </object>
                   <packing>
@@ -2835,25 +2859,25 @@ Weight by fit function - Weights are proportional to the fit function values det
     </child>
   </object>
   <object class="GtkPopoverMenu" id="primary_menu">
-    <property name="can-focus">False</property>
-    <property name="relative-to">primary_menu_button</property>
+    <property name="can_focus">False</property>
+    <property name="relative_to">primary_menu_button</property>
     <property name="position">bottom</property>
     <child>
       <object class="GtkBox" id="main_menu_box">
         <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="margin-start">10</property>
-        <property name="margin-end">10</property>
-        <property name="margin-top">10</property>
-        <property name="margin-bottom">10</property>
+        <property name="can_focus">False</property>
+        <property name="margin_start">10</property>
+        <property name="margin_end">10</property>
+        <property name="margin_top">10</property>
+        <property name="margin_bottom">10</property>
         <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkModelButton" id="calibrate_button">
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Specify a calibration and units for displayed spectra.</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Specify a calibration and units for displayed spectra.</property>
             <property name="text" translatable="yes">Calibrate...</property>
           </object>
           <packing>
@@ -2865,9 +2889,9 @@ Weight by fit function - Weights are proportional to the fit function values det
         <child>
           <object class="GtkModelButton" id="fit_button">
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Fit peaks in the displayed spectrum.</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Fit peaks in the displayed spectrum.</property>
             <property name="text" translatable="yes">Fit...</property>
           </object>
           <packing>
@@ -2879,9 +2903,9 @@ Weight by fit function - Weights are proportional to the fit function values det
         <child>
           <object class="GtkModelButton" id="manage_spectra_button">
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Rename or delete imported spectra.</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Rename or delete imported spectra.</property>
             <property name="text" translatable="yes">Manage data...</property>
           </object>
           <packing>
@@ -2893,7 +2917,7 @@ Weight by fit function - Weights are proportional to the fit function values det
         <child>
           <object class="GtkSeparator">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -2904,11 +2928,11 @@ Weight by fit function - Weights are proportional to the fit function values det
         <child>
           <object class="GtkModelButton" id="to_save_menu_button">
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Save the opened spectra to disk.</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Save the opened spectra to disk.</property>
             <property name="text" translatable="yes">Save...</property>
-            <property name="menu-name">submenu1</property>
+            <property name="menu_name">submenu1</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -2919,7 +2943,7 @@ Weight by fit function - Weights are proportional to the fit function values det
         <child>
           <object class="GtkSeparator">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -2930,8 +2954,8 @@ Weight by fit function - Weights are proportional to the fit function values det
         <child>
           <object class="GtkModelButton" id="preferences_button">
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
             <property name="text" translatable="yes">Preferences</property>
           </object>
           <packing>
@@ -2943,7 +2967,7 @@ Weight by fit function - Weights are proportional to the fit function values det
         <child>
           <object class="GtkSeparator">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -2954,8 +2978,8 @@ Weight by fit function - Weights are proportional to the fit function values det
         <child>
           <object class="GtkModelButton" id="shortcuts_button">
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
             <property name="text" translatable="yes">Keyboard Shortcuts</property>
           </object>
           <packing>
@@ -2967,8 +2991,8 @@ Weight by fit function - Weights are proportional to the fit function values det
         <child>
           <object class="GtkModelButton" id="help_button">
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
             <property name="text" translatable="yes">Help</property>
           </object>
           <packing>
@@ -2980,9 +3004,9 @@ Weight by fit function - Weights are proportional to the fit function values det
         <child>
           <object class="GtkModelButton" id="about_button">
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">More information about this program.</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">More information about this program.</property>
             <property name="text" translatable="yes">About SpecFitter</property>
           </object>
           <packing>
@@ -2999,20 +3023,20 @@ Weight by fit function - Weights are proportional to the fit function values det
     <child>
       <object class="GtkBox" id="saveas_menu_box">
         <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="margin-start">10</property>
-        <property name="margin-end">10</property>
-        <property name="margin-top">10</property>
-        <property name="margin-bottom">10</property>
+        <property name="can_focus">False</property>
+        <property name="margin_start">10</property>
+        <property name="margin_end">10</property>
+        <property name="margin_top">10</property>
+        <property name="margin_bottom">10</property>
         <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkModelButton" id="to_main_menu_button">
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
             <property name="text" translatable="yes">Back</property>
-            <property name="menu-name">main</property>
+            <property name="menu_name">main</property>
             <property name="inverted">True</property>
           </object>
           <packing>
@@ -3024,7 +3048,7 @@ Weight by fit function - Weights are proportional to the fit function values det
         <child>
           <object class="GtkSeparator">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -3035,9 +3059,9 @@ Weight by fit function - Weights are proportional to the fit function values det
         <child>
           <object class="GtkModelButton" id="save_button">
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Save the full session with comments (file extension .jf3).</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Save the full session with comments (file extension .jf3).</property>
             <property name="text" translatable="yes">jf3 session (.jf3)</property>
           </object>
           <packing>
@@ -3049,9 +3073,9 @@ Weight by fit function - Weights are proportional to the fit function values det
         <child>
           <object class="GtkModelButton" id="save_button_text">
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Export spectra to an ASCII text file (extension .txt).</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Export spectra to an ASCII text file (extension .txt).</property>
             <property name="text" translatable="yes">ASCII text (.txt)</property>
           </object>
           <packing>
@@ -3063,9 +3087,9 @@ Weight by fit function - Weights are proportional to the fit function values det
         <child>
           <object class="GtkModelButton" id="save_button_radware">
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Export spectra to RadWare-compatible file(s) (file extension .spe).</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Export spectra to RadWare-compatible file(s) (file extension .spe).</property>
             <property name="text" translatable="yes">RadWare file(s) (.spe)</property>
           </object>
           <packing>
@@ -3077,7 +3101,7 @@ Weight by fit function - Weights are proportional to the fit function values det
         <child>
           <object class="GtkSeparator">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -3088,9 +3112,9 @@ Weight by fit function - Weights are proportional to the fit function values det
         <child>
           <object class="GtkModelButton" id="save_button_png">
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Export spectra or custom views to an image file (extension .png).</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Export spectra or custom views to an image file (extension .png).</property>
             <property name="text" translatable="yes">PNG image (.png)</property>
           </object>
           <packing>
@@ -3107,38 +3131,129 @@ Weight by fit function - Weights are proportional to the fit function values det
     </child>
   </object>
   <object class="GtkWindow" id="window">
-    <property name="width-request">800</property>
-    <property name="height-request">580</property>
-    <property name="can-focus">False</property>
+    <property name="width_request">800</property>
+    <property name="height_request">580</property>
+    <property name="can_focus">False</property>
     <property name="title" translatable="yes">jf3 Spectrum Viewer</property>
-    <property name="window-position">center</property>
-    <property name="default-width">600</property>
-    <property name="default-height">400</property>
+    <property name="window_position">center</property>
+    <property name="default_width">600</property>
+    <property name="default_height">400</property>
     <property name="icon">specfitter-application-icon.svg</property>
     <property name="gravity">center</property>
+    <child type="titlebar">
+      <object class="GtkHeaderBar" id="header_bar">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="title" translatable="yes">SpecFitter</property>
+        <property name="show_close_button">True</property>
+        <child>
+          <object class="GtkButtonBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="layout_style">expand</property>
+            <child>
+              <object class="GtkButton" id="open_button">
+                <property name="label" translatable="yes">Open...</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Open a file containing spectra (.jf3, .txt, .mca, .fmca, .spe format).</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="append_button">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Append file(s) containing spectra to the already opened spectra.</property>
+                <property name="halign">start</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="icon_name">list-add-symbolic</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkMenuButton" id="primary_menu_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="direction">none</property>
+            <property name="popover">primary_menu</property>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="pack_type">end</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkMenuButton" id="display_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Show display options for the loaded spectra.</property>
+            <property name="use_popover">False</property>
+            <property name="popover">display_popover</property>
+            <child>
+              <object class="GtkImage" id="display_button_icon">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_name">document-edit-symbolic</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="pack_type">end</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+      </object>
+    </child>
     <child>
       <object class="GtkBox" id="box1">
         <property name="visible">True</property>
-        <property name="can-focus">False</property>
+        <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkOverlay">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
+            <property name="can_focus">False</property>
             <child>
               <object class="GtkBox" id="no_sp_box">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">10</property>
                 <child>
                   <object class="GtkImage" id="no_sp_image">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="valign">end</property>
                     <property name="vexpand">True</property>
-                    <property name="pixel-size">30</property>
-                    <property name="icon-name">dialog-information-symbolic</property>
+                    <property name="pixel_size">30</property>
+                    <property name="icon_name">dialog-information-symbolic</property>
                     <property name="icon_size">6</property>
                   </object>
                   <packing>
@@ -3150,7 +3265,7 @@ Weight by fit function - Weights are proportional to the fit function values det
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="valign">start</property>
                     <property name="vexpand">True</property>
                     <property name="label" translatable="yes">No data has been opened</property>
@@ -3172,7 +3287,7 @@ Weight by fit function - Weights are proportional to the fit function values det
             <child type="overlay">
               <object class="GtkDrawingArea" id="spectrumdrawingarea">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
               </object>
             </child>
           </object>
@@ -3185,20 +3300,20 @@ Weight by fit function - Weights are proportional to the fit function values det
         <child>
           <object class="GtkRevealer" id="revealer_info_panel">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="transition-type">slide-up</property>
+            <property name="can_focus">False</property>
+            <property name="transition_type">slide-up</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="margin-start">10</property>
-                <property name="margin-end">10</property>
-                <property name="margin-top">6</property>
-                <property name="margin-bottom">6</property>
+                <property name="can_focus">False</property>
+                <property name="margin_start">10</property>
+                <property name="margin_end">10</property>
+                <property name="margin_top">6</property>
+                <property name="margin_bottom">6</property>
                 <property name="spacing">10</property>
                 <child>
                   <object class="GtkSpinner" id="fit_spinner">
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="halign">start</property>
                     <property name="active">True</property>
                   </object>
@@ -3210,9 +3325,9 @@ Weight by fit function - Weights are proportional to the fit function values det
                 </child>
                 <child>
                   <object class="GtkLabel" id="revealer_info_label">
-                    <property name="width-request">400</property>
+                    <property name="width_request">400</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Right-click to set upper and lower fit bounds.</property>
                     <property name="xalign">0</property>
                   </object>
@@ -3225,16 +3340,16 @@ Weight by fit function - Weights are proportional to the fit function values det
                 <child>
                   <object class="GtkButton" id="fit_cancel_button">
                     <property name="label">Cancel</property>
-                    <property name="width-request">100</property>
+                    <property name="width_request">100</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
                     <property name="halign">end</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="pack-type">end</property>
+                    <property name="pack_type">end</property>
                     <property name="position">2</property>
                   </packing>
                 </child>
@@ -3242,23 +3357,23 @@ Weight by fit function - Weights are proportional to the fit function values det
                   <object class="GtkButton" id="fit_preferences_button">
                     <property name="label" translatable="yes">Preferences...</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="pack-type">end</property>
+                    <property name="pack_type">end</property>
                     <property name="position">3</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkButton" id="fit_fit_button">
                     <property name="label" translatable="yes">Fit!</property>
-                    <property name="width-request">100</property>
+                    <property name="width_request">100</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
                     <property name="halign">end</property>
                     <style>
                       <class name="suggested-action"/>
@@ -3267,7 +3382,7 @@ Weight by fit function - Weights are proportional to the fit function values det
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="pack-type">end</property>
+                    <property name="pack_type">end</property>
                     <property name="position">4</property>
                   </packing>
                 </child>
@@ -3283,20 +3398,20 @@ Weight by fit function - Weights are proportional to the fit function values det
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="margin-start">10</property>
-            <property name="margin-end">10</property>
-            <property name="margin-top">2</property>
-            <property name="margin-bottom">2</property>
+            <property name="can_focus">False</property>
+            <property name="margin_start">10</property>
+            <property name="margin_end">10</property>
+            <property name="margin_top">2</property>
+            <property name="margin_bottom">2</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkLabel" id="bottom_info_text">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can_focus">False</property>
                 <property name="halign">start</property>
                 <property name="label" translatable="yes">No spectrum loaded.</property>
                 <property name="ellipsize">end</property>
-                <property name="track-visited-links">False</property>
+                <property name="track_visited_links">False</property>
                 <attributes>
                   <attribute name="style" value="normal"/>
                 </attributes>
@@ -3310,14 +3425,14 @@ Weight by fit function - Weights are proportional to the fit function values det
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="tooltip-text" translatable="yes">Zoom the spectrum in and out.</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">Zoom the spectrum in and out.</property>
                 <property name="spacing">6</property>
                 <child>
                   <object class="GtkImage">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="icon-name">zoom-out-symbolic</property>
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">zoom-out-symbolic</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -3327,14 +3442,14 @@ Weight by fit function - Weights are proportional to the fit function values det
                 </child>
                 <child>
                   <object class="GtkScale" id="zoom_scale">
-                    <property name="width-request">250</property>
+                    <property name="width_request">250</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <property name="can_focus">False</property>
                     <property name="adjustment">zoom_adjustment</property>
-                    <property name="show-fill-level">True</property>
+                    <property name="show_fill_level">True</property>
                     <property name="digits">0</property>
-                    <property name="draw-value">False</property>
-                    <property name="value-pos">right</property>
+                    <property name="draw_value">False</property>
+                    <property name="value_pos">right</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -3345,8 +3460,8 @@ Weight by fit function - Weights are proportional to the fit function values det
                 <child>
                   <object class="GtkImage">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="icon-name">zoom-in-symbolic</property>
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">zoom-in-symbolic</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -3358,7 +3473,7 @@ Weight by fit function - Weights are proportional to the fit function values det
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="pack-type">end</property>
+                <property name="pack_type">end</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -3366,97 +3481,6 @@ Weight by fit function - Weights are proportional to the fit function values det
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-    <child type="titlebar">
-      <object class="GtkHeaderBar" id="header_bar">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="title" translatable="yes">SpecFitter</property>
-        <property name="show-close-button">True</property>
-        <child>
-          <object class="GtkMenuButton" id="primary_menu_button">
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <property name="direction">none</property>
-            <property name="popover">primary_menu</property>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="pack-type">end</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButtonBox">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="layout-style">expand</property>
-            <child>
-              <object class="GtkButton" id="open_button">
-                <property name="label" translatable="yes">Open...</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <property name="tooltip-text" translatable="yes">Open a file containing spectra (.jf3, .txt, .mca, .fmca, .spe format).</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="append_button">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <property name="tooltip-text" translatable="yes">Append file(s) containing spectra to the already opened spectra.</property>
-                <property name="halign">start</property>
-                <child>
-                  <object class="GtkImage">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="icon-name">list-add-symbolic</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="position">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkMenuButton" id="display_button">
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Show display options for the loaded spectra.</property>
-            <property name="use-popover">False</property>
-            <property name="popover">display_popover</property>
-            <child>
-              <object class="GtkImage" id="display_button_icon">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="icon-name">document-edit-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="pack-type">end</property>
             <property name="position">3</property>
           </packing>
         </child>
