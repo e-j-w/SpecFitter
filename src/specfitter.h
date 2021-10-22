@@ -14,6 +14,7 @@
 #include <sys/stat.h>
 
 #include "lin_eq_solver.h"
+#include "utils.h"
 
 #define BIG_NUMBER    1E30
 #define SMALL_NUMBER -1E30

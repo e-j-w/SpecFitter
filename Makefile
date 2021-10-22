@@ -2,19 +2,21 @@ GLIB_COMPILE_RESOURCES = `pkg-config --variable=glib_compile_resources gio-2.0`
 
 RESOURCES = $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir=./data --generate-dependencies data/specfitter.gresource.xml)
 
-CFLAGS = -I. -I./src/lin_eq_solver -O2 -Wall -Wshadow -Wunreachable-code -Wpointer-arith -Wcast-align -Wformat-security -Wstack-protector -Wconversion -std=c99
+CFLAGS = -I. -I./src/utils -O2 -Wall -Wshadow -Wunreachable-code -Wpointer-arith -Wcast-align -Wformat-security -Wstack-protector -Wconversion -std=c99
 
-all: src/lin_eq_solver/lin_eq_solver.o specfitter-resources.c specfitter
+all: src/utils/lin_eq_solver.o src/utils/utils.o specfitter-resources.c specfitter
 
-specfitter: src/specfitter.c src/specfitter.h src/read_data.c src/read_config.c src/fit_data.c src/spectrum_drawing.c src/utils.c specfitter-resources.c src/lin_eq_solver/lin_eq_solver.o
-	gcc src/specfitter.c $(CFLAGS) -lm `pkg-config --cflags --libs gtk+-3.0` -export-dynamic -o specfitter src/lin_eq_solver/lin_eq_solver.o
-	rm specfitter-resources.c
+specfitter: src/specfitter.c src/specfitter.h src/read_data.c src/read_config.c src/fit_data.c src/spectrum_drawing.c specfitter-resources.c src/utils/lin_eq_solver.o src/utils/utils.o
+	gcc src/specfitter.c $(CFLAGS) -lm `pkg-config --cflags --libs gtk+-3.0` -export-dynamic -o specfitter src/utils/lin_eq_solver.o src/utils/utils.o
 
 specfitter-resources.c: data/specfitter.gresource.xml data/specfitter.glade $(RESOURCES)
 	$(GLIB_COMPILE_RESOURCES) data/specfitter.gresource.xml --target=specfitter-resources.c --sourcedir=./data --generate-source
 
-src/lin_eq_solver/lin_eq_solver.o: src/lin_eq_solver/lin_eq_solver.c src/lin_eq_solver/lin_eq_solver.h
-	gcc $(CFLAGS) -c -o src/lin_eq_solver/lin_eq_solver.o src/lin_eq_solver/lin_eq_solver.c
+src/utils/lin_eq_solver.o: src/utils/lin_eq_solver.c src/utils/lin_eq_solver.h
+	gcc $(CFLAGS) -c -o src/utils/lin_eq_solver.o src/utils/lin_eq_solver.c
+
+src/utils/utils.o: src/utils/utils.c src/utils/utils.h
+	gcc $(CFLAGS) -c -o src/utils/utils.o src/utils/utils.c
 
 install:
 	@echo "Will install to /usr/bin."

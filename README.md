@@ -2,7 +2,7 @@
 
 A program for gamma-ray spectroscopy or similar data analysis.  Uses [GTK](https://www.gtk.org/) to provide smooth rendering and (hopefully) an easy to understand interface.  This is a hobby project, things should mostly work but all the typical disclaimers apply.
 
-## Screenshot
+## Screenshots
 
 ![SpecFitter user interface screenshot](https://raw.githubusercontent.com/e-j-w/e-j-w.github.io/master/media/specfitter.png "SpecFitter user interface")
 

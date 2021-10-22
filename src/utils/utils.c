@@ -2,6 +2,8 @@
 
 //Utility functions which shouldn't depend on anything else.
 
+#include "utils.h"
+
 //get a formatted string with a value and its uncertainty 
 //if roundErr=1, error will be properly rounded using the '20 rule' for reporting uncertainties
 void getFormattedValAndUncertainty(const double val, const double err, char *str, const long unsigned int strLength, const int showErr, const int roundErr){

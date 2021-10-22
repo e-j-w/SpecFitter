@@ -6,7 +6,6 @@
 #include "specfitter-resources.c"
 
 //routines
-#include "utils.c" //standalone utility functions
 #include "spectrum_data.c" //functions which access imported spectrum/histogram data
 #include "fit_data.c" //functions for fitting imported data
 #include "spectrum_drawing.c" //functions for drawing imported data
@@ -17,8 +16,7 @@
 //GTK interaction routines
 #include "gui.c"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]){
   
   gtk_init(&argc, &argv); //initialize GTK
   iniitalizeUIElements(); //see gui.c
