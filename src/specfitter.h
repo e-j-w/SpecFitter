@@ -24,8 +24,8 @@
 
 /* Data file specs (be careful if changing these, can break compatibility) */
 #define S32K      32768 //maximum number of channels per spectrum in .mca and .fmca (changing breaks file compatibility)
-#define NSPECT    100   //maximum number of spectra which may be opened at once (for compatibility should be 255 or less)
-#define MAXNVIEWS 100   //maximum number of views which can be saved by the user
+#define NSPECT    128   //maximum number of spectra which may be opened at once (for compatibility should be 255 or less)
+#define MAXNVIEWS 128   //maximum number of views which can be saved by the user
 #define NCHCOM    1000  //maximum number of comments that can be placed by the user on individual channels
 
 /* GUI globals */

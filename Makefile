@@ -6,7 +6,7 @@ CFLAGS = -I. -I./src/utils -O2 -Wall -Wshadow -Wunreachable-code -Wpointer-arith
 
 all: src/utils/lin_eq_solver.o src/utils/utils.o specfitter-resources.c specfitter
 
-specfitter: src/specfitter.c src/specfitter.h src/read_data.c src/read_config.c src/fit_data.c src/spectrum_drawing.c specfitter-resources.c src/utils/lin_eq_solver.o src/utils/utils.o
+specfitter: src/specfitter.c src/specfitter.h src/gui.c src/read_data.c src/read_config.c src/fit_data.c src/spectrum_drawing.c specfitter-resources.c src/utils/lin_eq_solver.o src/utils/utils.o
 	gcc src/specfitter.c $(CFLAGS) -lm `pkg-config --cflags --libs gtk+-3.0` -export-dynamic -o specfitter src/utils/lin_eq_solver.o src/utils/utils.o
 
 specfitter-resources.c: data/specfitter.gresource.xml data/specfitter.glade $(RESOURCES)

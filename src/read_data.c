@@ -32,7 +32,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
     if(numSpec > 0){
 
       if((numSpec + outHistStartSp)>NSPECT){
-        printf("Cannot open file %s, number of spectra would exceed maximum!\n", filename);
+        printf("Cannot open file %s, number of spectra would exceed maximum (%i, %i spectra already open, %i in file)!\n", filename, NSPECT, outHistStartSp, numSpec);
         fclose(inp);
         return -1; //over-import error
       }
@@ -228,9 +228,8 @@ int readMCA(const char *filename, double outHist[NSPECT][S32K], const unsigned i
     }
   fclose(inp);
   //printf("number of spectra in file '%s': %i\n",filename,numSpec);	
-  if((outHistStartSp+numSpec)>=NSPECT){
-    printf("Cannot open file %s, number of spectra would exceed maximum!\n", filename);
-    fclose(inp);
+  if((outHistStartSp+numSpec)>NSPECT){
+    printf("Cannot open file %s, number of spectra would exceed maximum (%i, %i spectra already open, %i in file)!\n", filename, NSPECT, outHistStartSp, numSpec);
     return -1; //over-import error
   }
 
@@ -280,9 +279,8 @@ int readFMCA(const char *filename, double outHist[NSPECT][S32K], const unsigned 
     }
   fclose(inp);
   //printf("number of spectra in file '%s': %i\n",filename,numSpec);
-  if((outHistStartSp+numSpec)>=NSPECT){
-    printf("Cannot open file %s, number of spectra would exceed maximum!\n", filename);
-    fclose(inp);
+  if((outHistStartSp+numSpec)>NSPECT){
+    printf("Cannot open file %s, number of spectra would exceed maximum (%i, %i spectra already open, %i in file)!\n", filename, NSPECT, outHistStartSp, numSpec);
     return -1;
   }
 
@@ -345,8 +343,7 @@ int readSPE(const char *filename, double outHist[NSPECT][S32K], const unsigned i
   }
 
   if(outHistStartSp>=NSPECT){
-    printf("Cannot open file %s, number of spectra would exceed maximum!\n", filename);
-    fclose(inp);
+    printf("Cannot open file %s, number of spectra would exceed maximum (%i, %i spectra already open, 1 in file)!\n", filename, NSPECT, outHistStartSp);
     return -1; //over-import error
   }
 
@@ -676,25 +673,25 @@ int readSpectrumDataFile(const char *filename, double outHist[NSPECT][S32K], con
   if(dot==NULL){
     return -2; //invalid file type
   }
-  if (strcmp(dot + 1, "mca") == 0)
+  if (strcmp(dot + 1, "mca") == 0){
     numSpec = readMCA(filename, outHist, outHistStartSp);
-  else if (strcmp(dot + 1, "fmca") == 0)
+  }else if (strcmp(dot + 1, "fmca") == 0){
     numSpec = readFMCA(filename, outHist, outHistStartSp);
-  else if (strcmp(dot + 1, "spe") == 0)
+  }else if (strcmp(dot + 1, "spe") == 0){
     numSpec = readSPE(filename, outHist, outHistStartSp);
-  else if (strcmp(dot + 1, "txt") == 0)
+  }else if (strcmp(dot + 1, "txt") == 0){
     numSpec = readTXT(filename, outHist, outHistStartSp);
-  else if (strcmp(dot + 1, "C") == 0)
+  }else if (strcmp(dot + 1, "C") == 0){
     numSpec = readROOT(filename, outHist, outHistStartSp);
-  else if (strcmp(dot + 1, "jf3") == 0)
+  }else if (strcmp(dot + 1, "jf3") == 0){
     numSpec = readJF3(filename, outHist, outHistStartSp);
-  else{
+  }else{
     //printf("Improper format of input file: %s\n", filename);
     //printf("Supported file formats are: jf3 (.jf3), plaintext (.txt) integer array (.mca), float array (.fmca), radware (.spe), or ROOT macro (.C) files.\n");
     return -2;
   }
 
-  if((numSpec==-1)||(((int)outHistStartSp+numSpec)>=NSPECT)){
+  if((numSpec==-1)||(((int)outHistStartSp+numSpec)>NSPECT)){
     return -1; //too many spectra opened
   }
 
