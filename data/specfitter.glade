@@ -1198,6 +1198,7 @@ binning factors will be preserved.</property>
                       <item translatable="yes">Small</item>
                       <item translatable="yes">Normal</item>
                       <item translatable="yes">Large</item>
+                      <item translatable="yes">Extra Large</item>
                     </items>
                   </object>
                   <packing>

@@ -913,7 +913,7 @@ void on_export_image_button_clicked(GtkButton *b){
   gtk_file_filter_add_pattern(file_filter,"*.png");
   gtk_file_chooser_add_filter(file_save_dialog,file_filter);
 
-  float scaleFactor = (float)((1.0 + inpAxisScale)*sqrt((hres*vres)/1000000.0));
+  float scaleFactor = (float)((1.0 + inpAxisScale*0.5)*sqrt((hres*vres)/1000000.0));
 
   int saveErr = 0; //to track if there are any errors when opening spectra
   if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
