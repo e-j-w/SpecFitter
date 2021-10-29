@@ -92,7 +92,7 @@ void getFormattedYAxisVal(const double val, const double axisMinVal, const doubl
     return;
   }
 
-  if((axisMaxVal - axisMinVal) > 2.0){
+  if((axisMaxVal - axisMinVal) > 5.0){
     //large axis range
     if(fabs(val) < 100000){
       //print value rounded to nearest integer

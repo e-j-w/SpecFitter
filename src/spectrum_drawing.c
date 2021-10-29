@@ -1186,11 +1186,12 @@ void drawPlotLabel(cairo_t *cr, const float width, const float height, const dou
 
 float getDistBetweenYAxisTicks(const float axisRange, const int numTicks){
 
-  if(axisRange == 0){
-    return 1;
+  if((axisRange == 0)||(numTicks == 0)){
+    return 1.0f;
   }
 
-  float trialDist = 0;
+  float trialDist = 0.0f;
+  float sfFactor = 0.0f;
   int sigf = 0;
   if(axisRange < 1){
     //get number of sig figs
@@ -1208,28 +1209,22 @@ float getDistBetweenYAxisTicks(const float axisRange, const int numTicks){
     }
   }
 
-  trialDist =  powf(10.0f,(float)(sigf-1));
-  int trialNumTicks = (int)floor(axisRange/trialDist);
-  //printf("1 - axisRange: %f, sigf: %i, trialDist: %f, trialNumTicks: %i, numTicks: %i\n",axisRange,sigf,trialDist,trialNumTicks,numTicks);
-
-  if(trialNumTicks > numTicks){
-    if((int)floor(axisRange/(trialDist*5.0)) < (numTicks/1.5))
-      trialDist *= 2.0f;
-    else
-      trialDist *= 5.0f;
-  }else{
-    if((int)floor(axisRange/(trialDist/5.0)) > numTicks*1.5)
-      trialDist /= 2.0f;
-    else
-      trialDist /= 5.0f;
+  trialDist = axisRange/(float)numTicks;
+  if(trialDist < 0.0f){
+    trialDist *= -1.0f;
   }
-  //printf("2 - axisRange: %f, sigf: %i, trialDist: %f, trialNumTicks: %i, numTicks: %i\n",axisRange,sigf,trialDist,trialNumTicks,numTicks);
 
-  if(trialDist > 0.0f){
-    return ceilf(trialDist);
-  }else{
-    return 1.0f; //a non-zero return value is assumed
+  sfFactor = powf(10.0f,(float)(sigf-1));
+  if(trialDist > sfFactor){
+    return sfFactor*(float)((int)(trialDist/sfFactor));
+  }else if(trialDist > sfFactor/2.0f){
+    return sfFactor/2.0f;
   }
+  while(trialDist < sfFactor){
+    sfFactor /= 10.0f;
+  }
+  return sfFactor*(float)((int)(trialDist/sfFactor));
+  
 
 }
 
@@ -1461,9 +1456,6 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   switch(drawing.multiplotMode){
     case MULTIPLOT_STACKED:
       //stacked
-      numTickPerSp = (int)((height)/(yorigin*(float)(drawing.numMultiplotSp)));
-      if(numTickPerSp < 2)
-        numTickPerSp = 2;
       if(drawing.logScale){
         for(i=0;i<drawing.numMultiplotSp;i++){
           float rangeVal = drawing.scaleLevelMax[i] - drawing.scaleLevelMin[i];
@@ -1473,7 +1465,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           if(rangeVal >= 1000.){
             //logarithmic scale ticks in base-10
             float tickVal = powf(10.0f,(float)(getNSigf(drawing.scaleLevelMax[i],10.0)));
-            while(numTickUsed < numTickPerSp){
+            while((tickVal > drawing.scaleLevelMin[i])&&(tickVal >= 1.0f)){
               drawYAxisTick(tickVal, i, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin);
               tickVal /= 10.0f;
               numTickUsed++;
@@ -1481,7 +1473,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           }else{
             //logarithmic scale ticks in base-2
             float tickVal = powf(2.0f,(float)(getNSigf(drawing.scaleLevelMax[i],2.0)));
-            while(numTickUsed < numTickPerSp){
+            while((tickVal > drawing.scaleLevelMin[i])&&(tickVal >= 1.0f)){
               drawYAxisTick(tickVal, i, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin);
               tickVal /= 2.0f;
               numTickUsed++;
@@ -1489,6 +1481,9 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           }
         }
       }else{
+        numTickPerSp = (int)((height)/(yorigin*(float)(drawing.numMultiplotSp)));
+        if(numTickPerSp < 2)
+          numTickPerSp = 2;
         for(i=0;i<drawing.numMultiplotSp;i++){
           yTickDist = getDistBetweenYAxisTicks(drawing.scaleLevelMax[i] - drawing.scaleLevelMin[i],numTickPerSp);
           cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
@@ -1526,7 +1521,6 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     case MULTIPLOT_NONE:
       //modes with a single scale
       setTextColor(cr);
-      numTickPerSp = (int)(height/(4.0f*yorigin)) + 1;
       if(drawing.logScale){
         //numTickPerSp *= 2;
         int nsigf10 = 0;
@@ -1539,7 +1533,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         if(nsigf10 >= 3){
           //logarithmic scale ticks in base-10
           float tickVal = powf(10.0f,(float)(getNSigf(drawing.scaleLevelMax[0],10.0)));
-          while(numTickUsed < numTickPerSp){
+          while((tickVal > drawing.scaleLevelMin[i])&&(tickVal >= 1.0f)){
             drawYAxisTick(tickVal, 0, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin);
             tickVal /= 10.0f;
             numTickUsed++;
@@ -1547,13 +1541,14 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         }else{
           //logarithmic scale ticks in base-2
           float tickVal = powf(2.0f,(float)(getNSigf(drawing.scaleLevelMax[0],2.0)));
-          while(numTickUsed < numTickPerSp){
+          while((tickVal > drawing.scaleLevelMin[i])&&(tickVal >= 1.0f)){
             drawYAxisTick(tickVal, 0, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin);
             tickVal /= 2.0f;
             numTickUsed++;
           }
         }
       }else{
+        numTickPerSp = (int)(height/(4.0f*yorigin)) + 1;
         yTickDist = getDistBetweenYAxisTicks(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0],numTickPerSp);
         for(yTick=0.;yTick<drawing.scaleLevelMax[0];yTick+=yTickDist){
           drawYAxisTick(yTick, 0, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin);
