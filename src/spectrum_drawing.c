@@ -246,9 +246,16 @@ gboolean zoom_y_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gpointer
   float diffFac = 0.00002f*(float)(frameTime-drawing.zoomYLastFrameTime);
   int i;
   for(i=0;i<drawing.numMultiplotSp;i++){
-    if(drawing.scaleLevelMax[i] > drawing.scaleToLevelMax[i]){
+    if(drawing.scaleToLevelMax[i] == drawing.scaleLevelMin[i]){
+      drawing.scaleLevelMax[i] = drawing.scaleLevelMin[i];
+    }else if(drawing.scaleLevelMax[i] > drawing.scaleToLevelMax[i]){
       drawing.scaleLevelMax[i] -= diffFac*(drawing.scaleLevelMax[i]-drawing.scaleToLevelMax[i]) + linFac*fabsf(drawing.scaleLevelMax[i]);
       if(drawing.scaleLevelMax[i] <= drawing.scaleToLevelMax[i]){
+        drawing.scaleLevelMax[i] = drawing.scaleToLevelMax[i];
+      }
+    }else if(drawing.scaleLevelMax[i] < drawing.scaleToLevelMax[i]){
+      drawing.scaleLevelMax[i] += diffFac*(drawing.scaleToLevelMax[i]-drawing.scaleLevelMax[i]) + linFac*fabsf(drawing.scaleLevelMax[i]);
+      if(drawing.scaleLevelMax[i] >= drawing.scaleToLevelMax[i]){
         drawing.scaleLevelMax[i] = drawing.scaleToLevelMax[i];
       }
     }
@@ -257,14 +264,7 @@ gboolean zoom_y_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gpointer
       if(drawing.scaleLevelMin[i] >= drawing.scaleToLevelMin[i]){
         drawing.scaleLevelMin[i] = drawing.scaleToLevelMin[i];
       }
-    }
-    if(drawing.scaleLevelMax[i] < drawing.scaleToLevelMax[i]){
-      drawing.scaleLevelMax[i] += diffFac*(drawing.scaleToLevelMax[i]-drawing.scaleLevelMax[i]) + linFac*fabsf(drawing.scaleLevelMax[i]);
-      if(drawing.scaleLevelMax[i] >= drawing.scaleToLevelMax[i]){
-        drawing.scaleLevelMax[i] = drawing.scaleToLevelMax[i];
-      }
-    }
-    if(drawing.scaleLevelMin[i] > drawing.scaleToLevelMin[i]){
+    }else if(drawing.scaleLevelMin[i] > drawing.scaleToLevelMin[i]){
       drawing.scaleLevelMin[i] -= diffFac*(drawing.scaleLevelMin[i]-drawing.scaleToLevelMin[i]) + linFac*fabsf(drawing.scaleLevelMin[i]);
       if(drawing.scaleLevelMin[i] <= drawing.scaleToLevelMin[i]){
         drawing.scaleLevelMin[i] = drawing.scaleToLevelMin[i];
