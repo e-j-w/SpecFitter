@@ -134,6 +134,8 @@ GdkFrameClock *frameClock;
 
 //non-GTK GUI globals
 struct {
+  char scrollDir;
+  double accSmoothScrollDelta; //storage variable for smooth scrolling
   char draggingSp; //0 if no drag motion, 1 if dragging
   int dragstartul, dragstartll; //click and drag position storage parameters
   float dragStartX; //start cursor position when dragging

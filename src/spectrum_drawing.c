@@ -385,23 +385,33 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
   }
 
   //get scroll direction
-  int scrollDir = GDK_SCROLL_UP;
   //printf("direction: %i, delta_y: %f\n",e->direction,e->delta_y);
   if((e->direction == GDK_SCROLL_UP)||(e->direction == GDK_SCROLL_DOWN)){
-    scrollDir = e->direction;
+    guiglobals.scrollDir = e->direction;
   }else if(e->direction == GDK_SCROLL_SMOOTH){
     if(e->delta_y>0.0){
-      scrollDir = GDK_SCROLL_DOWN;
+      if(guiglobals.scrollDir != GDK_SCROLL_DOWN){
+        guiglobals.scrollDir = GDK_SCROLL_DOWN;
+        guiglobals.accSmoothScrollDelta = fabs(0.05*e->delta_y);
+      }else{
+        guiglobals.accSmoothScrollDelta = guiglobals.accSmoothScrollDelta + fabs(0.05*e->delta_y);
+      }
     }else if(e->delta_y<0.0){
-      scrollDir = GDK_SCROLL_UP;
+      if(guiglobals.scrollDir != GDK_SCROLL_UP){
+        guiglobals.scrollDir = GDK_SCROLL_UP;
+        guiglobals.accSmoothScrollDelta = fabs(0.25*e->delta_y);
+      }else{
+        guiglobals.accSmoothScrollDelta = guiglobals.accSmoothScrollDelta + fabs(0.25*e->delta_y);
+      }
     }else{
+      guiglobals.accSmoothScrollDelta = 0.;
       return;
     }
   }else{
     return;
   }
 
-  if((scrollDir == GDK_SCROLL_DOWN)&&(drawing.zoomLevel > 1.0)){
+  if((guiglobals.scrollDir == GDK_SCROLL_DOWN)&&(drawing.zoomLevel > 1.0)){
     //printf("Scrolling down at %f %f!\n",e->x,e->y);
     on_zoom_out_x();
     //handle zooming that follows cursor
@@ -410,7 +420,19 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
     // Determine GtkDrawingArea dimensions
     gdk_window_get_geometry (wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
     if(guiglobals.useZoomAnimations){
-      drawing.zoomToLevel = drawing.zoomLevel * 0.5f;
+      if(drawing.zoomingSpX){
+        return;
+      }
+      if(e->direction == GDK_SCROLL_SMOOTH){
+        if(guiglobals.accSmoothScrollDelta <= 1.0){
+          return;
+        }
+        //printf("zoom out: %f\n",guiglobals.accSmoothScrollDelta);
+        drawing.zoomToLevel = drawing.zoomLevel * (float)(1.0/guiglobals.accSmoothScrollDelta);
+        guiglobals.accSmoothScrollDelta = 0.0; //reset
+      }else{
+        drawing.zoomToLevel = drawing.zoomLevel * 0.5f;
+      }
       if((drawing.upperLimit - drawing.lowerLimit)>0){
         drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-80.0)/(dasize.width-80.0)*(drawing.upperLimit - drawing.lowerLimit));
         drawing.zoomFocusFrac = (float)((drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit));
@@ -431,7 +453,7 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
       gtk_range_set_value(GTK_RANGE(zoom_scale),log(drawing.zoomLevel)/log(2.));//base 2 log of zoom
       gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
     }
-  }else if((scrollDir != GDK_SCROLL_DOWN)&&(drawing.zoomLevel < 1024.0)){
+  }else if((guiglobals.scrollDir != GDK_SCROLL_DOWN)&&(drawing.zoomLevel < 1024.0)){
     //handle zooming that follows cursor
     //printf("Scrolling up at %f %f!\n",e->x,e->y);
     GdkRectangle dasize;  // GtkDrawingArea size
@@ -439,7 +461,19 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
     // Determine GtkDrawingArea dimensions
     gdk_window_get_geometry (wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
     if(guiglobals.useZoomAnimations){
-      drawing.zoomToLevel = drawing.zoomLevel * 2.0f;
+      if(drawing.zoomingSpX){
+        return;
+      }
+      if(e->direction == GDK_SCROLL_SMOOTH){
+        if(guiglobals.accSmoothScrollDelta < 0.5){
+          return;
+        }
+        //printf("zoom in: %f\n",guiglobals.accSmoothScrollDelta);
+        drawing.zoomToLevel = drawing.zoomLevel * (float)(1.0 + guiglobals.accSmoothScrollDelta);
+        guiglobals.accSmoothScrollDelta = 0.0; //reset
+      }else{
+        drawing.zoomToLevel = drawing.zoomLevel * 2.0f;
+      }
       if((drawing.upperLimit - drawing.lowerLimit)>0){
         drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-80.0)/(dasize.width-80.0)*(drawing.upperLimit - drawing.lowerLimit));
         drawing.zoomFocusFrac = (float)((drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit));
