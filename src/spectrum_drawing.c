@@ -415,8 +415,10 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
       }
     }else if((e->delta_x==0.0)&&(e->delta_y==0.0)){
       //GTK bug lol (https://bugzilla.gnome.org/show_bug.cgi?id=675959)
-      guiglobals.scrollDir = GDK_SCROLL_UP;
-      guiglobals.accSmoothScrollDelta = 1.0;
+      if(drawing.zoomLevel > 1.0){
+        guiglobals.scrollDir = GDK_SCROLL_UP;
+        guiglobals.accSmoothScrollDelta = 1.0;
+      }
     }else{
       guiglobals.accSmoothScrollDelta = 0.;
       return;
