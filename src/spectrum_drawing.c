@@ -401,17 +401,17 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
       //touchpad scroll down
       if(guiglobals.scrollDir != GDK_SCROLL_DOWN){
         guiglobals.scrollDir = GDK_SCROLL_DOWN;
-        guiglobals.accSmoothScrollDelta = fabs(0.05*e->delta_y);
+        return; //skip a frame to account for spurious touchpad inputs
       }else{
-        guiglobals.accSmoothScrollDelta = guiglobals.accSmoothScrollDelta + fabs(0.05*e->delta_y);
+        guiglobals.accSmoothScrollDelta = guiglobals.accSmoothScrollDelta + 0.25*e->delta_y;
       }
     }else if(e->delta_y<0.0){
       //touchpad scroll up
       if(guiglobals.scrollDir != GDK_SCROLL_UP){
         guiglobals.scrollDir = GDK_SCROLL_UP;
-        guiglobals.accSmoothScrollDelta = fabs(0.25*e->delta_y);
+        return; //skip a frame to account for spurious touchpad inputs
       }else{
-        guiglobals.accSmoothScrollDelta = guiglobals.accSmoothScrollDelta + fabs(0.25*e->delta_y);
+        guiglobals.accSmoothScrollDelta = guiglobals.accSmoothScrollDelta - 0.25*e->delta_y;
       }
     }else if((e->delta_x==0.0)&&(e->delta_y==0.0)){
       //GTK bug lol (https://bugzilla.gnome.org/show_bug.cgi?id=675959)
@@ -1362,12 +1362,12 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   //get the maximum/minimum y values of the displayed region
   float maxVal[MAX_DISP_SP];
   float minVal[MAX_DISP_SP];
+  float currentVal[MAX_DISP_SP];
   for(i=0;i<drawing.numMultiplotSp;i++){
     minVal[i] = (float)(BIG_NUMBER);
     maxVal[i] = (float)(SMALL_NUMBER);
   }
   for(i=0;i<(drawing.upperLimit-drawing.lowerLimit-1);i+=drawing.contractFactor){
-    float currentVal[MAX_DISP_SP];
     switch(drawing.multiplotMode){
       case MULTIPLOT_STACKED:
         //stacked
@@ -1682,26 +1682,26 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       for(i=0;i<drawing.numMultiplotSp;i++){
         for(j=startBin;j<(drawing.upperLimit-drawing.lowerLimit);j+=binSkipFactor){
 
-          float currentVal, nextVal;
+          float nextVal;
 
           //draw high values even if they were going to be interpolated over
           if(binSkipFactor > drawing.contractFactor){
             for(k=0;k<binSkipFactor;k++){
               if(getDispSpBinVal(i, j+k) > drawing.scaleLevelMax[i]*0.8){
-                currentVal = getDispSpBinVal(i, j);
+                currentVal[0] = getDispSpBinVal(i, j);
                 nextVal = getDispSpBinVal(i, j+k);
-                cairo_move_to(cr, getXPos(j,width,xorigin), getYPos(currentVal,i,height,yorigin));
-                cairo_line_to(cr, getXPos(j+k,width,xorigin), getYPos(currentVal,i,height,yorigin));
+                cairo_move_to(cr, getXPos(j,width,xorigin), getYPos(currentVal[0],i,height,yorigin));
+                cairo_line_to(cr, getXPos(j+k,width,xorigin), getYPos(currentVal[0],i,height,yorigin));
                 cairo_line_to(cr, getXPos(j+k,width,xorigin), getYPos(nextVal,i,height,yorigin));
                 break;
               }
             }
           }
 
-          currentVal = getDispSpBinVal(i, j);
+          currentVal[0] = getDispSpBinVal(i, j);
           nextVal = getDispSpBinVal(i, j+binSkipFactor);
-          cairo_move_to(cr, getXPos(j,width,xorigin), getYPos(currentVal,i,height,yorigin));
-          cairo_line_to(cr, getXPos(j+binSkipFactor,width,xorigin), getYPos(currentVal,i,height,yorigin));
+          cairo_move_to(cr, getXPos(j,width,xorigin), getYPos(currentVal[0],i,height,yorigin));
+          cairo_line_to(cr, getXPos(j+binSkipFactor,width,xorigin), getYPos(currentVal[0],i,height,yorigin));
           cairo_line_to(cr, getXPos(j+binSkipFactor,width,xorigin), getYPos(nextVal,i,height,yorigin));
         }
         //choose color
@@ -1714,26 +1714,26 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       for(i=0;i<drawing.numMultiplotSp;i++){
         for(j=startBin;j<(drawing.upperLimit-drawing.lowerLimit);j+=binSkipFactor){
 
-          float currentVal, nextVal;
+          float nextVal;
 
           //draw high values even if they were going to be interpolated over
           if(binSkipFactor > drawing.contractFactor){
             for(k=0;k<binSkipFactor;k++){
               if(getDispSpBinVal(i, j+k) > drawing.scaleLevelMax[0]*0.8){
-                currentVal = getDispSpBinVal(i, j);
+                currentVal[0] = getDispSpBinVal(i, j);
                 nextVal = getDispSpBinVal(i, j+k);
-                cairo_move_to(cr, getXPos(j,width,xorigin), getYPos(currentVal,0,height,yorigin));
-                cairo_line_to(cr, getXPos(j+k,width,xorigin), getYPos(currentVal,0,height,yorigin));
+                cairo_move_to(cr, getXPos(j,width,xorigin), getYPos(currentVal[0],0,height,yorigin));
+                cairo_line_to(cr, getXPos(j+k,width,xorigin), getYPos(currentVal[0],0,height,yorigin));
                 cairo_line_to(cr, getXPos(j+k,width,xorigin), getYPos(nextVal,0,height,yorigin));
                 break;
               }
             }
           }
 
-          currentVal = getDispSpBinVal(i, j);
+          currentVal[0] = getDispSpBinVal(i, j);
           nextVal = getDispSpBinVal(i, j+binSkipFactor);
-          cairo_move_to(cr, getXPos(j,width,xorigin), getYPos(currentVal,0,height,yorigin));
-          cairo_line_to(cr, getXPos(j+binSkipFactor,width,xorigin), getYPos(currentVal,0,height,yorigin));
+          cairo_move_to(cr, getXPos(j,width,xorigin), getYPos(currentVal[0],0,height,yorigin));
+          cairo_line_to(cr, getXPos(j+binSkipFactor,width,xorigin), getYPos(currentVal[0],0,height,yorigin));
           cairo_line_to(cr, getXPos(j+binSkipFactor,width,xorigin), getYPos(nextVal,0,height,yorigin));
         }
         //choose color
@@ -1746,27 +1746,27 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     case MULTIPLOT_NONE:
       for(i=startBin;i<(drawing.upperLimit-drawing.lowerLimit);i+=binSkipFactor){
 
-        float currentVal, nextVal;
+        float nextVal;
 
         //draw high values even if they were going to be interpolated over
         if(binSkipFactor > drawing.contractFactor){
           for(k=0;k<binSkipFactor;k++){
             if(getDispSpBinVal(0, i+k) > drawing.scaleLevelMax[0]*0.8){
-              currentVal = getDispSpBinVal(0, i);
+              currentVal[0] = getDispSpBinVal(0, i);
               nextVal = getDispSpBinVal(0, i+k);
-              cairo_move_to(cr, getXPos(i,width,xorigin), getYPos(currentVal,0,height,yorigin));
-              cairo_line_to(cr, getXPos(i+k,width,xorigin), getYPos(currentVal,0,height,yorigin));
+              cairo_move_to(cr, getXPos(i,width,xorigin), getYPos(currentVal[0],0,height,yorigin));
+              cairo_line_to(cr, getXPos(i+k,width,xorigin), getYPos(currentVal[0],0,height,yorigin));
               cairo_line_to(cr, getXPos(i+k,width,xorigin), getYPos(nextVal,0,height,yorigin));
               break;
             }
           }
         }
 
-        currentVal = getDispSpBinVal(0, i);
+        currentVal[0] = getDispSpBinVal(0, i);
         nextVal = getDispSpBinVal(0, i+binSkipFactor);
         //printf("Here! x=%f,y=%f,yorig=%f xclip=%f %f\n",getXPos(i,width), rawdata.hist[drawing.multiPlots[0]][drawing.lowerLimit+i],rawdata.hist[drawing.multiPlots[0]][drawing.lowerLimit+i],0,width);
-        cairo_move_to(cr, getXPos(i,width,xorigin), getYPos(currentVal,0,height,yorigin));
-        cairo_line_to(cr, getXPos(i+binSkipFactor,width,xorigin), getYPos(currentVal,0,height,yorigin));
+        cairo_move_to(cr, getXPos(i,width,xorigin), getYPos(currentVal[0],0,height,yorigin));
+        cairo_line_to(cr, getXPos(i+binSkipFactor,width,xorigin), getYPos(currentVal[0],0,height,yorigin));
         cairo_line_to(cr, getXPos(i+binSkipFactor,width,xorigin), getYPos(nextVal,0,height,yorigin));
       }
       cairo_set_source_rgb(cr, drawing.spColors[0], drawing.spColors[1], drawing.spColors[2]);
