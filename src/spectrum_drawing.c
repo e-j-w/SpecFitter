@@ -440,7 +440,7 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
         return;
       }
       if(e->direction == GDK_SCROLL_SMOOTH){
-        if(guiglobals.accSmoothScrollDelta <= 1.0){
+        if(guiglobals.accSmoothScrollDelta < 0.25){
           return;
         }
         //printf("zoom out: %f\n",guiglobals.accSmoothScrollDelta);
@@ -1236,7 +1236,7 @@ void drawPlotLabel(cairo_t *cr, const float width, const float height, const dou
 
 float getDistBetweenYAxisTicks(const float axisRange, const int numTicks){
 
-  if((axisRange == 0)||(numTicks == 0)){
+  if((axisRange < 1E-10)||(numTicks == 0)){
     return 1.0f;
   }
 
@@ -1310,15 +1310,16 @@ double getDistBetweenXAxisTicks(const double axisRange, const float width){
 //get the x range of the plot in terms of x axis units, 
 //taking into account whether or not a calibration is in use
 double getPlotRangeXUnits(){
-  double cal_lowerLimit = (double)drawing.lowerLimit;
-  double cal_upperLimit = (double)drawing.upperLimit;
+  
   if(calpar.calMode==1){
     //calibrate
-    cal_lowerLimit = getCalVal(drawing.lowerLimit);
-    cal_upperLimit = getCalVal(drawing.upperLimit);
+    double cal_lowerLimit = getCalVal(drawing.lowerLimit);
+    double cal_upperLimit = getCalVal(drawing.upperLimit);
     //printf("cal upperlimit: %f, cal lowerlim: %f\n",cal_upperLimit,cal_lowerLimit);
+    return cal_upperLimit - cal_lowerLimit;
   }
-  return cal_upperLimit - cal_lowerLimit;
+  return (double)(drawing.upperLimit - drawing.lowerLimit);
+  
 }
 
 
@@ -1674,15 +1675,15 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   cairo_scale(cr, 1.0, -1.0); //invert y-axis so that positive y values go up
 
   //draw the actual histogram
+  int range = drawing.upperLimit-drawing.lowerLimit;
+  float nextVal;
   switch(drawing.multiplotMode){
     case MULTIPLOT_STACKED:
       //stacked
     case MULTIPLOT_OVERLAY_INDEPENDENT:
       //overlay (independent scaling)
       for(i=0;i<drawing.numMultiplotSp;i++){
-        for(j=startBin;j<(drawing.upperLimit-drawing.lowerLimit);j+=binSkipFactor){
-
-          float nextVal;
+        for(j=startBin;j<range;j+=binSkipFactor){
 
           //draw high values even if they were going to be interpolated over
           if(binSkipFactor > drawing.contractFactor){
@@ -1712,9 +1713,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     case MULTIPLOT_OVERLAY_COMMON:
       //overlay (common scaling)
       for(i=0;i<drawing.numMultiplotSp;i++){
-        for(j=startBin;j<(drawing.upperLimit-drawing.lowerLimit);j+=binSkipFactor){
-
-          float nextVal;
+        for(j=startBin;j<range;j+=binSkipFactor){
 
           //draw high values even if they were going to be interpolated over
           if(binSkipFactor > drawing.contractFactor){
@@ -1744,9 +1743,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     case MULTIPLOT_SUMMED:
       //summed
     case MULTIPLOT_NONE:
-      for(i=startBin;i<(drawing.upperLimit-drawing.lowerLimit);i+=binSkipFactor){
-
-        float nextVal;
+      for(i=startBin;i<range;i+=binSkipFactor){
 
         //draw high values even if they were going to be interpolated over
         if(binSkipFactor > drawing.contractFactor){
