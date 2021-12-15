@@ -16,3 +16,5 @@ specfitter-resources.c
 *#
 */*.o
 *workspace
+gmon.out
+gprof*

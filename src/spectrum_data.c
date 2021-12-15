@@ -221,24 +221,23 @@ float getSpBinValRaw(const int spNumRaw, const int bin, const double scaleFactor
 //if getWeight is set, will return weight values for fitting
 float getSpBinValOrWeight(const int dispSpNum, const int bin, const int getWeight){
 
-  if((dispSpNum >= drawing.numMultiplotSp)||(dispSpNum < 0)){
+  /*if((dispSpNum >= drawing.numMultiplotSp)||(dispSpNum < 0)){
     //invalid displayed spectrum number
     return 0;
-  }
+  }*/
 
-  int j,k;
   float val = 0.;
 
   switch(drawing.multiplotMode){
     case MULTIPLOT_SUMMED:
       //sum spectra
-      for(j=0;j<drawing.contractFactor;j++){
+      for(int j=0;j<drawing.contractFactor;j++){
         if(getWeight){
-          for(k=0;k<drawing.numMultiplotSp;k++){
+          for(int k=0;k<drawing.numMultiplotSp;k++){
             val += (float)(drawing.scaleFactor[drawing.multiPlots[k]]*drawing.scaleFactor[drawing.multiPlots[k]]*fabs(rawdata.hist[drawing.multiPlots[k]][bin+j]));
           }
         }else{
-          for(k=0;k<drawing.numMultiplotSp;k++){
+          for(int k=0;k<drawing.numMultiplotSp;k++){
             val += (float)(drawing.scaleFactor[drawing.multiPlots[k]]*rawdata.hist[drawing.multiPlots[k]][bin+j]);
           }
         }

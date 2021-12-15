@@ -793,7 +793,7 @@ void on_save_radware_button_clicked(GtkButton *b){
   gtk_window_present(export_options_window); //show the window
 }
 
-void on_export_mode_combobox_changed (GtkComboBox *widget, gpointer user_data){
+void on_export_mode_combobox_changed(GtkComboBox *widget, gpointer user_data){
   int exportMode = gtk_combo_box_get_active(GTK_COMBO_BOX(export_mode_combobox));
   switch(exportMode){
     case 0:

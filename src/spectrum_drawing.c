@@ -973,14 +973,14 @@ float getYPos(const float val, const int multiplotSpNum, const float height, con
             pos = yorigin + (height-yorigin)*(log10f(val)/log10f(drawing.scaleLevelMax[multiplotSpNum]));
           } 
         }else{
-          pos = yorigin;
+          return yorigin;
         }
       }else{
         pos = yorigin + (height-yorigin)*((val - drawing.scaleLevelMin[multiplotSpNum])/(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]));
       }
       //clip value to bottom edge of plot
       if((pos < yorigin)||(pos!=pos))
-        pos = yorigin;
+        return yorigin;
       break;
   }
   //printf("pos: %f\n",pos);
@@ -2101,7 +2101,7 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data){
 
   //printf("Drawing spectrum!\n");
 
-  cairo_set_antialias(cr,CAIRO_ANTIALIAS_FAST); //don't anitalias plots (doesn't apply to text)
+  cairo_set_antialias(cr,CAIRO_ANTIALIAS_FAST); //antialias setting, doesn't apply to text
   GdkRectangle dasize;  // GtkDrawingArea size
   GdkWindow *wwindow = gtk_widget_get_window(widget);
   // Determine GtkDrawingArea dimensions
