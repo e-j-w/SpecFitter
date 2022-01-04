@@ -1,4 +1,4 @@
-/* © J. Williams, 2020-2021 */
+/* © J. Williams, 2020-2022 */
 
 //File contains routines and callbacks for dealing with GTK and
 //the various UI elements used in the program.  Initialization

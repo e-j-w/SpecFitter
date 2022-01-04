@@ -11,6 +11,7 @@
         <icon name="application-x-spectrum-spe"/>
         <glob-deleteall/>
         <glob pattern="*.spe"/>
+        <glob pattern="*.Spe"/>
     </mime-type>
     <mime-type type="application/x-spectrum-mca">
         <comment>MCA spectrum data file</comment>
@@ -23,5 +24,12 @@
         <icon name="application-x-spectrum-fmca"/>
         <glob-deleteall/>
         <glob pattern="*.fmca"/>
+    </mime-type>
+    <mime-type type="application/x-spectrum-chn">
+        <comment>CHN spectrum data file</comment>
+        <icon name="application-x-spectrum-chn"/>
+        <glob-deleteall/>
+        <glob pattern="*.chn"/>
+        <glob pattern="*.Chn"/>
     </mime-type>
 </mime-info>

@@ -1,4 +1,4 @@
-/* © J. Williams, 2020-2021 */
+/* © J. Williams, 2020-2022 */
 
 //This file contains routines for drawing spectra using Cairo.
 //The main routine is drawSpectrum (near the bottom), helper 
