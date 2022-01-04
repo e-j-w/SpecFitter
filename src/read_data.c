@@ -9,8 +9,8 @@
 //.C - ROOT macro
 
 //function reads an .jf3 file into a double array and returns the array
-int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp)
-{
+int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp){
+
   unsigned int i,j;
   unsigned char ucharBuf, numSpec;
   unsigned int uintBuf;
@@ -205,8 +205,8 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 }
 
 //function reads an .mca file into a double array and returns the number of spectra read in
-int readMCA(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp)
-{
+int readMCA(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp){
+
   unsigned int i, j;
   int tmpHist[S32K];
   FILE *inp;
@@ -256,8 +256,8 @@ int readMCA(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 }
 
 //function reads an .fmca file into a double array and returns the number of spectra read in
-int readFMCA(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp)
-{
+int readFMCA(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp){
+
   unsigned int i, j;
   float tmpHist[S32K];
   FILE *inp;
@@ -306,9 +306,133 @@ int readFMCA(const char *filename, double outHist[NSPECT][S32K], const unsigned 
   return (int)numSpec;
 }
 
+//function reads an .chn (Maestro) file into the output hist and returns the number of spectra read in
+int readCHN(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp){
+
+  char acqTime[8], month[4];
+  short fType;
+  int i;
+  unsigned short chanOffset, mcaNum, numCh, segment;
+  int livetime, realtime, chData;
+  FILE *inp;
+  int hist[S32K];
+  memset(hist,0,sizeof(hist));
+
+  if((inp = fopen(filename, "r")) == NULL){ //open the file
+    printf("ERROR: Cannot open the input file: %s\n", filename);
+    printf("Check that the file exists.\n");
+    exit(-1);
+  }else{
+    fread(&fType,sizeof(fType),1,inp);
+    if(fType!=-1){
+      printf("ERROR: Input file %s is not a valid .chn file.\n",filename);
+      exit(-1);
+    }
+      
+    //read in the .chn file header and do absolutely nothing with it
+    fread(&mcaNum, sizeof(mcaNum), 1, inp);         // MCA #
+    fread(&segment, sizeof(segment), 1, inp);         // seg #
+    fread(acqTime, sizeof(char), 2, inp);            // start time
+    fread(&realtime, sizeof(realtime), 1, inp);       // real time, 20 ms ticks
+    fread(&livetime, sizeof(livetime), 1, inp);       // live time, 20 ms ticks
+    fread(acqTime, sizeof(char), 2, inp);            // start day
+    fread(month, sizeof(char), 3, inp);               // start month
+    fread(acqTime, sizeof(char), 2, inp);            // start year
+    fread(acqTime, sizeof(char), 1, inp);            // century
+    fread(acqTime, sizeof(char), 2, inp);            // hour
+    fread(acqTime, sizeof(char), 2, inp);            // minute
+    fread(&chanOffset, sizeof(chanOffset), 1, inp); // offset
+    fread(&numCh, sizeof(numCh), 1, inp);     // # channels
+
+    //read in histogram data from the .chn file
+    for(i=0;i<numCh;i++){
+      if(i<S32K){
+        fread(&chData, sizeof(chData), 1, inp);
+        hist[i]=chData;
+      }
+    }
+  }
+
+  for(i=0;i<S32K;i++){
+    outHist[outHistStartSp][i] = (double)hist[i];
+  }
+  snprintf(rawdata.histComment[outHistStartSp],256,"%s",basename((char*)filename));
+  
+  fclose(inp);
+  return 1;
+
+}
+
+//function reads an .spe (Maestro) file into the output hist and returns the number of spectra read in
+int readSPEM(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp){
+
+  unsigned int i;
+  unsigned int numChsRead = 0;
+  char str[1024];
+  char *tok;
+  FILE *inp;
+  int numCh = -1; // the detected number of channels
+
+  if((inp = fopen(filename, "r")) == NULL){ //open the file
+    printf("ERROR: Cannot open the input file: %s\n", filename);
+    printf("Check that the file exists.\n");
+    exit(-1);
+  }else{
+    while(!(feof(inp)))//go until the end of file is reached
+      {
+        if(numChsRead<S32K){
+          if(fgets(str,1024,inp)!=NULL){ //get an entire line
+            str[strcspn(str, "\r\n")] = 0;//strips newline characters from the string read by fgets
+            if(numCh>0){
+              if(numChsRead < numCh){
+                outHist[outHistStartSp][numChsRead] = atof(str);
+                numChsRead++;
+              }
+            }else if(strcmp(str,"$DATA:")==0){
+              if(fgets(str,1024,inp)!=NULL){ //get the next line
+                str[strcspn(str, "\r\n")] = 0;//strips newline characters from the string read by fgets
+                tok = strtok(str," ");
+                if(tok!=NULL){
+                  if(strcmp(tok,"0")==0){
+                    tok = strtok(NULL," ");
+                    if(tok!=NULL){
+                      numCh = atoi(tok);
+                    }
+                  }else{
+                    printf("ERROR: unexpected header format in Maestro file, number of channels not specified.\n");
+                    return 0;
+                  }
+                }
+              }
+            }
+            
+          }
+        }else{
+          break;
+        }
+        
+      }
+  }
+
+  //check for import errors
+  if(numChsRead == 0){
+    printf("ERROR: Empty input file: %s\n", filename);
+    fclose(inp);
+    return 0;
+  }
+
+  for(i=numChsRead;i<S32K;i++){
+    outHist[outHistStartSp][i]=0.;
+  }
+  snprintf(rawdata.histComment[outHistStartSp],256,"%s",basename((char*)filename));
+
+  fclose(inp);
+  return 1;
+}
+
 //function reads an .spe file into a double array and returns the array
-int readSPE(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp)
-{
+int readSPE(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp){
+
   unsigned int i;
   float inpHist[4096];
   FILE *inp;
@@ -361,8 +485,8 @@ int readSPE(const char *filename, double outHist[NSPECT][S32K], const unsigned i
   return 1;
 }
 
-int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp)
-{
+int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp){
+
   unsigned int i,j;
   unsigned int numElementsRead = 0;
   char str[1024], str2[1024];
@@ -578,8 +702,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const unsigned i
 }
 
 //function reads an .C ROOT macro file into a double array and returns the number of spectra read in
-int readROOT(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp)
-{
+int readROOT(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp){
 
   FILE *inp;
 
@@ -665,25 +788,32 @@ int readROOT(const char *filename, double outHist[NSPECT][S32K], const unsigned 
 
 //reads a file containing spectrum data into an array
 //returns the number of spectra read (0 if reading fails, -1 if too many files)
-int readSpectrumDataFile(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp)
-{
+int readSpectrumDataFile(const char *filename, double outHist[NSPECT][S32K], const unsigned int outHistStartSp){
+  
   int numSpec = 0;
 
   const char *dot = strrchr(filename, '.'); //get the file extension
   if(dot==NULL){
     return -2; //invalid file type
   }
-  if (strcmp(dot + 1, "mca") == 0){
+  if(strcmp(dot + 1, "mca") == 0){
     numSpec = readMCA(filename, outHist, outHistStartSp);
-  }else if (strcmp(dot + 1, "fmca") == 0){
+  }else if(strcmp(dot + 1, "fmca") == 0){
     numSpec = readFMCA(filename, outHist, outHistStartSp);
-  }else if (strcmp(dot + 1, "spe") == 0){
-    numSpec = readSPE(filename, outHist, outHistStartSp);
-  }else if (strcmp(dot + 1, "txt") == 0){
+  }else if((strcmp(dot + 1, "spe") == 0)||(strcmp(dot + 1, "Spe") == 0)){
+    printf("Trying Maestro SPE format.\n");
+    numSpec = readSPEM(filename, outHist, outHistStartSp);
+    if(numSpec != 1){
+      printf("Trying RadWare SPE format.\n");
+      numSpec = readSPE(filename, outHist, outHistStartSp);
+    }
+  }else if((strcmp(dot + 1, "chn") == 0)||(strcmp(dot + 1, "Chn") == 0)){
+    numSpec = readCHN(filename, outHist, outHistStartSp);
+  }else if(strcmp(dot + 1, "txt") == 0){
     numSpec = readTXT(filename, outHist, outHistStartSp);
-  }else if (strcmp(dot + 1, "C") == 0){
+  }else if(strcmp(dot + 1, "C") == 0){
     numSpec = readROOT(filename, outHist, outHistStartSp);
-  }else if (strcmp(dot + 1, "jf3") == 0){
+  }else if(strcmp(dot + 1, "jf3") == 0){
     numSpec = readJF3(filename, outHist, outHistStartSp);
   }else{
     //printf("Improper format of input file: %s\n", filename);
