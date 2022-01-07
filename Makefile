@@ -2,7 +2,7 @@ GLIB_COMPILE_RESOURCES = `pkg-config --variable=glib_compile_resources gio-2.0`
 
 RESOURCES = $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir=./data --generate-dependencies data/specfitter.gresource.xml)
 
-CFLAGS = -I. -I./src/utils -O2 -Wall -Wshadow -Wunreachable-code -Wpointer-arith -Wcast-align -Wformat-security -Wstack-protector -Wconversion -std=c99
+CFLAGS = -I. -I./src/utils -O2 -Wall -Wextra -Wshadow -Wunreachable-code -Wpointer-arith -Wcast-align -Wformat-security -Wstack-protector -Wconversion -std=c99
 
 all: src/utils/lin_eq_solver.o src/utils/utils.o specfitter-resources.c specfitter
 

@@ -8,6 +8,7 @@
 #include <cairo.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <stdint.h>
 #include <math.h>
 #include <libgen.h>
 #include <sys/types.h>
@@ -134,24 +135,24 @@ GdkFrameClock *frameClock;
 
 //non-GTK GUI globals
 struct {
-  unsigned char scrollDir;
+  uint8_t scrollDir;
   double accSmoothScrollDelta; //storage variable for smooth scrolling
-  unsigned char draggingSp; //0 if no drag motion, 1 if dragging
-  int dragstartul, dragstartll; //click and drag position storage parameters
+  uint8_t draggingSp; //0 if no drag motion, 1 if dragging
+  int32_t dragstartul, dragstartll; //click and drag position storage parameters
   float dragStartX; //start cursor position when dragging
   float cursorPosX, cursorPosY; //cursor position
   char drawSpCursor; //0 = don't draw vertical cursor on spectrum, 1=draw, -1=drawing disabled
-  unsigned char drawSpLabels; //0 = don't draw labels, 1 = draw labels
-  unsigned char drawSpComments; //0 = don't draw comments, 1 = draw comments
-  unsigned char drawGridLines; //0 = don't draw grid lines on plot, 1 = draw grid lines
-  unsigned char fittingSp; //uses values from fit_state_enum: 0=not fitting, 1=selecting limits, 2=selecting peaks, 3=fitting, 4,5=refining fit, 6=fitted (display fit)
-  int deferSpSelChange;
-  int deferToggleRow;
-  unsigned char showBinErrors; //0=don't show, 1=show
-  unsigned char roundErrors; //0=don't round, 1=round
-  unsigned char autoZoom; //0=don't autozoom, 1=autozoom
-  unsigned char commentEditMode; //0=editing comment, 1=editing view title
-  int commentEditInd;
+  uint8_t drawSpLabels; //0 = don't draw labels, 1 = draw labels
+  uint8_t drawSpComments; //0 = don't draw comments, 1 = draw comments
+  uint8_t drawGridLines; //0 = don't draw grid lines on plot, 1 = draw grid lines
+  uint8_t fittingSp; //uses values from fit_state_enum: 0=not fitting, 1=selecting limits, 2=selecting peaks, 3=fitting, 4,5=refining fit, 6=fitted (display fit)
+  int32_t deferSpSelChange;
+  int32_t deferToggleRow;
+  uint8_t showBinErrors; //0=don't show, 1=show
+  uint8_t roundErrors; //0=don't round, 1=round
+  uint8_t autoZoom; //0=don't autozoom, 1=autozoom
+  uint8_t commentEditMode; //0=editing comment, 1=editing view title
+  int32_t commentEditInd;
   char preferDarkTheme; //0=prefer light, 1=prefer dark
   char popupFitResults; //0=don't popup results after fit, 1=popup results
   char useZoomAnimations; //0=don't use, 1=use
@@ -163,67 +164,62 @@ struct {
   double hist[NSPECT][S32K]; //spectrum histogram data
   char histComment[NSPECT][256]; //spectrum description/comment
   char openedSp; //0=not opened, 1=opened
-  unsigned char numSpOpened; //number of spectra in the opened file(s)
-  unsigned char numFilesOpened; //number of files containing spectra opened
+  uint8_t numSpOpened; //number of spectra in the opened file(s)
+  uint8_t numFilesOpened; //number of files containing spectra opened
   char viewComment[MAXNVIEWS][256]; //view description/comment
-  unsigned char viewMultiplotMode[MAXNVIEWS]; //multiplot mode for each saved view, uses values from multiplot_mode_enum
-  unsigned char viewNumMultiplotSp[MAXNVIEWS]; //number of spectra to show for each saved view
+  uint8_t viewMultiplotMode[MAXNVIEWS]; //multiplot mode for each saved view, uses values from multiplot_mode_enum
+  uint8_t viewNumMultiplotSp[MAXNVIEWS]; //number of spectra to show for each saved view
   double viewScaleFactor[MAXNVIEWS][NSPECT]; //scaling factors for each spectrum in each saved view
-  unsigned char viewMultiPlots[MAXNVIEWS][NSPECT]; //indices of all the spectra to show for each saved view
-  unsigned char numViews; //number of views that have been saved
+  uint8_t viewMultiPlots[MAXNVIEWS][NSPECT]; //indices of all the spectra to show for each saved view
+  uint8_t numViews; //number of views that have been saved
   char chanComment[NCHCOM][256]; //channel comment text
-  unsigned char chanCommentView[NCHCOM]; //0=comment is on spectrum, 1=comment is on view
-  unsigned char chanCommentSp[NCHCOM]; //spectrum/view number at which channel comments are displayed
-  int chanCommentCh[NCHCOM]; //channels at which channel comments are displayed
+  uint8_t chanCommentView[NCHCOM]; //0=comment is on spectrum, 1=comment is on view
+  uint8_t chanCommentSp[NCHCOM]; //spectrum/view number at which channel comments are displayed
+  int32_t chanCommentCh[NCHCOM]; //channels at which channel comments are displayed
   float chanCommentVal[NCHCOM]; //y-values at which channel comments are displayed
-  unsigned int numChComments; //number of comments which have been placed
-  char dropEmptySpectra; //0=don't discard empty spectra on import, 1=discard
+  uint32_t numChComments; //number of comments which have been placed
+  uint8_t dropEmptySpectra; //0=don't discard empty spectra on import, 1=discard
 } rawdata;
 
 //spectrum drawing globals
 struct {
-  int lowerLimit, upperLimit; //lower and upper limits to plot spectrum (in uncalibrated units ie. channels)
-  int xChanFocus; //x channel to focus on when zooming
+  int32_t lowerLimit, upperLimit; //lower and upper limits to plot spectrum (in uncalibrated units ie. channels)
+  int32_t xChanFocus; //x channel to focus on when zooming
   float zoomFocusFrac; //fraction of the visible area to have before the zoom focus point
   float zoomLevel, zoomToLevel; //1.0 = zoomed out fully (on x axis)
-  int autoScale; //0=don't autoscale y axis, 1=autoscale y axis
-  int logScale; //0=draw in linear scale, 1=draw in log scale (y-axis)
+  uint8_t autoScale; //0=don't autoscale y axis, 1=autoscale y axis
+  uint8_t logScale; //0=draw in linear scale, 1=draw in log scale (y-axis)
   char zoomingSpX, zoomingSpY; //0 if no zoom motion, 1 if zooming
   gint64 zoomXStartFrameTime, zoomYStartFrameTime; //the frames at which the x and y-scale zooms were started
   gint64 zoomXLastFrameTime, zoomYLastFrameTime; //the most recent frames during the x and y-scale zooms
   float scaleToLevelMax[MAX_DISP_SP], scaleToLevelMin[MAX_DISP_SP]; //the y scale values to zoom to
   float scaleLevelMax[MAX_DISP_SP], scaleLevelMin[MAX_DISP_SP]; //the y scale values, ie. the maximum and minimum values to show on the y axis
-  int contractFactor; //the number of channels per bin (default=1)
-  unsigned char multiplotMode; //uses values from multiplot_mode_enum: 0=no multiplot, 1=summed spectra, 2=overlay spectra (common scaling), 3=overlay spectra (independent scaling), 4=stacked view
-  unsigned char numMultiplotSp; //number of spectra to show in multiplot mode
+  uint8_t contractFactor; //the number of channels per bin (default=1)
+  uint8_t multiplotMode; //uses values from multiplot_mode_enum: 0=no multiplot, 1=summed spectra, 2=overlay spectra (common scaling), 3=overlay spectra (independent scaling), 4=stacked view
+  uint8_t numMultiplotSp; //number of spectra to show in multiplot mode
   double scaleFactor[NSPECT]; //scaling factors for each spectrum
-  unsigned char multiPlots[NSPECT]; //indices of all the spectra to show in multiplot mode
-  int displayedView; //-1 if no view is being displayed, -2 if temporary view displayed, otherwise the index of the displayed view
+  uint8_t multiPlots[NSPECT]; //indices of all the spectra to show in multiplot mode
+  int32_t displayedView; //-1 if no view is being displayed, -2 if temporary view displayed, otherwise the index of the displayed view
   float spColors[MAX_DISP_SP*3];
-  signed char highlightedPeak; //the peak to highlight when drawing spectra, -1=don't highlight
-  signed char highlightedComment; //the comment to highlight when drawing spectra, -1=don't highlight
+  int8_t highlightedPeak; //the peak to highlight when drawing spectra, -1=don't highlight
+  int8_t highlightedComment; //the comment to highlight when drawing spectra, -1=don't highlight
 } drawing;
 
 //calibration globals
 struct {
-  unsigned char calMode; //0=no calibration, 1=calibration enabled
   float calpar0,calpar1,calpar2; //0th, 1st, and 2nd order calibration parameters
   char calUnit[16]; //name of the unit used for calibration
   char calYUnit[32]; //name of the y-axis units
+  uint8_t calMode; //0=no calibration, 1=calibration enabled
 } calpar;
 
 //fitting globals
 struct {
-  int fitStartCh, fitEndCh; //upper and lower channel bounds for fitting
-  int ndf; //DOF for fit
+  int32_t fitStartCh, fitEndCh; //upper and lower channel bounds for fitting
+  int32_t ndf; //DOF for fit
   float fitPeakInitGuess[MAX_FIT_PK]; //initial guess of peak positions, in channels
   double widthFGH[3]; //F,G,H parameters used to evaluate widths
-  unsigned char numFitPeaks; //number of peaks to fit
-  unsigned char fixRelativeWidths; //0=don't fix width, 1=fix widths
-  unsigned char weightMode; //uses values from fit_weight_mode_enum: 0=weight using data (properly weighting for background subtraction), 1=weight using fit, 2=no weights
   long double relWidths[MAX_FIT_PK]; //relative width factors
-  unsigned char errFound; //whether or not paramter errors have been found
-  unsigned char fitType; //0=Gaussian, 1=skewed Gaussian
   //fit parameters (indices defined in fit_par_enum): 
   //0, 1, 2       : quadratic background
   //3             : R (ratio of symmetric and skewed Gaussians, range 0 to 1)
@@ -234,7 +230,12 @@ struct {
   //8, 11, 14 ... : Peak width(s)
   long double fitParVal[6+(3*MAX_FIT_PK)]; //parameter values found by the fitter
   long double fitParErr[6+(3*MAX_FIT_PK)]; //errors in parameter values
-  unsigned char fixPar[6+(3*MAX_FIT_PK)]; //0=don't fix parameter, 1=fix at current value, 2=fix at relative value
+  uint8_t fixPar[6+(3*MAX_FIT_PK)]; //0=don't fix parameter, 1=fix at current value, 2=fix at relative value
+  uint8_t errFound; //whether or not paramter errors have been found
+  uint8_t fitType; //0=Gaussian, 1=skewed Gaussian
+  uint8_t numFitPeaks; //number of peaks to fit
+  uint8_t fixRelativeWidths; //0=don't fix width, 1=fix widths
+  uint8_t weightMode; //uses values from fit_weight_mode_enum: 0=weight using data (properly weighting for background subtraction), 1=weight using fit, 2=no weights
 } fitpar;
 
 enum fit_weight_mode_enum{FITWEIGHT_DATA, FITWEIGHT_FIT, FITWEIGHT_NONE, FITWEIGHT_ENUM_LENGTH};

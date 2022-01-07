@@ -22,7 +22,7 @@ void setGridLineColor(cairo_t *cr){
 }
 
 //converts cursor position units to channel units on the displayed spectrum
-//return value is float to allow sub-channel prescision, cast it to int if needed
+//return value is float to allow sub-channel prescision, cast it to int32_t if needed
 float getCursorChannel(const double cursorx, const double cursory, const double xorigin, const double yorigin){
   GdkRectangle dasize;  // GtkDrawingArea size
   GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
@@ -77,7 +77,7 @@ float getCursorYVal(const double cursorx, const double cursory, const double xor
 //return -1 if no comment is at the cursor position
 //some shameless magic numbers used to map channel and y-values to comment indicator size
 int getCommentAtCursor(const double cursorx, const double cursory, const double xorigin, const double yorigin){
-  int i;
+  int32_t i;
   GdkRectangle dasize;  // GtkDrawingArea size
   GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
   // Determine GtkDrawingArea dimensions
@@ -89,7 +89,7 @@ int getCommentAtCursor(const double cursorx, const double cursory, const double 
     switch(drawing.multiplotMode){
       case MULTIPLOT_SUMMED:
         //sum plot mode
-        for(i=0;i<rawdata.numChComments;i++){
+        for(i=0;i<(int32_t)rawdata.numChComments;i++){
           if(rawdata.chanCommentView[i] == 1){
             if(rawdata.chanCommentSp[i] == drawing.displayedView){
               //check proximity to channel
@@ -112,7 +112,7 @@ int getCommentAtCursor(const double cursorx, const double cursory, const double 
       case MULTIPLOT_NONE:
         //single plot mode
         if(drawing.displayedView == -1){
-          for(i=0;i<rawdata.numChComments;i++){
+          for(i=0;i<(int32_t)rawdata.numChComments;i++){
             if(rawdata.chanCommentView[i] == 0){
               if(rawdata.chanCommentSp[i] == drawing.multiPlots[0]){
                 //check proximity to channel
@@ -133,7 +133,7 @@ int getCommentAtCursor(const double cursorx, const double cursory, const double 
           }
         }else{
           //scaled single spectrum view
-          for(i=0;i<rawdata.numChComments;i++){
+          for(i=0;i<(int32_t)rawdata.numChComments;i++){
             if(rawdata.chanCommentView[i] == 1){
               if(rawdata.chanCommentSp[i] == drawing.displayedView){
                 //check proximity to channel
@@ -182,7 +182,7 @@ void setPlotLimits(){
     drawing.zoomFocusFrac = 0.0;
   }
 
-  int numChansToDisp = (int)(1.0*S32K/drawing.zoomLevel);
+  int32_t numChansToDisp = (int)(1.0*S32K/drawing.zoomLevel);
   drawing.lowerLimit = drawing.xChanFocus - (int)((float)numChansToDisp*drawing.zoomFocusFrac);
   drawing.lowerLimit = drawing.lowerLimit - (drawing.lowerLimit % drawing.contractFactor); //round to nearest multiple of contraction factor
   //clamp to lower limit of 0 if needed
@@ -204,7 +204,7 @@ void setPlotLimits(){
 //zoom to the non-zero region of the spectrum
 void autoZoom(){
   if(drawing.multiplotMode == MULTIPLOT_NONE){
-    int i;
+    int32_t i;
     for(i=0;i<S32K;i++){
       if(rawdata.hist[drawing.multiPlots[0]][i] != 0.){
         drawing.lowerLimit = i;
@@ -219,7 +219,7 @@ void autoZoom(){
     }
     drawing.xChanFocus = (int)((drawing.upperLimit + drawing.lowerLimit)/2.0);
     drawing.zoomFocusFrac = 0.5;
-    int numChansToDisp = drawing.upperLimit - drawing.lowerLimit;
+    int32_t numChansToDisp = drawing.upperLimit - drawing.lowerLimit;
     if(numChansToDisp > 0){
       drawing.zoomLevel = (float)(1.0*S32K/numChansToDisp);
     }
@@ -235,7 +235,7 @@ void autoZoom(){
   //printf("lowerLimit: %i, upperLimit: %i, xChanFocus: %i, zoomLevel: %f\n",drawing.lowerLimit,drawing.upperLimit,drawing.xChanFocus, drawing.zoomLevel);
 }
 
-gboolean zoom_y_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gpointer user_data){
+gboolean zoom_y_callback(){
 
   if(drawing.zoomingSpY == 0){
     return G_SOURCE_REMOVE;
@@ -244,7 +244,7 @@ gboolean zoom_y_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gpointer
   gint64 frameTime = gdk_frame_clock_get_frame_time(frameClock);
   float linFac = 0.00001f*(float)(frameTime-drawing.zoomYLastFrameTime);
   float diffFac = 0.00002f*(float)(frameTime-drawing.zoomYLastFrameTime);
-  int i;
+  int32_t i;
   for(i=0;i<drawing.numMultiplotSp;i++){
     if(drawing.scaleToLevelMax[i] == drawing.scaleLevelMin[i]){
       drawing.scaleLevelMax[i] = drawing.scaleLevelMin[i];
@@ -286,7 +286,7 @@ gboolean zoom_y_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gpointer
   return G_SOURCE_REMOVE;
 }
 
-gboolean zoom_in_tick_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gpointer user_data){
+gboolean zoom_in_tick_callback(){
   gint64 frameTime = gdk_frame_clock_get_frame_time(frameClock);
   //printf("Zooming x in, frame time %li\n",frameTime-drawing.zoomXLastFrameTime);
   drawing.zoomLevel *= 1.0f + 0.000009f*(float)(frameTime-drawing.zoomXLastFrameTime);
@@ -304,7 +304,7 @@ gboolean zoom_in_tick_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gp
   return G_SOURCE_CONTINUE;
 }
 
-gboolean zoom_out_tick_callback(GtkWidget *widget, GdkFrameClock *frame_clock, gpointer user_data){
+gboolean zoom_out_tick_callback(){
   gint64 frameTime = gdk_frame_clock_get_frame_time(frameClock);
   //printf("Zooming x out\n");
   drawing.zoomLevel *= 1.0f - 0.000008f*(float)(frameTime-drawing.zoomXLastFrameTime);
@@ -514,8 +514,13 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
   
 }
 
-void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
+void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
   
+  if(widget==NULL){
+    printf("on_spectrum_click - no widget.\n");
+    return;
+  }
+
   if ((event->type == GDK_BUTTON_PRESS) && (event->button == 3)){
     //right mouse button being pressed
     float cursorChan = getCursorChannel(event->x, event->y, 80.0, 40.0);
@@ -605,7 +610,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
               rawdata.chanCommentCh[(int)rawdata.numChComments] = (int)cursorChan;
               rawdata.chanCommentView[(int)rawdata.numChComments] = 1;
               if(drawing.displayedView >= 0){
-                rawdata.chanCommentSp[(int)rawdata.numChComments] = (unsigned char)drawing.displayedView;
+                rawdata.chanCommentSp[(int)rawdata.numChComments] = (uint8_t)drawing.displayedView;
                 gtk_button_set_label(comment_ok_button,"Apply");
               }else if (drawing.displayedView == -2){
                 //this is a view that hasn't been saved yet
@@ -668,7 +673,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
               }else if(drawing.displayedView >= 0){
                 //commenting on a saved view
                 rawdata.chanCommentView[(int)rawdata.numChComments] = 1;
-                rawdata.chanCommentSp[(int)rawdata.numChComments] = (unsigned char)drawing.displayedView;
+                rawdata.chanCommentSp[(int)rawdata.numChComments] = (uint8_t)drawing.displayedView;
                 gtk_button_set_label(comment_ok_button,"Apply");
               }else if (drawing.displayedView == -2){
                 //commenting on a view that hasn't been saved yet
@@ -707,14 +712,19 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event, gpointer data){
 }
 
 //take action when a mouse button is released
-void on_spectrum_unclick(GtkWidget *widget, GdkEventButton *event, gpointer data){
+void on_spectrum_unclick(){
   if(guiglobals.draggingSp == 1){
     gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
   }
   guiglobals.draggingSp = 0;
 }
 
-void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointer data){
+void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event){
+
+  if(widget==NULL){
+    printf("WARNING: on_spectrum_cursor_motion - no widget.\n");
+    return;
+  }
 
   if(!rawdata.openedSp){
     return;
@@ -754,8 +764,8 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
     guiglobals.draggingSp = 0;
   }
 
-  int cursorChan = (int)getCursorChannel(event->x, event->y, 80.0, 40.0);
-  int cursorChanRounded = cursorChan - (cursorChan % drawing.contractFactor); //channel at the start of the bin (if rebinned)
+  int32_t cursorChan = (int)getCursorChannel(event->x, event->y, 80.0, 40.0);
+  int32_t cursorChanRounded = cursorChan - (cursorChan % drawing.contractFactor); //channel at the start of the bin (if rebinned)
   //printf("cursorChan: %i\n",cursorChan);
 
   if(cursorChan >= 0){
@@ -770,7 +780,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
     signed char peakToHighlight = -1;
     if(guiglobals.fittingSp == FITSTATE_FITCOMPLETE){
       //check if the cursor is over a peak
-      unsigned char i;
+      uint8_t i;
       for(i=0;i<fitpar.numFitPeaks;i++){
         if(cursorChan > (fitpar.fitParVal[FITPAR_POS1+(3*i)] - 2.*fitpar.fitParVal[FITPAR_WIDTH1+(3*i)])){
           if(cursorChan < (fitpar.fitParVal[FITPAR_POS1+(3*i)] + 2.*fitpar.fitParVal[FITPAR_WIDTH1+(3*i)])){
@@ -805,7 +815,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
       char binValStr[50];
       //char *binValStrp = binValStr;
       float binVal;
-      int i;
+      int32_t i;
       switch(drawing.highlightedPeak){
         case -1:
           //print cursor position on status bar
@@ -815,7 +825,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
             case MULTIPLOT_OVERLAY_COMMON:
               //multiple visible plots
               if(calpar.calMode == 1){
-                int cursorChanEnd = cursorChanRounded + drawing.contractFactor;
+                int32_t cursorChanEnd = cursorChanRounded + drawing.contractFactor;
                 float cal_lowerChanLimit = (float)(getCalVal(cursorChanRounded));
                 float cal_upperChanLimit = (float)(getCalVal(cursorChanEnd));
                 statusBarLabelp += snprintf(statusBarLabelp,50,"%s: %0.1f - %0.1f, Values:", calpar.calUnit, cal_lowerChanLimit, cal_upperChanLimit);
@@ -843,7 +853,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
               binVal = getDispSpBinVal(0,cursorChanRounded-drawing.lowerLimit);
               getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,guiglobals.showBinErrors,guiglobals.roundErrors);
               if(calpar.calMode == 1){
-                int cursorChanEnd = cursorChanRounded + drawing.contractFactor;
+                int32_t cursorChanEnd = cursorChanRounded + drawing.contractFactor;
                 float cal_lowerChanLimit = (float)(getCalVal(cursorChanRounded));
                 float cal_upperChanLimit = (float)(getCalVal(cursorChanEnd));
                 snprintf(statusBarLabel,256,"%s: %0.1f to %0.1f, Value: %s", calpar.calUnit,cal_lowerChanLimit,cal_upperChanLimit,binValStr);
@@ -912,8 +922,8 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event, gpointe
 }
 
 //get the bin position in the histogram plot
-float getXPos(const int bin, const float width, const float xorigin){
-  int binc=bin;
+float getXPos(const int32_t bin, const float width, const float xorigin){
+  int32_t binc=bin;
   if(bin < 0)
     binc=0;
   else if(bin > (drawing.upperLimit - drawing.lowerLimit))
@@ -925,7 +935,7 @@ float getXPos(const int bin, const float width, const float xorigin){
 //get the screen position of a channel (or fractional channel)
 //returns -1 if offscreen
 //if halfBinOffset=1, will offset by half a bin (for drawing fits)
-float getXPosFromCh(const float chVal, const float width, const unsigned char halfBinOffset, const float xorigin){
+float getXPosFromCh(const float chVal, const float width, const uint8_t halfBinOffset, const float xorigin){
   if((chVal < drawing.lowerLimit)||(chVal > drawing.upperLimit)){
     return -1;
   }
@@ -936,7 +946,7 @@ float getXPosFromCh(const float chVal, const float width, const unsigned char ha
 }
 
 //get the y-coordinate for drawing a specific bin value
-float getYPos(const float val, const int multiplotSpNum, const float height, const float yorigin){
+float getYPos(const float val, const int32_t multiplotSpNum, const float height, const float yorigin){
   float pos, minVal;
   switch(drawing.multiplotMode){
     case MULTIPLOT_STACKED:
@@ -1001,7 +1011,7 @@ float getAxisXPos(const double axisVal, const float width, const float xorigin){
   
   return xorigin + (width-xorigin)*(float)((double)axisVal - cal_lowerLimit)/(float)(cal_upperLimit - cal_lowerLimit);
 }
-void drawXAxisTick(const double axisVal, cairo_t *cr, const float width, const float height, const double baseFontSize, const unsigned char drawGridLines, const float xorigin, const float yorigin){
+void drawXAxisTick(const double axisVal, cairo_t *cr, const float width, const float height, const double baseFontSize, const uint8_t drawGridLines, const float xorigin, const float yorigin){
   float axisPos = getAxisXPos(axisVal,width,xorigin);
   //printf("axis Val: %i, axisPos: %f\n",axisVal,axisPos);
   if(axisPos != (float)SMALL_NUMBER){
@@ -1034,7 +1044,7 @@ void drawXAxisTick(const double axisVal, cairo_t *cr, const float width, const f
     cairo_show_text(cr, tickLabel);
   }
 }
-float getAxisYPos(const float axisVal, const int multiplotSpNum, const float height, const float yorigin){
+float getAxisYPos(const float axisVal, const int32_t multiplotSpNum, const float height, const float yorigin){
   float posVal;
   switch(drawing.multiplotMode){
     case MULTIPLOT_STACKED:
@@ -1077,7 +1087,7 @@ float getAxisYPos(const float axisVal, const int multiplotSpNum, const float hei
   //printf("height: %f, multiplotsp: %i, axisval: %f, posval: %f\n",height,multiplotSpNum,axisVal,posVal);
   return posVal;
 }
-void drawYAxisTick(const double axisVal, const int multiplotSpNum, cairo_t *cr, const float width, const float height, const double baseFontSize, const unsigned char drawGridLines, const float xorigin, const float yorigin){
+void drawYAxisTick(const double axisVal, const int32_t multiplotSpNum, cairo_t *cr, const float width, const float height, const double baseFontSize, const uint8_t drawGridLines, const float xorigin, const float yorigin){
   if((axisVal < drawing.scaleLevelMin[multiplotSpNum])||(axisVal >= drawing.scaleLevelMax[multiplotSpNum])){
     //printf("axisval:%f,scalemin:%f,scalemax:%f\n",axisVal,drawing.scaleLevelMin[multiplotSpNum],drawing.scaleLevelMax[multiplotSpNum]);
     return; //invalid axis value,
@@ -1161,7 +1171,7 @@ void drawYAxisTick(const double axisVal, const int multiplotSpNum, cairo_t *cr, 
 
 void drawPlotLabel(cairo_t *cr, const float width, const float height, const double baseFontSize, const float yorigin){
   char plotLabel[256];
-  int i;
+  int32_t i;
   cairo_text_extents_t extents; //get dimensions needed to justify text labels
   float labelYOffset;
   cairo_set_font_size(cr, baseFontSize);
@@ -1234,7 +1244,7 @@ void drawPlotLabel(cairo_t *cr, const float width, const float height, const dou
   }
 }
 
-float getDistBetweenYAxisTicks(const float axisRange, const int numTicks){
+float getDistBetweenYAxisTicks(const float axisRange, const int32_t numTicks){
 
   if((axisRange < 1E-10)||(numTicks == 0)){
     return 1.0f;
@@ -1242,7 +1252,7 @@ float getDistBetweenYAxisTicks(const float axisRange, const int numTicks){
 
   float trialDist = 0.0f;
   float sfFactor = 0.0f;
-  int sigf = 0;
+  int32_t sigf = 0;
   if(axisRange < 1){
     //get number of sig figs
     float axisRangec = axisRange;
@@ -1328,7 +1338,7 @@ double getPlotRangeXUnits(){
 //showFit: 0=don't show, 1=show without highlighted peaks, 2=show with highlighted peaks
 //drawComments: 0=don't draw, 1=draw
 //drawFast: 0=don't interpolate, 1=interpolate (faster drawing, less accurate)
-void drawSpectrum(cairo_t *cr, const float width, const float height, const float scaleFactor, const unsigned char drawLabels, const unsigned char drawGridLines, const unsigned char showFit, const unsigned char drawComments, const unsigned char drawFast){
+void drawSpectrum(cairo_t *cr, const float width, const float height, const float scaleFactor, const uint8_t drawLabels, const uint8_t drawGridLines, const uint8_t showFit, const uint8_t drawComments, const uint8_t drawFast){
 
   if(!rawdata.openedSp){
     return;
@@ -1340,7 +1350,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     return;
   }
 
-  int i,j,k;
+  int32_t i,j,k;
 
   //set the origin of the coordinate system in pixels
   float xorigin = 80.0f*scaleFactor;
@@ -1502,7 +1512,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   cairo_stroke(cr);
 
   //draw y axis ticks and gridlines
-  int numTickPerSp;
+  int32_t numTickPerSp;
   float yTickDist, yTick;
   switch(drawing.multiplotMode){
     case MULTIPLOT_STACKED:
@@ -1512,7 +1522,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           float rangeVal = drawing.scaleLevelMax[i] - drawing.scaleLevelMin[i];
           if(rangeVal > drawing.scaleLevelMax[i])
             rangeVal = drawing.scaleLevelMax[i];
-          int numTickUsed = 0;
+          int32_t numTickUsed = 0;
           if(rangeVal >= 1000.){
             //logarithmic scale ticks in base-10
             float tickVal = powf(10.0f,(float)(getNSigf(drawing.scaleLevelMax[i],10.0)));
@@ -1574,12 +1584,12 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       setTextColor(cr);
       if(drawing.logScale){
         //numTickPerSp *= 2;
-        int nsigf10 = 0;
+        int32_t nsigf10 = 0;
         if(drawing.scaleLevelMin[0] <= 0)
           nsigf10 = getNSigf(drawing.scaleLevelMax[0],10.0);
         else
           nsigf10 = getNSigf(drawing.scaleLevelMax[0],10.0) - getNSigf(drawing.scaleLevelMin[0],10.0);
-        int numTickUsed = 0;
+        int32_t numTickUsed = 0;
         //printf("nsigf10: %i\n",nsigf10);
         if(nsigf10 >= 3){
           //logarithmic scale ticks in base-10
@@ -1659,7 +1669,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       }
     }
   }
-  int binSkipFactor = (int)binSkipFactorF;
+  int32_t binSkipFactor = (int)binSkipFactorF;
   if(binSkipFactor <= drawing.contractFactor){
     binSkipFactor = drawing.contractFactor;
   }
@@ -1670,12 +1680,12 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   //printf("dragging: %i, zooming x: %i, zooming y: %i\n",guiglobals.draggingSp,drawing.zoomingSpX,drawing.zoomingSpY);
   //for smooth scrolling of interpolated spectra, have the start bin always
   //be a multiple of the skip factor
-  int startBin = 0 - (drawing.lowerLimit % binSkipFactor);
+  int32_t startBin = 0 - (drawing.lowerLimit % binSkipFactor);
 
   cairo_scale(cr, 1.0, -1.0); //invert y-axis so that positive y values go up
 
   //draw the actual histogram
-  int range = drawing.upperLimit-drawing.lowerLimit;
+  int32_t range = drawing.upperLimit-drawing.lowerLimit;
   float nextVal;
   switch(drawing.multiplotMode){
     case MULTIPLOT_STACKED:
@@ -1966,7 +1976,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     switch (drawing.multiplotMode){
       case MULTIPLOT_SUMMED:
         //sum view
-        for(i=0;i<rawdata.numChComments;i++){
+        for(i=0;i<(int32_t)rawdata.numChComments;i++){
           if(rawdata.chanCommentView[i]==1){
             if(rawdata.chanCommentSp[i]==drawing.displayedView){
               if(rawdata.chanCommentCh[i] > drawing.lowerLimit){
@@ -2003,7 +2013,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       case MULTIPLOT_NONE:
         //single non-summed spectrum
         if(drawing.displayedView == -1){
-          for(i=0;i<rawdata.numChComments;i++){
+          for(i=0;i<(int32_t)rawdata.numChComments;i++){
             if(rawdata.chanCommentView[i]==0){
               if(rawdata.chanCommentSp[i]==drawing.multiPlots[0]){
                 if(rawdata.chanCommentCh[i] > drawing.lowerLimit){
@@ -2037,7 +2047,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
             }
           }
         }else{
-          for(i=0;i<rawdata.numChComments;i++){
+          for(i=0;i<(int32_t)rawdata.numChComments;i++){
             if(rawdata.chanCommentView[i]==1){
               if(rawdata.chanCommentSp[i]==drawing.displayedView){
                 if(rawdata.chanCommentCh[i] > drawing.lowerLimit){
@@ -2093,7 +2103,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
 }
 
 //update the spectrum drawing area
-void drawSpectrumArea(GtkWidget *widget, cairo_t *cr, gpointer user_data){
+void drawSpectrumArea(GtkWidget *widget, cairo_t *cr){
 
   if(!rawdata.openedSp){
     return;

@@ -90,7 +90,7 @@ void manualSpectrumAreaDraw(){
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw the spectrum
 }
 
-void getViewStr(char *viewStr, const unsigned int strSize, const int viewNum){
+void getViewStr(char *viewStr, const uint32_t strSize, const int32_t viewNum){
   if(viewNum == -1){
     //generating string for temporary view
     switch(drawing.multiplotMode){
@@ -141,7 +141,7 @@ void getViewStr(char *viewStr, const unsigned int strSize, const int viewNum){
   
 }
 
-unsigned char getMultiplotStackPage(){
+uint8_t getMultiplotStackPage(){
   GtkWidget *stackW = gtk_stack_get_visible_child(multiplot_manage_stack);
   if(strcmp(gtk_widget_get_name(stackW),"page0")==0){
     //printf("Spectra tab open\n");
@@ -168,7 +168,7 @@ void on_view_tree_selection_changed(GtkTreeSelection *treeselection){
 }
 
 void on_multiplot_manage_stack_switcher_changed(){
-  unsigned char pageNum = getMultiplotStackPage();
+  uint8_t pageNum = getMultiplotStackPage();
   switch(pageNum){
     case 2:
       gtk_stack_set_visible_child(multiplot_manage_button_stack,GTK_WIDGET(manage_delete_button));
@@ -198,7 +198,7 @@ void on_multiplot_manage_stack_switcher_changed(){
 void setup_manage_window(){
   GtkTreeIter iter;
   //GtkTreeModel *model = gtk_tree_view_get_model(manage_tree_view);
-  int i;
+  int32_t i;
   gtk_list_store_clear(manage_liststore);
   for(i=0;i<rawdata.numSpOpened;i++){
     gtk_list_store_append(manage_liststore,&iter);
@@ -225,7 +225,7 @@ void setup_multiplot_window(){
   gboolean val = FALSE;
   gboolean scaledSelSpExists = FALSE;
   GtkTreeModel *model = gtk_tree_view_get_model(multiplot_tree_view);
-  int i;
+  int32_t i;
   char scaleFacStr[16];
   gtk_list_store_clear(multiplot_liststore);
   for(i=0;i<rawdata.numSpOpened;i++){
@@ -237,8 +237,8 @@ void setup_multiplot_window(){
     gtk_list_store_set(multiplot_liststore, &iter, 3, i, -1);
   }
 
-  int selectedSpCount = 0;
-  int spInd = 0;
+  int32_t selectedSpCount = 0;
+  int32_t spInd = 0;
   gboolean readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
  
   while (readingTreeModel)
@@ -350,11 +350,11 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button)
 {
   if(!guiglobals.deferSpSelChange){
 
-    int spNum = gtk_spin_button_get_value_as_int(spin_button) - 1;
+    int32_t spNum = gtk_spin_button_get_value_as_int(spin_button) - 1;
     if(spNum >= 0){
       //handle drawing individual spectra
       if(spNum < rawdata.numSpOpened){
-        drawing.multiPlots[0] = (unsigned char)spNum;
+        drawing.multiPlots[0] = (uint8_t)spNum;
         drawing.multiplotMode = MULTIPLOT_NONE;//unset multiplot, if it is being used
         drawing.numMultiplotSp = 1;//unset multiplot
         drawing.scaleFactor[spNum] = 1.0; //reset any scaling from custom views
@@ -365,7 +365,7 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button)
         gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE); //no multiplot, therefore can fit
       }else if(spNum < (rawdata.numSpOpened+rawdata.numViews)){
         //handle drawing views
-        int viewNum = spNum - rawdata.numSpOpened;
+        int32_t viewNum = spNum - rawdata.numSpOpened;
         drawing.numMultiplotSp = rawdata.viewNumMultiplotSp[viewNum];
         drawing.multiplotMode = rawdata.viewMultiplotMode[viewNum];
         memcpy(&drawing.scaleFactor,&rawdata.viewScaleFactor[viewNum],sizeof(drawing.scaleFactor));
@@ -400,7 +400,7 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button)
     }
 
     /*printf("Number of spectra selected for plotting: %i.  Selected spectra: ", drawing.numMultiplotSp);
-    int i;
+    int32_t i;
     for(i=0;i<drawing.numMultiplotSp;i++){
       printf("%i ",drawing.multiPlots[i]);
     }
@@ -416,15 +416,15 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button)
 
 //function for opening a single file without UI (ie. from the command line)
 //if append=1, append this file to already opened files
-void openSingleFile(char *filename, int append){
-  int i;
-  int openErr = 0;
+void openSingleFile(char *filename, int32_t append){
+  int32_t i;
+  int32_t openErr = 0;
   if(append!=1){
     rawdata.numSpOpened=0;
     rawdata.numChComments=0;
     rawdata.numViews=0;
   }
-  int numSp = readSpectrumDataFile(filename,rawdata.hist,rawdata.numSpOpened);
+  int32_t numSp = readSpectrumDataFile(filename,rawdata.hist,rawdata.numSpOpened);
   if(numSp > 0){ //see read_data.c
     rawdata.openedSp = 1;
     //set comments and scaling for spectra just opened
@@ -432,11 +432,11 @@ void openSingleFile(char *filename, int append){
       //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
       drawing.scaleFactor[i] = 1.00;
     }
-    rawdata.numSpOpened = (unsigned char)(rawdata.numSpOpened+numSp);
+    rawdata.numSpOpened = (uint8_t)(rawdata.numSpOpened+numSp);
     //select the first non-empty spectrum by default
-    int sel = getFirstNonemptySpectrum(rawdata.numSpOpened);
+    int32_t sel = getFirstNonemptySpectrum(rawdata.numSpOpened);
     if(sel >=0){
-      drawing.multiPlots[0] = (unsigned char)sel;
+      drawing.multiPlots[0] = (uint8_t)sel;
       drawing.multiplotMode = MULTIPLOT_NONE; //file just opened, disable multiplot
       setSpOpenView(1);
       //set the range of selectable spectra values
@@ -490,9 +490,9 @@ void openSingleFile(char *filename, int append){
 
 }
 
-void on_open_button_clicked(GtkButton *b)
-{
-  unsigned int i,j;
+void on_open_button_clicked(){
+
+  uint32_t i,j;
 
   GtkFileChooserNative *native = gtk_file_chooser_native_new ("Open Data File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
   file_open_dialog = GTK_FILE_CHOOSER(native);
@@ -510,7 +510,7 @@ void on_open_button_clicked(GtkButton *b)
   gtk_file_filter_add_pattern(file_filter,"*.jf3");
   gtk_file_chooser_add_filter(file_open_dialog,file_filter);
 
-  int openErr = 0; //to track if there are any errors when opening spectra
+  int32_t openErr = 0; //to track if there are any errors when opening spectra
   if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
 
     rawdata.numSpOpened = 0; //reset the open spectra
@@ -520,19 +520,19 @@ void on_open_button_clicked(GtkButton *b)
     GSList *file_list = gtk_file_chooser_get_filenames(file_open_dialog);
     for(i=0;i<g_slist_length(file_list);i++){
       filename = g_slist_nth_data(file_list,i);
-      int numSp = readSpectrumDataFile(filename,rawdata.hist,rawdata.numSpOpened);
+      int32_t numSp = readSpectrumDataFile(filename,rawdata.hist,rawdata.numSpOpened);
       if(numSp > 0){ //see read_data.c
         rawdata.openedSp = 1;
         //set comments for spectra just opened
-        for (j = rawdata.numSpOpened; j < (rawdata.numSpOpened+numSp); j++){
+        for (j = rawdata.numSpOpened; j < (uint32_t)(rawdata.numSpOpened+numSp); j++){
           //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
           drawing.scaleFactor[j] = 1.00;
         }
-        rawdata.numSpOpened = (unsigned char)(rawdata.numSpOpened+numSp);
+        rawdata.numSpOpened = (uint8_t)(rawdata.numSpOpened+numSp);
         //select the first non-empty spectrum by default
-        int sel = getFirstNonemptySpectrum(rawdata.numSpOpened);
+        int32_t sel = getFirstNonemptySpectrum(rawdata.numSpOpened);
         if(sel >=0){
-          drawing.multiPlots[0] = (unsigned char)sel;
+          drawing.multiPlots[0] = (uint8_t)sel;
           drawing.multiplotMode = MULTIPLOT_NONE; //files just opened, disable multiplot
           guiglobals.fittingSp = FITSTATE_NOTFITTING; //files just opened, reset fit state
           setSpOpenView(1);
@@ -582,7 +582,7 @@ void on_open_button_clicked(GtkButton *b)
       gtk_dialog_run (GTK_DIALOG (message_dialog));
       gtk_widget_destroy (message_dialog);
     }else{
-      rawdata.numFilesOpened = (unsigned char)g_slist_length(file_list);
+      rawdata.numFilesOpened = (uint8_t)g_slist_length(file_list);
       //set the title of the opened spectrum in the header bar
       if(rawdata.numFilesOpened > 1){
         char headerBarSub[256];
@@ -608,15 +608,14 @@ void on_open_button_clicked(GtkButton *b)
 }
 
 
-void on_append_button_clicked(GtkButton *b)
-{
+void on_append_button_clicked(){
 
   //handle case where this is called by shortcut, and spectra are not open
   if(rawdata.openedSp == 0){
     return;
   }
 
-  unsigned int i,j;
+  uint32_t i,j;
   
   GtkFileChooserNative *native = gtk_file_chooser_native_new ("Add More Data File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
   file_open_dialog = GTK_FILE_CHOOSER(native);
@@ -634,22 +633,22 @@ void on_append_button_clicked(GtkButton *b)
   gtk_file_filter_add_pattern(file_filter,"*.jf3");
   gtk_file_chooser_add_filter(file_open_dialog,file_filter);
 
-  int openErr = 0; //to track if there are any errors when opening spectra
+  int32_t openErr = 0; //to track if there are any errors when opening spectra
   if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
 
     char *filename = NULL;
     GSList *file_list = gtk_file_chooser_get_filenames(file_open_dialog);
     for(i=0;i<g_slist_length(file_list);i++){
       filename = g_slist_nth_data(file_list,i);
-      int numSp = readSpectrumDataFile(filename,rawdata.hist,rawdata.numSpOpened);
+      int32_t numSp = readSpectrumDataFile(filename,rawdata.hist,rawdata.numSpOpened);
       if(numSp > 0){ //see read_data.c
         rawdata.openedSp = 1;
         //set comments for spectra just opened
-        for (j = rawdata.numSpOpened; j < (rawdata.numSpOpened+numSp); j++){
+        for (j = rawdata.numSpOpened; j < (uint32_t)(rawdata.numSpOpened+numSp); j++){
           //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
           drawing.scaleFactor[j] = 1.00;
         }
-        rawdata.numSpOpened = (unsigned char)(rawdata.numSpOpened+numSp);
+        rawdata.numSpOpened = (uint8_t)(rawdata.numSpOpened+numSp);
         setSpOpenView(1);
         gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened+rawdata.numViews);
         on_spectrum_selector_changed(spectrum_selector); //update displayed name if needed
@@ -689,7 +688,7 @@ void on_append_button_clicked(GtkButton *b)
       gtk_dialog_run (GTK_DIALOG (message_dialog));
       gtk_widget_destroy (message_dialog);
     }else{
-      rawdata.numFilesOpened = (unsigned char)(rawdata.numFilesOpened + g_slist_length(file_list));
+      rawdata.numFilesOpened = (uint8_t)(rawdata.numFilesOpened + g_slist_length(file_list));
       //set the title of the opened spectrum in the header bar
       if(rawdata.numFilesOpened > 1){
         char headerBarSub[256];
@@ -708,8 +707,7 @@ void on_append_button_clicked(GtkButton *b)
   
 }
 
-void on_save_button_clicked(GtkButton *b)
-{
+void on_save_button_clicked(){
   //handle case where this is called by shortcut, and spectra are not open
   if(rawdata.openedSp == 0){
     return;
@@ -724,7 +722,7 @@ void on_save_button_clicked(GtkButton *b)
   gtk_file_filter_add_pattern(file_filter,"*.jf3");
   gtk_file_chooser_add_filter(file_save_dialog,file_filter);
 
-  int saveErr = 0; //to track if there are any errors when opening spectra
+  int32_t saveErr = 0; //to track if there are any errors when opening spectra
   if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
 
     char *fn = NULL;
@@ -764,9 +762,8 @@ void on_save_button_clicked(GtkButton *b)
   g_object_unref(native);
 }
 
-void on_save_text_button_clicked(GtkButton *b)
-{
-  int i;
+void on_save_text_button_clicked(){
+  int32_t i;
   guiglobals.exportFileType = 0; //exporting to text format
   gtk_label_set_text(export_description_label,"Export to .txt format:");
   gtk_widget_hide(GTK_WIDGET(export_note_label));
@@ -780,8 +777,8 @@ void on_save_text_button_clicked(GtkButton *b)
   gtk_window_present(export_options_window); //show the window
 }
 
-void on_save_radware_button_clicked(GtkButton *b){
-  int i;
+void on_save_radware_button_clicked(){
+  int32_t i;
   guiglobals.exportFileType = 1; //exporting to radware format
   gtk_label_set_text(export_description_label,"Export to .spe format:");
   if(rawdata.numChComments > 0)
@@ -799,8 +796,8 @@ void on_save_radware_button_clicked(GtkButton *b){
   gtk_window_present(export_options_window); //show the window
 }
 
-void on_export_mode_combobox_changed(GtkComboBox *widget, gpointer user_data){
-  int exportMode = gtk_combo_box_get_active(GTK_COMBO_BOX(export_mode_combobox));
+void on_export_mode_combobox_changed(){
+  int32_t exportMode = gtk_combo_box_get_active(GTK_COMBO_BOX(export_mode_combobox));
   switch(exportMode){
     case 0:
       if(guiglobals.exportFileType == 0){
@@ -815,10 +812,10 @@ void on_export_mode_combobox_changed(GtkComboBox *widget, gpointer user_data){
   }
 }
 
-void on_export_save_button_clicked(GtkButton *b){
+void on_export_save_button_clicked(){
   //get export settings
-  int exportMode = gtk_combo_box_get_active(GTK_COMBO_BOX(export_mode_combobox));
-  int rebin = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_rebin_checkbutton));
+  int32_t exportMode = gtk_combo_box_get_active(GTK_COMBO_BOX(export_mode_combobox));
+  int32_t rebin = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_rebin_checkbutton));
 
   GtkFileChooserNative *native = gtk_file_chooser_native_new ("Export Spectrum Data", window, GTK_FILE_CHOOSER_ACTION_SAVE, "_Export", "_Cancel");
   file_save_dialog = GTK_FILE_CHOOSER(native);
@@ -842,7 +839,7 @@ void on_export_save_button_clicked(GtkButton *b){
       break;
   }
 
-  int saveErr = 0; //to track if there are any errors when opening spectra
+  int32_t saveErr = 0; //to track if there are any errors when opening spectra
   if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
     
     char *fn = NULL;
@@ -895,20 +892,19 @@ void on_export_save_button_clicked(GtkButton *b){
   gtk_widget_hide(GTK_WIDGET(export_options_window)); //hide the window
 }
 
-void on_save_png_button_clicked(GtkButton *b)
-{
+void on_save_png_button_clicked(){
   gtk_window_present(export_image_window); //show the window
 }
 
-void on_export_image_button_clicked(GtkButton *b){
+void on_export_image_button_clicked(){
   
   //get image file settings
-  int inpAxisScale = gtk_combo_box_get_active(GTK_COMBO_BOX(export_axissize_combobox));
-  unsigned char showFit = (unsigned char)gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_fit_checkbutton));
-  unsigned char showLabels = (unsigned char)gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_label_checkbutton));
-  unsigned char showGridLines = (unsigned char)gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_gridline_checkbutton));
-  int hres = gtk_spin_button_get_value_as_int(export_h_res_spinbutton);
-  int vres = gtk_spin_button_get_value_as_int(export_v_res_spinbutton);
+  int32_t inpAxisScale = gtk_combo_box_get_active(GTK_COMBO_BOX(export_axissize_combobox));
+  uint8_t showFit = (uint8_t)gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_fit_checkbutton));
+  uint8_t showLabels = (uint8_t)gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_label_checkbutton));
+  uint8_t showGridLines = (uint8_t)gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_gridline_checkbutton));
+  int32_t hres = gtk_spin_button_get_value_as_int(export_h_res_spinbutton);
+  int32_t vres = gtk_spin_button_get_value_as_int(export_v_res_spinbutton);
 
   GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Image File", window, GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
   file_save_dialog = GTK_FILE_CHOOSER(native);
@@ -921,7 +917,7 @@ void on_export_image_button_clicked(GtkButton *b){
 
   float scaleFactor = (float)((1.0 + inpAxisScale*0.5)*sqrt((hres*vres)/1000000.0));
 
-  int saveErr = 0; //to track if there are any errors when opening spectra
+  int32_t saveErr = 0; //to track if there are any errors when opening spectra
   if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
     
     char *fn = NULL;
@@ -972,8 +968,7 @@ void on_export_image_button_clicked(GtkButton *b){
 }
 
 
-void on_display_button_clicked(GtkButton *b)
-{
+void on_display_button_clicked(){
   //gtk_range_set_value(GTK_RANGE(pan_scale),(drawing.xChanFocus*100.0/S32K));
   if(drawing.logScale){
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(logscale_button),TRUE);
@@ -984,15 +979,15 @@ void on_display_button_clicked(GtkButton *b)
   gtk_popover_popup(display_popover); //show the popover menu
 }
 
-void on_zoom_scale_changed(GtkRange *range, gpointer user_data){
+void on_zoom_scale_changed(GtkRange *range){
   drawing.zoomLevel = (float)pow(2,gtk_range_get_value(range)); //modify the zoom level
   gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw without changing the status bar label
 }
-void on_contract_scale_changed(GtkRange *range, gpointer user_data){
-  int oldContractFactor = drawing.contractFactor;
-  drawing.contractFactor = (int)gtk_range_get_value(range); //modify the contraction factor
+void on_contract_scale_changed(GtkRange *range){
+  int32_t oldContractFactor = drawing.contractFactor;
+  drawing.contractFactor = (uint8_t)gtk_range_get_value(range); //modify the contraction factor
   if(guiglobals.fittingSp == FITSTATE_FITCOMPLETE){
-    int i;
+    int32_t i;
     //rescale fit (optimization - don't refit)
     for(i=0;i<fitpar.numFitPeaks;i++){
       fitpar.fitParVal[FITPAR_AMP1+(3*i)] *= 1.0*drawing.contractFactor/oldContractFactor;
@@ -1004,8 +999,8 @@ void on_contract_scale_changed(GtkRange *range, gpointer user_data){
   manualSpectrumAreaDraw(); //redraw the spectrum
 }
 
-void on_calibrate_button_clicked(GtkButton *b)
-{
+void on_calibrate_button_clicked(){
+
   if(calpar.calMode == 1){
     char str[256];
     if(calpar.calpar0!=0.0){
@@ -1035,8 +1030,8 @@ void on_calibrate_button_clicked(GtkButton *b)
   gtk_window_present(calibrate_window); //show the window
 }
 
-void on_calibrate_ok_button_clicked(GtkButton *b)
-{
+void on_calibrate_ok_button_clicked(){
+
   //apply settings here!
   strncpy(calpar.calUnit,gtk_entry_get_text(cal_entry_unit),12);
   if(strcmp(calpar.calUnit,"")==0){
@@ -1070,8 +1065,8 @@ void on_calibrate_ok_button_clicked(GtkButton *b)
   
 }
 
-void on_remove_calibration_button_clicked(GtkButton *b)
-{
+void on_remove_calibration_button_clicked(){
+
   calpar.calMode=0;
   calpar.calpar0=0.0;
   calpar.calpar1=1.0;
@@ -1084,8 +1079,7 @@ void on_remove_calibration_button_clicked(GtkButton *b)
 
 
 //used for keyboard shortcut to rename the displayed view
-void on_rename_displayed_view()
-{
+void on_rename_displayed_view(){
 
   if(rawdata.openedSp == 0){
     return;
@@ -1127,9 +1121,9 @@ void on_rename_displayed_view()
 
 }
 
-void on_comment_entry_changed(GtkEntry *entry, gpointer user_data)
-{
-  int len = gtk_entry_get_text_length(entry);
+void on_comment_entry_changed(GtkEntry *entry){
+
+  int32_t len = gtk_entry_get_text_length(entry);
   if(len==0){
     gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
   }else{
@@ -1164,8 +1158,8 @@ void on_comment_entry_changed(GtkEntry *entry, gpointer user_data)
     
   }
 }
-void on_comment_ok_button_clicked(GtkButton *b)
-{
+void on_comment_ok_button_clicked(){
+
   if(strcmp(gtk_entry_get_text(comment_entry),"")!=0){
     if(guiglobals.commentEditMode==0){
       //editing spectrum/view channel comment
@@ -1224,20 +1218,19 @@ void on_comment_ok_button_clicked(GtkButton *b)
     manualSpectrumAreaDraw(); //redraw the spectrum
   }
 }
-void on_comment_cancel()
-{
+void on_comment_cancel(){
   //handle escape button shortcut
   gtk_widget_hide(GTK_WIDGET(comment_window)); //close the comment window
   manualSpectrumAreaDraw(); //redraw the spectrum
 }
-void on_remove_comment_button_clicked(GtkButton *b)
-{
+void on_remove_comment_button_clicked(){
+
   if(guiglobals.commentEditInd == -1){
     printf("WARNING: attempting to delete a comment that doesn't exist!\n");
   }else if(guiglobals.commentEditInd < NCHCOM){
     //shorten the comment array
-    int i;
-    for(i=guiglobals.commentEditInd+1;i<rawdata.numChComments;i++){
+    int32_t i;
+    for(i=guiglobals.commentEditInd+1;i<(int32_t)rawdata.numChComments;i++){
       rawdata.chanCommentCh[i-1]=rawdata.chanCommentCh[i];
       rawdata.chanCommentSp[i-1]=rawdata.chanCommentSp[i];
       rawdata.chanCommentVal[i-1]=rawdata.chanCommentVal[i];
@@ -1250,7 +1243,13 @@ void on_remove_comment_button_clicked(GtkButton *b)
 }
 
 void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
-  unsigned int i;
+
+  if(c==NULL){
+    printf("WARNING: on_multiplot_cell_toggled - no GtkCellRendererToggle.\n");
+    return;
+  }
+
+  uint32_t i;
   GtkTreeIter iter;
   gboolean toggleVal = FALSE;
   gboolean val = FALSE;
@@ -1268,7 +1267,7 @@ void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
 
   GList *rowList = gtk_tree_selection_get_selected_rows(gtk_tree_view_get_selection(multiplot_tree_view),&model);
   //printf("List length: %i, toggleVal: %i\n",g_list_length(rowList),toggleVal);
-  unsigned int llength = g_list_length(rowList);
+  uint32_t llength = g_list_length(rowList);
   if(llength > 1){
     for(i = 0; i < g_list_length(rowList); i++){
       gtk_tree_model_get_iter(model,&iter,g_list_nth_data(rowList, i));
@@ -1286,8 +1285,8 @@ void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
   }
   g_list_free_full(rowList,(GDestroyNotify)gtk_tree_path_free);
   
-  int selectedSpCount = 0;
-  int spInd = 0;
+  int32_t selectedSpCount = 0;
+  int32_t spInd = 0;
   gboolean readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
   while (readingTreeModel)
   {
@@ -1318,7 +1317,13 @@ void on_multiplot_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
   //gtk_widget_queue_draw(GTK_WIDGET(multiplot_window));
 }
 
-void on_multiplot_scaling_edited(GtkCellRendererText *c, gchar *path_string, gchar *new_text, gpointer user_data){
+void on_multiplot_scaling_edited(GtkCellRendererText *c, gchar *path_string, gchar *new_text){
+
+  if(c==NULL){
+    printf("WARNING: on_multiplot_scaling_edited - no GtkCellRendererText.\n");
+    return;
+  }
+
   //int i;
   GtkTreeIter iter;
   gdouble scaleVal = 1.0;
@@ -1344,7 +1349,7 @@ void on_multiplot_scaling_edited(GtkCellRendererText *c, gchar *path_string, gch
   gtk_list_store_set(multiplot_liststore,&iter,2,scaleFacStr,-1); //set the string
 
   //now see whether the view can be saved
-  int selectedSpCount = 0;
+  int32_t selectedSpCount = 0;
   gboolean readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
   while (readingTreeModel)
   {
@@ -1371,13 +1376,11 @@ void on_multiplot_scaling_edited(GtkCellRendererText *c, gchar *path_string, gch
   //gtk_widget_queue_draw(GTK_WIDGET(multiplot_window));
 }
 
-void on_multiplot_button_clicked(GtkButton *b)
-{
+void on_multiplot_button_clicked(){
   show_multiplot_window();
 }
 
-void on_multiplot_make_view_button_clicked(GtkButton *b)
-{
+void on_multiplot_make_view_button_clicked(){
 
   if(rawdata.numViews >= MAXNVIEWS){
     //show an error dialog
@@ -1392,8 +1395,8 @@ void on_multiplot_make_view_button_clicked(GtkButton *b)
   GtkTreeIter iter;
   gboolean readingTreeModel;
   gboolean val = FALSE;
-  int spInd = 0;
-  unsigned char selectedSpCount = 0;
+  int32_t spInd = 0;
+  uint8_t selectedSpCount = 0;
   GtkTreeModel *model = gtk_tree_view_get_model(multiplot_tree_view);
   readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
   while (readingTreeModel)
@@ -1401,7 +1404,7 @@ void on_multiplot_make_view_button_clicked(GtkButton *b)
     gtk_tree_model_get(model,&iter,1,&val,3,&spInd,-1); //get whether the spectrum is selected and the spectrum index
     if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
       if(val==TRUE){
-        rawdata.viewMultiPlots[rawdata.numViews][selectedSpCount]=(unsigned char)spInd;
+        rawdata.viewMultiPlots[rawdata.numViews][selectedSpCount]=(uint8_t)spInd;
         selectedSpCount++;
       }
     }
@@ -1409,7 +1412,7 @@ void on_multiplot_make_view_button_clicked(GtkButton *b)
   }
 
   rawdata.viewNumMultiplotSp[rawdata.numViews] = selectedSpCount;
-  rawdata.viewMultiplotMode[rawdata.numViews] = (unsigned char)gtk_combo_box_get_active(GTK_COMBO_BOX(multiplot_mode_combobox));
+  rawdata.viewMultiplotMode[rawdata.numViews] = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(multiplot_mode_combobox));
 
 
   if(rawdata.viewNumMultiplotSp[rawdata.numViews] > MAX_DISP_SP){
@@ -1457,19 +1460,18 @@ void on_multiplot_make_view_button_clicked(GtkButton *b)
   
 }
 
-void on_multiplot_ok_button_clicked(GtkButton *b)
-{
+void on_multiplot_ok_button_clicked(){
 
   GtkTreeIter iter;
   gboolean readingTreeModel;
   gboolean val = FALSE;
   GtkTreeModel *model;
-  unsigned char pageNum = getMultiplotStackPage();
+  uint8_t pageNum = getMultiplotStackPage();
   
   if(pageNum==0){
     //plot spectrum data
-    int spInd = 0;
-    unsigned char selectedSpCount = 0;
+    int32_t spInd = 0;
+    uint8_t selectedSpCount = 0;
     model = gtk_tree_view_get_model(multiplot_tree_view);
     readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
     while (readingTreeModel){
@@ -1477,7 +1479,7 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
       if(spInd>=0){
         if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
           if(val==TRUE){
-            drawing.multiPlots[selectedSpCount]=(unsigned char)spInd;
+            drawing.multiPlots[selectedSpCount]=(uint8_t)spInd;
             selectedSpCount++;
           }
         }
@@ -1485,7 +1487,7 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
       readingTreeModel = gtk_tree_model_iter_next (model, &iter);
     }
     drawing.numMultiplotSp = selectedSpCount;
-    drawing.multiplotMode = (unsigned char)gtk_combo_box_get_active(GTK_COMBO_BOX(multiplot_mode_combobox));
+    drawing.multiplotMode = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(multiplot_mode_combobox));
 
     if(drawing.numMultiplotSp > MAX_DISP_SP){
 
@@ -1524,7 +1526,7 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
       gtk_label_set_text(display_spectrumname_label,viewStr);
       
       printf("Number of spectra selected for plotting: %i.  Selected spectra: ", drawing.numMultiplotSp);
-      int i;
+      int32_t i;
       for(i=0;i<drawing.numMultiplotSp;i++){
         printf("%i ",drawing.multiPlots[i]);
       }
@@ -1540,7 +1542,7 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
     }
   }else{
     //show view
-    int viewInd = 0;
+    int32_t viewInd = 0;
     model = gtk_tree_view_get_model(view_tree_view);
     readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
     if(gtk_tree_selection_get_selected(gtk_tree_view_get_selection(view_tree_view), &model, &iter)==TRUE){ //set the iterator to the selected entry
@@ -1572,14 +1574,19 @@ void on_multiplot_ok_button_clicked(GtkButton *b)
 }
 
 
-void on_manage_spectra_button_clicked(GtkButton *b)
-{
+void on_manage_spectra_button_clicked(){
   show_manage_window(0);
 }
 
-void on_manage_name_cell_edited(GtkCellRendererText *cell, gchar *path_string, gchar *new_text, gpointer user_data){
+void on_manage_name_cell_edited(GtkCellRendererText *cell, gchar *path_string, gchar *new_text){
+
+  if(cell==NULL){
+    printf("WARNING: on_manage_name_cell_edited - no GtkCellRendererText.\n");
+    return;
+  }
+
   GtkTreeIter iter;
-  int spInd = 0;
+  int32_t spInd = 0;
   GtkTreeModel *model = gtk_tree_view_get_model(manage_tree_view);
 
   //get the value of the cell which was toggled
@@ -1606,7 +1613,13 @@ void on_manage_name_cell_edited(GtkCellRendererText *cell, gchar *path_string, g
 }
 
 void on_manage_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
-  unsigned int i;
+
+  if(c==NULL){
+    printf("WARNING: on_manage_cell_toggled - no GtkCellRendererToggle.\n");
+    return;
+  }
+
+  uint32_t i;
   GtkTreeIter iter;
   gboolean toggleVal = FALSE;
   gboolean val = FALSE;
@@ -1623,7 +1636,7 @@ void on_manage_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
 
   GList *rowList = gtk_tree_selection_get_selected_rows(gtk_tree_view_get_selection(manage_tree_view),&model);
   //printf("List length: %i, toggleVal: %i\n",g_list_length(rowList),toggleVal);
-  unsigned int llength = g_list_length(rowList);
+  uint32_t llength = g_list_length(rowList);
   if(llength > 1){
     for(i = 0; i < g_list_length(rowList); i++){
       gtk_tree_model_get_iter(model,&iter,g_list_nth_data(rowList, i));
@@ -1641,8 +1654,8 @@ void on_manage_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
   }
   g_list_free_full(rowList,(GDestroyNotify)gtk_tree_path_free);
   
-  int selectedSpCount = 0;
-  int spInd = 0;
+  int32_t selectedSpCount = 0;
+  int32_t spInd = 0;
   gboolean readingTreeModel = gtk_tree_model_get_iter_first(model, &iter);
   while (readingTreeModel)
   {
@@ -1663,13 +1676,13 @@ void on_manage_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
   //gtk_widget_queue_draw(GTK_WIDGET(multiplot_window));
 }
 
-void on_manage_delete_button_clicked(GtkButton *b)
-{
+void on_manage_delete_button_clicked(){
+
   GtkTreeIter iter;
   gboolean readingTreeModel;
   gboolean val = FALSE;
-  int spInd = 0;
-  int deletedSpCounter = 0;
+  int32_t spInd = 0;
+  int32_t deletedSpCounter = 0;
   GtkTreeModel *model = gtk_tree_view_get_model(manage_tree_view);
   readingTreeModel = gtk_tree_model_get_iter_first(model, &iter);
   while (readingTreeModel)
@@ -1721,8 +1734,8 @@ void on_manage_delete_button_clicked(GtkButton *b)
   
 }
 
-void on_sum_all_button_clicked(GtkButton *b)
-{
+void on_sum_all_button_clicked(){
+  
   //set all opened spectra to be drawn, in sum mode 
 
   if(rawdata.numSpOpened > MAX_DISP_SP){
@@ -1739,7 +1752,7 @@ void on_sum_all_button_clicked(GtkButton *b)
     return;
   }
 
-  unsigned char i;
+  uint8_t i;
   drawing.multiplotMode = MULTIPLOT_SUMMED;//sum spectra
   drawing.numMultiplotSp = rawdata.numSpOpened;
   if(drawing.numMultiplotSp > NSPECT)
@@ -1771,8 +1784,7 @@ void on_sum_all_button_clicked(GtkButton *b)
 
 }
 
-void on_fit_button_clicked(GtkButton *b)
-{
+void on_fit_button_clicked(){
   //do some checks, since this can be activated from a keyboard shortcut
   //spectrum must be open to fit
   if(rawdata.openedSp){
@@ -1803,49 +1815,42 @@ void on_fit_button_clicked(GtkButton *b)
   
 }
 
-void on_fit_fit_button_clicked(GtkButton *b)
-{
+void on_fit_fit_button_clicked(){
   startGausFit(); //perform the fit
   manualSpectrumAreaDraw();
   //update widgets
   update_gui_fit_state();
 }
 
-void on_fit_cancel_button_clicked(GtkButton *b)
-{
+void on_fit_cancel_button_clicked(){
   guiglobals.fittingSp = FITSTATE_NOTFITTING;
   //update widgets
   update_gui_fit_state();
 }
 
-void on_fit_preferences_button_clicked(GtkButton *b)
-{
+void on_fit_preferences_button_clicked(){
   showPreferences(1);
 }
 
-void on_toggle_discard_empty(GtkToggleButton *togglebutton, gpointer user_data)
-{
+void on_toggle_discard_empty(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton))
     rawdata.dropEmptySpectra=1;
   else
     rawdata.dropEmptySpectra=0;
 }
-void on_toggle_bin_errors(GtkToggleButton *togglebutton, gpointer user_data)
-{
+void on_toggle_bin_errors(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton))
     guiglobals.showBinErrors=1;
   else
     guiglobals.showBinErrors=0;
 }
-void on_toggle_round_errors(GtkToggleButton *togglebutton, gpointer user_data)
-{
+void on_toggle_round_errors(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton))
     guiglobals.roundErrors=1;
   else
     guiglobals.roundErrors=0;
 }
-void on_toggle_dark_theme(GtkToggleButton *togglebutton, gpointer user_data)
-{
+void on_toggle_dark_theme(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton))
     guiglobals.preferDarkTheme=1;
   else
@@ -1853,106 +1858,92 @@ void on_toggle_dark_theme(GtkToggleButton *togglebutton, gpointer user_data)
   
   setupUITheme();
 }
-void on_toggle_animation(GtkToggleButton *togglebutton, gpointer user_data)
-{
+void on_toggle_animation(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton))
     guiglobals.useZoomAnimations=1;
   else
     guiglobals.useZoomAnimations=0;
 }
-void on_toggle_autozoom(GtkToggleButton *togglebutton, gpointer user_data)
-{
+void on_toggle_autozoom(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton))
     guiglobals.autoZoom=1;
   else
     guiglobals.autoZoom=0;
 }
 
-void on_toggle_spectrum_label(GtkToggleButton *togglebutton, gpointer user_data)
-{
+void on_toggle_spectrum_label(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton))
     guiglobals.drawSpLabels=1;
   else
     guiglobals.drawSpLabels=0;
 }
 
-void on_toggle_spectrum_comment(GtkToggleButton *togglebutton, gpointer user_data)
-{
+void on_toggle_spectrum_comment(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton))
     guiglobals.drawSpComments=1;
   else
     guiglobals.drawSpComments=0;
 }
 
-void on_toggle_spectrum_gridlines(GtkToggleButton *togglebutton, gpointer user_data)
-{
+void on_toggle_spectrum_gridlines(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton))
     guiglobals.drawGridLines=1;
   else
     guiglobals.drawGridLines=0;
 }
 
-void on_toggle_relative_widths(GtkToggleButton *togglebutton, gpointer user_data)
-{
+void on_toggle_relative_widths(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton))
     fitpar.fixRelativeWidths=1;
   else
     fitpar.fixRelativeWidths=0;
 }
 
-void on_toggle_popup_results(GtkToggleButton *togglebutton, gpointer user_data)
-{
+void on_toggle_popup_results(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton))
     guiglobals.popupFitResults=1;
   else
     guiglobals.popupFitResults=0;
 }
 
-void on_preferences_button_clicked(GtkButton *b)
-{
+void on_preferences_button_clicked(){
   showPreferences(0);
 }
 
-void on_preferences_apply_button_clicked(GtkButton *b)
-{
-  if(fitpar.fitType != (unsigned char)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox))){
+void on_preferences_apply_button_clicked(){
+  if(fitpar.fitType != (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox))){
     if(guiglobals.fittingSp == FITSTATE_FITCOMPLETE){
       //the fit type was changed, clear the fit
       guiglobals.fittingSp = FITSTATE_NOTFITTING;
     }
   }
-  fitpar.fitType = (unsigned char)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox));
-  fitpar.weightMode = (unsigned char)gtk_combo_box_get_active(GTK_COMBO_BOX(weight_mode_combobox));
+  fitpar.fitType = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox));
+  fitpar.weightMode = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(weight_mode_combobox));
   updateConfigFile();
   manualSpectrumAreaDraw(); //redraw the spectrum
   gtk_widget_hide(GTK_WIDGET(preferences_window)); //close the preferences window
 }
 
-void on_preferences_cancel_button_clicked(GtkButton *b)
-{
+void on_preferences_cancel_button_clicked(){
   updatePrefsFromConfigFile(); //rather than updating the config file, read from it to revert settings
   setupUITheme();
   //hide the dialog
   gtk_widget_hide(GTK_WIDGET(preferences_window)); //close the multiplot window
 }
 
-void on_shortcuts_button_clicked(GtkButton *b)
-{
+void on_shortcuts_button_clicked(){
   gtk_window_present(GTK_WINDOW(shortcuts_window)); //show the window
 }
 
-void on_help_button_clicked(GtkButton *b)
-{
+void on_help_button_clicked(){
   gtk_window_present(help_window); //show the window
 }
 
-void on_about_button_clicked(GtkButton *b)
-{
+void on_about_button_clicked(){
   gtk_window_present(GTK_WINDOW(about_dialog)); //show the window
 }
 
-void on_toggle_autoscale(GtkToggleButton *togglebutton, gpointer user_data)
-{
+void on_toggle_autoscale(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton))
     drawing.autoScale=1;
   else
@@ -1960,8 +1951,7 @@ void on_toggle_autoscale(GtkToggleButton *togglebutton, gpointer user_data)
   manualSpectrumAreaDraw();
 }
 
-void on_toggle_logscale(GtkToggleButton *togglebutton, gpointer user_data)
-{
+void on_toggle_logscale(GtkToggleButton *togglebutton){
   if(rawdata.openedSp){
     if(gtk_toggle_button_get_active(togglebutton))
       drawing.logScale=1;
@@ -1982,8 +1972,7 @@ void toggle_logscale(){
   manualSpectrumAreaDraw();
 }
 
-void on_toggle_cursor(GtkToggleButton *togglebutton, gpointer user_data)
-{
+void on_toggle_cursor(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton))
     guiglobals.drawSpCursor=0;
   else
@@ -2033,7 +2022,7 @@ void cycle_multiplot_mode_down(){
 }
 //cycle between individual spectra/views, argument determines cycle direction
 void cycle_sp(int up){
-  int spNum = gtk_spin_button_get_value_as_int(spectrum_selector);
+  int32_t spNum = gtk_spin_button_get_value_as_int(spectrum_selector);
   if(up){
     if(spNum < (rawdata.numSpOpened+rawdata.numViews)){
       spNum++;
@@ -2060,7 +2049,7 @@ void cycle_sp_down(){
 
 void iniitalizeUIElements(){
 
-  int i;
+  int32_t i;
 
   //import UI layout and graphics data
   builder = gtk_builder_new_from_resource("/resources/specfitter.glade"); //get UI layout from glade XML file

@@ -1,10 +1,9 @@
 #include "lin_eq_solver.h"
 
-int solve_lin_eq(lin_eq_type *lin_eq, int weighted)
-{
+uint8_t solve_lin_eq(lin_eq_type *lin_eq, int weighted){
 
-  int i,j;//iterators
-  const unsigned int n=lin_eq->dim;//dimension of the matrix (assume square)
+  uint8_t i,j;//iterators
+  const uint8_t n=lin_eq->dim;//dimension of the matrix (assume square)
 
   if(n > MAX_DIM)
     {
@@ -34,11 +33,10 @@ int solve_lin_eq(lin_eq_type *lin_eq, int weighted)
 }
 
 //get the inverse matrix using Gauss-Jordan elimination
-int get_inv(lin_eq_type *lin_eq)
-{
+uint8_t get_inv(lin_eq_type *lin_eq){
 
-  int i,j,k,l;//iterators
-  const unsigned int n=lin_eq->dim;//dimension of the matrix (assume square) 
+  uint8_t i,j,k,l;//iterators
+  const uint8_t n=lin_eq->dim;//dimension of the matrix (assume square) 
   long double s;//storage variable
 
   //allocate the identity matrix to be transformed to the inverse

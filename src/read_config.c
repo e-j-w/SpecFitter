@@ -2,8 +2,8 @@
 
 //read data from a config file
 //keepCalibration: 0=update the calibration, 1=don't change the calibration
-int readConfigFile(FILE *file, int keepCalibration)
-{
+uint8_t readConfigFile(FILE *file, uint8_t keepCalibration){
+
   char fullLine[256],par[256],val[256];
   char *tok;
 
@@ -106,12 +106,12 @@ int readConfigFile(FILE *file, int keepCalibration)
         }
       }
       if(strcmp(par,"fit_weight_mode") == 0){
-        unsigned char ucVal = (unsigned char)atoi(val);
+        uint8_t ucVal = (uint8_t)atoi(val);
         if(ucVal <= 2)
           fitpar.weightMode = ucVal;
       }
       if(strcmp(par,"fit_type") == 0){
-        unsigned char ucVal = (unsigned char)atoi(val);
+        uint8_t ucVal = (uint8_t)atoi(val);
         if(ucVal <= 1)
           fitpar.fitType = ucVal;
       }
@@ -162,8 +162,8 @@ int readConfigFile(FILE *file, int keepCalibration)
 }
 
 //write current settings to a config file
-int writeConfigFile(FILE *file)
-{
+uint8_t writeConfigFile(FILE *file){
+
   fprintf(file,"# This is a config file for SpecFitter.\n");
   if(calpar.calMode == 1){
     fprintf(file,"calibrate=yes\n");

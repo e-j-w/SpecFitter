@@ -4,11 +4,11 @@
 //mainly to help other parts of the program with drawing, 
 //fitting, and saving displayed data to disk
 
-int getFirstViewDependingOnSp(const int spInd){
+int getFirstViewDependingOnSp(const int32_t spInd){
   if((spInd<0)||(spInd>=rawdata.numSpOpened)){
     return -1;
   }
-  int i,j;
+  int32_t i,j;
   for(i=0;i<rawdata.numViews;i++){
     for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
       if(rawdata.viewMultiPlots[i][j] == spInd){
@@ -19,7 +19,7 @@ int getFirstViewDependingOnSp(const int spInd){
   return -1;
 }
 
-void deleteSpectrumOrView(const int spInd){
+void deleteSpectrumOrView(const int32_t spInd){
   
   //printf("deleting spectrum %i\n",spInd);
   if((spInd>=(rawdata.numSpOpened+rawdata.numViews))||(spInd<0)){
@@ -27,17 +27,17 @@ void deleteSpectrumOrView(const int spInd){
     return;
   }
 
-  int i,j;
+  int32_t i,j;
 
   if(spInd<rawdata.numSpOpened){
     //deleting spectrum data
 
     //delete comments
-    for(i=0;i<rawdata.numChComments;i++){
+    for(i=0;i<(int32_t)rawdata.numChComments;i++){
       if(rawdata.chanCommentView[i] == 0){
         if(rawdata.chanCommentSp[i] == spInd){
           //delete the comment
-          for(j=i;j<(rawdata.numChComments-1);j++){
+          for(j=i;j<(int32_t)(rawdata.numChComments-1);j++){
             memcpy(&rawdata.chanComment[j],&rawdata.chanComment[j+1],sizeof(rawdata.chanComment[j]));
             memcpy(&rawdata.chanCommentView[j],&rawdata.chanCommentView[j+1],sizeof(rawdata.chanCommentView[j]));
             memcpy(&rawdata.chanCommentSp[j],&rawdata.chanCommentSp[j+1],sizeof(rawdata.chanCommentSp[j]));
@@ -48,23 +48,23 @@ void deleteSpectrumOrView(const int spInd){
           i -= 1; //indices have shifted, reheck the current index
         }else if(rawdata.chanCommentSp[i] > spInd){
           //change to the new index for the spectrum
-          rawdata.chanCommentSp[i] = (unsigned char)(rawdata.chanCommentSp[i]-1);
+          rawdata.chanCommentSp[i] = (uint8_t)(rawdata.chanCommentSp[i]-1);
         }
       }
     }
 
     //delete views that depend on the data
-    int deletingViews = 1;
+    int32_t deletingViews = 1;
     while(deletingViews){
-      int viewToDel = getFirstViewDependingOnSp(spInd);
+      int32_t viewToDel = getFirstViewDependingOnSp(spInd);
       if(viewToDel >= 0){
 
         //delete comments associated with the view
-        for(i=0;i<rawdata.numChComments;i++){
+        for(i=0;i<(int32_t)rawdata.numChComments;i++){
           if(rawdata.chanCommentView[i] == 1){
             if(rawdata.chanCommentSp[i] == viewToDel){
               //delete the comment
-              for(j=i;j<(rawdata.numChComments-1);j++){
+              for(j=i;j<(int32_t)(rawdata.numChComments-1);j++){
                 memcpy(&rawdata.chanComment[j],&rawdata.chanComment[j+1],sizeof(rawdata.chanComment[j]));
                 memcpy(&rawdata.chanCommentView[j],&rawdata.chanCommentView[j+1],sizeof(rawdata.chanCommentView[j]));
                 memcpy(&rawdata.chanCommentSp[j],&rawdata.chanCommentSp[j+1],sizeof(rawdata.chanCommentSp[j]));
@@ -75,7 +75,7 @@ void deleteSpectrumOrView(const int spInd){
               i -= 1; //indices have shifted, reheck the current index
             }else if(rawdata.chanCommentSp[i] > viewToDel){
               //change to the new index for the view
-              rawdata.chanCommentSp[i] = (unsigned char)(rawdata.chanCommentSp[i]-1);
+              rawdata.chanCommentSp[i] = (uint8_t)(rawdata.chanCommentSp[i]-1);
             }
           }
         }
@@ -89,7 +89,7 @@ void deleteSpectrumOrView(const int spInd){
           memcpy(&rawdata.viewMultiPlots[i],&rawdata.viewMultiPlots[i+1],sizeof(rawdata.viewMultiPlots[i]));
         }
         if(rawdata.numViews > 0){
-          rawdata.numViews = (unsigned char)(rawdata.numViews-1);
+          rawdata.numViews = (uint8_t)(rawdata.numViews-1);
         }
       }else{
         deletingViews = 0;
@@ -100,7 +100,7 @@ void deleteSpectrumOrView(const int spInd){
     for(i=0;i<rawdata.numViews;i++){
       for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
         if(rawdata.viewMultiPlots[i][j] > spInd){
-          rawdata.viewMultiPlots[i][j] = (unsigned char)(rawdata.viewMultiPlots[i][j]-1);
+          rawdata.viewMultiPlots[i][j] = (uint8_t)(rawdata.viewMultiPlots[i][j]-1);
         }
       }
       for(j=spInd;j<(rawdata.numSpOpened-1);j++){
@@ -114,7 +114,7 @@ void deleteSpectrumOrView(const int spInd){
       memcpy(&rawdata.histComment[i],&rawdata.histComment[i+1],sizeof(rawdata.histComment[i]));
     }
     if(rawdata.numSpOpened > 0){
-      rawdata.numSpOpened = (unsigned char)(rawdata.numSpOpened-1);
+      rawdata.numSpOpened = (uint8_t)(rawdata.numSpOpened-1);
     }
     if(rawdata.numSpOpened == 0){
       rawdata.openedSp = 0;
@@ -123,14 +123,14 @@ void deleteSpectrumOrView(const int spInd){
   }else{
     //deleting view
 
-    int viewInd = spInd - rawdata.numSpOpened;
+    int32_t viewInd = spInd - rawdata.numSpOpened;
 
     //delete comments associated with the view
-    for(i=0;i<rawdata.numChComments;i++){
+    for(i=0;i<(int32_t)rawdata.numChComments;i++){
       if(rawdata.chanCommentView[i] == 1){
         if(rawdata.chanCommentSp[i] == viewInd){
           //delete the comment
-          for(j=i;j<(rawdata.numChComments-1);j++){
+          for(j=i;j<(int32_t)(rawdata.numChComments-1);j++){
             memcpy(&rawdata.chanComment[j],&rawdata.chanComment[j+1],sizeof(rawdata.chanComment[j]));
             memcpy(&rawdata.chanCommentView[j],&rawdata.chanCommentView[j+1],sizeof(rawdata.chanCommentView[j]));
             memcpy(&rawdata.chanCommentSp[j],&rawdata.chanCommentSp[j+1],sizeof(rawdata.chanCommentSp[j]));
@@ -141,7 +141,7 @@ void deleteSpectrumOrView(const int spInd){
           i -= 1; //indices have shifted, reheck the current index
         }else if(rawdata.chanCommentSp[i] > viewInd){
           //change to the new index for the view
-          rawdata.chanCommentSp[i] = (unsigned char)(rawdata.chanCommentSp[i]-1);
+          rawdata.chanCommentSp[i] = (uint8_t)(rawdata.chanCommentSp[i]-1);
         }
       }
     }
@@ -155,7 +155,7 @@ void deleteSpectrumOrView(const int spInd){
       memcpy(&rawdata.viewMultiPlots[i],&rawdata.viewMultiPlots[i+1],sizeof(rawdata.viewMultiPlots[i]));
     }
     if(rawdata.numViews > 0){
-      rawdata.numViews = (unsigned char)(rawdata.numViews-1);
+      rawdata.numViews = (uint8_t)(rawdata.numViews-1);
     }
 
   }
@@ -165,11 +165,11 @@ void deleteSpectrumOrView(const int spInd){
   return;
 }
 
-int getFirstNonemptySpectrum(const int numSpOpened){
+int getFirstNonemptySpectrum(const int32_t numSpOpened){
   if(numSpOpened>=NSPECT){
     return -1;
   }
-  int i,j;
+  int32_t i,j;
   for(i=0;i<numSpOpened;i++){
     for(j=0;j<S32K;j++){
       if(rawdata.hist[i][j]!=0.0){
@@ -181,8 +181,8 @@ int getFirstNonemptySpectrum(const int numSpOpened){
 }
 
 //used to check whether a spectrum has been selected in multiplot mode
-int isSpSelected(const int spNum){
-  int i;
+int isSpSelected(const int32_t spNum){
+  int32_t i;
   for(i=0;i<drawing.numMultiplotSp;i++){
     if(drawing.multiPlots[i] == spNum){
       return 1;
@@ -202,13 +202,13 @@ double getCalWidth(const double val){
 }
 
 //lower level spectrum data access routine which takes rebinning into account
-float getSpBinValRaw(const int spNumRaw, const int bin, const double scaleFactor, const int contractFactor){
+float getSpBinValRaw(const int32_t spNumRaw, const int32_t bin, const double scaleFactor, const int32_t contractFactor){
 
   if(spNumRaw >= NSPECT){
     return 0;
   }
 
-  int i;
+  int32_t i;
   float val = 0.;
   for(i=0;i<contractFactor;i++){
     if((bin+i) < S32K){
@@ -219,7 +219,7 @@ float getSpBinValRaw(const int spNumRaw, const int bin, const double scaleFactor
 }
 
 //if getWeight is set, will return weight values for fitting
-float getSpBinValOrWeight(const int dispSpNum, const int bin, const int getWeight){
+float getSpBinValOrWeight(const int32_t dispSpNum, const int32_t bin, const int32_t getWeight){
 
   /*if((dispSpNum >= drawing.numMultiplotSp)||(dispSpNum < 0)){
     //invalid displayed spectrum number
@@ -264,12 +264,12 @@ float getSpBinValOrWeight(const int dispSpNum, const int bin, const int getWeigh
 //for contracted spectra, the original channel units are retained, but the sum
 //of j bins is returned, where j is the contraction factor
 //spNum is the displayed spectrum number (for multiplot), 0 is the first displayed spectrum
-float getDispSpBinVal(const int dispSpNum, const int bin){
+float getDispSpBinVal(const int32_t dispSpNum, const int32_t bin){
   return getSpBinValOrWeight(dispSpNum,drawing.lowerLimit+bin,0);
 }
-float getSpBinVal(const int dispSpNum, const int bin){
+float getSpBinVal(const int32_t dispSpNum, const int32_t bin){
   return getSpBinValOrWeight(dispSpNum,bin,0);
 }
-float getSpBinFitWeight(const int dispSpNum, const int bin){
+float getSpBinFitWeight(const int32_t dispSpNum, const int32_t bin){
   return getSpBinValOrWeight(dispSpNum,bin,1);
 }

@@ -1,17 +1,17 @@
 /* © J. Williams, 2020-2021 */
 
 //routine to write a .jf3 file
-//header containing: file format version number (unsigned char), number of spectra (unsigned char), label for each spactrum (each 256 element char array),
-//number of comments (unsigned char), individual comments (comment sp (char), ch (int32), y-val (float32), followed by a 256 element char array for the comment itself)
+//header containing: file format version number (uint8_t), number of spectra (uint8_t), label for each spactrum (each 256 element char array),
+//number of comments (uint8_t), individual comments (comment sp (char), ch (int32), y-val (float32), followed by a 256 element char array for the comment itself)
 //spectrum data is compressed using a basic RLE method: packet header (signed char) specifying number of elements to repeat, then the element as a 32-bit float
 //alternatively, the packet header may be a negative number -n, in which case n non-repeating elements follow as 32-bit floats
 //if the packet header is 0, that is the end of the spectrum  
 int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
 {
-  int i, j, k;
+  int32_t i, j, k;
   FILE *out;
-  unsigned char ucharBuf;
-  unsigned int uintBuf;
+  uint8_t ucharBuf;
+  uint32_t uintBuf;
 
   if ((out = fopen(filename, "w")) == NULL) //open the file
   {
@@ -23,9 +23,9 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
   //printf("Number of spectra to write: %i\n",rawdata.numSpOpened);
 
   ucharBuf = 2; //file format version number
-  fwrite(&ucharBuf,sizeof(unsigned char),1,out);
+  fwrite(&ucharBuf,sizeof(uint8_t),1,out);
   ucharBuf = rawdata.numSpOpened; //number of spectra to write
-  fwrite(&ucharBuf,sizeof(unsigned char),1,out);
+  fwrite(&ucharBuf,sizeof(uint8_t),1,out);
   for(i=0;i<rawdata.numSpOpened;i++){
     fwrite(&rawdata.histComment[i],sizeof(rawdata.histComment[i]),1,out);
   }
@@ -33,8 +33,8 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
   fwrite(&calpar,sizeof(calpar),1,out);
   //write comments
   uintBuf = rawdata.numChComments; //number of comments to write
-  fwrite(&uintBuf,sizeof(unsigned int),1,out);
-  for(i=0;i<rawdata.numChComments;i++){
+  fwrite(&uintBuf,sizeof(uint32_t),1,out);
+  for(i=0;i<(int32_t)rawdata.numChComments;i++){
     fwrite(&rawdata.chanCommentView[i],sizeof(rawdata.chanCommentView[i]),1,out);
     fwrite(&rawdata.chanCommentSp[i],sizeof(rawdata.chanCommentSp[i]),1,out);
     fwrite(&rawdata.chanCommentCh[i],sizeof(rawdata.chanCommentCh[i]),1,out);
@@ -43,13 +43,13 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
   }
   //write views
   uintBuf = rawdata.numViews; //number of views to write
-  fwrite(&uintBuf,sizeof(unsigned int),1,out);
-  for(i=0;i<rawdata.numViews;i++){
+  fwrite(&uintBuf,sizeof(uint32_t),1,out);
+  for(i=0;i<(int32_t)rawdata.numViews;i++){
     fwrite(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,out);
-    fwrite(&rawdata.viewMultiplotMode[i],sizeof(unsigned char),1,out);
-    fwrite(&rawdata.viewNumMultiplotSp[i],sizeof(unsigned char),1,out);
+    fwrite(&rawdata.viewMultiplotMode[i],sizeof(uint8_t),1,out);
+    fwrite(&rawdata.viewNumMultiplotSp[i],sizeof(uint8_t),1,out);
     for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
-      fwrite(&rawdata.viewMultiPlots[i][j],sizeof(unsigned char),1,out);
+      fwrite(&rawdata.viewMultiPlots[i][j],sizeof(uint8_t),1,out);
     }
     for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
       fwrite(&rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]],sizeof(double),1,out);
@@ -280,7 +280,7 @@ int exportSPE(const char *filePrefix, const int exportMode, const int rebin)
 //exportMode: 0=write displayed spectrum, 1=write all imported spectra
 int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
 {
-  int i,j;
+  int32_t i,j;
   int spID;
   int maxArraySize;
   float val;
@@ -392,7 +392,7 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
   }
 
   //write comments
-  for(i=0;i<rawdata.numChComments;i++){
+  for(i=0;i<(int32_t)rawdata.numChComments;i++){
     fprintf(out,"COMMENT %i %i %i %f %s\n", rawdata.chanCommentView[i], rawdata.chanCommentSp[i], rawdata.chanCommentCh[i], rawdata.chanCommentVal[i], rawdata.chanComment[i]);
   }
 
