@@ -132,16 +132,18 @@ gboolean print_fit_results(){
     length += len;
   }
 
-  switch (guiglobals.popupFitResults)
-  {
+  switch (guiglobals.popupFitResults){
     case 1:
       //show a dialog box with the fit results
       flags = GTK_DIALOG_DESTROY_WITH_PARENT;
       message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, "Fit results");
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",fitResStr);
-      gtk_dialog_run (GTK_DIALOG (message_dialog));
-      gtk_widget_destroy (message_dialog);
-      //break;
+      gtk_dialog_run(GTK_DIALOG (message_dialog));
+      gtk_widget_destroy(message_dialog);
+      //print to the console
+      length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"\n");
+      printf("%s",fitResStr);
+      break;
     default:
       //print to the console
       length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"\n");
