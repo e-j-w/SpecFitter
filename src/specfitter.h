@@ -141,7 +141,7 @@ struct {
   int32_t dragstartul, dragstartll; //click and drag position storage parameters
   float dragStartX; //start cursor position when dragging
   float cursorPosX, cursorPosY; //cursor position
-  char drawSpCursor; //0 = don't draw vertical cursor on spectrum, 1=draw, -1=drawing disabled
+  int8_t drawSpCursor; //0 = don't draw vertical cursor on spectrum, 1=draw, -1=drawing disabled
   uint8_t drawSpLabels; //0 = don't draw labels, 1 = draw labels
   uint8_t drawSpComments; //0 = don't draw comments, 1 = draw comments
   uint8_t drawGridLines; //0 = don't draw grid lines on plot, 1 = draw grid lines
@@ -153,17 +153,17 @@ struct {
   uint8_t autoZoom; //0=don't autozoom, 1=autozoom
   uint8_t commentEditMode; //0=editing comment, 1=editing view title
   int32_t commentEditInd;
-  char preferDarkTheme; //0=prefer light, 1=prefer dark
-  char popupFitResults; //0=don't popup results after fit, 1=popup results
-  char useZoomAnimations; //0=don't use, 1=use
-  char exportFileType; //0=text, 1=radware
+  uint8_t preferDarkTheme; //0=prefer light, 1=prefer dark
+  uint8_t popupFitResults; //0=don't popup results after fit, 1=popup results
+  uint8_t useZoomAnimations; //0=don't use, 1=use
+  uint8_t exportFileType; //0=text, 1=radware
 } guiglobals;
 
 //raw histogram data globals
 struct {
   double hist[NSPECT][S32K]; //spectrum histogram data
   char histComment[NSPECT][256]; //spectrum description/comment
-  char openedSp; //0=not opened, 1=opened
+  uint8_t openedSp; //0=not opened, 1=opened
   uint8_t numSpOpened; //number of spectra in the opened file(s)
   uint8_t numFilesOpened; //number of files containing spectra opened
   char viewComment[MAXNVIEWS][256]; //view description/comment
@@ -207,10 +207,10 @@ struct {
 
 //calibration globals
 struct {
-  float calpar0,calpar1,calpar2; //0th, 1st, and 2nd order calibration parameters
+  float calpar[3]; //0th, 1st, and 2nd order calibration parameters
+  uint8_t calMode; //0=no calibration, 1=calibration enabled
   char calUnit[16]; //name of the unit used for calibration
   char calYUnit[32]; //name of the y-axis units
-  uint8_t calMode; //0=no calibration, 1=calibration enabled
 } calpar;
 
 //fitting globals

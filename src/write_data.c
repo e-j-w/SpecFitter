@@ -397,7 +397,7 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
   }
 
   //write calibration parameters
-  fprintf(out,"CALPAR %f %f %f %i\n", calpar.calpar0, calpar.calpar1, calpar.calpar2, calpar.calMode);
+  fprintf(out,"CALPAR %f %f %f %i\n", calpar.calpar[2], calpar.calpar[1], calpar.calpar[2], calpar.calMode);
   fprintf(out,"CALXUNIT %s\n", calpar.calUnit);
   fprintf(out,"CALYUNIT %s\n", calpar.calYUnit);
 

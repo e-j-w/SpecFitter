@@ -46,9 +46,9 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
 
       //read calibration parameters
       if(fread(&calpar, sizeof(calpar), 1, inp)!=1){fclose(inp); return 0;}
-      if((calpar.calpar1==0.0)&&(calpar.calpar2==0.0)){
+      if((calpar.calpar[1]==0.0)&&(calpar.calpar[2]==0.0)){
         //invalid calibration, fix parameters
-        calpar.calpar1=1.0;
+        calpar.calpar[1]=1.0;
       }
 
       //read comments
@@ -643,13 +643,13 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
                 }else if(strcmp(tok,"CALPAR")==0){
                   tok = strtok(NULL," ");
                   if(tok!=NULL){
-                    calpar.calpar0 = (float)atof(tok);
+                    calpar.calpar[2] = (float)atof(tok);
                     tok = strtok(NULL," ");
                     if(tok!=NULL){
-                      calpar.calpar1 = (float)atof(tok);
+                      calpar.calpar[1] = (float)atof(tok);
                       tok = strtok(NULL," ");
                       if(tok!=NULL){
-                        calpar.calpar2 = (float)atof(tok);
+                        calpar.calpar[2] = (float)atof(tok);
                         tok = strtok(NULL," ");
                         if(tok!=NULL){
                           calpar.calMode = (uint8_t)atoi(tok);
@@ -657,9 +657,9 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
                       }
                     }
                   }
-                  if((calpar.calpar1==0.0)&&(calpar.calpar2==0.0)){
+                  if((calpar.calpar[1]==0.0)&&(calpar.calpar[2]==0.0)){
                     //invalid calibration, fix parameters
-                    calpar.calpar1=1.0;
+                    calpar.calpar[1]=1.0;
                   }
                 }else if(strcmp(tok,"CALXUNIT")==0){
                   tok = strtok(NULL,""); //get the rest of the string

@@ -132,13 +132,13 @@ uint8_t readConfigFile(FILE *file, uint8_t keepCalibration){
           }
         }
         if(strcmp(par,"cal_parameter0") == 0){
-          calpar.calpar0 = (float)atof(val);
+          calpar.calpar[0] = (float)atof(val);
         }
         if(strcmp(par,"cal_parameter1") == 0){
-          calpar.calpar1 = (float)atof(val);
+          calpar.calpar[1] = (float)atof(val);
         }
         if(strcmp(par,"cal_parameter2") == 0){
-          calpar.calpar2 = (float)atof(val);
+          calpar.calpar[2] = (float)atof(val);
         }
         if(strcmp(par,"cal_unit") == 0){
           val[15] = '\0'; //truncate string
@@ -154,8 +154,8 @@ uint8_t readConfigFile(FILE *file, uint8_t keepCalibration){
   }
 
   //check for and correct invalid parameter values
-  if((calpar.calpar1 == 0.0)&&(calpar.calpar2 == 0.0)){
-    calpar.calpar1=1.0;
+  if((calpar.calpar[1] == 0.0)&&(calpar.calpar[2] == 0.0)){
+    calpar.calpar[1]=1.0;
   }
 
   return 1;
@@ -167,9 +167,9 @@ uint8_t writeConfigFile(FILE *file){
   fprintf(file,"# This is a config file for SpecFitter.\n");
   if(calpar.calMode == 1){
     fprintf(file,"calibrate=yes\n");
-    fprintf(file,"cal_parameter0=%f\n",calpar.calpar0);
-    fprintf(file,"cal_parameter1=%f\n",calpar.calpar1);
-    fprintf(file,"cal_parameter2=%f\n",calpar.calpar2);
+    fprintf(file,"cal_parameter0=%f\n",calpar.calpar[0]);
+    fprintf(file,"cal_parameter1=%f\n",calpar.calpar[1]);
+    fprintf(file,"cal_parameter2=%f\n",calpar.calpar[2]);
     fprintf(file,"cal_unit=%s\n",calpar.calUnit);
     fprintf(file,"cal_unit_y=%s\n",calpar.calYUnit);
   }else{

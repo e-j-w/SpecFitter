@@ -1003,20 +1003,20 @@ void on_calibrate_button_clicked(){
 
   if(calpar.calMode == 1){
     char str[256];
-    if(calpar.calpar0!=0.0){
-      sprintf(str,"%.3f",calpar.calpar0);
+    if(calpar.calpar[0]!=0.0){
+      sprintf(str,"%.3f",calpar.calpar[0]);
       gtk_entry_set_text(cal_entry_const,str);
     }else{
       gtk_entry_set_text(cal_entry_const,"");
     }
-    if(calpar.calpar1!=0.0){
-      sprintf(str,"%.3f",calpar.calpar1);
+    if(calpar.calpar[1]!=0.0){
+      sprintf(str,"%.3f",calpar.calpar[1]);
       gtk_entry_set_text(cal_entry_lin,str);
     }else{
       gtk_entry_set_text(cal_entry_lin,"");
     }
-    if(calpar.calpar2!=0.0){
-      sprintf(str,"%.3f",calpar.calpar2);
+    if(calpar.calpar[2]!=0.0){
+      sprintf(str,"%.3f",calpar.calpar[2]);
       gtk_entry_set_text(cal_entry_quad,str);
     }else{
       gtk_entry_set_text(cal_entry_quad,"");
@@ -1047,10 +1047,10 @@ void on_calibrate_ok_button_clicked(){
   if(!((linPar==0.0)&&(quadPar==0.0))){
     //not all calibration parameters are zero, calibration is valid
     calpar.calMode=1;
-    calpar.calpar0 = (float)constPar;
-    calpar.calpar1 = (float)linPar;
-    calpar.calpar2 = (float)quadPar;
-    //printf("Calibration parameters: %f %f %f, drawing.calMode: %i, calpar.calUnit: %s\n",calpar.calpar0,calpar.calpar1,calpar.calpar2,drawing.calMode,drawing.calUnit);
+    calpar.calpar[0] = (float)constPar;
+    calpar.calpar[1] = (float)linPar;
+    calpar.calpar[2] = (float)quadPar;
+    //printf("Calibration parameters: %f %f %f, drawing.calMode: %i, calpar.calUnit: %s\n",calpar.calpar[0],calpar.calpar[1],calpar.calpar[2],drawing.calMode,drawing.calUnit);
     updateConfigFile();
     gtk_widget_hide(GTK_WIDGET(calibrate_window)); //close the calibration window
     manualSpectrumAreaDraw();
@@ -1068,9 +1068,9 @@ void on_calibrate_ok_button_clicked(){
 void on_remove_calibration_button_clicked(){
 
   calpar.calMode=0;
-  calpar.calpar0=0.0;
-  calpar.calpar1=1.0;
-  calpar.calpar2=0.0;
+  calpar.calpar[0]=0.0;
+  calpar.calpar[1]=1.0;
+  calpar.calpar[2]=0.0;
   updateConfigFile();
   gtk_widget_hide(GTK_WIDGET(calibrate_window)); //close the calibration window
   manualSpectrumAreaDraw();
