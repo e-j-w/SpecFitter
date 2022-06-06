@@ -184,10 +184,10 @@ int exportSPE(const char *filePrefix, const int exportMode, const int rebin)
   int32_t arraySize = 4096;
   int32_t junk = 1;
   int32_t byteSize = arraySize*4;
-  
-  switch (exportMode)
+
+  switch(exportMode + (drawing.multiplotMode != MULTIPLOT_SUMMED))
   {
-    case 0:
+    case 1:
       //export all
       for(i=0;i<rawdata.numSpOpened;i++){
 
@@ -227,10 +227,41 @@ int exportSPE(const char *filePrefix, const int exportMode, const int rebin)
         printf("Wrote data to file: %s\n",outFileName);
       }
       break;
+    case 0:
+      //export current (summed) spectrum view
+      snprintf(outFileName,256,"%s.spe",filePrefix);
+      if((out = fopen(outFileName, "w")) == NULL) //open the file
+      {
+        printf("ERROR: Cannot open the output file: %s\n", outFileName);
+        printf("The file may not be accesible.\n");
+        return 1;
+      }
+
+      //write .spe header
+      strncpy(spLabel,"Summed",7);
+      fwrite(&buffSize,sizeof(int32_t),1,out);
+      fwrite(&spLabel,sizeof(spLabel),1,out);
+      fwrite(&arraySize,sizeof(int32_t),1,out);
+      fwrite(&junk,sizeof(int32_t),1,out);
+      fwrite(&junk,sizeof(int32_t),1,out);
+      fwrite(&junk,sizeof(int32_t),1,out);
+      fwrite(&buffSize,sizeof(int32_t),1,out);
+      fwrite(&byteSize,sizeof(int32_t),1,out);
+
+      //write histogram
+      for(j=0;j<arraySize;j++){
+        val = getSpBinValOrWeight(0,j,0);
+        fwrite(&val,sizeof(float),1,out);
+      }
+      fwrite(&byteSize,sizeof(int32_t),1,out);
+      fclose(out);
+      printf("Wrote data to file: %s\n",outFileName);
+
+      break;
     default:
       //export one histogram
       
-      spID = exportMode-1;
+      spID = exportMode-2;
       if((spID < 0)||(spID >= rawdata.numSpOpened)){
         printf("ERROR: invalid spectrum index for export.\n");
         return 2;
@@ -295,9 +326,9 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
     return 1;
   }
   
-  switch (exportMode)
+  switch(exportMode + (drawing.multiplotMode != MULTIPLOT_SUMMED))
   {
-    case 0:
+    case 1:
       //export all
 
       //write header
@@ -350,6 +381,34 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
         fprintf(out,"\n");
       }
 
+      //write comments
+      for(i=0;i<(int32_t)rawdata.numChComments;i++){
+        fprintf(out,"COMMENT %i %i %i %f %s\n", rawdata.chanCommentView[i], rawdata.chanCommentSp[i], rawdata.chanCommentCh[i], rawdata.chanCommentVal[i], rawdata.chanComment[i]);
+      }
+
+      break;
+    case 0:
+      //export current (summed) spectrum view
+      //write header
+      fprintf(out,"SPECTRUM1\n");
+
+      //get max array size
+      maxArraySize = S32K;
+      for(j=S32K-1;j>=0;j--){
+        if(getSpBinValOrWeight(0,j,0) != 0.){
+          maxArraySize = j+1;
+          break;
+        }
+      }
+
+      for(j=0;j<maxArraySize;j++){
+        val = getSpBinValOrWeight(0,j,0);
+        fprintf(out,"%f\n",val);
+      }
+
+      //write histogram title
+      fprintf(out,"TITLE 1 Summed View\n");
+
       break;
     default:
       //export one histogram
@@ -389,11 +448,6 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
       fprintf(out,"TITLE 1 %s\n",rawdata.histComment[spID]);
 
       break;
-  }
-
-  //write comments
-  for(i=0;i<(int32_t)rawdata.numChComments;i++){
-    fprintf(out,"COMMENT %i %i %i %f %s\n", rawdata.chanCommentView[i], rawdata.chanCommentSp[i], rawdata.chanCommentCh[i], rawdata.chanCommentVal[i], rawdata.chanComment[i]);
   }
 
   //write calibration parameters

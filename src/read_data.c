@@ -512,10 +512,11 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
               numLineEntries = 0;
             }else{
               //line is data
-              while(tok!=NULL){
+              while((tok!=NULL)&&((strcmp(tok,"")!=0))){
                 if(numLineEntries<NSPECT){
+                  tok[strcspn(tok, "\r\n")] = 0;//strips newline characters from the string
                   num[numLineEntries] = atof(tok);
-                  //printf("numLineEntries: %i, num: %f\n",numLineEntries, num[numLineEntries]);
+                  //printf("%s, numLineEntries: %i, num: %f\n",tok,numLineEntries, num[numLineEntries]);
                   numLineEntries++;
                   tok = strtok(NULL," ");
                 }else{
@@ -523,7 +524,6 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
                   break;
                 }
               }
-              numLineEntries--;
             }
             if(numLineEntries > 0){
               if(numColumns == 0){
@@ -537,6 +537,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
                 fclose(inp);
                 return 0;
               }
+              //printf("numLineEntries: %u, numColumns: %u\n",numLineEntries,numColumns);
               for(i=0;i<numLineEntries;i++){
                 outHist[outHistStartSp+i][numElementsRead]=num[i];
               }

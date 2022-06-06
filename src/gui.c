@@ -763,14 +763,23 @@ void on_save_button_clicked(){
 }
 
 void on_save_text_button_clicked(){
-  int32_t i;
+  int32_t i, cbEntry;
   guiglobals.exportFileType = 0; //exporting to text format
   gtk_label_set_text(export_description_label,"Export to .txt format:");
-  gtk_widget_hide(GTK_WIDGET(export_note_label));
+  
   gtk_combo_box_text_remove_all(export_mode_combobox);
-  gtk_combo_box_text_insert(export_mode_combobox,0,NULL,"Full session (single file)");
+  cbEntry = 0;
+  if(drawing.multiplotMode == MULTIPLOT_SUMMED){
+    gtk_combo_box_text_insert(export_mode_combobox,cbEntry,NULL,"Current summed view (single file)");
+    cbEntry++;
+  }else{
+    gtk_widget_hide(GTK_WIDGET(export_note_label));
+  }
+  gtk_combo_box_text_insert(export_mode_combobox,cbEntry,NULL,"Full session (single file)");
+  cbEntry++;
   for(i=0;i<rawdata.numSpOpened;i++){
-    gtk_combo_box_text_insert(export_mode_combobox,i+1,NULL,rawdata.histComment[i]);
+    gtk_combo_box_text_insert(export_mode_combobox,cbEntry,NULL,rawdata.histComment[i]);
+    cbEntry++;
   }
   gtk_combo_box_set_active(GTK_COMBO_BOX(export_mode_combobox),0); //set the default entry
   gtk_revealer_set_reveal_child(export_options_revealer, FALSE);
@@ -778,18 +787,20 @@ void on_save_text_button_clicked(){
 }
 
 void on_save_radware_button_clicked(){
-  int32_t i;
+  int32_t i, cbEntry;
   guiglobals.exportFileType = 1; //exporting to radware format
   gtk_label_set_text(export_description_label,"Export to .spe format:");
-  if(rawdata.numChComments > 0)
-    gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins.\nComments will not be exported (incomatible with .spe format).");
-  else
-    gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins.");
-  gtk_widget_show(GTK_WIDGET(export_note_label));
   gtk_combo_box_text_remove_all(export_mode_combobox);
-  gtk_combo_box_text_insert(export_mode_combobox,0,NULL,"All spectra (separate files)");
+  cbEntry = 0;
+  if(drawing.multiplotMode == MULTIPLOT_SUMMED){
+    gtk_combo_box_text_insert(export_mode_combobox,cbEntry,NULL,"Current summed view");
+    cbEntry++;
+  }
+  gtk_combo_box_text_insert(export_mode_combobox,cbEntry,NULL,"All spectra (separate files)");
+  cbEntry++;
   for(i=0;i<rawdata.numSpOpened;i++){
-    gtk_combo_box_text_insert(export_mode_combobox,i+1,NULL,rawdata.histComment[i]);
+    gtk_combo_box_text_insert(export_mode_combobox,cbEntry,NULL,rawdata.histComment[i]);
+    cbEntry++;
   }
   gtk_combo_box_set_active(GTK_COMBO_BOX(export_mode_combobox),0); //set the default entry
   gtk_revealer_set_reveal_child(export_options_revealer, TRUE);
@@ -800,14 +811,44 @@ void on_export_mode_combobox_changed(){
   int32_t exportMode = gtk_combo_box_get_active(GTK_COMBO_BOX(export_mode_combobox));
   switch(exportMode){
     case 0:
-      if(guiglobals.exportFileType == 0){
+      if(drawing.multiplotMode == MULTIPLOT_SUMMED){
         gtk_revealer_set_reveal_child(export_options_revealer, FALSE);
+        if(guiglobals.exportFileType == 0){
+          gtk_label_set_text(export_note_label,"NOTE: Exported data will not contain weighted errors.");
+          gtk_widget_show(GTK_WIDGET(export_note_label));
+        }else{
+          if(rawdata.numChComments > 0)
+            gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins,\nand will not contain weighted errors.\nComments will not be exported (incomatible with .spe format).");
+          else
+            gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins,\nand will not contain weighted errors.");
+          gtk_widget_show(GTK_WIDGET(export_note_label));
+        }
       }else{
-        gtk_revealer_set_reveal_child(export_options_revealer, TRUE);
+        if(guiglobals.exportFileType == 0){
+          gtk_revealer_set_reveal_child(export_options_revealer, FALSE);
+          gtk_widget_hide(GTK_WIDGET(export_note_label));
+        }else{
+          gtk_revealer_set_reveal_child(export_options_revealer, TRUE);
+          if(rawdata.numChComments > 0)
+            gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins.\nComments will not be exported (incomatible with .spe format).");
+          else
+            gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins.");
+          gtk_widget_show(GTK_WIDGET(export_note_label));
+        }
       }
       break;
     default:
       gtk_revealer_set_reveal_child(export_options_revealer, TRUE);
+      if(guiglobals.exportFileType == 0){
+        gtk_widget_hide(GTK_WIDGET(export_note_label));
+      }else{
+        gtk_revealer_set_reveal_child(export_options_revealer, TRUE);
+        if(rawdata.numChComments > 0)
+          gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins.\nComments will not be exported (incomatible with .spe format).");
+        else
+          gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins.");
+        gtk_widget_show(GTK_WIDGET(export_note_label));
+      }
       break;
   }
 }
