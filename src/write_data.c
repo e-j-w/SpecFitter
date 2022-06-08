@@ -251,12 +251,18 @@ int exportSPE(const char *filePrefix, const int exportMode, const int rebin)
       //write histogram
       int32_t numBinsWritten = 0;
       for(j=0;j<S32K;j+=drawing.contractFactor){
-        val = getSpBinValOrWeight(0,j,0);
-        fwrite(&val,sizeof(float),1,out);
-        numBinsWritten++;
-        if(numBinsWritten >= arraySize){
+        if(numBinsWritten < arraySize){
+          val = getSpBinValOrWeight(0,j,0);
+          fwrite(&val,sizeof(float),1,out);
+          numBinsWritten++;
+        }else{
           break;
         }
+      }
+      while(numBinsWritten < arraySize){
+        val = 0.0f;
+        fwrite(&val,sizeof(float),1,out);
+        numBinsWritten++;
       }
       fwrite(&byteSize,sizeof(int32_t),1,out);
       fclose(out);
