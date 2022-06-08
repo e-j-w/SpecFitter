@@ -803,7 +803,6 @@ void on_save_radware_button_clicked(){
     cbEntry++;
   }
   gtk_combo_box_set_active(GTK_COMBO_BOX(export_mode_combobox),0); //set the default entry
-  gtk_revealer_set_reveal_child(export_options_revealer, TRUE);
   gtk_window_present(export_options_window); //show the window
 }
 
