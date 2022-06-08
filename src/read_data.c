@@ -323,31 +323,31 @@ int readCHN(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
     printf("Check that the file exists.\n");
     exit(-1);
   }else{
-    fread(&fType,sizeof(fType),1,inp);
+    if(fread(&fType,sizeof(fType),1,inp) != 1) return 0;
     if(fType!=-1){
       printf("ERROR: Input file %s is not a valid .chn file.\n",filename);
       exit(-1);
     }
       
     //read in the .chn file header and do absolutely nothing with it
-    fread(&mcaNum, sizeof(mcaNum), 1, inp);         // MCA #
-    fread(&segment, sizeof(segment), 1, inp);         // seg #
-    fread(acqTime, sizeof(char), 2, inp);            // start time
-    fread(&realtime, sizeof(realtime), 1, inp);       // real time, 20 ms ticks
-    fread(&livetime, sizeof(livetime), 1, inp);       // live time, 20 ms ticks
-    fread(acqTime, sizeof(char), 2, inp);            // start day
-    fread(month, sizeof(char), 3, inp);               // start month
-    fread(acqTime, sizeof(char), 2, inp);            // start year
-    fread(acqTime, sizeof(char), 1, inp);            // century
-    fread(acqTime, sizeof(char), 2, inp);            // hour
-    fread(acqTime, sizeof(char), 2, inp);            // minute
-    fread(&chanOffset, sizeof(chanOffset), 1, inp); // offset
-    fread(&numCh, sizeof(numCh), 1, inp);     // # channels
+    if(fread(&mcaNum, sizeof(mcaNum), 1, inp) != 1) return 0;         // MCA #
+    if(fread(&segment, sizeof(segment), 1, inp) != 1) return 0;         // seg #
+    if(fread(acqTime, sizeof(char), 2, inp) != 2) return 0;            // start time
+    if(fread(&realtime, sizeof(realtime), 1, inp) != 1) return 0;       // real time, 20 ms ticks
+    if(fread(&livetime, sizeof(livetime), 1, inp) != 1) return 0;       // live time, 20 ms ticks
+    if(fread(acqTime, sizeof(char), 2, inp) != 2) return 0;            // start day
+    if(fread(month, sizeof(char), 3, inp) != 3) return 0;               // start month
+    if(fread(acqTime, sizeof(char), 2, inp) != 2) return 0;            // start year
+    if(fread(acqTime, sizeof(char), 1, inp) != 1) return 0;            // century
+    if(fread(acqTime, sizeof(char), 2, inp) != 2) return 0;            // hour
+    if(fread(acqTime, sizeof(char), 2, inp) != 2) return 0;            // minute
+    if(fread(&chanOffset, sizeof(chanOffset), 1, inp) != 1) return 0; // offset
+    if(fread(&numCh, sizeof(numCh), 1, inp) != 1) return 0;     // # channels
 
     //read in histogram data from the .chn file
     for(i=0;i<numCh;i++){
       if(i<S32K){
-        fread(&chData, sizeof(chData), 1, inp);
+        if(fread(&chData, sizeof(chData), 1, inp) != 1) return 0;
         hist[i]=chData;
       }
     }
