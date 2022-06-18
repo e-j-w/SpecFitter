@@ -7,8 +7,8 @@ Author: Jonathan Williams
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <!-- interface-license-type mit -->
-  <!-- interface-name jf3 Spectrum Viewer -->
-  <!-- interface-description A simple 1D spectrum viewer in GTK3. -->
+  <!-- interface-name SpecFitter -->
+  <!-- interface-description A spectrum viewer in GTK. -->
   <!-- interface-copyright Jonathan Williams and contributors -->
   <!-- interface-authors Jonathan Williams -->
   <object class="GtkMenu">
@@ -3113,7 +3113,7 @@ Weight by fit function - Weights are proportional to the fit function values det
     <property name="width_request">800</property>
     <property name="height_request">580</property>
     <property name="can_focus">False</property>
-    <property name="title" translatable="yes">jf3 Spectrum Viewer</property>
+    <property name="title" translatable="yes">SpecFitter</property>
     <property name="window_position">center</property>
     <property name="default_width">600</property>
     <property name="default_height">400</property>
