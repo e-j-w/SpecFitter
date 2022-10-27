@@ -23,9 +23,8 @@ int main(int argc, char *argv[]){
 
   //open a file if requested from the command line
   if(argc > 1){
-    int32_t i;
     openSingleFile(argv[1],0);
-    for(i=2;i<argc;i++){
+    for(int32_t i=2;i<argc;i++){
       openSingleFile(argv[i],1);
     }
     //set headerbar info for opened files

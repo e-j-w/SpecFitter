@@ -77,7 +77,7 @@ float getCursorYVal(const double cursorx, const double cursory, const double xor
 //return -1 if no comment is at the cursor position
 //some shameless magic numbers used to map channel and y-values to comment indicator size
 int getCommentAtCursor(const double cursorx, const double cursory, const double xorigin, const double yorigin){
-  int32_t i;
+
   GdkRectangle dasize;  // GtkDrawingArea size
   GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
   // Determine GtkDrawingArea dimensions
@@ -89,7 +89,7 @@ int getCommentAtCursor(const double cursorx, const double cursory, const double 
     switch(drawing.multiplotMode){
       case MULTIPLOT_SUMMED:
         //sum plot mode
-        for(i=0;i<(int32_t)rawdata.numChComments;i++){
+        for(int32_t i=0;i<(int32_t)rawdata.numChComments;i++){
           if(rawdata.chanCommentView[i] == 1){
             if(rawdata.chanCommentSp[i] == drawing.displayedView){
               //check proximity to channel
@@ -112,7 +112,7 @@ int getCommentAtCursor(const double cursorx, const double cursory, const double 
       case MULTIPLOT_NONE:
         //single plot mode
         if(drawing.displayedView == -1){
-          for(i=0;i<(int32_t)rawdata.numChComments;i++){
+          for(int32_t i=0;i<(int32_t)rawdata.numChComments;i++){
             if(rawdata.chanCommentView[i] == 0){
               if(rawdata.chanCommentSp[i] == drawing.multiPlots[0]){
                 //check proximity to channel
@@ -133,7 +133,7 @@ int getCommentAtCursor(const double cursorx, const double cursory, const double 
           }
         }else{
           //scaled single spectrum view
-          for(i=0;i<(int32_t)rawdata.numChComments;i++){
+          for(int32_t i=0;i<(int32_t)rawdata.numChComments;i++){
             if(rawdata.chanCommentView[i] == 1){
               if(rawdata.chanCommentSp[i] == drawing.displayedView){
                 //check proximity to channel
@@ -204,14 +204,13 @@ void setPlotLimits(){
 //zoom to the non-zero region of the spectrum
 void autoZoom(){
   if(drawing.multiplotMode == MULTIPLOT_NONE){
-    int32_t i;
-    for(i=0;i<S32K;i++){
+    for(int32_t i=0;i<S32K;i++){
       if(rawdata.hist[drawing.multiPlots[0]][i] != 0.){
         drawing.lowerLimit = i;
         break;
       }
     }
-    for(i=S32K-1;i>=0;i--){
+    for(int32_t i=S32K-1;i>=0;i--){
       if(rawdata.hist[drawing.multiPlots[0]][i] != 0.){
         drawing.upperLimit = i;
         break;
@@ -1171,7 +1170,6 @@ void drawYAxisTick(const double axisVal, const int32_t multiplotSpNum, cairo_t *
 
 void drawPlotLabel(cairo_t *cr, const float width, const float height, const double baseFontSize, const float yorigin){
   char plotLabel[256];
-  int32_t i;
   cairo_text_extents_t extents; //get dimensions needed to justify text labels
   float labelYOffset;
   cairo_set_font_size(cr, baseFontSize);
@@ -1182,7 +1180,7 @@ void drawPlotLabel(cairo_t *cr, const float width, const float height, const dou
       if(labelYOffset > yorigin){
         labelYOffset = yorigin;
       }
-      for(i=0;i<drawing.numMultiplotSp;i++){
+      for(int32_t i=0;i<drawing.numMultiplotSp;i++){
         cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
         if(drawing.scaleFactor[drawing.multiPlots[i]] == 1.0){
           strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[i]]);
@@ -1197,7 +1195,7 @@ void drawPlotLabel(cairo_t *cr, const float width, const float height, const dou
     case MULTIPLOT_OVERLAY_INDEPENDENT:
     case MULTIPLOT_OVERLAY_COMMON:
       //overlaid spectra
-      for(i=0;i<drawing.numMultiplotSp;i++){
+      for(int32_t i=0;i<drawing.numMultiplotSp;i++){
         cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
         if(drawing.scaleFactor[drawing.multiPlots[i]] == 1.0){
           strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[i]]);
@@ -1216,7 +1214,7 @@ void drawPlotLabel(cairo_t *cr, const float width, const float height, const dou
       cairo_text_extents(cr, plotLabel, &extents);
       cairo_move_to(cr, (width)*0.95 - extents.width, yorigin);
       cairo_show_text(cr, plotLabel);
-      for(i=0;i<drawing.numMultiplotSp;i++){
+      for(int32_t i=0;i<drawing.numMultiplotSp;i++){
         if(drawing.scaleFactor[drawing.multiPlots[i]] == 1.0){
           strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[i]]);
         }else{
@@ -1350,8 +1348,6 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     return;
   }
 
-  int32_t i,j,k;
-
   //set the origin of the coordinate system in pixels
   float xorigin = 80.0f*scaleFactor;
   float yorigin = 40.0f*scaleFactor;
@@ -1374,17 +1370,17 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   float maxVal[MAX_DISP_SP];
   float minVal[MAX_DISP_SP];
   float currentVal[MAX_DISP_SP];
-  for(i=0;i<drawing.numMultiplotSp;i++){
+  for(int32_t i=0;i<drawing.numMultiplotSp;i++){
     minVal[i] = (float)(BIG_NUMBER);
     maxVal[i] = (float)(SMALL_NUMBER);
   }
-  for(i=0;i<(drawing.upperLimit-drawing.lowerLimit-1);i+=drawing.contractFactor){
+  for(int32_t i=0;i<(drawing.upperLimit-drawing.lowerLimit-1);i+=drawing.contractFactor){
     switch(drawing.multiplotMode){
       case MULTIPLOT_STACKED:
         //stacked
       case MULTIPLOT_OVERLAY_INDEPENDENT:
         //overlay (independent scaling)
-        for(j=0;j<drawing.numMultiplotSp;j++){
+        for(int32_t j=0;j<drawing.numMultiplotSp;j++){
           currentVal[j] = getDispSpBinVal(j, i);
           if(currentVal[j] > maxVal[j]){
             maxVal[j] = currentVal[j];
@@ -1396,7 +1392,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         break;
       case MULTIPLOT_OVERLAY_COMMON:
         //overlay (common scaling)
-        for(j=0;j<drawing.numMultiplotSp;j++){
+        for(int32_t j=0;j<drawing.numMultiplotSp;j++){
           currentVal[0] = getDispSpBinVal(j, i);
           if(currentVal[0] > maxVal[0]){
             maxVal[0] = currentVal[0];
@@ -1426,7 +1422,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     switch(drawing.multiplotMode){
       case MULTIPLOT_STACKED:
       case MULTIPLOT_OVERLAY_INDEPENDENT:
-        for(i=0;i<drawing.numMultiplotSp;i++){
+        for(int32_t i=0;i<drawing.numMultiplotSp;i++){
           if(drawing.logScale){
             drawing.scaleToLevelMax[i] = maxVal[i]*2.0f;
           }else{
@@ -1436,7 +1432,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         }
         break;
       case MULTIPLOT_OVERLAY_COMMON:
-        for(i=0;i<drawing.numMultiplotSp;i++){
+        for(int32_t i=0;i<drawing.numMultiplotSp;i++){
           if(drawing.logScale){
             drawing.scaleToLevelMax[i] = maxVal[0]*2.0f;
           }else{
@@ -1460,18 +1456,18 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     if(guiglobals.useZoomAnimations){
       if((drawing.zoomYLastFrameTime-drawing.zoomYStartFrameTime) > 3000000){
         //reset zoom
-        for(i=0;i<drawing.numMultiplotSp;i++){
+        for(int32_t i=0;i<drawing.numMultiplotSp;i++){
           drawing.scaleLevelMax[i] = drawing.scaleToLevelMax[i];
           drawing.scaleLevelMin[i] = drawing.scaleToLevelMin[i];
         }
       }
-      for(i=0;i<drawing.numMultiplotSp;i++){
+      for(int32_t i=0;i<drawing.numMultiplotSp;i++){
         if(drawing.scaleLevelMax[i]==drawing.scaleLevelMin[i]){
           drawing.scaleLevelMax[i] = drawing.scaleToLevelMax[i];
           drawing.scaleLevelMin[i] = drawing.scaleToLevelMin[i];
         }
       }
-      for(i=0;i<drawing.numMultiplotSp;i++){
+      for(int32_t i=0;i<drawing.numMultiplotSp;i++){
         if((drawing.scaleLevelMax[i] != drawing.scaleToLevelMax[i])||(drawing.scaleLevelMin[i] != drawing.scaleToLevelMin[i])){
           if(drawing.zoomingSpY == 0){
             //printf("Starting y zoom.\n");
@@ -1485,7 +1481,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       }
 
     }else{
-      for(i=0;i<drawing.numMultiplotSp;i++){
+      for(int32_t i=0;i<drawing.numMultiplotSp;i++){
         drawing.scaleLevelMax[i] = drawing.scaleToLevelMax[i];
         drawing.scaleLevelMin[i] = drawing.scaleToLevelMin[i];
       }
@@ -1518,7 +1514,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     case MULTIPLOT_STACKED:
       //stacked
       if(drawing.logScale){
-        for(i=0;i<drawing.numMultiplotSp;i++){
+        for(int32_t i=0;i<drawing.numMultiplotSp;i++){
           float rangeVal = drawing.scaleLevelMax[i] - drawing.scaleLevelMin[i];
           if(rangeVal > drawing.scaleLevelMax[i])
             rangeVal = drawing.scaleLevelMax[i];
@@ -1545,7 +1541,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         numTickPerSp = (int)((height)/(yorigin*(float)(drawing.numMultiplotSp)));
         if(numTickPerSp < 2)
           numTickPerSp = 2;
-        for(i=0;i<drawing.numMultiplotSp;i++){
+        for(int32_t i=0;i<drawing.numMultiplotSp;i++){
           yTickDist = getDistBetweenYAxisTicks(drawing.scaleLevelMax[i] - drawing.scaleLevelMin[i],numTickPerSp);
           cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
           for(yTick=0.;yTick<drawing.scaleLevelMax[i];yTick+=yTickDist){
@@ -1570,7 +1566,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       break;
     case MULTIPLOT_OVERLAY_INDEPENDENT:
       //overlay (independent scaling)
-      for(i=0;i<drawing.numMultiplotSp;i++){
+      for(int32_t i=0;i<drawing.numMultiplotSp;i++){
         double labelOffset = 0.4*((double)i+1.0)/((double)(drawing.numMultiplotSp)*1.0);
         cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
         drawYAxisTick((double)drawing.scaleLevelMax[i]*(0.3 + labelOffset), i, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin); //draw one axis tick near the middle of the axis, per spectrum
@@ -1594,7 +1590,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         if(nsigf10 >= 3){
           //logarithmic scale ticks in base-10
           float tickVal = powf(10.0f,(float)(getNSigf(drawing.scaleLevelMax[0],10.0)));
-          while((tickVal > drawing.scaleLevelMin[i])&&(tickVal >= 1.0f)){
+          while((tickVal > drawing.scaleLevelMin[0])&&(tickVal >= 1.0f)){
             drawYAxisTick(tickVal, 0, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin);
             tickVal /= 10.0f;
             numTickUsed++;
@@ -1602,7 +1598,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         }else{
           //logarithmic scale ticks in base-2
           float tickVal = powf(2.0f,(float)(getNSigf(drawing.scaleLevelMax[0],2.0)));
-          while((tickVal > drawing.scaleLevelMin[i])&&(tickVal >= 1.0f)){
+          while((tickVal > drawing.scaleLevelMin[0])&&(tickVal >= 1.0f)){
             drawYAxisTick(tickVal, 0, cr, width, height, plotFontSize, drawGridLines, xorigin, yorigin);
             tickVal /= 2.0f;
             numTickUsed++;
@@ -1692,13 +1688,13 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       //stacked
     case MULTIPLOT_OVERLAY_INDEPENDENT:
       //overlay (independent scaling)
-      for(i=0;i<drawing.numMultiplotSp;i++){
+      for(int32_t i=0;i<drawing.numMultiplotSp;i++){
         cairo_move_to(cr, getXPos(startBin,width,xorigin), getYPos(getDispSpBinVal(i,startBin),i,height,yorigin));
-        for(j=startBin;j<range;j+=binSkipFactor){
+        for(int32_t j=startBin;j<range;j+=binSkipFactor){
 
           //draw high values even if they were going to be interpolated over
           if(binSkipFactor > drawing.contractFactor){
-            for(k=0;k<binSkipFactor;k++){
+            for(int32_t k=0;k<binSkipFactor;k++){
               if(getDispSpBinVal(i, j+k) > drawing.scaleLevelMax[i]*0.8){
                 currentVal[0] = getDispSpBinVal(i, j);
                 nextVal = getDispSpBinVal(i, j+k);
@@ -1721,13 +1717,13 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       break;
     case MULTIPLOT_OVERLAY_COMMON:
       //overlay (common scaling)
-      for(i=0;i<drawing.numMultiplotSp;i++){
+      for(int32_t i=0;i<drawing.numMultiplotSp;i++){
         cairo_move_to(cr, getXPos(startBin,width,xorigin), getYPos(getDispSpBinVal(i,startBin),0,height,yorigin));
-        for(j=startBin;j<range;j+=binSkipFactor){
+        for(int32_t j=startBin;j<range;j+=binSkipFactor){
 
           //draw high values even if they were going to be interpolated over
           if(binSkipFactor > drawing.contractFactor){
-            for(k=0;k<binSkipFactor;k++){
+            for(int32_t k=0;k<binSkipFactor;k++){
               if(getDispSpBinVal(i, j+k) > drawing.scaleLevelMax[0]*0.8){
                 currentVal[0] = getDispSpBinVal(i, j);
                 nextVal = getDispSpBinVal(i, j+k);
@@ -1752,11 +1748,11 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       //summed
     case MULTIPLOT_NONE:
       cairo_move_to(cr, getXPos(startBin,width,xorigin), getYPos(getDispSpBinVal(0,startBin),0,height,yorigin));
-      for(i=startBin;i<range;i+=binSkipFactor){
+      for(int32_t i=startBin;i<range;i+=binSkipFactor){
 
         //draw high values even if they were going to be interpolated over
         if(binSkipFactor > drawing.contractFactor){
-          for(k=0;k<binSkipFactor;k++){
+          for(int32_t k=0;k<binSkipFactor;k++){
             if(getDispSpBinVal(0, i+k) > drawing.scaleLevelMax[0]*0.8){
               currentVal[0] = getDispSpBinVal(0, i);
               nextVal = getDispSpBinVal(0, i+k);
@@ -1791,7 +1787,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         fitSkipFactor = 0.5f;
       }
       //draw each peak
-      for(i=0;i<fitpar.numFitPeaks;i++){
+      for(int32_t i=0;i<fitpar.numFitPeaks;i++){
         fitDrawX=(float)(fitpar.fitStartCh);
         nextXpos = getXPosFromCh(fitDrawX,width,1,xorigin);
         if(nextXpos > 0){
@@ -1872,7 +1868,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   switch(drawing.multiplotMode){
     case MULTIPLOT_STACKED:
       //stacked
-      for(i=0;i<drawing.numMultiplotSp;i++){
+      for(int32_t i=0;i<drawing.numMultiplotSp;i++){
         cairo_move_to(cr, xorigin, yorigin + (height-yorigin)*(float)(i/(drawing.numMultiplotSp*1.0)));
         cairo_line_to(cr, width, yorigin + (height-yorigin)*(float)(i/(drawing.numMultiplotSp*1.0)));
       }
@@ -1949,7 +1945,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       //put markers at guessed positions
       cairo_set_source_rgb (cr, 0.0, 0.0, 0.8);
       cairo_set_line_width(cr, 2.0*scaleFactor);
-      for(i=0;i<fitpar.numFitPeaks;i++){
+      for(int32_t i=0;i<fitpar.numFitPeaks;i++){
         if((fitpar.fitPeakInitGuess[i] > drawing.lowerLimit)&&(fitpar.fitPeakInitGuess[i] < drawing.upperLimit)){
           cairo_arc(cr,getXPosFromCh(fitpar.fitPeakInitGuess[i],width,1,xorigin),(-0.002*(height)*30.0)-getYPos(getDispSpBinVal(0,(int)(fitpar.fitPeakInitGuess[i])-drawing.lowerLimit),0,height,yorigin),5.,0.,2*G_PI);
         }
@@ -1960,7 +1956,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       //put markers at fitted positions
       cairo_set_source_rgb (cr, 0.0, 0.0, 0.8);
       cairo_set_line_width(cr, 2.0*scaleFactor);
-      for(i=0;i<fitpar.numFitPeaks;i++){
+      for(int32_t i=0;i<fitpar.numFitPeaks;i++){
         if((fitpar.fitParVal[FITPAR_POS1+(3*i)] > drawing.lowerLimit)&&(fitpar.fitParVal[FITPAR_POS1+(3*i)] < drawing.upperLimit)){
           cairo_arc(cr,getXPosFromCh((float)(fitpar.fitParVal[FITPAR_POS1+(3*i)]),width,1,xorigin),(-0.002*(height)*30.0)-getYPos((float)(evalFit(fitpar.fitParVal[FITPAR_POS1+(3*i)],fitpar.fitType)),0,height,yorigin),5.,0.,2*G_PI);
         }
@@ -1976,7 +1972,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     switch (drawing.multiplotMode){
       case MULTIPLOT_SUMMED:
         //sum view
-        for(i=0;i<(int32_t)rawdata.numChComments;i++){
+        for(int32_t i=0;i<(int32_t)rawdata.numChComments;i++){
           if(rawdata.chanCommentView[i]==1){
             if(rawdata.chanCommentSp[i]==drawing.displayedView){
               if(rawdata.chanCommentCh[i] > drawing.lowerLimit){
@@ -2013,7 +2009,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       case MULTIPLOT_NONE:
         //single non-summed spectrum
         if(drawing.displayedView == -1){
-          for(i=0;i<(int32_t)rawdata.numChComments;i++){
+          for(int32_t i=0;i<(int32_t)rawdata.numChComments;i++){
             if(rawdata.chanCommentView[i]==0){
               if(rawdata.chanCommentSp[i]==drawing.multiPlots[0]){
                 if(rawdata.chanCommentCh[i] > drawing.lowerLimit){
@@ -2047,7 +2043,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
             }
           }
         }else{
-          for(i=0;i<(int32_t)rawdata.numChComments;i++){
+          for(int32_t i=0;i<(int32_t)rawdata.numChComments;i++){
             if(rawdata.chanCommentView[i]==1){
               if(rawdata.chanCommentSp[i]==drawing.displayedView){
                 if(rawdata.chanCommentCh[i] > drawing.lowerLimit){

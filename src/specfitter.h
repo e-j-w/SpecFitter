@@ -6,12 +6,10 @@
 #include <gtk/gtk.h>
 #include <gtk/gtkx.h>
 #include <cairo.h>
-#include <stdio.h>
 #include <ctype.h>
 #include <stdint.h>
 #include <math.h>
 #include <libgen.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 
 #include "lin_eq_solver.h"

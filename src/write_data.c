@@ -6,9 +6,8 @@
 //spectrum data is compressed using a basic RLE method: packet header (signed char) specifying number of elements to repeat, then the element as a 32-bit float
 //alternatively, the packet header may be a negative number -n, in which case n non-repeating elements follow as 32-bit floats
 //if the packet header is 0, that is the end of the spectrum  
-int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
-{
-  int32_t i, j, k;
+int writeJF3(const char *filename, double inpHist[NSPECT][S32K]){
+  
   FILE *out;
   uint8_t ucharBuf;
   uint32_t uintBuf;
@@ -26,7 +25,7 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
   fwrite(&ucharBuf,sizeof(uint8_t),1,out);
   ucharBuf = rawdata.numSpOpened; //number of spectra to write
   fwrite(&ucharBuf,sizeof(uint8_t),1,out);
-  for(i=0;i<rawdata.numSpOpened;i++){
+  for(int32_t i=0;i<rawdata.numSpOpened;i++){
     fwrite(&rawdata.histComment[i],sizeof(rawdata.histComment[i]),1,out);
   }
   //write calibration parameters
@@ -34,7 +33,7 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
   //write comments
   uintBuf = rawdata.numChComments; //number of comments to write
   fwrite(&uintBuf,sizeof(uint32_t),1,out);
-  for(i=0;i<(int32_t)rawdata.numChComments;i++){
+  for(int32_t i=0;i<(int32_t)rawdata.numChComments;i++){
     fwrite(&rawdata.chanCommentView[i],sizeof(rawdata.chanCommentView[i]),1,out);
     fwrite(&rawdata.chanCommentSp[i],sizeof(rawdata.chanCommentSp[i]),1,out);
     fwrite(&rawdata.chanCommentCh[i],sizeof(rawdata.chanCommentCh[i]),1,out);
@@ -44,14 +43,14 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
   //write views
   uintBuf = rawdata.numViews; //number of views to write
   fwrite(&uintBuf,sizeof(uint32_t),1,out);
-  for(i=0;i<(int32_t)rawdata.numViews;i++){
+  for(int32_t i=0;i<(int32_t)rawdata.numViews;i++){
     fwrite(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,out);
     fwrite(&rawdata.viewMultiplotMode[i],sizeof(uint8_t),1,out);
     fwrite(&rawdata.viewNumMultiplotSp[i],sizeof(uint8_t),1,out);
-    for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
+    for(int32_t j=0;j<rawdata.viewNumMultiplotSp[i];j++){
       fwrite(&rawdata.viewMultiPlots[i][j],sizeof(uint8_t),1,out);
     }
-    for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
+    for(int32_t j=0;j<rawdata.viewNumMultiplotSp[i];j++){
       fwrite(&rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]],sizeof(double),1,out);
     }
   }
@@ -60,14 +59,14 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
   float currentBin;
   float val;
   signed char packetCounter;
-  for(i=0;i<rawdata.numSpOpened;i++){
+  for(int32_t i=0;i<rawdata.numSpOpened;i++){
     if(i<NSPECT){
 
       //printf("Writing spectrum %i\n",i);
 
       //scan for end of spectrum
       int lastCh = 0;
-      for(j=S32K-1;j>=0;j--){
+      for(int32_t j=S32K-1;j>=0;j--){
         if(inpHist[i][j]!=0){
           lastCh=j;
           break;
@@ -76,7 +75,7 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
 
       //encode spectrum
       packetCounter = 1;
-      for(j=0;j<S32K;j++){
+      for(int32_t j=0;j<S32K;j++){
         
         //get bin values
         currentBin = (float)inpHist[i][j];
@@ -99,7 +98,7 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
             //write last packet
             fwrite(&packetCounter,sizeof(signed char),1,out);
             //printf("wrote packet counter %i\n",packetCounter);
-            for(k=0;k<(packetCounter*-1);k++){
+            for(int32_t k=0;k<(packetCounter*-1);k++){
               val = (float)inpHist[i][j+packetCounter+k];
               fwrite(&val,sizeof(float),1,out);
             }
@@ -122,7 +121,7 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
           //write last packet
           fwrite(&packetCounter,sizeof(signed char),1,out);
           //printf("wrote packet counter %i\n",packetCounter);
-          for(k=0;k<(packetCounter*-1);k++){
+          for(int32_t k=0;k<(packetCounter*-1);k++){
             val = (float)inpHist[i][j+packetCounter+k];
             fwrite(&val,sizeof(float),1,out);
           }
@@ -147,7 +146,7 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
           //write last packet
           fwrite(&packetCounter,sizeof(signed char),1,out);
           //printf("wrote packet counter %i\n",packetCounter);
-          for(k=0;k<(packetCounter*-1);k++){
+          for(int32_t k=0;k<(packetCounter*-1);k++){
             val = (float)inpHist[i][j+packetCounter+k];
             fwrite(&val,sizeof(float),1,out);
           }
@@ -170,9 +169,8 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K])
 
 //routine to export a RadWare compatible file
 //exportMode: 0=write displayed spectrum, 1=write all imported spectra
-int exportSPE(const char *filePrefix, const int exportMode, const int rebin)
-{
-  int i,j;
+int exportSPE(const char *filePrefix, const int exportMode, const int rebin){
+  
   int spID;
   float val;
   FILE *out;
@@ -185,15 +183,13 @@ int exportSPE(const char *filePrefix, const int exportMode, const int rebin)
   int32_t junk = 1;
   int32_t byteSize = arraySize*4;
 
-  switch(exportMode + (drawing.multiplotMode != MULTIPLOT_SUMMED))
-  {
+  switch(exportMode + (drawing.multiplotMode != MULTIPLOT_SUMMED)){
     case 1:
       //export all
-      for(i=0;i<rawdata.numSpOpened;i++){
+      for(int32_t i=0;i<rawdata.numSpOpened;i++){
 
         snprintf(outFileName,256,"%s_hist%i.spe",filePrefix,i+1);
-        if((out = fopen(outFileName, "w")) == NULL) //open the file
-        {
+        if((out = fopen(outFileName, "w")) == NULL){ //open the file
           printf("ERROR: Cannot open the output file: %s\n", outFileName);
           printf("The file may not be accesible.\n");
           return 1;
@@ -212,12 +208,12 @@ int exportSPE(const char *filePrefix, const int exportMode, const int rebin)
         
         //write histogram
         if(rebin){
-          for(j=0;j<(arraySize*drawing.contractFactor);j+=drawing.contractFactor){
+          for(int32_t j=0;j<(arraySize*drawing.contractFactor);j+=drawing.contractFactor){
             val = getSpBinValRaw(i,j,drawing.scaleFactor[i],drawing.contractFactor);
             fwrite(&val,sizeof(float),1,out);
           }
         }else{
-          for(j=0;j<arraySize;j++){
+          for(int32_t j=0;j<arraySize;j++){
             val = getSpBinValRaw(i,j,1,1);
             fwrite(&val,sizeof(float),1,out);
           }
@@ -230,8 +226,7 @@ int exportSPE(const char *filePrefix, const int exportMode, const int rebin)
     case 0:
       //export current (summed) spectrum view
       snprintf(outFileName,256,"%s.spe",filePrefix);
-      if((out = fopen(outFileName, "w")) == NULL) //open the file
-      {
+      if((out = fopen(outFileName, "w")) == NULL){ //open the file
         printf("ERROR: Cannot open the output file: %s\n", outFileName);
         printf("The file may not be accesible.\n");
         return 1;
@@ -250,7 +245,7 @@ int exportSPE(const char *filePrefix, const int exportMode, const int rebin)
 
       //write histogram
       int32_t numBinsWritten = 0;
-      for(j=0;j<S32K;j+=drawing.contractFactor){
+      for(int32_t j=0;j<S32K;j+=drawing.contractFactor){
         if(numBinsWritten < arraySize){
           val = getSpBinValOrWeight(0,j,0);
           fwrite(&val,sizeof(float),1,out);
@@ -279,8 +274,7 @@ int exportSPE(const char *filePrefix, const int exportMode, const int rebin)
       }
 
       snprintf(outFileName,256,"%s.spe",filePrefix);
-      if((out = fopen(outFileName, "w")) == NULL) //open the file
-      {
+      if((out = fopen(outFileName, "w")) == NULL){ //open the file
         printf("ERROR: Cannot open the output file: %s\n", outFileName);
         printf("The file may not be accesible.\n");
         return 1;
@@ -299,12 +293,12 @@ int exportSPE(const char *filePrefix, const int exportMode, const int rebin)
 
       //write histogram
       if(rebin){
-        for(i=0;i<(arraySize*drawing.contractFactor);i+=drawing.contractFactor){
+        for(int32_t i=0;i<(arraySize*drawing.contractFactor);i+=drawing.contractFactor){
           val = getSpBinValRaw(spID,i,drawing.scaleFactor[spID],drawing.contractFactor);
           fwrite(&val,sizeof(float),1,out);
         }
       }else{
-        for(i=0;i<arraySize;i++){
+        for(int32_t i=0;i<arraySize;i++){
           val = getSpBinValRaw(spID,i,1,1);
           fwrite(&val,sizeof(float),1,out);
         }
@@ -320,9 +314,8 @@ int exportSPE(const char *filePrefix, const int exportMode, const int rebin)
 
 //routine to export a plaintext file
 //exportMode: 0=write displayed spectrum, 1=write all imported spectra
-int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
-{
-  int32_t i,j;
+int exportTXT(const char *filePrefix, const int exportMode, const int rebin){
+  
   int spID;
   int maxArraySize;
   float val;
@@ -330,28 +323,26 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
   char outFileName[256];
 
   snprintf(outFileName,256,"%s.txt",filePrefix);
-  if((out = fopen(outFileName, "w")) == NULL) //open the file
-  {
+  if((out = fopen(outFileName, "w")) == NULL){ //open the file
     printf("ERROR: Cannot open the output file: %s\n", outFileName);
     printf("The file may not be accesible.\n");
     return 1;
   }
   
-  switch(exportMode + (drawing.multiplotMode != MULTIPLOT_SUMMED))
-  {
+  switch(exportMode + (drawing.multiplotMode != MULTIPLOT_SUMMED)){
     case 1:
       //export all
 
       //write header
-      for(i=0;i<rawdata.numSpOpened;i++){
+      for(int32_t i=0;i<rawdata.numSpOpened;i++){
         fprintf(out,"SPECTRUM%i ",i+1);
       }
       fprintf(out,"\n");
 
       //get max array size
       maxArraySize = S32K;
-      for(j=S32K-1;j>=0;j--){
-        for(i=0;i<rawdata.numSpOpened;i++){
+      for(int32_t j=S32K-1;j>=0;j--){
+        for(int32_t i=0;i<rawdata.numSpOpened;i++){
           if(rawdata.hist[i][j] != 0.){
             maxArraySize = j+1;
             break;
@@ -363,8 +354,8 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
       }
       
       //write histogram (not applying rebin or scale factors since the whole session with custom views is saved)
-      for(j=0;j<maxArraySize;j++){
-        for(i=0;i<rawdata.numSpOpened;i++){
+      for(int32_t j=0;j<maxArraySize;j++){
+        for(int32_t i=0;i<rawdata.numSpOpened;i++){
           val = getSpBinValRaw(i,j,drawing.scaleFactor[i],1);
           fprintf(out,"%f ",val);
         }
@@ -372,19 +363,19 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
       }
 
       //write histogram titles
-      for(i=0;i<rawdata.numSpOpened;i++){
+      for(int32_t i=0;i<rawdata.numSpOpened;i++){
         fprintf(out,"TITLE %i %s\n",i+1,rawdata.histComment[i]);
       }
 
       //write views
-      for(i=0;i<rawdata.numViews;i++){
+      for(int32_t i=0;i<rawdata.numViews;i++){
         fprintf(out,"VIEW %s\nVIEWPAR %u %i\n",rawdata.viewComment[i],rawdata.viewMultiplotMode[i],rawdata.viewNumMultiplotSp[i]);
         fprintf(out,"VIEWSP ");
-        for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
+        for(int32_t j=0;j<rawdata.viewNumMultiplotSp[i];j++){
           fprintf(out," %u", rawdata.viewMultiPlots[i][j]);
         }
         fprintf(out,"\nVIEWSCALE ");
-        for(j=0;j<rawdata.viewNumMultiplotSp[i];j++){
+        for(int32_t j=0;j<rawdata.viewNumMultiplotSp[i];j++){
           if(rawdata.viewMultiPlots[i][j]<NSPECT){
             fprintf(out," %0.3f", rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]]);
           }
@@ -393,7 +384,7 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
       }
 
       //write comments
-      for(i=0;i<(int32_t)rawdata.numChComments;i++){
+      for(int32_t i=0;i<(int32_t)rawdata.numChComments;i++){
         fprintf(out,"COMMENT %i %i %i %f %s\n", rawdata.chanCommentView[i], rawdata.chanCommentSp[i], rawdata.chanCommentCh[i], rawdata.chanCommentVal[i], rawdata.chanComment[i]);
       }
 
@@ -405,14 +396,14 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
 
       //get max array size
       maxArraySize = S32K;
-      for(j=S32K-1;j>=0;j--){
+      for(int32_t j=S32K-1;j>=0;j--){
         if(getSpBinValOrWeight(0,j,0) != 0.){
           maxArraySize = j+1;
           break;
         }
       }
 
-      for(j=0;j<maxArraySize;j+=drawing.contractFactor){
+      for(int32_t j=0;j<maxArraySize;j+=drawing.contractFactor){
         val = getSpBinValOrWeight(0,j,0);
         fprintf(out,"%f\n",val);
       }
@@ -435,7 +426,7 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
 
       //get array size
       maxArraySize = S32K;
-      for(j=S32K-1;j>=0;j--){
+      for(int32_t j=S32K-1;j>=0;j--){
         if(rawdata.hist[spID][j] != 0.){
           maxArraySize = j+1;
           break;
@@ -444,12 +435,12 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin)
 
       //write histogram
       if(rebin){
-        for(j=0;j<maxArraySize;j+=drawing.contractFactor){
+        for(int32_t j=0;j<maxArraySize;j+=drawing.contractFactor){
           val = getSpBinValRaw(spID,j,drawing.scaleFactor[spID],drawing.contractFactor);
           fprintf(out,"%f\n",val);
         }
       }else{
-        for(j=0;j<maxArraySize;j++){
+        for(int32_t j=0;j<maxArraySize;j++){
           val = getSpBinValRaw(spID,j,drawing.scaleFactor[spID],1);
           fprintf(out,"%f\n",val);
         }
