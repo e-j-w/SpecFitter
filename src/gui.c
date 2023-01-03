@@ -806,47 +806,107 @@ void on_save_radware_button_clicked(){
   gtk_window_present(export_options_window); //show the window
 }
 
+void on_save_fmca_button_clicked(){
+  int32_t i, cbEntry;
+  guiglobals.exportFileType = 2; //exporting to fmca format
+  gtk_label_set_text(export_description_label,"Export to .fmca format:");
+  gtk_combo_box_text_remove_all(export_mode_combobox);
+  cbEntry = 0;
+  if(drawing.multiplotMode == MULTIPLOT_SUMMED){
+    gtk_combo_box_text_insert(export_mode_combobox,cbEntry,NULL,"Current summed view");
+    cbEntry++;
+  }
+  gtk_combo_box_text_insert(export_mode_combobox,cbEntry,NULL,"All spectra (concatenated in one file)");
+  cbEntry++;
+  for(i=0;i<rawdata.numSpOpened;i++){
+    gtk_combo_box_text_insert(export_mode_combobox,cbEntry,NULL,rawdata.histComment[i]);
+    cbEntry++;
+  }
+  gtk_combo_box_set_active(GTK_COMBO_BOX(export_mode_combobox),0); //set the default entry
+  gtk_window_present(export_options_window); //show the window
+}
+
 void on_export_mode_combobox_changed(){
   int32_t exportMode = gtk_combo_box_get_active(GTK_COMBO_BOX(export_mode_combobox));
   switch(exportMode){
     case 0:
       if(drawing.multiplotMode == MULTIPLOT_SUMMED){
         gtk_revealer_set_reveal_child(export_options_revealer, FALSE);
-        if(guiglobals.exportFileType == 0){
-          gtk_label_set_text(export_note_label,"NOTE: Exported data will not contain weighted errors.");
-          gtk_widget_show(GTK_WIDGET(export_note_label));
-        }else{
-          if(rawdata.numChComments > 0)
-            gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins,\nand will not contain weighted errors.\nComments will not be exported (incomatible with .spe format).");
-          else
-            gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins,\nand will not contain weighted errors.");
-          gtk_widget_show(GTK_WIDGET(export_note_label));
+        switch(guiglobals.exportFileType){
+          case 2:
+            //fmca
+            if(rawdata.numChComments > 0)
+              gtk_label_set_text(export_note_label,"NOTE: Exported data will not contain weighted errors.\nComments will not be exported (incomatible with .fmca format).");
+            else
+              gtk_label_set_text(export_note_label,"NOTE: Exported data will not contain weighted errors.");
+            gtk_widget_show(GTK_WIDGET(export_note_label));
+            break;
+          case 1:
+            //radware
+            if(rawdata.numChComments > 0)
+              gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins,\nand will not contain weighted errors.\nComments will not be exported (incomatible with .spe format).");
+            else
+              gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins,\nand will not contain weighted errors.");
+            gtk_widget_show(GTK_WIDGET(export_note_label));
+            break;
+          case 0:
+          default:
+            //text
+            gtk_label_set_text(export_note_label,"NOTE: Exported data will not contain weighted errors.");
+            gtk_widget_show(GTK_WIDGET(export_note_label));
+            break;
         }
       }else{
-        if(guiglobals.exportFileType == 0){
-          gtk_revealer_set_reveal_child(export_options_revealer, FALSE);
-          gtk_widget_hide(GTK_WIDGET(export_note_label));
-        }else{
-          gtk_revealer_set_reveal_child(export_options_revealer, TRUE);
-          if(rawdata.numChComments > 0)
-            gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins.\nComments will not be exported (incomatible with .spe format).");
-          else
-            gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins.");
-          gtk_widget_show(GTK_WIDGET(export_note_label));
+        switch(guiglobals.exportFileType){
+          case 2:
+            //fmca
+            gtk_revealer_set_reveal_child(export_options_revealer, TRUE);
+            if(rawdata.numChComments > 0){
+              gtk_label_set_text(export_note_label,"NOTE: Comments will not be exported (incomatible with .fmca format).");
+              gtk_widget_show(GTK_WIDGET(export_note_label));
+            }
+            break;
+          case 1:
+            //radware
+            gtk_revealer_set_reveal_child(export_options_revealer, TRUE);
+            if(rawdata.numChComments > 0)
+              gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins.\nComments will not be exported (incomatible with .spe format).");
+            else
+              gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins.");
+            gtk_widget_show(GTK_WIDGET(export_note_label));
+            break;
+          case 0:
+          default:
+            //text
+            gtk_revealer_set_reveal_child(export_options_revealer, FALSE);
+            gtk_widget_hide(GTK_WIDGET(export_note_label));
+            break;
         }
       }
       break;
     default:
       gtk_revealer_set_reveal_child(export_options_revealer, TRUE);
-      if(guiglobals.exportFileType == 0){
-        gtk_widget_hide(GTK_WIDGET(export_note_label));
-      }else{
-        gtk_revealer_set_reveal_child(export_options_revealer, TRUE);
-        if(rawdata.numChComments > 0)
-          gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins.\nComments will not be exported (incomatible with .spe format).");
-        else
-          gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins.");
-        gtk_widget_show(GTK_WIDGET(export_note_label));
+      switch(guiglobals.exportFileType){
+        case 2:
+          //fmca
+          if(rawdata.numChComments > 0){
+            gtk_label_set_text(export_note_label,"NOTE: Comments will not be exported (incomatible with .fmca format).");
+            gtk_widget_show(GTK_WIDGET(export_note_label));
+          }
+          break;
+        case 1:
+          //radware
+          if(rawdata.numChComments > 0)
+            gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins.\nComments will not be exported (incomatible with .spe format).");
+          else
+            gtk_label_set_text(export_note_label,"NOTE: Exported data will be truncated to the first 4096 bins.");
+          gtk_widget_show(GTK_WIDGET(export_note_label));
+          break;
+        case 0:
+        default:
+          //text
+          gtk_widget_hide(GTK_WIDGET(export_note_label));
+          break;
       }
       break;
   }
@@ -864,6 +924,12 @@ void on_export_save_button_clicked(){
   file_filter = gtk_file_filter_new();
 
   switch(guiglobals.exportFileType){
+    case 2:
+      //fmca
+      gtk_file_filter_set_name(file_filter,"FMCA files (.fmca)");
+      gtk_file_filter_add_pattern(file_filter,"*.fmca");
+      gtk_file_chooser_add_filter(file_save_dialog,file_filter);
+      break;
     case 1:
       //radware
       gtk_file_filter_set_name(file_filter,"RadWare files (.spe)");
@@ -890,6 +956,10 @@ void on_export_save_button_clicked(){
 
     //write file
     switch(guiglobals.exportFileType){
+      case 2:
+        //fmca
+        saveErr = exportFMCA(fileName, exportMode, rebin);
+        break;
       case 1:
         //radware
         saveErr = exportSPE(fileName, exportMode, rebin);
@@ -2139,6 +2209,7 @@ void iniitalizeUIElements(){
   to_save_menu_button = GTK_BUTTON(gtk_builder_get_object(builder, "to_save_menu_button"));
   save_button = GTK_BUTTON(gtk_builder_get_object(builder, "save_button"));
   save_button_radware = GTK_BUTTON(gtk_builder_get_object(builder, "save_button_radware"));
+  save_button_fmca = GTK_BUTTON(gtk_builder_get_object(builder, "save_button_fmca"));
   save_button_text = GTK_BUTTON(gtk_builder_get_object(builder, "save_button_text"));
   save_button_png = GTK_BUTTON(gtk_builder_get_object(builder, "save_button_png"));
   help_button = GTK_BUTTON(gtk_builder_get_object(builder, "help_button"));
@@ -2266,6 +2337,7 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(manage_spectra_button), "clicked", G_CALLBACK(on_manage_spectra_button_clicked), NULL);
   g_signal_connect(G_OBJECT(save_button), "clicked", G_CALLBACK(on_save_button_clicked), NULL);
   g_signal_connect(G_OBJECT(save_button_radware), "clicked", G_CALLBACK(on_save_radware_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(save_button_fmca), "clicked", G_CALLBACK(on_save_fmca_button_clicked), NULL);
   g_signal_connect(G_OBJECT(save_button_text), "clicked", G_CALLBACK(on_save_text_button_clicked), NULL);
   g_signal_connect(G_OBJECT(save_button_png), "clicked", G_CALLBACK(on_save_png_button_clicked), NULL);
   g_signal_connect(G_OBJECT(help_button), "clicked", G_CALLBACK(on_help_button_clicked), NULL);

@@ -312,6 +312,84 @@ int exportSPE(const char *filePrefix, const int exportMode, const int rebin){
   return 0;
 }
 
+//routine to export an .fmca file (S32K float values per spectrum)
+//exportMode: 0=write displayed spectrum, 1=write all imported spectra
+int exportFMCA(const char *filePrefix, const int exportMode, const int rebin){
+  
+  int spID;
+  float val;
+  FILE *out;
+  char outFileName[256];
+
+  snprintf(outFileName,256,"%s.fmca",filePrefix);
+  if((out = fopen(outFileName, "w")) == NULL){ //open the file
+    printf("ERROR: Cannot open the output file: %s\n", outFileName);
+    printf("The file may not be accesible.\n");
+    return 1;
+  }
+
+  switch(exportMode + (drawing.multiplotMode != MULTIPLOT_SUMMED)){
+    case 1:
+      //export all
+      for(int32_t i=0;i<rawdata.numSpOpened;i++){
+        //write histogram
+        if(rebin){
+          for(int32_t j=0;j<(S32K*drawing.contractFactor);j+=drawing.contractFactor){
+            val = getSpBinValRaw(i,j,drawing.scaleFactor[i],drawing.contractFactor);
+            fwrite(&val,sizeof(float),1,out);
+          }
+        }else{
+          for(int32_t j=0;j<S32K;j++){
+            val = getSpBinValRaw(i,j,1,1);
+            fwrite(&val,sizeof(float),1,out);
+          }
+        }
+      }
+      fclose(out);
+       printf("Wrote data to file: %s\n",outFileName);
+      break;
+    case 0:
+      //export current (summed) spectrum view
+
+      //write histogram
+      for(int32_t j=0;j<S32K;j+=drawing.contractFactor){
+        val = getSpBinValOrWeight(0,j,0);
+        fwrite(&val,sizeof(float),1,out);
+      }
+      fclose(out);
+      printf("Wrote data to file: %s\n",outFileName);
+
+      break;
+    default:
+      //export one histogram
+      
+      spID = exportMode-2;
+      if((spID < 0)||(spID >= rawdata.numSpOpened)){
+        printf("ERROR: invalid spectrum index for export.\n");
+        fclose(out);
+        return 2;
+      }
+
+      //write histogram
+      if(rebin){
+        for(int32_t i=0;i<(S32K*drawing.contractFactor);i+=drawing.contractFactor){
+          val = getSpBinValRaw(spID,i,drawing.scaleFactor[spID],drawing.contractFactor);
+          fwrite(&val,sizeof(float),1,out);
+        }
+      }else{
+        for(int32_t i=0;i<S32K;i++){
+          val = getSpBinValRaw(spID,i,1,1);
+          fwrite(&val,sizeof(float),1,out);
+        }
+      }
+      fclose(out);
+      printf("Wrote data to file: %s\n",outFileName);
+      break;
+  }
+
+  return 0;
+}
+
 //routine to export a plaintext file
 //exportMode: 0=write displayed spectrum, 1=write all imported spectra
 int exportTXT(const char *filePrefix, const int exportMode, const int rebin){

@@ -3078,6 +3078,20 @@ Weight by fit function - Weights are proportional to the fit function values det
           </packing>
         </child>
         <child>
+          <object class="GtkModelButton" id="save_button_fmca">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Export spectra to 2D floating-point array data (file extension .spe).</property>
+            <property name="text" translatable="yes">FMCA file (.fmca)</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">5</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkSeparator">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
@@ -3085,7 +3099,7 @@ Weight by fit function - Weights are proportional to the fit function values det
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">5</property>
+            <property name="position">6</property>
           </packing>
         </child>
         <child>
@@ -3099,7 +3113,7 @@ Weight by fit function - Weights are proportional to the fit function values det
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">6</property>
+            <property name="position">7</property>
           </packing>
         </child>
       </object>
