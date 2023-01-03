@@ -1,4 +1,4 @@
-/* © J. Williams, 2020-2021 */
+/* © J. Williams, 2020-2023 */
 
 //routine to write a .jf3 file
 //header containing: file format version number (uint8_t), number of spectra (uint8_t), label for each spactrum (each 256 element char array),

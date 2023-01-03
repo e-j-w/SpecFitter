@@ -1,4 +1,4 @@
-/* © J. Williams, 2020-2022 */
+/* © J. Williams, 2020-2023 */
 
 //This file contains routines for accessing spectrum data, 
 //mainly to help other parts of the program with drawing, 

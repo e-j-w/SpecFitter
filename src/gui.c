@@ -1,4 +1,4 @@
-/* © J. Williams, 2020-2022 */
+/* © J. Williams, 2020-2023 */
 
 //File contains routines and callbacks for dealing with GTK and
 //the various UI elements used in the program.  Initialization
@@ -864,6 +864,8 @@ void on_export_mode_combobox_changed(){
             if(rawdata.numChComments > 0){
               gtk_label_set_text(export_note_label,"NOTE: Comments will not be exported (incomatible with .fmca format).");
               gtk_widget_show(GTK_WIDGET(export_note_label));
+            }else{
+              gtk_widget_hide(GTK_WIDGET(export_note_label));
             }
             break;
           case 1:
@@ -892,6 +894,8 @@ void on_export_mode_combobox_changed(){
           if(rawdata.numChComments > 0){
             gtk_label_set_text(export_note_label,"NOTE: Comments will not be exported (incomatible with .fmca format).");
             gtk_widget_show(GTK_WIDGET(export_note_label));
+          }else{
+            gtk_widget_hide(GTK_WIDGET(export_note_label));
           }
           break;
         case 1:

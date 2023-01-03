@@ -108,7 +108,7 @@ Author: Jonathan Williams
     <property name="type_hint">dialog</property>
     <property name="attached_to">window</property>
     <property name="program_name">SpecFitter</property>
-    <property name="copyright" translatable="yes">© Jonathan Williams, 2020-2022</property>
+    <property name="copyright" translatable="yes">© Jonathan Williams, 2020-2023</property>
     <property name="comments" translatable="yes">A GTK-based spectroscopy tool.</property>
     <property name="website">https://github.com/e-j-w/specfitter</property>
     <property name="website_label" translatable="yes">Source Repository</property>
@@ -3082,7 +3082,7 @@ Weight by fit function - Weights are proportional to the fit function values det
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Export spectra to 2D floating-point array data (file extension .spe).</property>
+            <property name="tooltip_text" translatable="yes">Export spectra to 2D floating-point array data (file extension .fmca).</property>
             <property name="text" translatable="yes">FMCA file (.fmca)</property>
           </object>
           <packing>

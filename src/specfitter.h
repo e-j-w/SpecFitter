@@ -1,4 +1,4 @@
-/* © J. Williams, 2020-2022 */
+/* © J. Williams, 2020-2023 */
 
 #include <stdlib.h>
 #include <string.h>
