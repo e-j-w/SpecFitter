@@ -717,7 +717,7 @@ int readROOT(const char *filename, double outHist[NSPECT][S32K], const uint32_t 
                 if((tok!=NULL)&&(strncmp(tok,"SetBinContent",256)==0)){
                   tok = strtok (NULL," *->(),");
                   if(tok!=NULL){
-                    ind=atoi(tok);
+                    ind=atoi(tok)-1; //offset by 1, since 0 is the underflow bin in ROOT
                     tok = strtok (NULL," *->(),");
                     if(tok!=NULL){
                       val=atof(tok);
