@@ -98,6 +98,13 @@ uint8_t readConfigFile(FILE *file, uint8_t keepCalibration){
           fitpar.fixRelativeWidths = 0;
         }
       }
+      if(strcmp(par,"step_function") == 0){
+        if(strcmp(val,"yes") == 0){
+          fitpar.stepFunction = 1;
+        }else{
+          fitpar.stepFunction = 0;
+        }
+      }
       if(strcmp(par,"popup_fit_results") == 0){
         if(strcmp(val,"yes") == 0){
           guiglobals.popupFitResults = 1;
@@ -233,6 +240,11 @@ uint8_t writeConfigFile(FILE *file){
     fprintf(file,"fix_relative_widths=yes\n");
   }else{
     fprintf(file,"fix_relative_widths=no\n");
+  }
+  if(fitpar.stepFunction == 1){
+    fprintf(file,"step_function=yes\n");
+  }else{
+    fprintf(file,"step_function=no\n");
   }
   if(guiglobals.popupFitResults == 1){
     fprintf(file,"popup_fit_results=yes\n");

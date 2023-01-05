@@ -122,6 +122,14 @@ gboolean print_fit_results(){
     }
     length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"R: %s, Beta (skewness): %s\n\n",fitParStr[0],fitParStr[1]);
   }
+  if(fitpar.stepFunction == 1){
+    if(calpar.calMode == 1){
+      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_STEP]),getCalWidth((double)fitpar.fitParErr[FITPAR_STEP]),fitParStr[0],50,1,guiglobals.roundErrors);
+    }else{
+      getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_STEP],(double)fitpar.fitParErr[FITPAR_STEP],fitParStr[0],50,1,guiglobals.roundErrors);
+    }
+    length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Step: %s\n\n",fitParStr[0]);
+  }
   length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Peaks");
   for(int32_t i=0;i<fitpar.numFitPeaks;i++){
     getFormattedValAndUncertainty((double)fitpar.areaVal[i],(double)fitpar.areaErr[i],fitParStr[0],50,1,guiglobals.roundErrors);
@@ -931,6 +939,13 @@ int startGausFit(){
     fitpar.fitParVal[FITPAR_BETA] = fitpar.fitParVal[FITPAR_WIDTH1]; //beta
     fitpar.fitParFree[FITPAR_BETA] = 1; //beta
     fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+2);
+  }
+
+  //set up step function if needed
+  if(fitpar.stepFunction){
+    fitpar.fitParVal[FITPAR_STEP] = 0.1; //step function
+    fitpar.fitParFree[FITPAR_STEP] = 1; //step function
+    fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
   }
 
   switch(fitpar.weightMode){

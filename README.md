@@ -2,7 +2,7 @@
 
 A program for gamma-ray spectroscopy or similar data analysis.  Uses [GTK](https://www.gtk.org/) for the user interface.  This is a hobby project, things should mostly work but all the typical disclaimers apply.
 
-Features are listed [here](FEATURES.md).
+A list of features is [here](FEATURES.md).
 
 ## Screenshots
 
