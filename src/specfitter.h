@@ -117,7 +117,7 @@ GtkCheckButton *discard_empty_checkbutton, *bin_errors_checkbutton, *round_error
 GtkCheckButton *spectrum_label_checkbutton, *spectrum_comment_checkbutton, *spectrum_gridline_checkbutton, *autozoom_checkbutton;
 GtkCheckButton *relative_widths_checkbutton;
 GtkButton *preferences_apply_button;
-GtkComboBoxText *peak_shape_combobox, *weight_mode_combobox;
+GtkComboBoxText *background_type_combobox, *peak_shape_combobox, *weight_mode_combobox;
 GtkCheckButton *popup_results_checkbutton;
 GtkCheckButton *animation_checkbutton;
 //shortcuts window
@@ -232,7 +232,7 @@ struct {
   long double chisq; //fit chisq
   uint8_t fitParFree[6+(3*MAX_FIT_PK)]; //whether individual parameters are fixed or free
   uint8_t numFreePar; //number of fit parameters which have been freed
-  uint8_t errFound; //whether or not parameter errors have been found
+  uint8_t bgType; //0=constant, 1=linear, 2=quadratic
   uint8_t skewed; //0=Gaussian, 1=skewed Gaussian
   uint8_t numFitPeaks; //number of peaks to fit
   uint8_t fixRelativeWidths; //0=don't fix width, 1=fix widths

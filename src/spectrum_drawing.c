@@ -876,27 +876,19 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event){
           if(calpar.calMode == 1){
             float calCentr = (float)(getCalVal((double)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)])));
             float calWidth = (float)(getCalWidth((double)(fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)])));
-            if(fitpar.errFound){
-              float calCentrErr = (float)(getCalWidth((double)(fitpar.fitParErr[FITPAR_POS1+(3*drawing.highlightedPeak)])));
-              float calWidthErr = (float)(getCalWidth((double)(fitpar.fitParErr[FITPAR_WIDTH1+(3*drawing.highlightedPeak)])));
-              char fitParStr[3][50];
-              getFormattedValAndUncertainty((double)fitpar.areaVal[drawing.highlightedPeak],(double)fitpar.areaErr[drawing.highlightedPeak],fitParStr[0],50,1,guiglobals.roundErrors);
-              getFormattedValAndUncertainty(calCentr,calCentrErr,fitParStr[1],50,1,guiglobals.roundErrors);
-              getFormattedValAndUncertainty(2.35482*calWidth,2.35482*calWidthErr,fitParStr[2],50,1,guiglobals.roundErrors);
-              snprintf(statusBarLabel,256,"Area: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
-            }else{
-              snprintf(statusBarLabel,256,"Area: %0.3Lf, Centroid: %0.3f, FWHM: %0.3f",fitpar.areaVal[drawing.highlightedPeak],calCentr,2.35482*calWidth);
-            }
+            float calCentrErr = (float)(getCalWidth((double)(fitpar.fitParErr[FITPAR_POS1+(3*drawing.highlightedPeak)])));
+            float calWidthErr = (float)(getCalWidth((double)(fitpar.fitParErr[FITPAR_WIDTH1+(3*drawing.highlightedPeak)])));
+            char fitParStr[3][50];
+            getFormattedValAndUncertainty((double)fitpar.areaVal[drawing.highlightedPeak],(double)fitpar.areaErr[drawing.highlightedPeak],fitParStr[0],50,1,guiglobals.roundErrors);
+            getFormattedValAndUncertainty(calCentr,calCentrErr,fitParStr[1],50,1,guiglobals.roundErrors);
+            getFormattedValAndUncertainty(2.35482*calWidth,2.35482*calWidthErr,fitParStr[2],50,1,guiglobals.roundErrors);
+            snprintf(statusBarLabel,256,"Area: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
           }else{
-            if(fitpar.errFound){
-              char fitParStr[3][50];
-              getFormattedValAndUncertainty((double)fitpar.areaVal[drawing.highlightedPeak],(double)fitpar.areaErr[drawing.highlightedPeak],fitParStr[0],50,1,guiglobals.roundErrors);
-              getFormattedValAndUncertainty((double)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)]),(double)(fitpar.fitParErr[FITPAR_POS1+(3*drawing.highlightedPeak)]),fitParStr[1],50,1,guiglobals.roundErrors);
-              getFormattedValAndUncertainty(2.35482*(double)(fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]),2.35482*(double)(fitpar.fitParErr[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]),fitParStr[2],50,1,guiglobals.roundErrors);
-              snprintf(statusBarLabel,256,"Area: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
-            }else{
-              snprintf(statusBarLabel,256,"Area: %0.3Lf, Centroid: %0.3Lf, FWHM: %0.3Lf",fitpar.areaVal[drawing.highlightedPeak],fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)],2.35482*fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]);
-            }
+            char fitParStr[3][50];
+            getFormattedValAndUncertainty((double)fitpar.areaVal[drawing.highlightedPeak],(double)fitpar.areaErr[drawing.highlightedPeak],fitParStr[0],50,1,guiglobals.roundErrors);
+            getFormattedValAndUncertainty((double)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)]),(double)(fitpar.fitParErr[FITPAR_POS1+(3*drawing.highlightedPeak)]),fitParStr[1],50,1,guiglobals.roundErrors);
+            getFormattedValAndUncertainty(2.35482*(double)(fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]),2.35482*(double)(fitpar.fitParErr[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]),fitParStr[2],50,1,guiglobals.roundErrors);
+            snprintf(statusBarLabel,256,"Area: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
           }
 
           break;

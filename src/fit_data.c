@@ -860,8 +860,6 @@ int startGausFit(){
   guiglobals.fittingSp = FITSTATE_FITTING;
   g_idle_add(update_gui_fit_state,NULL);
 
-  fitpar.errFound = 0;
-
   memset(fitpar.fitParErr,0,sizeof(fitpar.fitParErr));
 
   //width parameters
@@ -869,10 +867,37 @@ int startGausFit(){
   fitpar.widthFGH[1] = 2.;
   fitpar.widthFGH[2] = 0.;
 
-  //assign initial guesses for background
-  fitpar.fitParVal[FITPAR_BGCONST] = (getSpBinVal(0,fitpar.fitStartCh) + getSpBinVal(0,fitpar.fitEndCh))/2.0;
-  fitpar.fitParVal[FITPAR_BGLIN] = (getSpBinVal(0,fitpar.fitEndCh) - getSpBinVal(0,fitpar.fitStartCh))/(float)(fitpar.fitEndCh - fitpar.fitStartCh);
-  fitpar.fitParVal[FITPAR_BGQUAD] = 0.0;
+  //free background fit parameters and assign initial guesses for background
+  switch(fitpar.bgType){
+    case 0:
+      //constant
+      fitpar.fitParVal[FITPAR_BGCONST] = (getSpBinVal(0,fitpar.fitStartCh) + getSpBinVal(0,fitpar.fitEndCh))/2.0;
+      fitpar.fitParVal[FITPAR_BGLIN] = 0.0;
+      fitpar.fitParVal[FITPAR_BGQUAD] = 0.0;
+      fitpar.fitParFree[0] = 1;
+      fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
+      break;
+    case 1:
+      //linear
+      fitpar.fitParVal[FITPAR_BGCONST] = (getSpBinVal(0,fitpar.fitStartCh) + getSpBinVal(0,fitpar.fitEndCh))/2.0;
+      fitpar.fitParVal[FITPAR_BGLIN] = (getSpBinVal(0,fitpar.fitEndCh) - getSpBinVal(0,fitpar.fitStartCh))/(float)(fitpar.fitEndCh - fitpar.fitStartCh);
+      fitpar.fitParVal[FITPAR_BGQUAD] = 0.0;
+      fitpar.fitParFree[0] = 1;
+      fitpar.fitParFree[1] = 1;
+      fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+2);
+      break;
+    case 2:
+    default:
+      //quadratic
+      fitpar.fitParVal[FITPAR_BGCONST] = (getSpBinVal(0,fitpar.fitStartCh) + getSpBinVal(0,fitpar.fitEndCh))/2.0;
+      fitpar.fitParVal[FITPAR_BGLIN] = (getSpBinVal(0,fitpar.fitEndCh) - getSpBinVal(0,fitpar.fitStartCh))/(float)(fitpar.fitEndCh - fitpar.fitStartCh);
+      fitpar.fitParVal[FITPAR_BGQUAD] = 0.0;
+      fitpar.fitParFree[0] = 1;
+      fitpar.fitParFree[1] = 1;
+      fitpar.fitParFree[2] = 1;
+      fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+3);
+      break;
+  }
 
   //assign initial guesses for non-linear params
   for(int32_t i=0;i<fitpar.numFitPeaks;i++){

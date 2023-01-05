@@ -17,6 +17,7 @@ void showPreferences(int page){
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_gridline_checkbutton),guiglobals.drawGridLines);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(relative_widths_checkbutton),fitpar.fixRelativeWidths);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(popup_results_checkbutton),guiglobals.popupFitResults);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(background_type_combobox),fitpar.bgType);
   gtk_combo_box_set_active(GTK_COMBO_BOX(peak_shape_combobox),fitpar.skewed);
   gtk_combo_box_set_active(GTK_COMBO_BOX(weight_mode_combobox),fitpar.weightMode);
   gtk_window_present(preferences_window); //show the window
@@ -1913,12 +1914,8 @@ void on_fit_button_clicked(){
         fitpar.fitStartCh = -1;
         fitpar.fitEndCh = -1;
         fitpar.numFitPeaks = 0;
+        fitpar.numFreePar = 0;
         memset(&fitpar.fitParFree,0,sizeof(fitpar.fitParFree));
-        //free background fit parameters
-        fitpar.fitParFree[0] = 1;
-        fitpar.fitParFree[1] = 1;
-        fitpar.fitParFree[2] = 1;
-        fitpar.numFreePar = 3;
         //update widgets
         update_gui_fit_state();
       }else{
@@ -2037,6 +2034,13 @@ void on_preferences_apply_button_clicked(){
       guiglobals.fittingSp = FITSTATE_NOTFITTING;
     }
   }
+  if(fitpar.bgType != (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(background_type_combobox))){
+    if(guiglobals.fittingSp == FITSTATE_FITCOMPLETE){
+      //the fit type was changed, clear the fit
+      guiglobals.fittingSp = FITSTATE_NOTFITTING;
+    }
+  }
+  fitpar.bgType = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(background_type_combobox));
   fitpar.skewed = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox));
   fitpar.weightMode = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(weight_mode_combobox));
   updateConfigFile();
@@ -2318,6 +2322,7 @@ void iniitalizeUIElements(){
   spectrum_comment_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "spectrum_comment_checkbutton"));
   spectrum_gridline_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "spectrum_gridline_checkbutton"));
   relative_widths_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "relative_widths_checkbutton"));
+  background_type_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "background_type_combobox"));
   peak_shape_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "peak_shape_combobox"));
   weight_mode_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "weight_mode_combobox"));
   popup_results_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "popup_results_checkbutton"));
@@ -2496,6 +2501,7 @@ void iniitalizeUIElements(){
   fitpar.fitEndCh = -1;
   fitpar.numFitPeaks = 0;
   fitpar.skewed = 0;
+  fitpar.bgType = 2; //default to quadratic BG
 
   gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);
   gtk_adjustment_set_upper(spectrum_selector_adjustment, 1);

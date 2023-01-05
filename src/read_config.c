@@ -115,6 +115,11 @@ uint8_t readConfigFile(FILE *file, uint8_t keepCalibration){
         if(ucVal <= 1)
           fitpar.skewed = ucVal;
       }
+      if(strcmp(par,"bg_type") == 0){
+        uint8_t ucVal = (uint8_t)atoi(val);
+        if(ucVal <= 2)
+          fitpar.bgType = ucVal;
+      }
       if(strcmp(par,"autozoom") == 0){
         if(strcmp(val,"yes") == 0){
           guiglobals.autoZoom = 1;
@@ -234,10 +239,11 @@ uint8_t writeConfigFile(FILE *file){
   }else{
     fprintf(file,"popup_fit_results=no\n");
   }
-  if(fitpar.skewed == 0){
-    fprintf(file,"fit_type=0\n");
-  }else if(fitpar.skewed == 1){
-    fprintf(file,"fit_type=1\n");
+  if(fitpar.bgType < 3){
+    fprintf(file,"bg_type=%u\n",fitpar.bgType);
+  }
+  if(fitpar.skewed < 2){
+    fprintf(file,"fit_type=%u\n",fitpar.skewed);
   }
   if(fitpar.weightMode < FITWEIGHT_ENUM_LENGTH){
     fprintf(file,"fit_weight_mode=%u\n",fitpar.weightMode);
