@@ -214,30 +214,32 @@ struct {
 
 //fitting globals
 struct {
-  int32_t fitStartCh, fitEndCh; //upper and lower channel bounds for fitting
+  int32_t fitStartCh, fitEndCh, fitMidCh; //upper and lower channel bounds for fitting, and middle channel
   int32_t ndf; //DOF for fit
   float fitPeakInitGuess[MAX_FIT_PK]; //initial guess of peak positions, in channels
   double widthFGH[3]; //F,G,H parameters used to evaluate widths
-  long double relWidths[MAX_FIT_PK]; //relative width factors
   //fit parameters (indices defined in fit_par_enum): 
   //0, 1, 2       : quadratic background
   //3             : R (ratio of symmetric and skewed Gaussians, range 0 to 1)
   //4             : beta (skewness)
-  //5             : reserved for future use
-  //6, 9, 12 ...  : Peak amplitude(s)
-  //7, 10, 13 ... : Peak position(s)
-  //8, 11, 14 ... : Peak width(s)
+  //5             : step function
+  //6, 9, 12 ...  : Peak position(s)
+  //7, 10, 13 ... : Peak width(s)
+  //8, 11, 14 ... : Peak amplitude(s)
   long double fitParVal[6+(3*MAX_FIT_PK)]; //parameter values found by the fitter
   long double fitParErr[6+(3*MAX_FIT_PK)]; //errors in parameter values
-  uint8_t fixPar[6+(3*MAX_FIT_PK)]; //0=don't fix parameter, 1=fix at current value, 2=fix at relative value
-  uint8_t errFound; //whether or not paramter errors have been found
-  uint8_t fitType; //0=Gaussian, 1=skewed Gaussian
+  long double areaVal[MAX_FIT_PK], areaErr[MAX_FIT_PK]; //areas of peaks and errors
+  long double chisq; //fit chisq
+  uint8_t fitParFree[6+(3*MAX_FIT_PK)]; //whether individual parameters are fixed or free
+  uint8_t numFreePar; //number of fit parameters which have been freed
+  uint8_t errFound; //whether or not parameter errors have been found
+  uint8_t skewed; //0=Gaussian, 1=skewed Gaussian
   uint8_t numFitPeaks; //number of peaks to fit
   uint8_t fixRelativeWidths; //0=don't fix width, 1=fix widths
   uint8_t weightMode; //uses values from fit_weight_mode_enum: 0=weight using data (properly weighting for background subtraction), 1=weight using fit, 2=no weights
 } fitpar;
 
 enum fit_weight_mode_enum{FITWEIGHT_DATA, FITWEIGHT_FIT, FITWEIGHT_NONE, FITWEIGHT_ENUM_LENGTH};
-enum fit_par_enum{FITPAR_BGCONST,FITPAR_BGLIN,FITPAR_BGQUAD,FITPAR_R,FITPAR_BETA,FITPAR_RESERVED1,FITPAR_AMP1,FITPAR_POS1,FITPAR_WIDTH1,FITPAR_ENUM_LENGTH};
-enum fit_state_enum{FITSTATE_NOTFITTING, FITSTATE_SETTINGLIMITS, FITSTATE_SETTINGPEAKS, FITSTATE_FITTING, FITSTATE_REFININGFIT, FITSTATE_REFININGFIT2, FITSTATE_FITCOMPLETE, FITSTATE_ENUM_LENGTH};
+enum fit_par_enum{FITPAR_BGCONST,FITPAR_BGLIN,FITPAR_BGQUAD,FITPAR_R,FITPAR_BETA,FITPAR_RESERVED1,FITPAR_POS1,FITPAR_WIDTH1,FITPAR_AMP1,FITPAR_ENUM_LENGTH};
+enum fit_state_enum{FITSTATE_NOTFITTING, FITSTATE_SETTINGLIMITS, FITSTATE_SETTINGPEAKS, FITSTATE_FITTING, FITSTATE_REFININGFIT, FITSTATE_FITCOMPLETE, FITSTATE_ENUM_LENGTH};
 enum multiplot_mode_enum{MULTIPLOT_NONE, MULTIPLOT_SUMMED, MULTIPLOT_OVERLAY_COMMON, MULTIPLOT_OVERLAY_INDEPENDENT, MULTIPLOT_STACKED, MULTIPLOT_ENUM_LENGTH};

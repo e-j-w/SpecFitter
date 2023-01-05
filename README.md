@@ -59,3 +59,7 @@ This will place the `specfitter` binary in `/usr/bin`, a data-type definition fi
 * Preferences are stored in a plaintext configuration file on a per-user basis at `$HOME/.config/specfitter/specfitter.conf`.
 * When running the program from the command line, it is possible to automatically open files by specifying the filename(s) as arguments (eg. `specfitter /path/to/file1 /path/to/file2`).
 * After fitting a spectrum, the onscreen fit can be cleared using the right mouse button.
+
+# Acknowledgements
+
+The peak fitter is based on [RadWare](https://radware.phy.ornl.gov/) code by David C. Radford with some modifications.  The RadWare source code can be obtained from [this](https://github.com/radforddc/rw05) repository.

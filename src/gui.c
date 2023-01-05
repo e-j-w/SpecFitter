@@ -17,7 +17,7 @@ void showPreferences(int page){
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_gridline_checkbutton),guiglobals.drawGridLines);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(relative_widths_checkbutton),fitpar.fixRelativeWidths);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(popup_results_checkbutton),guiglobals.popupFitResults);
-  gtk_combo_box_set_active(GTK_COMBO_BOX(peak_shape_combobox),fitpar.fitType);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(peak_shape_combobox),fitpar.skewed);
   gtk_combo_box_set_active(GTK_COMBO_BOX(weight_mode_combobox),fitpar.weightMode);
   gtk_window_present(preferences_window); //show the window
 }
@@ -1913,6 +1913,12 @@ void on_fit_button_clicked(){
         fitpar.fitStartCh = -1;
         fitpar.fitEndCh = -1;
         fitpar.numFitPeaks = 0;
+        memset(&fitpar.fitParFree,0,sizeof(fitpar.fitParFree));
+        //free background fit parameters
+        fitpar.fitParFree[0] = 1;
+        fitpar.fitParFree[1] = 1;
+        fitpar.fitParFree[2] = 1;
+        fitpar.numFreePar = 3;
         //update widgets
         update_gui_fit_state();
       }else{
@@ -1923,7 +1929,7 @@ void on_fit_button_clicked(){
         gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
         gtk_dialog_run (GTK_DIALOG (message_dialog));
         gtk_widget_destroy (message_dialog);
-        }
+      }
     }
   }
   
@@ -2025,13 +2031,13 @@ void on_preferences_button_clicked(){
 }
 
 void on_preferences_apply_button_clicked(){
-  if(fitpar.fitType != (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox))){
+  if(fitpar.skewed != (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox))){
     if(guiglobals.fittingSp == FITSTATE_FITCOMPLETE){
       //the fit type was changed, clear the fit
       guiglobals.fittingSp = FITSTATE_NOTFITTING;
     }
   }
-  fitpar.fitType = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox));
+  fitpar.skewed = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox));
   fitpar.weightMode = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(weight_mode_combobox));
   updateConfigFile();
   manualSpectrumAreaDraw(); //redraw the spectrum
@@ -2489,7 +2495,7 @@ void iniitalizeUIElements(){
   fitpar.fitStartCh = -1;
   fitpar.fitEndCh = -1;
   fitpar.numFitPeaks = 0;
-  fitpar.fitType = 0;
+  fitpar.skewed = 0;
 
   gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);
   gtk_adjustment_set_upper(spectrum_selector_adjustment, 1);
