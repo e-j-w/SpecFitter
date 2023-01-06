@@ -79,6 +79,12 @@ Author: Jonathan Williams
     <property name="step_increment">0.01</property>
     <property name="page_increment">10</property>
   </object>
+  <object class="GtkAdjustment" id="skew_amplitude_adjustment">
+    <property name="upper">100</property>
+    <property name="value">10</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkAdjustment" id="spectrum_selector_adjustment">
     <property name="upper">100</property>
     <property name="step_increment">1</property>
@@ -2379,7 +2385,7 @@ They will then appear on this panel.</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <child>
-              <object class="GtkBox">
+              <object class="GtkBox" id="data_preferences_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_start">10</property>
@@ -2482,7 +2488,7 @@ They will then appear on this panel.</property>
               </packing>
             </child>
             <child>
-              <object class="GtkBox">
+              <object class="GtkBox" id="fit_preferences_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_start">10</property>
@@ -2555,7 +2561,7 @@ They will then appear on this panel.</property>
                     <property name="can_focus">False</property>
                     <property name="tooltip_text" translatable="yes">Set the shape of the peaks used in the fit.
 Symmetric - Guassian peak shape.
-Skewed - Shape is the sum of two Guassian shapes, one of them convoluted with an exponential tail on the low-energy side (can represent incomplete charge collection in a detector).</property>
+Skewed - Shape is the sum of two Guassian shapes, one of them skewed via convolution with an exponential tail on the low-energy side (can represent incomplete charge collection in a detector).</property>
                     <property name="spacing">10</property>
                     <child>
                       <object class="GtkLabel">
@@ -2593,6 +2599,71 @@ Skewed - Shape is the sum of two Guassian shapes, one of them convoluted with an
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkRevealer" id="skew_parameters_revealer">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="reveal_child">True</property>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Whether to fix the amplitude of the skewed Gaussian component in the peak fit, and the percentage value to fix it to.</property>
+                        <property name="spacing">10</property>
+                        <child>
+                          <object class="GtkCheckButton" id="fix_skew_amplitude_checkbutton">
+                            <property name="label" translatable="yes"> Fix skewed component amplitude</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="draw_indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSpinButton" id="skew_amplitude_spinbutton">
+                            <property name="visible">True</property>
+                            <property name="sensitive">False</property>
+                            <property name="can_focus">True</property>
+                            <property name="width_chars">4</property>
+                            <property name="input_purpose">number</property>
+                            <property name="adjustment">skew_amplitude_adjustment</property>
+                            <property name="digits">1</property>
+                            <property name="numeric">True</property>
+                            <property name="value">10</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">%</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkCheckButton" id="relative_widths_checkbutton">
                     <property name="label" translatable="yes"> Fix relative peak widths</property>
                     <property name="name">drop_empty_checkbox</property>
@@ -2606,7 +2677,7 @@ Skewed - Shape is the sum of two Guassian shapes, one of them convoluted with an
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">3</property>
+                    <property name="position">4</property>
                   </packing>
                 </child>
                 <child>
@@ -2623,7 +2694,7 @@ Skewed - Shape is the sum of two Guassian shapes, one of them convoluted with an
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">4</property>
+                    <property name="position">5</property>
                   </packing>
                 </child>
                 <child>
@@ -2667,7 +2738,7 @@ Weight by fit function - Weights are proportional to the fit function values det
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">5</property>
+                    <property name="position">6</property>
                   </packing>
                 </child>
                 <child>
@@ -2683,7 +2754,7 @@ Weight by fit function - Weights are proportional to the fit function values det
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
-                    <property name="position">6</property>
+                    <property name="position">7</property>
                   </packing>
                 </child>
                 <child>
@@ -2700,7 +2771,7 @@ Weight by fit function - Weights are proportional to the fit function values det
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">7</property>
+                    <property name="position">8</property>
                   </packing>
                 </child>
               </object>
@@ -2720,7 +2791,7 @@ Weight by fit function - Weights are proportional to the fit function values det
               </packing>
             </child>
             <child>
-              <object class="GtkBox">
+              <object class="GtkBox" id="look_preferences_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_start">10</property>

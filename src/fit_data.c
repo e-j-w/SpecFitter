@@ -120,7 +120,7 @@ gboolean print_fit_results(){
       getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_R],(double)fitpar.fitParErr[FITPAR_R],fitParStr[0],50,1,guiglobals.roundErrors);
       getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BETA],(double)fitpar.fitParErr[FITPAR_BETA],fitParStr[1],50,1,guiglobals.roundErrors);
     }
-    length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"R: %s, Beta (skewness): %s\n\n",fitParStr[0],fitParStr[1]);
+    length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Skew component amplitude: %s\nBeta (skewness): %s\n\n",fitParStr[0],fitParStr[1]);
   }
   if(fitpar.stepFunction == 1){
     if(calpar.calMode == 1){
@@ -934,11 +934,17 @@ int startGausFit(){
   //set up skewed Gaussian if needed
   if(fitpar.skewed){
     //free parameters
-    fitpar.fitParVal[FITPAR_R] = 10; //R
-    fitpar.fitParFree[FITPAR_R] = 1; //R
+    if(fitpar.fixSkewAmplitide){
+      fitpar.fitParVal[FITPAR_R] = (long double)fitpar.fixedRVal; //R
+      fitpar.fitParFree[FITPAR_R] = 0; //R
+    }else{
+      fitpar.fitParVal[FITPAR_R] = 10; //R
+      fitpar.fitParFree[FITPAR_R] = 1; //R
+      fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
+    }
     fitpar.fitParVal[FITPAR_BETA] = fitpar.fitParVal[FITPAR_WIDTH1]; //beta
     fitpar.fitParFree[FITPAR_BETA] = 1; //beta
-    fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+2);
+    fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
   }
 
   //set up step function if needed

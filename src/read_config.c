@@ -91,6 +91,19 @@ uint8_t readConfigFile(FILE *file, uint8_t keepCalibration){
           guiglobals.drawGridLines = 0;
         }
       }
+      if(strcmp(par,"fix_skew_amp") == 0){
+        if(strcmp(val,"yes") == 0){
+          fitpar.fixSkewAmplitide = 1;
+        }else{
+          fitpar.fixSkewAmplitide = 0;
+        }
+      }
+      if(strcmp(par,"fix_skew_amp_val") == 0){
+        float ampVal = (float)atof(val);
+        if((ampVal >= 0.0f)&&(ampVal <= 100.0f)){
+          fitpar.fixedRVal = ampVal;
+        }
+      }
       if(strcmp(par,"fix_relative_widths") == 0){
         if(strcmp(val,"yes") == 0){
           fitpar.fixRelativeWidths = 1;
@@ -236,6 +249,12 @@ uint8_t writeConfigFile(FILE *file){
   }else{
     fprintf(file,"autozoom=no\n");
   }
+  if(fitpar.fixSkewAmplitide == 1){
+    fprintf(file,"fix_skew_amp=yes\n");
+  }else{
+    fprintf(file,"fix_skew_amp=no\n");
+  }
+  fprintf(file,"fix_skew_amp_val=%f\n",fitpar.fixedRVal);
   if(fitpar.fixRelativeWidths == 1){
     fprintf(file,"fix_relative_widths=yes\n");
   }else{
