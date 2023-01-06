@@ -1558,6 +1558,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
             cairo_line_to (cr, width, getAxisYPos(0.0,i,height,yorigin));
             cairo_stroke(cr);
           }
+          cairo_set_line_width(cr, 2.0*scaleFactor);
         }
       }
       break;
@@ -1622,6 +1623,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           cairo_line_to (cr, width, getAxisYPos(0.0,0,height,yorigin));
           cairo_stroke(cr);
         }
+        cairo_set_line_width(cr, 2.0*scaleFactor);
       }
       break;
     default:
@@ -1777,30 +1779,33 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   if((guiglobals.fittingSp == FITSTATE_FITCOMPLETE)&&(showFit>0)){
     if((drawing.lowerLimit < fitpar.fitEndCh)&&(drawing.upperLimit > fitpar.fitStartCh)){
       cairo_set_line_width(cr, 3.0*scaleFactor);
-      cairo_set_source_rgb(cr, 0.5, 0.5, 0.5);
+      //cairo_set_source_rgb(cr, 0.5, 0.5, 0.5);
+      cairo_set_source_rgb (cr, 0.0, 0.0, 0.8);
       float fitDrawX, nextFitDrawX, nextXpos;
       float fitSkipFactor = 0.5f*(float)(binSkipFactor*fitpar.numFitPeaks);
       if(fitSkipFactor <= 0.0f){
         fitSkipFactor = 0.5f;
       }
       //draw each peak
-      for(int32_t i=0;i<fitpar.numFitPeaks;i++){
+      /*for(int32_t i=0;i<fitpar.numFitPeaks;i++){
         fitDrawX=(float)(fitpar.fitStartCh);
+        fitDrawX = floorf((float)(fitpar.fitParVal[FITPAR_POS1+(3*i)] - 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*i)]));
         nextXpos = getXPosFromCh(fitDrawX,width,1,xorigin);
         if(nextXpos > 0){
           cairo_move_to(cr, nextXpos, getYPos((float)(evalFitOnePeak(fitDrawX,i)),0,height,yorigin));
         }else{
           cairo_move_to(cr, xorigin, getYPos((float)(evalFitOnePeak((float)drawing.lowerLimit,i)),0,height,yorigin));
         }
-        for(; fitDrawX<=(float)(fitpar.fitEndCh); fitDrawX+= fitSkipFactor){
+        for(; fitDrawX<=floorf((float)(fitpar.fitParVal[FITPAR_POS1+(3*i)] + 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*i)])); fitDrawX+= fitSkipFactor){
           nextFitDrawX = fitDrawX + fitSkipFactor;
           nextXpos = getXPosFromCh(nextFitDrawX,width,1,xorigin);
           if(nextXpos > 0){
             cairo_line_to(cr, nextXpos, getYPos((float)(evalFitOnePeak(nextFitDrawX,i)),0,height,yorigin));
           }
         }
-      }
+      }*/
       //draw background
+      cairo_set_line_width(cr, 1.0*scaleFactor);
       fitDrawX=(float)(fitpar.fitStartCh);
       nextXpos = getXPosFromCh(fitDrawX,width,1,xorigin);
       if(nextXpos > 0){
@@ -1818,7 +1823,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       cairo_stroke(cr);
       //draw sum of peaks
       if(fitpar.numFitPeaks > 1){
-        cairo_set_line_width(cr, 2.0*scaleFactor);
+        cairo_set_line_width(cr, 3.0*scaleFactor);
         fitDrawX=(float)(fitpar.fitStartCh);
         nextXpos = getXPosFromCh(fitDrawX,width,1,xorigin);
         if(nextXpos > 0){
@@ -1838,14 +1843,14 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       //draw highlighed peak
       if((drawing.highlightedPeak >= 0)&&(drawing.highlightedPeak <= fitpar.numFitPeaks)&&(showFit>1)){
         cairo_set_line_width(cr, 6.0*scaleFactor);
-        fitDrawX = floorf((float)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)] - 3.*fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]));
+        fitDrawX = floorf((float)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)] - 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]));
         nextXpos = getXPosFromCh(fitDrawX,width,1,xorigin);
         if(nextXpos > 0){
           cairo_move_to(cr, nextXpos, getYPos((float)(evalFitOnePeak(fitDrawX,drawing.highlightedPeak)),0,height,yorigin));
         }else{
           cairo_move_to(cr, xorigin, getYPos((float)(evalFitOnePeak((float)drawing.lowerLimit,drawing.highlightedPeak)),0,height,yorigin));
         }
-        for(; fitDrawX<=floorf((float)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)] + 3.*fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)])); fitDrawX+= fitSkipFactor){
+        for(; fitDrawX<=floorf((float)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)] + 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)])); fitDrawX+= fitSkipFactor){
           nextFitDrawX = fitDrawX + fitSkipFactor;
           nextXpos = getXPosFromCh(nextFitDrawX,width,1,xorigin);
           if(nextXpos > 0){

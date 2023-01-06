@@ -1518,8 +1518,7 @@ void on_multiplot_make_view_button_clicked(){
   uint8_t selectedSpCount = 0;
   GtkTreeModel *model = gtk_tree_view_get_model(multiplot_tree_view);
   readingTreeModel = gtk_tree_model_get_iter_first (model, &iter);
-  while (readingTreeModel)
-  {
+  while (readingTreeModel){
     gtk_tree_model_get(model,&iter,1,&val,3,&spInd,-1); //get whether the spectrum is selected and the spectrum index
     if((spInd < NSPECT)&&(selectedSpCount<NSPECT)){
       if(val==TRUE){
@@ -1562,6 +1561,14 @@ void on_multiplot_make_view_button_clicked(){
 
     memcpy(rawdata.viewComment[rawdata.numViews],viewStr,sizeof(viewStr));
     rawdata.numViews++;
+
+    //show the newly created view
+    drawing.multiplotMode = rawdata.viewMultiplotMode[rawdata.numViews-1];
+    drawing.numMultiplotSp = rawdata.viewNumMultiplotSp[rawdata.numViews-1];
+    memcpy(&drawing.scaleFactor,&rawdata.viewScaleFactor[rawdata.numViews-1],sizeof(drawing.scaleFactor));
+    memcpy(&drawing.multiPlots,&rawdata.viewMultiPlots[rawdata.numViews-1],sizeof(drawing.multiPlots));
+    drawing.displayedView = rawdata.numViews-1;
+    gtk_spin_button_set_value(spectrum_selector, rawdata.numSpOpened+rawdata.numViews+1);
 
     //switch to display the custom views
     gtk_widget_show(GTK_WIDGET(view_list_box));
