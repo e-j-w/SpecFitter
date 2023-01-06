@@ -529,7 +529,7 @@ void performGausFit(){
       dat = fit;
     }else if(fitpar.weightMode == FITWEIGHT_DATA){
       dat = getSpBinFitWeight(0,i);
-    }else if(fitpar.weightMode == FITWEIGHT_NONE){
+    }else{
       dat = 1.;
     }
     if (dat < 1.f) dat = 1.f;
@@ -602,7 +602,7 @@ void performGausFit(){
         dat = fit;
       }else if(fitpar.weightMode == FITWEIGHT_DATA){
         dat = getSpBinFitWeight(0,i);
-      }else if(fitpar.weightMode == FITWEIGHT_NONE){
+      }else{
         dat = 1.;
       }
       if(dat < 1.f) dat = 1.f;
