@@ -118,13 +118,6 @@ uint8_t readConfigFile(FILE *file, uint8_t keepCalibration){
           fitpar.stepFunction = 0;
         }
       }
-      if(strcmp(par,"popup_fit_results") == 0){
-        if(strcmp(val,"yes") == 0){
-          guiglobals.popupFitResults = 1;
-        }else{
-          guiglobals.popupFitResults = 0;
-        }
-      }
       if(strcmp(par,"fit_weight_mode") == 0){
         uint8_t ucVal = (uint8_t)atoi(val);
         if(ucVal <= 2)
@@ -264,11 +257,6 @@ uint8_t writeConfigFile(FILE *file){
     fprintf(file,"step_function=yes\n");
   }else{
     fprintf(file,"step_function=no\n");
-  }
-  if(guiglobals.popupFitResults == 1){
-    fprintf(file,"popup_fit_results=yes\n");
-  }else{
-    fprintf(file,"popup_fit_results=no\n");
   }
   if(fitpar.bgType < 3){
     fprintf(file,"bg_type=%u\n",fitpar.bgType);

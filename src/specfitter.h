@@ -56,8 +56,9 @@ GtkWidget *spectrum_drawing_area;
 GtkGesture *spectrum_drag_gesture;
 //fit overlay/revealer
 GtkRevealer *revealer_info_panel;
-GtkLabel *revealer_info_label;
-GtkButton *fit_cancel_button, *fit_fit_button, *fit_preferences_button;
+GtkBox *fit_button_box, *fit_display_button_box;
+GtkLabel *fit_panel_label, *fit_info_label;
+GtkButton *fit_cancel_button, *fit_fit_button, *fit_preferences_button, *fit_dismiss_button;
 GtkSpinner *fit_spinner;
 //Calibration dialog
 GtkWidget *calibrate_ok_button, *remove_calibration_button;
@@ -121,7 +122,6 @@ GtkSpinButton *skew_amplitude_spinbutton;
 GtkCheckButton *relative_widths_checkbutton, *step_function_checkbutton;
 GtkButton *preferences_apply_button;
 GtkComboBoxText *background_type_combobox, *peak_shape_combobox, *weight_mode_combobox;
-GtkCheckButton *popup_results_checkbutton;
 GtkCheckButton *animation_checkbutton;
 //shortcuts window
 GtkModelButton *shortcuts_button;
@@ -156,7 +156,6 @@ struct {
   uint8_t commentEditMode; //0=editing comment, 1=editing view title
   int32_t commentEditInd;
   uint8_t preferDarkTheme; //0=prefer light, 1=prefer dark
-  uint8_t popupFitResults; //0=don't popup results after fit, 1=popup results
   uint8_t useZoomAnimations; //0=don't use, 1=use
   uint8_t exportFileType; //0=text, 1=radware
 } guiglobals;
@@ -247,5 +246,5 @@ struct {
 
 enum fit_weight_mode_enum{FITWEIGHT_DATA, FITWEIGHT_FIT, FITWEIGHT_NONE, FITWEIGHT_ENUM_LENGTH};
 enum fit_par_enum{FITPAR_BGCONST,FITPAR_BGLIN,FITPAR_BGQUAD,FITPAR_R,FITPAR_BETA,FITPAR_STEP,FITPAR_POS1,FITPAR_WIDTH1,FITPAR_AMP1,FITPAR_ENUM_LENGTH};
-enum fit_state_enum{FITSTATE_NOTFITTING, FITSTATE_SETTINGLIMITS, FITSTATE_SETTINGPEAKS, FITSTATE_FITTING, FITSTATE_REFININGFIT, FITSTATE_FITCOMPLETE, FITSTATE_ENUM_LENGTH};
+enum fit_state_enum{FITSTATE_NOTFITTING, FITSTATE_SETTINGLIMITS, FITSTATE_SETTINGPEAKS, FITSTATE_FITTING, FITSTATE_FITCOMPLETE, FITSTATE_ENUM_LENGTH};
 enum multiplot_mode_enum{MULTIPLOT_NONE, MULTIPLOT_SUMMED, MULTIPLOT_OVERLAY_COMMON, MULTIPLOT_OVERLAY_INDEPENDENT, MULTIPLOT_STACKED, MULTIPLOT_ENUM_LENGTH};

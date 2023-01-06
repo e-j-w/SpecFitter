@@ -19,7 +19,6 @@ void showPreferences(int page){
   gtk_spin_button_set_value(skew_amplitude_spinbutton,(gdouble)fitpar.fixedRVal);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(relative_widths_checkbutton),fitpar.fixRelativeWidths);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(step_function_checkbutton),fitpar.stepFunction);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(popup_results_checkbutton),guiglobals.popupFitResults);
   gtk_combo_box_set_active(GTK_COMBO_BOX(background_type_combobox),fitpar.bgType);
   gtk_combo_box_set_active(GTK_COMBO_BOX(peak_shape_combobox),fitpar.skewed);
   gtk_combo_box_set_active(GTK_COMBO_BOX(weight_mode_combobox),fitpar.weightMode);
@@ -1568,7 +1567,7 @@ void on_multiplot_make_view_button_clicked(){
     memcpy(&drawing.scaleFactor,&rawdata.viewScaleFactor[rawdata.numViews-1],sizeof(drawing.scaleFactor));
     memcpy(&drawing.multiPlots,&rawdata.viewMultiPlots[rawdata.numViews-1],sizeof(drawing.multiPlots));
     drawing.displayedView = rawdata.numViews-1;
-    gtk_spin_button_set_value(spectrum_selector, rawdata.numSpOpened+rawdata.numViews+1);
+    //gtk_spin_button_set_value(spectrum_selector,rawdata.numSpOpened+rawdata.numViews);
 
     //switch to display the custom views
     gtk_widget_show(GTK_WIDGET(view_list_box));
@@ -1960,6 +1959,12 @@ void on_fit_preferences_button_clicked(){
   showPreferences(1);
 }
 
+void on_fit_dismiss_button_clicked(){
+  guiglobals.fittingSp = FITSTATE_NOTFITTING;
+  //update widgets
+  update_gui_fit_state();
+}
+
 void on_toggle_discard_empty(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton))
     rawdata.dropEmptySpectra=1;
@@ -2041,13 +2046,6 @@ void on_toggle_step_function(GtkToggleButton *togglebutton){
     fitpar.stepFunction=1;
   else
     fitpar.stepFunction=0;
-}
-
-void on_toggle_popup_results(GtkToggleButton *togglebutton){
-  if(gtk_toggle_button_get_active(togglebutton))
-    guiglobals.popupFitResults=1;
-  else
-    guiglobals.popupFitResults=0;
 }
 
 void on_peak_shape_changed(GtkComboBox *combo_box){
@@ -2279,10 +2277,13 @@ void iniitalizeUIElements(){
 
   //fit interface UI elements
   revealer_info_panel = GTK_REVEALER(gtk_builder_get_object(builder, "revealer_info_panel"));
-  revealer_info_label = GTK_LABEL(gtk_builder_get_object(builder, "revealer_info_label"));
+  fit_button_box = GTK_BOX(gtk_builder_get_object(builder, "fit_button_box"));
+  fit_display_button_box = GTK_BOX(gtk_builder_get_object(builder, "fit_display_button_box"));
+  fit_info_label = GTK_LABEL(gtk_builder_get_object(builder, "fit_info_label"));
   fit_cancel_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_cancel_button"));
   fit_fit_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_fit_button"));
   fit_preferences_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_preferences_button"));
+  fit_dismiss_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_dismiss_button"));
   fit_spinner = GTK_SPINNER(gtk_builder_get_object(builder, "fit_spinner"));
 
   //calibration window UI elements
@@ -2369,7 +2370,6 @@ void iniitalizeUIElements(){
   background_type_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "background_type_combobox"));
   peak_shape_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "peak_shape_combobox"));
   weight_mode_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "weight_mode_combobox"));
-  popup_results_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "popup_results_checkbutton"));
   animation_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "animation_checkbutton"));
   preferences_apply_button = GTK_BUTTON(gtk_builder_get_object(builder, "preferences_apply_button"));
 
@@ -2406,6 +2406,7 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(fit_fit_button), "clicked", G_CALLBACK(on_fit_fit_button_clicked), NULL);
   g_signal_connect(G_OBJECT(fit_cancel_button), "clicked", G_CALLBACK(on_fit_cancel_button_clicked), NULL);
   g_signal_connect(G_OBJECT(fit_preferences_button), "clicked", G_CALLBACK(on_fit_preferences_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(fit_dismiss_button), "clicked", G_CALLBACK(on_fit_dismiss_button_clicked), NULL);
   g_signal_connect(G_OBJECT(display_button), "clicked", G_CALLBACK(on_display_button_clicked), NULL);
   g_signal_connect(G_OBJECT(calibrate_ok_button), "clicked", G_CALLBACK(on_calibrate_ok_button_clicked), NULL);
   g_signal_connect(G_OBJECT(comment_ok_button), "clicked", G_CALLBACK(on_comment_ok_button_clicked), NULL);
@@ -2430,7 +2431,6 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(skew_amplitude_spinbutton), "value-changed", G_CALLBACK(on_skew_amplitude_changed), NULL);
   g_signal_connect(G_OBJECT(relative_widths_checkbutton), "toggled", G_CALLBACK(on_toggle_relative_widths), NULL);
   g_signal_connect(G_OBJECT(step_function_checkbutton), "toggled", G_CALLBACK(on_toggle_step_function), NULL);
-  g_signal_connect(G_OBJECT(popup_results_checkbutton), "toggled", G_CALLBACK(on_toggle_popup_results), NULL);
   g_signal_connect(G_OBJECT(animation_checkbutton), "toggled", G_CALLBACK(on_toggle_animation), NULL);
   g_signal_connect(G_OBJECT(autozoom_checkbutton), "toggled", G_CALLBACK(on_toggle_autozoom), NULL);
   g_signal_connect(G_OBJECT(preferences_apply_button), "clicked", G_CALLBACK(on_preferences_apply_button_clicked), NULL);
@@ -2541,7 +2541,6 @@ void iniitalizeUIElements(){
   guiglobals.roundErrors = 0;
   guiglobals.autoZoom = 1;
   guiglobals.preferDarkTheme = 0;
-  guiglobals.popupFitResults = 1;
   guiglobals.useZoomAnimations = 1;
   guiglobals.exportFileType = 0;
   fitpar.fixSkewAmplitide = 0;

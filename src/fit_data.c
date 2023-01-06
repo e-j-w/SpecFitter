@@ -19,22 +19,20 @@ gboolean update_gui_fit_state(){
       gtk_widget_set_sensitive(GTK_WIDGET(contract_scale),TRUE);
       gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),TRUE);
       gtk_widget_hide(GTK_WIDGET(fit_spinner));
-      gtk_revealer_set_reveal_child(revealer_info_panel, FALSE);
+      gtk_widget_hide(GTK_WIDGET(fit_button_box));
+      gtk_widget_show(GTK_WIDGET(fit_display_button_box));
+      //gtk_revealer_set_reveal_child(revealer_info_panel, FALSE);
       gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw to show the fit
       break;
-    case FITSTATE_REFININGFIT:
-      gtk_label_set_text(revealer_info_label,"Refining fit...");
-      gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
-      break;
     case FITSTATE_FITTING:
-      gtk_label_set_text(revealer_info_label,"Fitting...");
+      gtk_label_set_text(fit_info_label,"Fitting...");
       gtk_widget_show(GTK_WIDGET(fit_spinner));
       gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
       gtk_widget_set_sensitive(GTK_WIDGET(contract_scale),FALSE);
       gtk_revealer_set_reveal_child(revealer_info_panel, TRUE);
       break;
     case FITSTATE_SETTINGPEAKS:
-      gtk_label_set_text(revealer_info_label,"Right-click at approximate peak positions.");
+      gtk_label_set_text(fit_info_label,"Right-click on spectrum at approximate peak position(s).");
       break;
     case FITSTATE_SETTINGLIMITS:
       gtk_widget_set_sensitive(GTK_WIDGET(open_button),FALSE);
@@ -43,7 +41,9 @@ gboolean update_gui_fit_state(){
       gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),FALSE);
       gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
       gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
-      gtk_label_set_text(revealer_info_label,"Right-click to set fit region lower and upper bounds.");
+      gtk_label_set_text(fit_info_label,"Right-click on spectrum to set fit region lower and upper bounds.");
+      gtk_widget_show(GTK_WIDGET(fit_button_box));
+      gtk_widget_hide(GTK_WIDGET(fit_display_button_box));
       gtk_revealer_set_reveal_child(revealer_info_panel, TRUE);
       break;
     case FITSTATE_NOTFITTING:
@@ -98,39 +98,8 @@ gboolean print_fit_results(){
   const int32_t strSize = 1024;
   char *fitResStr = malloc((size_t)strSize);
   char fitParStr[3][50];
-  GtkDialogFlags flags; 
-  GtkWidget *message_dialog;
 
   int32_t length = 0;
-  if(calpar.calMode == 1){
-    getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BGCONST]),getCalWidth((double)fitpar.fitParErr[FITPAR_BGCONST]),fitParStr[0],50,1,guiglobals.roundErrors);
-    getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BGLIN]),getCalWidth((double)fitpar.fitParErr[FITPAR_BGLIN]),fitParStr[1],50,1,guiglobals.roundErrors);
-    getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BGQUAD]),getCalWidth((double)fitpar.fitParErr[FITPAR_BGQUAD]),fitParStr[2],50,1,guiglobals.roundErrors);
-  }else{
-    getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BGCONST],(double)fitpar.fitParErr[FITPAR_BGCONST],fitParStr[0],50,1,guiglobals.roundErrors);
-    getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BGLIN],(double)fitpar.fitParErr[FITPAR_BGLIN],fitParStr[1],50,1,guiglobals.roundErrors);
-    getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BGQUAD],(double)fitpar.fitParErr[FITPAR_BGQUAD],fitParStr[2],50,1,guiglobals.roundErrors);
-  }
-  length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Chisq/NDF: %Lf\n\nBackground\nA: %s, B: %s, C: %s\n\n",fitpar.chisq,fitParStr[0],fitParStr[1],fitParStr[2]);
-  if(fitpar.skewed == 1){
-    if(calpar.calMode == 1){
-      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_R]),getCalWidth((double)fitpar.fitParErr[FITPAR_R]),fitParStr[0],50,1,guiglobals.roundErrors);
-      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BETA]),getCalWidth((double)fitpar.fitParErr[FITPAR_BETA]),fitParStr[1],50,1,guiglobals.roundErrors);
-    }else{
-      getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_R],(double)fitpar.fitParErr[FITPAR_R],fitParStr[0],50,1,guiglobals.roundErrors);
-      getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BETA],(double)fitpar.fitParErr[FITPAR_BETA],fitParStr[1],50,1,guiglobals.roundErrors);
-    }
-    length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Skew component amplitude: %s\nBeta (skewness): %s\n\n",fitParStr[0],fitParStr[1]);
-  }
-  if(fitpar.stepFunction == 1){
-    if(calpar.calMode == 1){
-      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_STEP]),getCalWidth((double)fitpar.fitParErr[FITPAR_STEP]),fitParStr[0],50,1,guiglobals.roundErrors);
-    }else{
-      getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_STEP],(double)fitpar.fitParErr[FITPAR_STEP],fitParStr[0],50,1,guiglobals.roundErrors);
-    }
-    length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Step: %s\n\n",fitParStr[0]);
-  }
-  length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Peaks");
   for(int32_t i=0;i<fitpar.numFitPeaks;i++){
     getFormattedValAndUncertainty((double)fitpar.areaVal[i],(double)fitpar.areaErr[i],fitParStr[0],50,1,guiglobals.roundErrors);
     if(calpar.calMode == 1){
@@ -140,31 +109,46 @@ gboolean print_fit_results(){
       getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_POS1+(3*i)],(double)fitpar.fitParErr[FITPAR_POS1+(3*i)],fitParStr[1],50,1,guiglobals.roundErrors);
       getFormattedValAndUncertainty(2.35482*(double)fitpar.fitParVal[FITPAR_WIDTH1+(3*i)],2.35482*(double)fitpar.fitParErr[FITPAR_WIDTH1+(3*i)],fitParStr[2],50,1,guiglobals.roundErrors);
     }
-    int32_t len = snprintf(fitResStr+length,(uint64_t)(strSize-length),"\nPeak %i Area: %s, Centroid: %s, FWHM: %s",i+1,fitParStr[0],fitParStr[1],fitParStr[2]);
+    int32_t len = snprintf(fitResStr+length,(uint64_t)(strSize-length),"Peak %i\nArea: %s\nCentroid: %s\nFWHM: %s\n\n",i+1,fitParStr[0],fitParStr[1],fitParStr[2]);
     if((len < 0)||(len >= strSize-length)){
       break;
     }
     length += len;
   }
-
-  switch (guiglobals.popupFitResults){
-    case 1:
-      //show a dialog box with the fit results
-      flags = GTK_DIALOG_DESTROY_WITH_PARENT;
-      message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, "Fit results");
-      gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",fitResStr);
-      gtk_dialog_run(GTK_DIALOG (message_dialog));
-      gtk_widget_destroy(message_dialog);
-      //print to the console
-      length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"\n");
-      printf("%s",fitResStr);
-      break;
-    default:
-      //print to the console
-      length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"\n");
-      printf("%s",fitResStr);
-      break;
+  if(calpar.calMode == 1){
+    getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BGCONST]),getCalWidth((double)fitpar.fitParErr[FITPAR_BGCONST]),fitParStr[0],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BGLIN]),getCalWidth((double)fitpar.fitParErr[FITPAR_BGLIN]),fitParStr[1],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BGQUAD]),getCalWidth((double)fitpar.fitParErr[FITPAR_BGQUAD]),fitParStr[2],50,1,guiglobals.roundErrors);
+  }else{
+    getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BGCONST],(double)fitpar.fitParErr[FITPAR_BGCONST],fitParStr[0],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BGLIN],(double)fitpar.fitParErr[FITPAR_BGLIN],fitParStr[1],50,1,guiglobals.roundErrors);
+    getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BGQUAD],(double)fitpar.fitParErr[FITPAR_BGQUAD],fitParStr[2],50,1,guiglobals.roundErrors);
   }
+  length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Chisq/NDF: %Lf\n\nBackground\nA: %s\nB: %s\nC: %s\n\n",fitpar.chisq,fitParStr[0],fitParStr[1],fitParStr[2]);
+  if(fitpar.skewed == 1){
+    if(calpar.calMode == 1){
+      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_R]),getCalWidth((double)fitpar.fitParErr[FITPAR_R]),fitParStr[0],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BETA]),getCalWidth((double)fitpar.fitParErr[FITPAR_BETA]),fitParStr[1],50,1,guiglobals.roundErrors);
+    }else{
+      getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_R],(double)fitpar.fitParErr[FITPAR_R],fitParStr[0],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BETA],(double)fitpar.fitParErr[FITPAR_BETA],fitParStr[1],50,1,guiglobals.roundErrors);
+    }
+    length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Skew component amplitude: %s %%\nBeta (skewness): %s",fitParStr[0],fitParStr[1]);
+  }
+  if(fitpar.stepFunction == 1){
+    if(calpar.calMode == 1){
+      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_STEP]),getCalWidth((double)fitpar.fitParErr[FITPAR_STEP]),fitParStr[0],50,1,guiglobals.roundErrors);
+    }else{
+      getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_STEP],(double)fitpar.fitParErr[FITPAR_STEP],fitParStr[0],50,1,guiglobals.roundErrors);
+    }
+    length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"\n\nStep: %s",fitParStr[0]);
+  }
+
+  //print to the console
+  length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"\n");
+  printf("%s",fitResStr);
+
+  gtk_label_set_text(fit_info_label,fitResStr);
 
   free(fitResStr);
   return FALSE; //stop running
@@ -649,17 +633,16 @@ void performGausFit(){
 
   evalPeakAreas(); //get areas/errors
 
-  printf("Fitted chs %d to %d, %d peaks\n%d indept. pars, %d degrees of freedom, weight mode %u\n", fitpar.fitStartCh, fitpar.fitEndCh, fitpar.numFitPeaks, linEq.dim, fitpar.ndf, fitpar.weightMode);
   if(rwfixed) printf("Relative widths fixed.\n");
 
   if(conv){
-    printf(" %d iterations,  Chisq/d.o.f.= %.3Lf\n", nits, fitpar.chisq);
+    printf("Converged after %d fit iterations.\n", nits);
     guiglobals.fittingSp = FITSTATE_FITCOMPLETE;
     g_idle_add(update_gui_fit_state,NULL);
     g_idle_add(print_fit_results,NULL);
     return;
   }
-  printf("Failed to converge after %d iterations,  Chisq/d.o.f.= %.3Lf\nWARNING: do not believe quoted parameter values!\n", nits, fitpar.chisq);
+  printf("Failed to converge after %d iterations.\nWARNING: do not believe quoted parameter values!\n", nits);
   if(rwfixed){
     for(i = 6; i < npars; ++i){
       fitpar.fitParFree[i] = (uint8_t)(fixed[i]);

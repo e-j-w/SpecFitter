@@ -527,7 +527,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
       case FITSTATE_FITCOMPLETE:
         //fit being displayed, clear it on right click
         guiglobals.fittingSp = FITSTATE_NOTFITTING;
-        gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+        update_gui_fit_state();
         break;
       case FITSTATE_SETTINGPEAKS:
         //setup peak positions
