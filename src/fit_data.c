@@ -127,7 +127,7 @@ gboolean print_fit_results(){
   length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Chisq/NDF: %Lf\n\nBackground\nA: %s\nB: %s\nC: %s\n\n",fitpar.chisq,fitParStr[0],fitParStr[1],fitParStr[2]);
   if(fitpar.skewed == 1){
     if(calpar.calMode == 1){
-      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_R]),getCalWidth((double)fitpar.fitParErr[FITPAR_R]),fitParStr[0],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_R],(double)fitpar.fitParErr[FITPAR_R],fitParStr[0],50,1,guiglobals.roundErrors);
       getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BETA]),getCalWidth((double)fitpar.fitParErr[FITPAR_BETA]),fitParStr[1],50,1,guiglobals.roundErrors);
     }else{
       getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_R],(double)fitpar.fitParErr[FITPAR_R],fitParStr[0],50,1,guiglobals.roundErrors);
@@ -278,34 +278,35 @@ double evalSkewedGaussArea(const int32_t peakNum){
 //Evaluate proprties of fitted peaks
 //based on gffin from RadWare gf3_subs.c
 void evalPeakAreas(){
-  long double a, d, r, y, r1, eb, eh, er, ew, bet;
+  long double area, d, r, y, r1, eb, eh, er, ew, beta;
   int   i, ic;
   long double pkwidth;
 
   /* calc. areas, centroids and errors */
   r = fitpar.fitParVal[3] / 50.f;
   r1 = 1.f - r * .5f;
-  bet = fitpar.fitParVal[4];
-  if(bet == 0.){
-    bet = 0.001; //handle symmetric peak case
+  beta = fitpar.fitParVal[4];
+  if(beta == 0.){
+    beta = 0.001; //handle symmetric peak case
   }
   for(i = 0; i < fitpar.numFitPeaks; ++i){
     ic = i*3 + FITPAR_WIDTH1;
     pkwidth = fitpar.fitParVal[ic] * 2.35482;
-    y = pkwidth / (bet * 3.33021838f);
+    y = pkwidth / (beta * 3.33021838f);
     if (y > 4.0f) {
       d = 0.0f;
     } else {
       d = expl(-y * y) / erfcl(y);
     }
-    a = r * bet * d + pkwidth * 1.06446705f * r1;
-    fitpar.areaVal[i] = a * fitpar.fitParVal[ic + 1];
-    eh = a * fitpar.fitParErr[ic + 1];
-    er = (bet * 2.f * d - pkwidth * 1.06446705f) * fitpar.fitParErr[3] / 100.f;
+    area = r * beta * d + pkwidth * 1.06446705f * r1;
+    fitpar.areaVal[i] = area * fitpar.fitParVal[ic + 1] / (1.0*drawing.contractFactor);
+    eh = area * fitpar.fitParErr[ic + 1];
+    er = (beta * 2.f * d - pkwidth * 1.06446705f) * fitpar.fitParErr[3] / 100.f;
     eb = r * d * (y * 2.f * y + 1.f - d * 1.12837917f * y) * fitpar.fitParErr[4];
     ew = (r1 * 1.06446705f + r * .600561216f * d *
 	  (d / 1.77245385f - y)) * fitpar.fitParErr[ic];
     fitpar.areaErr[i] = sqrtl(eh * eh + fitpar.fitParVal[ic+1] * fitpar.fitParVal[ic+1] * (er * er + eb * eb + ew * ew));
+    fitpar.areaErr[i] /= (1.0*drawing.contractFactor);
   }
 } 
 
@@ -920,6 +921,7 @@ int startGausFit(){
     if(fitpar.fixSkewAmplitide){
       fitpar.fitParVal[FITPAR_R] = (long double)fitpar.fixedRVal; //R
       fitpar.fitParFree[FITPAR_R] = 0; //R
+      printf("Fixed R to: %Lf\n",fitpar.fitParVal[FITPAR_R]);
     }else{
       fitpar.fitParVal[FITPAR_R] = 10; //R
       fitpar.fitParFree[FITPAR_R] = 1; //R
