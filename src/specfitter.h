@@ -117,8 +117,8 @@ GtkNotebook *preferences_notebook;
 GtkCheckButton *discard_empty_checkbutton, *bin_errors_checkbutton, *round_errors_checkbutton, *dark_theme_checkbutton;
 GtkCheckButton *spectrum_label_checkbutton, *spectrum_comment_checkbutton, *spectrum_gridline_checkbutton, *autozoom_checkbutton;
 GtkRevealer *skew_parameters_revealer;
-GtkCheckButton *fix_skew_amplitude_checkbutton;
-GtkSpinButton *skew_amplitude_spinbutton;
+GtkCheckButton *fix_skew_amplitude_checkbutton, *fix_beta_checkbutton;
+GtkSpinButton *skew_amplitude_spinbutton, *beta_spinbutton;
 GtkCheckButton *relative_widths_checkbutton, *step_function_checkbutton;
 GtkButton *preferences_apply_button;
 GtkComboBoxText *background_type_combobox, *peak_shape_combobox, *weight_mode_combobox;
@@ -238,7 +238,9 @@ struct {
   uint8_t skewed; //0=Gaussian, 1=skewed Gaussian
   uint8_t numFitPeaks; //number of peaks to fit
   uint8_t fixSkewAmplitide; //whether the R parameter is fixed
-  float fixedRVal; //fixed value of the skewed componnent amplitude R, if fixSkewAmplitide==1
+  uint8_t fixBeta; //whether the skewness parameter is fixed
+  float fixedRVal; //fixed value of the skewed component amplitude R, if fixSkewAmplitide==1
+  float fixedBetaVal; //fixed value of the skewness beta, if fixBeta==1
   uint8_t fixRelativeWidths; //0=don't fix width, 1=fix widths
   uint8_t stepFunction; //0=no step function, 1=step function
   uint8_t weightMode; //uses values from fit_weight_mode_enum: 0=weight using data (properly weighting for background subtraction), 1=weight using fit, 2=no weights

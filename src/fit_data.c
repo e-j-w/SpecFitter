@@ -638,6 +638,17 @@ void performGausFit(){
 
   if(conv){
     printf("Converged after %d fit iterations.\n", nits);
+    if(fitpar.skewed){
+      //convenience: set fixed values of skewed component parameters
+      //to the values that were just used in the just successful fit,
+      //assuming the values aren't already fixed
+      if(fitpar.fixSkewAmplitide == 0){
+        fitpar.fixedRVal = (float)fitpar.fitParVal[FITPAR_R];
+      }
+      if(fitpar.fixBeta == 0){
+        fitpar.fixedBetaVal = (float)fitpar.fitParVal[FITPAR_BETA];
+      }
+    }
     guiglobals.fittingSp = FITSTATE_FITCOMPLETE;
     g_idle_add(update_gui_fit_state,NULL);
     g_idle_add(print_fit_results,NULL);
@@ -652,6 +663,7 @@ void performGausFit(){
   guiglobals.fittingSp = FITSTATE_FITCOMPLETE;
   g_idle_add(update_gui_fit_state,NULL);
   g_idle_add(print_fit_dubious,NULL);
+  g_idle_add(print_fit_results,NULL);
   return;
 
  QUIT:
@@ -835,7 +847,7 @@ float centroidGuess(const float centroidInit){
   return centroidVal;
 }
 
-int isCentroidNearOthers(const int32_t centInd, const float dist){
+/*int isCentroidNearOthers(const int32_t centInd, const float dist){
   
   for(int32_t i=0;i<fitpar.numFitPeaks;i++){
     if(i!=centInd){
@@ -845,7 +857,7 @@ int isCentroidNearOthers(const int32_t centInd, const float dist){
     }
   }
   return 0;
-}
+}*/
 
 int startGausFit(){
 
@@ -893,9 +905,9 @@ int startGausFit(){
 
   //assign initial guesses for non-linear params
   for(int32_t i=0;i<fitpar.numFitPeaks;i++){
-    if(isCentroidNearOthers(i,10.0)==0){
+    /*if(isCentroidNearOthers(i,10.0)==0){
       fitpar.fitPeakInitGuess[i] = centroidGuess(fitpar.fitPeakInitGuess[i]); //guess peak positions
-    }
+    }*/
     fitpar.fitParVal[FITPAR_AMP1+(3*i)] = getSpBinVal(0,(int)fitpar.fitPeakInitGuess[i]) - fitpar.fitParVal[FITPAR_BGCONST] - fitpar.fitParVal[FITPAR_BGLIN]*fitpar.fitPeakInitGuess[i];
     fitpar.fitParVal[FITPAR_POS1+(3*i)] = fitpar.fitPeakInitGuess[i];
   }
@@ -921,15 +933,21 @@ int startGausFit(){
     if(fitpar.fixSkewAmplitide){
       fitpar.fitParVal[FITPAR_R] = (long double)fitpar.fixedRVal; //R
       fitpar.fitParFree[FITPAR_R] = 0; //R
-      printf("Fixed R to: %Lf\n",fitpar.fitParVal[FITPAR_R]);
+      //printf("Fixed R to: %Lf\n",fitpar.fitParVal[FITPAR_R]);
     }else{
       fitpar.fitParVal[FITPAR_R] = 10; //R
       fitpar.fitParFree[FITPAR_R] = 1; //R
       fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
     }
-    fitpar.fitParVal[FITPAR_BETA] = fitpar.fitParVal[FITPAR_WIDTH1]; //beta
-    fitpar.fitParFree[FITPAR_BETA] = 1; //beta
-    fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
+    if(fitpar.fixBeta){
+      fitpar.fitParVal[FITPAR_BETA] = (long double)fitpar.fixedBetaVal; //beta
+      fitpar.fitParFree[FITPAR_BETA] = 0; //beta
+      //printf("Fixed beta to: %Lf\n",fitpar.fitParVal[FITPAR_BETA]);
+    }else{
+      fitpar.fitParVal[FITPAR_BETA] = fitpar.fitParVal[FITPAR_WIDTH1]; //beta
+      fitpar.fitParFree[FITPAR_BETA] = 1; //beta
+      fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
+    }
   }
 
   //set up step function if needed

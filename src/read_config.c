@@ -98,11 +98,22 @@ uint8_t readConfigFile(FILE *file, uint8_t keepCalibration){
           fitpar.fixSkewAmplitide = 0;
         }
       }
+      if(strcmp(par,"fix_beta") == 0){
+        if(strcmp(val,"yes") == 0){
+          fitpar.fixBeta = 1;
+        }else{
+          fitpar.fixBeta = 0;
+        }
+      }
       if(strcmp(par,"fix_skew_amp_val") == 0){
         float ampVal = (float)atof(val);
         if((ampVal >= 0.0f)&&(ampVal <= 100.0f)){
           fitpar.fixedRVal = ampVal;
         }
+      }
+      if(strcmp(par,"fix_beta_val") == 0){
+        float bVal = (float)atof(val);
+        fitpar.fixedBetaVal = bVal;
       }
       if(strcmp(par,"fix_relative_widths") == 0){
         if(strcmp(val,"yes") == 0){
@@ -244,10 +255,16 @@ uint8_t writeConfigFile(FILE *file){
   }
   if(fitpar.fixSkewAmplitide == 1){
     fprintf(file,"fix_skew_amp=yes\n");
+    fprintf(file,"fix_skew_amp_val=%f\n",fitpar.fixedRVal);
   }else{
     fprintf(file,"fix_skew_amp=no\n");
   }
-  fprintf(file,"fix_skew_amp_val=%f\n",fitpar.fixedRVal);
+  if(fitpar.fixBeta == 1){
+    fprintf(file,"fix_beta=yes\n");
+    fprintf(file,"fix_beta_val=%f\n",fitpar.fixedBetaVal);
+  }else{
+    fprintf(file,"fix_beta=no\n");
+  }
   if(fitpar.fixRelativeWidths == 1){
     fprintf(file,"fix_relative_widths=yes\n");
   }else{
