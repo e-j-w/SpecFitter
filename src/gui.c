@@ -19,10 +19,10 @@ void showPreferences(int page){
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fix_beta_checkbutton),fitpar.fixBeta);
   gtk_spin_button_set_value(skew_amplitude_spinbutton,(gdouble)fitpar.fixedRVal);
   gtk_spin_button_set_value(beta_spinbutton,(gdouble)fitpar.fixedBetaVal);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(relative_widths_checkbutton),fitpar.fixRelativeWidths);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(step_function_checkbutton),fitpar.stepFunction);
   gtk_combo_box_set_active(GTK_COMBO_BOX(background_type_combobox),fitpar.bgType);
   gtk_combo_box_set_active(GTK_COMBO_BOX(peak_shape_combobox),fitpar.skewed);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(peak_width_combobox),fitpar.peakWidthMethod);
   gtk_combo_box_set_active(GTK_COMBO_BOX(weight_mode_combobox),fitpar.weightMode);
   gtk_revealer_set_reveal_child(skew_parameters_revealer, fitpar.skewed);
   gtk_window_present(preferences_window); //show the window
@@ -1921,7 +1921,7 @@ void on_fit_button_clicked(){
       if(drawing.multiplotMode < MULTIPLOT_OVERLAY_COMMON){
         //safe to fit
         guiglobals.fittingSp = FITSTATE_SETTINGLIMITS;
-        memset(fitpar.fitParVal,0,sizeof(fitpar.fitParVal));
+        memset(&fitpar.fitParVal,0,sizeof(fitpar.fitParVal));
         memset(&fitpar.fitParFree,0,sizeof(fitpar.fitParFree));
         //set default values
         fitpar.fitStartCh = -1;
@@ -2045,13 +2045,6 @@ void on_toggle_fix_beta(GtkToggleButton *togglebutton){
   gtk_widget_set_sensitive(GTK_WIDGET(beta_spinbutton),fitpar.fixBeta);
 }
 
-void on_toggle_relative_widths(GtkToggleButton *togglebutton){
-  if(gtk_toggle_button_get_active(togglebutton))
-    fitpar.fixRelativeWidths=1;
-  else
-    fitpar.fixRelativeWidths=0;
-}
-
 void on_toggle_step_function(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton))
     fitpar.stepFunction=1;
@@ -2096,6 +2089,7 @@ void on_preferences_apply_button_clicked(){
   }
   fitpar.bgType = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(background_type_combobox));
   fitpar.skewed = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox));
+  fitpar.peakWidthMethod = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_width_combobox));
   fitpar.weightMode = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(weight_mode_combobox));
   updateConfigFile();
   manualSpectrumAreaDraw(); //redraw the spectrum
@@ -2383,10 +2377,10 @@ void iniitalizeUIElements(){
   skew_amplitude_spinbutton = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "skew_amplitude_spinbutton"));
   fix_beta_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "fix_beta_checkbutton"));
   beta_spinbutton = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "beta_spinbutton"));
-  relative_widths_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "relative_widths_checkbutton"));
   step_function_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "step_function_checkbutton"));
   background_type_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "background_type_combobox"));
   peak_shape_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "peak_shape_combobox"));
+  peak_width_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "peak_width_combobox"));
   weight_mode_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "weight_mode_combobox"));
   animation_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "animation_checkbutton"));
   preferences_apply_button = GTK_BUTTON(gtk_builder_get_object(builder, "preferences_apply_button"));
@@ -2449,7 +2443,6 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(skew_amplitude_spinbutton), "value-changed", G_CALLBACK(on_skew_amplitude_changed), NULL);
   g_signal_connect(G_OBJECT(fix_beta_checkbutton), "toggled", G_CALLBACK(on_toggle_fix_beta), NULL);
   g_signal_connect(G_OBJECT(beta_spinbutton), "value-changed", G_CALLBACK(on_beta_changed), NULL);
-  g_signal_connect(G_OBJECT(relative_widths_checkbutton), "toggled", G_CALLBACK(on_toggle_relative_widths), NULL);
   g_signal_connect(G_OBJECT(step_function_checkbutton), "toggled", G_CALLBACK(on_toggle_step_function), NULL);
   g_signal_connect(G_OBJECT(animation_checkbutton), "toggled", G_CALLBACK(on_toggle_animation), NULL);
   g_signal_connect(G_OBJECT(autozoom_checkbutton), "toggled", G_CALLBACK(on_toggle_autozoom), NULL);
@@ -2567,7 +2560,8 @@ void iniitalizeUIElements(){
   fitpar.fixBeta = 0;
   fitpar.fixedRVal = 10.0f;
   fitpar.fixedBetaVal = 5.0f;
-  fitpar.fixRelativeWidths = 1;
+  fitpar.peakWidthMethod = 1;
+  fitpar.prevFitNumPeaks = 0;
   fitpar.stepFunction = 0;
   fitpar.fitStartCh = -1;
   fitpar.fitEndCh = -1;

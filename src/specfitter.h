@@ -121,7 +121,7 @@ GtkCheckButton *fix_skew_amplitude_checkbutton, *fix_beta_checkbutton;
 GtkSpinButton *skew_amplitude_spinbutton, *beta_spinbutton;
 GtkCheckButton *relative_widths_checkbutton, *step_function_checkbutton;
 GtkButton *preferences_apply_button;
-GtkComboBoxText *background_type_combobox, *peak_shape_combobox, *weight_mode_combobox;
+GtkComboBoxText *background_type_combobox, *peak_shape_combobox, *peak_width_combobox, *weight_mode_combobox;
 GtkCheckButton *animation_checkbutton;
 //shortcuts window
 GtkModelButton *shortcuts_button;
@@ -231,6 +231,7 @@ struct {
   long double fitParVal[6+(3*MAX_FIT_PK)]; //parameter values found by the fitter
   long double fitParErr[6+(3*MAX_FIT_PK)]; //errors in parameter values
   long double areaVal[MAX_FIT_PK], areaErr[MAX_FIT_PK]; //areas of peaks and errors
+  long double prevFitWidths[MAX_FIT_PK];
   long double chisq; //fit chisq
   uint8_t fitParFree[6+(3*MAX_FIT_PK)]; //whether individual parameters are fixed or free
   uint8_t numFreePar; //number of fit parameters which have been freed
@@ -241,9 +242,10 @@ struct {
   uint8_t fixBeta; //whether the skewness parameter is fixed
   float fixedRVal; //fixed value of the skewed component amplitude R, if fixSkewAmplitide==1
   float fixedBetaVal; //fixed value of the skewness beta, if fixBeta==1
-  uint8_t fixRelativeWidths; //0=don't fix width, 1=fix widths
+  uint8_t peakWidthMethod; //0=don't fix width, 1=fix widths, 2=fix to previous
   uint8_t stepFunction; //0=no step function, 1=step function
   uint8_t weightMode; //uses values from fit_weight_mode_enum: 0=weight using data (properly weighting for background subtraction), 1=weight using fit, 2=no weights
+  uint8_t prevFitNumPeaks; //number of peaks in the previous fit
 } fitpar;
 
 enum fit_weight_mode_enum{FITWEIGHT_DATA, FITWEIGHT_FIT, FITWEIGHT_NONE, FITWEIGHT_ENUM_LENGTH};

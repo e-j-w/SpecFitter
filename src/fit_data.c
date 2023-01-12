@@ -100,6 +100,11 @@ gboolean print_fit_results(){
   char fitParStr[3][50];
 
   int32_t length = 0;
+  if((fitpar.peakWidthMethod == 2)&&(fitpar.prevFitNumPeaks > 0)){
+    length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Peak widths were fixed to previous fit values.\n\n");
+  }else if(fitpar.peakWidthMethod == 1){
+    length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Relative peak widths were fixed.\n\n");
+  }
   for(int32_t i=0;i<fitpar.numFitPeaks;i++){
     getFormattedValAndUncertainty((double)fitpar.areaVal[i],(double)fitpar.areaErr[i],fitParStr[0],50,1,guiglobals.roundErrors);
     if(calpar.calMode == 1){
@@ -151,6 +156,13 @@ gboolean print_fit_results(){
   gtk_label_set_text(fit_info_label,fitResStr);
 
   free(fitResStr);
+
+
+  fitpar.prevFitNumPeaks = fitpar.numFitPeaks;
+  for(uint8_t i=0;i<fitpar.numFitPeaks;i++){
+    fitpar.prevFitWidths[i] = fitpar.fitParVal[FITPAR_WIDTH1+(3*i)];
+  }
+
   return FALSE; //stop running
 }
 
@@ -444,7 +456,7 @@ void performGausFit(){
   }
   /* set up fixed relative widths */
   uint8_t rwfixed = 0;
-  if(fitpar.fixRelativeWidths){
+  if(fitpar.peakWidthMethod == 1){
     uint8_t niw = 0;
     //loop over width parameters for all peaks
     for(j = 7; j < npars; j += 3){
@@ -910,20 +922,41 @@ int startGausFit(){
     }*/
     fitpar.fitParVal[FITPAR_AMP1+(3*i)] = getSpBinVal(0,(int)fitpar.fitPeakInitGuess[i]) - fitpar.fitParVal[FITPAR_BGCONST] - fitpar.fitParVal[FITPAR_BGLIN]*fitpar.fitPeakInitGuess[i];
     fitpar.fitParVal[FITPAR_POS1+(3*i)] = fitpar.fitPeakInitGuess[i];
+    fitpar.fitParFree[FITPAR_AMP1+(3*i)] = 1; //free amplitude
+    fitpar.fitParFree[FITPAR_POS1+(3*i)] = 1; //free position
+    fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+2);
   }
 
   //fix relative widths if required
-  if(fitpar.fixRelativeWidths){
+  if((fitpar.peakWidthMethod == 2)&&(fitpar.prevFitNumPeaks > 0)){
+    printf("Fitting with peak widths fixed to previous fit values.\n");
+    for(uint32_t i=0;i<fitpar.prevFitNumPeaks;i++){
+      fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] = fitpar.prevFitWidths[i];
+      fitpar.fitParFree[FITPAR_WIDTH1+(3*i)] = 0; //fix width
+      printf("Peak %u width fixed to %Lf\n",i,fitpar.fitParVal[FITPAR_WIDTH1+(3*i)]);
+    }
+    for(uint32_t i=fitpar.prevFitNumPeaks;i<fitpar.numFitPeaks;i++){
+      fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] = widthGuess(fitpar.fitPeakInitGuess[i],getFWHM(fitpar.fitPeakInitGuess[i],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482);
+      fitpar.fitParFree[FITPAR_WIDTH1+(3*i)] = 1; //free width
+      fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
+    }
+  }else if(fitpar.peakWidthMethod == 1){
     printf("Fitting with relative peak widths fixed.\n");
     double firstWidthInitGuess = getFWHM(fitpar.fitPeakInitGuess[0],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482;
     fitpar.fitParVal[FITPAR_WIDTH1] = widthGuess(fitpar.fitPeakInitGuess[0],firstWidthInitGuess);
+    fitpar.fitParFree[FITPAR_WIDTH1] = 1; //free width
+    fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
     //printf("width guess: %f\n",fitpar.fitParVal[FITPAR_WIDTH1]);
-    for(int32_t i=1;i<fitpar.numFitPeaks;i++){
+    for(uint32_t i=1;i<fitpar.numFitPeaks;i++){
       fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] = fitpar.fitParVal[FITPAR_WIDTH1]*(getFWHM(fitpar.fitPeakInitGuess[i],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482)/firstWidthInitGuess;
+      fitpar.fitParFree[FITPAR_WIDTH1+(3*i)] = 1; //free width
+      fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
     }
   }else{
-    for(int32_t i=0;i<fitpar.numFitPeaks;i++){
+    for(uint32_t i=0;i<fitpar.numFitPeaks;i++){
       fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] = widthGuess(fitpar.fitPeakInitGuess[i],getFWHM(fitpar.fitPeakInitGuess[i],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482);
+      fitpar.fitParFree[FITPAR_WIDTH1+(3*i)] = 1; //free width
+      fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
     }
   }
 
@@ -941,11 +974,11 @@ int startGausFit(){
     }
     if(fitpar.fixBeta){
       fitpar.fitParVal[FITPAR_BETA] = (long double)fitpar.fixedBetaVal; //beta
-      fitpar.fitParFree[FITPAR_BETA] = 0; //beta
+      fitpar.fitParFree[FITPAR_BETA] = 0; //fix beta
       //printf("Fixed beta to: %Lf\n",fitpar.fitParVal[FITPAR_BETA]);
     }else{
       fitpar.fitParVal[FITPAR_BETA] = fitpar.fitParVal[FITPAR_WIDTH1]; //beta
-      fitpar.fitParFree[FITPAR_BETA] = 1; //beta
+      fitpar.fitParFree[FITPAR_BETA] = 1; //fix beta
       fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
     }
   }

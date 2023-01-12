@@ -115,11 +115,10 @@ uint8_t readConfigFile(FILE *file, uint8_t keepCalibration){
         float bVal = (float)atof(val);
         fitpar.fixedBetaVal = bVal;
       }
-      if(strcmp(par,"fix_relative_widths") == 0){
-        if(strcmp(val,"yes") == 0){
-          fitpar.fixRelativeWidths = 1;
-        }else{
-          fitpar.fixRelativeWidths = 0;
+      if(strcmp(par,"peak_width_method") == 0){
+        uint8_t pwVal = (uint8_t)atoi(val);
+        if(pwVal <= 2){
+          fitpar.peakWidthMethod = pwVal;
         }
       }
       if(strcmp(par,"step_function") == 0){
@@ -131,8 +130,9 @@ uint8_t readConfigFile(FILE *file, uint8_t keepCalibration){
       }
       if(strcmp(par,"fit_weight_mode") == 0){
         uint8_t ucVal = (uint8_t)atoi(val);
-        if(ucVal <= 2)
+        if(ucVal <= 2){
           fitpar.weightMode = ucVal;
+        }
       }
       if(strcmp(par,"fit_type") == 0){
         uint8_t ucVal = (uint8_t)atoi(val);
@@ -141,8 +141,9 @@ uint8_t readConfigFile(FILE *file, uint8_t keepCalibration){
       }
       if(strcmp(par,"bg_type") == 0){
         uint8_t ucVal = (uint8_t)atoi(val);
-        if(ucVal <= 2)
+        if(ucVal <= 2){
           fitpar.bgType = ucVal;
+        }
       }
       if(strcmp(par,"autozoom") == 0){
         if(strcmp(val,"yes") == 0){
@@ -265,10 +266,8 @@ uint8_t writeConfigFile(FILE *file){
   }else{
     fprintf(file,"fix_beta=no\n");
   }
-  if(fitpar.fixRelativeWidths == 1){
-    fprintf(file,"fix_relative_widths=yes\n");
-  }else{
-    fprintf(file,"fix_relative_widths=no\n");
+  if(fitpar.peakWidthMethod < 3){
+    fprintf(file,"peak_width_method=%u\n",fitpar.peakWidthMethod);
   }
   if(fitpar.stepFunction == 1){
     fprintf(file,"step_function=yes\n");
