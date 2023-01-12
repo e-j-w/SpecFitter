@@ -1930,6 +1930,7 @@ void on_fit_button_clicked(){
         fitpar.numFreePar = 0;
         //update widgets
         update_gui_fit_state();
+        gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw to hide any fit
       }else{
         GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
         GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot fit data!");
