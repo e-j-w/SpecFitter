@@ -116,7 +116,7 @@ GtkWindow *preferences_window;
 GtkNotebook *preferences_notebook;
 GtkCheckButton *discard_empty_checkbutton, *bin_errors_checkbutton, *round_errors_checkbutton, *dark_theme_checkbutton;
 GtkCheckButton *spectrum_label_checkbutton, *spectrum_comment_checkbutton, *spectrum_gridline_checkbutton, *autozoom_checkbutton;
-GtkRevealer *skew_parameters_revealer;
+GtkRevealer *skew_parameters_revealer, *peak_parameters_revealer;
 GtkCheckButton *fix_skew_amplitude_checkbutton, *fix_beta_checkbutton;
 GtkSpinButton *skew_amplitude_spinbutton, *beta_spinbutton;
 GtkCheckButton *relative_widths_checkbutton, *step_function_checkbutton;

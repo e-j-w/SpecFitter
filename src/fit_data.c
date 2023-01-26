@@ -509,7 +509,7 @@ void performGausFit(){
     printf("Not enough degrees of freedom to fit!\n");
     goto QUIT;
   }
-  if(fitPar.fitType != FITTYPE_BGONLY){
+  if(fitpar.fitType != FITTYPE_BGONLY){
     if(linEq.dim < 2){
       printf("Too many fixed parameters.\n");
       goto QUIT;

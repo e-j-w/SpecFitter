@@ -2549,7 +2549,7 @@ Skewed - Shape is the sum of two Guassian shapes, one of them skewed via convolu
                             <property name="can_focus">False</property>
                             <property name="active">0</property>
                             <items>
-                              <item id="&lt;Enter ID&gt;" translatable="yes">Symmetric peaks</item>
+                              <item id="&lt;Enter ID&gt;" translatable="yes">Gaussian peaks</item>
                               <item translatable="yes">Skewed peaks (low energy tail)</item>
                               <item translatable="yes">Background only</item>
                             </items>
@@ -2705,6 +2705,89 @@ Skewed - Shape is the sum of two Guassian shapes, one of them skewed via convolu
                         <property name="position">1</property>
                       </packing>
                     </child>
+                    <child>
+                      <object class="GtkRevealer" id="peak_parameters_revealer">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="reveal_child">True</property>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="margin_top">10</property>
+                            <property name="orientation">vertical</property>
+                            <property name="spacing">8</property>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">The method to use to determine peak widths.
+Fit freely - Widths allowed to vary freely.
+Fix relative widths - force peak widths to follow a quadratic relationship with the channel number when more than one peak is fit.  Recommended for gamma-ray spectroscopy.
+Fix to previous fit values - use the width values from the previous fit.  If no peaks have been fit yet, this is equivalent to 'fit freely'.</property>
+                                <property name="spacing">10</property>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">Peak widths</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkComboBoxText" id="peak_width_combobox">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="active">0</property>
+                                    <items>
+                                      <item id="&lt;Enter ID&gt;" translatable="yes">Fit freely</item>
+                                      <item translatable="yes">Fix relative widths</item>
+                                      <item translatable="yes">Fix to previous fit values</item>
+                                    </items>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkCheckButton" id="step_function_checkbutton">
+                                <property name="label" translatable="yes"> Use step function</property>
+                                <property name="name">drop_empty_checkbox</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="tooltip_text" translatable="yes">If checked, will use a step function to compensate for the background being larger on one side of each peak.</property>
+                                <property name="halign">start</property>
+                                <property name="draw_indicator">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2752,68 +2835,6 @@ Skewed - Shape is the sum of two Guassian shapes, one of them skewed via convolu
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkBox">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="tooltip_text" translatable="yes">The method to use to determine peak widths.
-Fit freely - Widths allowed to vary freely.
-Fix relative widths - force peak widths to follow a quadratic relationship with the channel number when more than one peak is fit.  Recommended for gamma-ray spectroscopy.
-Fix to previous fit values - use the width values from the previous fit.  If no peaks have been fit yet, this is equivalent to 'fit freely'.</property>
-                    <property name="spacing">10</property>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Peak widths</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkComboBoxText" id="peak_width_combobox">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="active">0</property>
-                        <items>
-                          <item id="&lt;Enter ID&gt;" translatable="yes">Fit freely</item>
-                          <item translatable="yes">Fix relative widths</item>
-                          <item translatable="yes">Fix to previous fit values</item>
-                        </items>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">5</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkCheckButton" id="step_function_checkbutton">
-                    <property name="label" translatable="yes"> Use step function</property>
-                    <property name="name">drop_empty_checkbox</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">If checked, will use a step function to compensate for the background being larger on one side of each peak.</property>
-                    <property name="halign">start</property>
-                    <property name="draw_indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">6</property>
                   </packing>
                 </child>
                 <child>

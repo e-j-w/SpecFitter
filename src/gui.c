@@ -29,6 +29,11 @@ void showPreferences(int page){
   }else{
     gtk_revealer_set_reveal_child(skew_parameters_revealer, FALSE);
   }
+  if(fitpar.fitType == FITTYPE_BGONLY){
+    gtk_revealer_set_reveal_child(peak_parameters_revealer, FALSE);
+  }else{
+    gtk_revealer_set_reveal_child(peak_parameters_revealer, TRUE);
+  }
   gtk_window_present(preferences_window); //show the window
 }
 
@@ -2062,11 +2067,16 @@ void on_peak_shape_changed(GtkComboBox *combo_box){
   if((entry >=0)&&(entry <= 2)){
     if(entry == 1){
       gtk_revealer_set_reveal_child(skew_parameters_revealer, TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(skew_amplitude_spinbutton),fitpar.fixSkewAmplitide);
+    gtk_widget_set_sensitive(GTK_WIDGET(beta_spinbutton),fitpar.fixBeta);
     }else{
       gtk_revealer_set_reveal_child(skew_parameters_revealer, FALSE);
     }
-    gtk_widget_set_sensitive(GTK_WIDGET(skew_amplitude_spinbutton),fitpar.fixSkewAmplitide);
-    gtk_widget_set_sensitive(GTK_WIDGET(beta_spinbutton),fitpar.fixBeta);
+    if(entry == 2){
+      gtk_revealer_set_reveal_child(peak_parameters_revealer, FALSE);
+    }else{
+      gtk_revealer_set_reveal_child(peak_parameters_revealer, TRUE);
+    }
   }
 }
 
@@ -2390,6 +2400,7 @@ void iniitalizeUIElements(){
   spectrum_comment_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "spectrum_comment_checkbutton"));
   spectrum_gridline_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "spectrum_gridline_checkbutton"));
   skew_parameters_revealer = GTK_REVEALER(gtk_builder_get_object(builder, "skew_parameters_revealer"));
+  peak_parameters_revealer = GTK_REVEALER(gtk_builder_get_object(builder, "peak_parameters_revealer"));
   fix_skew_amplitude_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "fix_skew_amplitude_checkbutton"));
   skew_amplitude_spinbutton = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "skew_amplitude_spinbutton"));
   fix_beta_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "fix_beta_checkbutton"));
