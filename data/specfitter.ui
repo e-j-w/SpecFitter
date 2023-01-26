@@ -2522,48 +2522,6 @@ They will then appear on this panel.</property>
                   <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="tooltip_text" translatable="yes">Set the form of the background used in the fit.</property>
-                    <property name="spacing">10</property>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Background type</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkComboBoxText" id="background_type_combobox">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="active">2</property>
-                        <items>
-                          <item id="&lt;Enter ID&gt;" translatable="yes">Constant</item>
-                          <item translatable="yes">Linear</item>
-                          <item translatable="yes">Quadratic</item>
-                        </items>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkBox">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkBox">
@@ -2577,7 +2535,7 @@ Skewed - Shape is the sum of two Guassian shapes, one of them skewed via convolu
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Peak shape</property>
+                            <property name="label" translatable="yes">Fit type</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -2591,8 +2549,9 @@ Skewed - Shape is the sum of two Guassian shapes, one of them skewed via convolu
                             <property name="can_focus">False</property>
                             <property name="active">0</property>
                             <items>
-                              <item id="&lt;Enter ID&gt;" translatable="yes">Symmetric</item>
-                              <item translatable="yes">Skewed (low energy tail)</item>
+                              <item id="&lt;Enter ID&gt;" translatable="yes">Symmetric peaks</item>
+                              <item translatable="yes">Skewed peaks (low energy tail)</item>
+                              <item translatable="yes">Background only</item>
                             </items>
                           </object>
                           <packing>
@@ -2750,7 +2709,49 @@ Skewed - Shape is the sum of two Guassian shapes, one of them skewed via convolu
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">4</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="tooltip_text" translatable="yes">Set the form of the background used in the fit.</property>
+                    <property name="spacing">10</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Background type</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBoxText" id="background_type_combobox">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="active">2</property>
+                        <items>
+                          <item id="&lt;Enter ID&gt;" translatable="yes">Constant</item>
+                          <item translatable="yes">Linear</item>
+                          <item translatable="yes">Quadratic</item>
+                        </items>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
                 <child>

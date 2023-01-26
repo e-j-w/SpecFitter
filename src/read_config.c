@@ -136,8 +136,9 @@ uint8_t readConfigFile(FILE *file, uint8_t keepCalibration){
       }
       if(strcmp(par,"fit_type") == 0){
         uint8_t ucVal = (uint8_t)atoi(val);
-        if(ucVal <= 1)
-          fitpar.skewed = ucVal;
+        if(ucVal < FITTYPE_ENUM_LENGTH){
+          fitpar.fitType = ucVal;
+        }
       }
       if(strcmp(par,"bg_type") == 0){
         uint8_t ucVal = (uint8_t)atoi(val);
@@ -277,8 +278,8 @@ uint8_t writeConfigFile(FILE *file){
   if(fitpar.bgType < 3){
     fprintf(file,"bg_type=%u\n",fitpar.bgType);
   }
-  if(fitpar.skewed < 2){
-    fprintf(file,"fit_type=%u\n",fitpar.skewed);
+  if(fitpar.fitType < FITTYPE_ENUM_LENGTH){
+    fprintf(file,"fit_type=%u\n",fitpar.fitType);
   }
   if(fitpar.weightMode < FITWEIGHT_ENUM_LENGTH){
     fprintf(file,"fit_weight_mode=%u\n",fitpar.weightMode);

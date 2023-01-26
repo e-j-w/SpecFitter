@@ -4,6 +4,9 @@
 //The main routine is drawSpectrum (near the bottom), helper 
 //subroutines are above it.
 
+//forward declarations
+void on_fit_fit_button_clicked();
+
 //set the default text color, depending on the theme
 void setTextColor(cairo_t *cr){
   if(guiglobals.preferDarkTheme){
@@ -564,7 +567,12 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
         if((fitpar.fitStartCh >= 0)&&(fitpar.fitEndCh >=0)){
           printf("Fit limits: channel %i through %i\n",fitpar.fitStartCh,fitpar.fitEndCh);
           fitpar.fitMidCh = (fitpar.fitStartCh + fitpar.fitEndCh) / 2; //used by fitter
-          guiglobals.fittingSp = FITSTATE_SETTINGPEAKS;
+          if(fitpar.fitType == FITTYPE_BGONLY){
+            //background only, start the fit right away
+            on_fit_fit_button_clicked(); //gui.c
+          }else{
+            guiglobals.fittingSp = FITSTATE_SETTINGPEAKS;
+          }
           update_gui_fit_state();
         }
         gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));

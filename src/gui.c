@@ -21,10 +21,14 @@ void showPreferences(int page){
   gtk_spin_button_set_value(beta_spinbutton,(gdouble)fitpar.fixedBetaVal);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(step_function_checkbutton),fitpar.stepFunction);
   gtk_combo_box_set_active(GTK_COMBO_BOX(background_type_combobox),fitpar.bgType);
-  gtk_combo_box_set_active(GTK_COMBO_BOX(peak_shape_combobox),fitpar.skewed);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(peak_shape_combobox),fitpar.fitType);
   gtk_combo_box_set_active(GTK_COMBO_BOX(peak_width_combobox),fitpar.peakWidthMethod);
   gtk_combo_box_set_active(GTK_COMBO_BOX(weight_mode_combobox),fitpar.weightMode);
-  gtk_revealer_set_reveal_child(skew_parameters_revealer, fitpar.skewed);
+  if(fitpar.fitType == FITTYPE_SKEWED){
+    gtk_revealer_set_reveal_child(skew_parameters_revealer, TRUE);
+  }else{
+    gtk_revealer_set_reveal_child(skew_parameters_revealer, FALSE);
+  }
   gtk_window_present(preferences_window); //show the window
 }
 
@@ -2055,8 +2059,12 @@ void on_toggle_step_function(GtkToggleButton *togglebutton){
 
 void on_peak_shape_changed(GtkComboBox *combo_box){
   int entry = gtk_combo_box_get_active(combo_box);
-  if((entry >=0)&&(entry <= 1)){
-    gtk_revealer_set_reveal_child(skew_parameters_revealer, entry);
+  if((entry >=0)&&(entry <= 2)){
+    if(entry == 1){
+      gtk_revealer_set_reveal_child(skew_parameters_revealer, TRUE);
+    }else{
+      gtk_revealer_set_reveal_child(skew_parameters_revealer, FALSE);
+    }
     gtk_widget_set_sensitive(GTK_WIDGET(skew_amplitude_spinbutton),fitpar.fixSkewAmplitide);
     gtk_widget_set_sensitive(GTK_WIDGET(beta_spinbutton),fitpar.fixBeta);
   }
@@ -2076,7 +2084,7 @@ void on_preferences_button_clicked(){
 }
 
 void on_preferences_apply_button_clicked(){
-  if(fitpar.skewed != (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox))){
+  if(fitpar.fitType != (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox))){
     if(guiglobals.fittingSp == FITSTATE_FITCOMPLETE){
       //the fit type was changed, clear the fit
       guiglobals.fittingSp = FITSTATE_NOTFITTING;
@@ -2089,11 +2097,19 @@ void on_preferences_apply_button_clicked(){
     }
   }
   fitpar.bgType = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(background_type_combobox));
-  fitpar.skewed = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox));
+  fitpar.fitType = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox));
   fitpar.peakWidthMethod = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_width_combobox));
   fitpar.weightMode = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(weight_mode_combobox));
+  if(fitpar.fitType == FITTYPE_BGONLY){
+    //background fit only
+    if(guiglobals.fittingSp > FITSTATE_SETTINGLIMITS){
+      //already past the point of fitting, clear the fit
+      guiglobals.fittingSp = FITSTATE_NOTFITTING;
+    }
+  }
   updateConfigFile();
   manualSpectrumAreaDraw(); //redraw the spectrum
+  update_gui_fit_state();
   gtk_widget_hide(GTK_WIDGET(preferences_window)); //close the preferences window
 }
 
@@ -2567,7 +2583,7 @@ void iniitalizeUIElements(){
   fitpar.fitStartCh = -1;
   fitpar.fitEndCh = -1;
   fitpar.numFitPeaks = 0;
-  fitpar.skewed = 0;
+  fitpar.fitType = FITTYPE_SYMMETRIC;
   fitpar.bgType = 2; //default to quadratic BG
 
   gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);

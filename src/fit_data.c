@@ -4,7 +4,10 @@
 //The main fit routine is startGausFit (at the bottom), which
 //in turn calls other subroutines.
 
+//forward declarations
 int eval(long double *pars, uint8_t *freepars, long double *derivs, int ichan, long double *fit, uint8_t npks, int mode);
+long double evalAreaAboveBG();
+long double evalAreaAboveBGErr();
 
 //update the gui state while/after fitting
 gboolean update_gui_fit_state(){
@@ -130,7 +133,13 @@ gboolean print_fit_results(){
     getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BGQUAD],(double)fitpar.fitParErr[FITPAR_BGQUAD],fitParStr[2],50,1,guiglobals.roundErrors);
   }
   length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Chisq/NDF: %Lf\n\nBackground\nA: %s\nB: %s\nC: %s\n\n",fitpar.chisq,fitParStr[0],fitParStr[1],fitParStr[2]);
-  if(fitpar.skewed == 1){
+  if(fitpar.fitType == FITTYPE_BGONLY){
+    //background fit only
+    getFormattedValAndUncertainty((double)evalAreaAboveBG(),(double)evalAreaAboveBGErr(),fitParStr[0],50,1,guiglobals.roundErrors);
+    length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Area above background: %s\n\n",fitParStr[0]);
+  }
+  if(fitpar.fitType == FITTYPE_SKEWED){
+    //print peak skew parameters
     if(calpar.calMode == 1){
       getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_R],(double)fitpar.fitParErr[FITPAR_R],fitParStr[0],50,1,guiglobals.roundErrors);
       getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BETA]),getCalWidth((double)fitpar.fitParErr[FITPAR_BETA]),fitParStr[1],50,1,guiglobals.roundErrors);
@@ -141,6 +150,7 @@ gboolean print_fit_results(){
     length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Skew component amplitude: %s %%\nBeta (skewness): %s",fitParStr[0],fitParStr[1]);
   }
   if(fitpar.stepFunction == 1){
+    //print step function parameter
     if(calpar.calMode == 1){
       getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_STEP]),getCalWidth((double)fitpar.fitParErr[FITPAR_STEP]),fitParStr[0],50,1,guiglobals.roundErrors);
     }else{
@@ -190,6 +200,39 @@ long double evalFitBG(const long double xChVal){
   long double xvalFit = xChVal - (long double)fitpar.fitMidCh;
   return fitpar.fitParVal[FITPAR_BGCONST] + xvalFit*fitpar.fitParVal[FITPAR_BGLIN] + xvalFit*xvalFit*fitpar.fitParVal[FITPAR_BGQUAD];
 }
+
+long double evalFitBGErr(const long double xChVal){
+  long double pctErr = 0.;
+  if(fitpar.fitParVal[FITPAR_BGCONST] != 0.){
+    pctErr += powl(fitpar.fitParErr[FITPAR_BGCONST]/fitpar.fitParVal[FITPAR_BGCONST],2.);
+  }
+  if(fitpar.fitParVal[FITPAR_BGLIN] != 0.){
+    pctErr += powl(fitpar.fitParErr[FITPAR_BGLIN]/fitpar.fitParVal[FITPAR_BGLIN],2.);
+  }
+  if(fitpar.fitParVal[FITPAR_BGQUAD] != 0.){
+    pctErr += powl(fitpar.fitParErr[FITPAR_BGQUAD]/fitpar.fitParVal[FITPAR_BGQUAD],2.);
+  }
+  pctErr = sqrtl(pctErr);
+  return pctErr*evalFitBG(xChVal);
+}
+
+long double evalAreaAboveBG(){
+  long double area = 0.;
+  for(int32_t i = fitpar.fitStartCh; i <= fitpar.fitEndCh; i += drawing.contractFactor){
+    area += getSpBinVal(0,i) - evalFitBG(i);
+  }
+  return area;
+}
+
+long double evalAreaAboveBGErr(){
+  long double areaErr = 0.;
+  for(int32_t i = fitpar.fitStartCh; i <= fitpar.fitEndCh; i += drawing.contractFactor){
+    areaErr += getSpBinVal(0,i) + powl(evalFitBGErr(i),2.);
+  }
+  areaErr = sqrtl(areaErr);
+  return areaErr;
+}
+
 
 //gets the y value for a single fitted peak, sans background
 //based on eval from RadWare gf3_subs.c
@@ -272,19 +315,6 @@ long double evalFitOnePeak(const long double xChVal, const int32_t peak){
     return 0.0;
 
   return evalFitBG(xChVal) + evalFitOnePeakNoBG(xChVal,peak);
-}
-
-double evalSymGaussArea(const int32_t peakNum){
-  //use Guassian integral
-  long double area = fitpar.fitParVal[FITPAR_AMP1+(3*peakNum)]*(1.0 - (fitpar.fitParVal[FITPAR_R]/100.0))*fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)]*sqrt(2.0*G_PI)/(1.0*drawing.contractFactor);
-  return (double)area;
-}
-
-double evalSkewedGaussArea(const int32_t peakNum){
-  //use definite integral of skewed Gaussian wrt x, taken
-  //from -inf to inf (which collapses erf and erfc terms)
-  long double area = fitpar.fitParVal[FITPAR_AMP1+(3*peakNum)]*(fitpar.fitParVal[FITPAR_R]/100.0)*fitpar.fitParVal[FITPAR_BETA]*expl(-2.0*fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)]*fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)]/(4.0*fitpar.fitParVal[FITPAR_BETA]*fitpar.fitParVal[FITPAR_BETA]));
-  return (double)area;
 }
 
 //Evaluate proprties of fitted peaks
@@ -479,9 +509,11 @@ void performGausFit(){
     printf("Not enough degrees of freedom to fit!\n");
     goto QUIT;
   }
-  if(linEq.dim < 2){
-    printf("Too many fixed parameters.\n");
-    goto QUIT;
+  if(fitPar.fitType != FITTYPE_BGONLY){
+    if(linEq.dim < 2){
+      printf("Too many fixed parameters.\n");
+      goto QUIT;
+    }
   }
   /* set up array nextp, pointing to free pars */
   k = 0;
@@ -650,7 +682,7 @@ void performGausFit(){
 
   if(conv){
     printf("Converged after %d fit iterations.\n", nits);
-    if(fitpar.skewed){
+    if(fitpar.fitType == FITTYPE_SKEWED){
       //convenience: set fixed values of skewed component parameters
       //to the values that were just used in the just successful fit,
       //assuming the values aren't already fixed
@@ -914,94 +946,99 @@ int startGausFit(){
       fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+3);
       break;
   }
+  
+  if(fitpar.fitType != FITTYPE_BGONLY){
+    //peaks are being used in this fit, set up parameters
 
-  //assign initial guesses for non-linear params
-  for(int32_t i=0;i<fitpar.numFitPeaks;i++){
-    /*if(isCentroidNearOthers(i,10.0)==0){
-      fitpar.fitPeakInitGuess[i] = centroidGuess(fitpar.fitPeakInitGuess[i]); //guess peak positions
-    }*/
-    fitpar.fitParVal[FITPAR_AMP1+(3*i)] = getSpBinVal(0,(int)fitpar.fitPeakInitGuess[i]) - fitpar.fitParVal[FITPAR_BGCONST] - fitpar.fitParVal[FITPAR_BGLIN]*fitpar.fitPeakInitGuess[i];
-    fitpar.fitParVal[FITPAR_POS1+(3*i)] = fitpar.fitPeakInitGuess[i];
-    fitpar.fitParFree[FITPAR_AMP1+(3*i)] = 1; //free amplitude
-    fitpar.fitParFree[FITPAR_POS1+(3*i)] = 1; //free position
-    fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+2);
-  }
+    //assign initial guesses for non-linear params
+    for(int32_t i=0;i<fitpar.numFitPeaks;i++){
+      /*if(isCentroidNearOthers(i,10.0)==0){
+        fitpar.fitPeakInitGuess[i] = centroidGuess(fitpar.fitPeakInitGuess[i]); //guess peak positions
+      }*/
+      fitpar.fitParVal[FITPAR_AMP1+(3*i)] = getSpBinVal(0,(int)fitpar.fitPeakInitGuess[i]) - fitpar.fitParVal[FITPAR_BGCONST] - fitpar.fitParVal[FITPAR_BGLIN]*fitpar.fitPeakInitGuess[i];
+      fitpar.fitParVal[FITPAR_POS1+(3*i)] = fitpar.fitPeakInitGuess[i];
+      fitpar.fitParFree[FITPAR_AMP1+(3*i)] = 1; //free amplitude
+      fitpar.fitParFree[FITPAR_POS1+(3*i)] = 1; //free position
+      fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+2);
+    }
 
-  //fix relative widths if required
-  if((fitpar.peakWidthMethod == 2)&&(fitpar.prevFitNumPeaks > 0)){
-    printf("Fitting with peak widths fixed to previous fit values.\n");
-    for(uint32_t i=0;i<fitpar.prevFitNumPeaks;i++){
-      fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] = fitpar.prevFitWidths[i];
-      fitpar.fitParFree[FITPAR_WIDTH1+(3*i)] = 0; //fix width
-      printf("Peak %u width fixed to %Lf\n",i,fitpar.fitParVal[FITPAR_WIDTH1+(3*i)]);
-    }
-    for(uint32_t i=fitpar.prevFitNumPeaks;i<fitpar.numFitPeaks;i++){
-      fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] = widthGuess(fitpar.fitPeakInitGuess[i],getFWHM(fitpar.fitPeakInitGuess[i],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482);
-      fitpar.fitParFree[FITPAR_WIDTH1+(3*i)] = 1; //free width
+    //fix relative widths if required
+    if((fitpar.peakWidthMethod == 2)&&(fitpar.prevFitNumPeaks > 0)){
+      printf("Fitting with peak widths fixed to previous fit values.\n");
+      for(uint32_t i=0;i<fitpar.prevFitNumPeaks;i++){
+        fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] = fitpar.prevFitWidths[i];
+        fitpar.fitParFree[FITPAR_WIDTH1+(3*i)] = 0; //fix width
+        printf("Peak %u width fixed to %Lf\n",i,fitpar.fitParVal[FITPAR_WIDTH1+(3*i)]);
+      }
+      for(uint32_t i=fitpar.prevFitNumPeaks;i<fitpar.numFitPeaks;i++){
+        fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] = widthGuess(fitpar.fitPeakInitGuess[i],getFWHM(fitpar.fitPeakInitGuess[i],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482);
+        fitpar.fitParFree[FITPAR_WIDTH1+(3*i)] = 1; //free width
+        fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
+      }
+    }else if(fitpar.peakWidthMethod == 1){
+      printf("Fitting with relative peak widths fixed.\n");
+      double firstWidthInitGuess = getFWHM(fitpar.fitPeakInitGuess[0],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482;
+      fitpar.fitParVal[FITPAR_WIDTH1] = widthGuess(fitpar.fitPeakInitGuess[0],firstWidthInitGuess);
+      fitpar.fitParFree[FITPAR_WIDTH1] = 1; //free width
       fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
-    }
-  }else if(fitpar.peakWidthMethod == 1){
-    printf("Fitting with relative peak widths fixed.\n");
-    double firstWidthInitGuess = getFWHM(fitpar.fitPeakInitGuess[0],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482;
-    fitpar.fitParVal[FITPAR_WIDTH1] = widthGuess(fitpar.fitPeakInitGuess[0],firstWidthInitGuess);
-    fitpar.fitParFree[FITPAR_WIDTH1] = 1; //free width
-    fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
-    //printf("width guess: %f\n",fitpar.fitParVal[FITPAR_WIDTH1]);
-    for(uint32_t i=1;i<fitpar.numFitPeaks;i++){
-      fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] = fitpar.fitParVal[FITPAR_WIDTH1]*(getFWHM(fitpar.fitPeakInitGuess[i],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482)/firstWidthInitGuess;
-      fitpar.fitParFree[FITPAR_WIDTH1+(3*i)] = 1; //free width
-      fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
-    }
-  }else{
-    for(uint32_t i=0;i<fitpar.numFitPeaks;i++){
-      fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] = widthGuess(fitpar.fitPeakInitGuess[i],getFWHM(fitpar.fitPeakInitGuess[i],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482);
-      fitpar.fitParFree[FITPAR_WIDTH1+(3*i)] = 1; //free width
-      fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
-    }
-  }
-
-  //set up skewed Gaussian if needed
-  if(fitpar.skewed){
-    //free parameters
-    if(fitpar.fixSkewAmplitide){
-      fitpar.fitParVal[FITPAR_R] = (long double)fitpar.fixedRVal; //R
-      fitpar.fitParFree[FITPAR_R] = 0; //R
-      //printf("Fixed R to: %Lf\n",fitpar.fitParVal[FITPAR_R]);
+      //printf("width guess: %f\n",fitpar.fitParVal[FITPAR_WIDTH1]);
+      for(uint32_t i=1;i<fitpar.numFitPeaks;i++){
+        fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] = fitpar.fitParVal[FITPAR_WIDTH1]*(getFWHM(fitpar.fitPeakInitGuess[i],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482)/firstWidthInitGuess;
+        fitpar.fitParFree[FITPAR_WIDTH1+(3*i)] = 1; //free width
+        fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
+      }
     }else{
-      fitpar.fitParVal[FITPAR_R] = 10; //R
-      fitpar.fitParFree[FITPAR_R] = 1; //R
+      for(uint32_t i=0;i<fitpar.numFitPeaks;i++){
+        fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] = widthGuess(fitpar.fitPeakInitGuess[i],getFWHM(fitpar.fitPeakInitGuess[i],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482);
+        fitpar.fitParFree[FITPAR_WIDTH1+(3*i)] = 1; //free width
+        fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
+      }
+    }
+
+    //set up skewed Gaussian if needed
+    if(fitpar.fitType == FITTYPE_SKEWED){
+      //free parameters
+      if(fitpar.fixSkewAmplitide){
+        fitpar.fitParVal[FITPAR_R] = (long double)fitpar.fixedRVal; //R
+        fitpar.fitParFree[FITPAR_R] = 0; //R
+        //printf("Fixed R to: %Lf\n",fitpar.fitParVal[FITPAR_R]);
+      }else{
+        fitpar.fitParVal[FITPAR_R] = 10; //R
+        fitpar.fitParFree[FITPAR_R] = 1; //R
+        fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
+      }
+      if(fitpar.fixBeta){
+        fitpar.fitParVal[FITPAR_BETA] = (long double)fitpar.fixedBetaVal; //beta
+        fitpar.fitParFree[FITPAR_BETA] = 0; //fix beta
+        //printf("Fixed beta to: %Lf\n",fitpar.fitParVal[FITPAR_BETA]);
+      }else{
+        fitpar.fitParVal[FITPAR_BETA] = fitpar.fitParVal[FITPAR_WIDTH1]; //beta
+        fitpar.fitParFree[FITPAR_BETA] = 1; //fix beta
+        fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
+      }
+    }
+
+    //set up step function if needed
+    if(fitpar.stepFunction){
+      fitpar.fitParVal[FITPAR_STEP] = 0.1; //step function
+      fitpar.fitParFree[FITPAR_STEP] = 1; //step function
       fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
     }
-    if(fitpar.fixBeta){
-      fitpar.fitParVal[FITPAR_BETA] = (long double)fitpar.fixedBetaVal; //beta
-      fitpar.fitParFree[FITPAR_BETA] = 0; //fix beta
-      //printf("Fixed beta to: %Lf\n",fitpar.fitParVal[FITPAR_BETA]);
-    }else{
-      fitpar.fitParVal[FITPAR_BETA] = fitpar.fitParVal[FITPAR_WIDTH1]; //beta
-      fitpar.fitParFree[FITPAR_BETA] = 1; //fix beta
-      fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
+
+    switch(fitpar.weightMode){
+      case FITWEIGHT_DATA:
+        printf("Weighting using data.\n");
+        break;
+      case FITWEIGHT_FIT:
+        printf("Weighting using fit function.\n");
+        break;
+      case FITWEIGHT_NONE:
+      default:
+        printf("No weighting for fit.\n");
+        break;
     }
   }
-
-  //set up step function if needed
-  if(fitpar.stepFunction){
-    fitpar.fitParVal[FITPAR_STEP] = 0.1; //step function
-    fitpar.fitParFree[FITPAR_STEP] = 1; //step function
-    fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
-  }
-
-  switch(fitpar.weightMode){
-    case FITWEIGHT_DATA:
-      printf("Weighting using data.\n");
-      break;
-    case FITWEIGHT_FIT:
-      printf("Weighting using fit function.\n");
-      break;
-    case FITWEIGHT_NONE:
-    default:
-      printf("No weighting for fit.\n");
-      break;
-  }
+  
   
   //printf("Initial guesses: %f %f %f %f %f %f %f %f\n",fitpar.fitParVal[FITPAR_BGCONST],fitpar.fitParVal[FITPAR_BGLIN],fitpar.fitParVal[FITPAR_BGQUAD],fitpar.fitParVal[FITPAR_R],fitpar.fitParVal[FITPAR_BETA],fitpar.fitParVal[FITPAR_AMP1],fitpar.fitParVal[FITPAR_POS1],fitpar.fitParVal[FITPAR_WIDTH1]);
 

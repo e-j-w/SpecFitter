@@ -236,7 +236,7 @@ struct {
   uint8_t fitParFree[6+(3*MAX_FIT_PK)]; //whether individual parameters are fixed or free
   uint8_t numFreePar; //number of fit parameters which have been freed
   uint8_t bgType; //0=constant, 1=linear, 2=quadratic
-  uint8_t skewed; //0=Gaussian, 1=skewed Gaussian
+  uint8_t fitType; //fit type (values from fit_type_enum)
   uint8_t numFitPeaks; //number of peaks to fit
   uint8_t fixSkewAmplitide; //whether the R parameter is fixed
   uint8_t fixBeta; //whether the skewness parameter is fixed
@@ -248,6 +248,7 @@ struct {
   uint8_t prevFitNumPeaks; //number of peaks in the previous fit
 } fitpar;
 
+enum fit_type_enum{FITTYPE_SYMMETRIC, FITTYPE_SKEWED, FITTYPE_BGONLY, FITTYPE_ENUM_LENGTH};
 enum fit_weight_mode_enum{FITWEIGHT_DATA, FITWEIGHT_FIT, FITWEIGHT_NONE, FITWEIGHT_ENUM_LENGTH};
 enum fit_par_enum{FITPAR_BGCONST,FITPAR_BGLIN,FITPAR_BGQUAD,FITPAR_R,FITPAR_BETA,FITPAR_STEP,FITPAR_POS1,FITPAR_WIDTH1,FITPAR_AMP1,FITPAR_ENUM_LENGTH};
 enum fit_state_enum{FITSTATE_NOTFITTING, FITSTATE_SETTINGLIMITS, FITSTATE_SETTINGPEAKS, FITSTATE_FITTING, FITSTATE_FITCOMPLETE, FITSTATE_ENUM_LENGTH};
