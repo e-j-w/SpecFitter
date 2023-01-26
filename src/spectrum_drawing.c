@@ -566,7 +566,6 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
         //check if both limits have been set
         if((fitpar.fitStartCh >= 0)&&(fitpar.fitEndCh >=0)){
           printf("Fit limits: channel %i through %i\n",fitpar.fitStartCh,fitpar.fitEndCh);
-          fitpar.fitMidCh = (fitpar.fitStartCh + fitpar.fitEndCh) / 2; //used by fitter
           if(fitpar.fitType == FITTYPE_BGONLY){
             //background only, start the fit right away
             on_fit_fit_button_clicked(); //gui.c

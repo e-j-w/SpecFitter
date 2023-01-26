@@ -20,7 +20,8 @@ gboolean update_gui_fit_state(){
       gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
       gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
       gtk_widget_set_sensitive(GTK_WIDGET(contract_scale),TRUE);
-      gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_refit_button),FALSE);
       gtk_widget_hide(GTK_WIDGET(fit_spinner));
       gtk_widget_hide(GTK_WIDGET(fit_button_box));
       gtk_widget_show(GTK_WIDGET(fit_display_button_box));
@@ -31,6 +32,7 @@ gboolean update_gui_fit_state(){
       gtk_label_set_text(fit_info_label,"Fitting...");
       gtk_widget_show(GTK_WIDGET(fit_spinner));
       gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_refit_button),FALSE);
       gtk_widget_set_sensitive(GTK_WIDGET(contract_scale),FALSE);
       gtk_revealer_set_reveal_child(revealer_info_panel, TRUE);
       break;
@@ -44,7 +46,13 @@ gboolean update_gui_fit_state(){
       gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),FALSE);
       gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
       gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
-      gtk_label_set_text(fit_info_label,"Right-click on spectrum to set fit region lower and upper bounds.");
+      if(fitpar.prevFitStartCh == -1){
+        gtk_label_set_text(fit_info_label,"Right-click on spectrum to set fit region lower and upper bounds.");
+        gtk_widget_set_sensitive(GTK_WIDGET(fit_refit_button),FALSE);
+      }else{
+        gtk_label_set_text(fit_info_label,"Right-click on spectrum to set fit region lower and upper bounds.\n\nOr, click 'Re-fit' to use the previous fit region and peak position(s).");
+        gtk_widget_set_sensitive(GTK_WIDGET(fit_refit_button),TRUE);
+      }
       gtk_widget_show(GTK_WIDGET(fit_button_box));
       gtk_widget_hide(GTK_WIDGET(fit_display_button_box));
       gtk_revealer_set_reveal_child(revealer_info_panel, TRUE);
@@ -57,7 +65,7 @@ gboolean update_gui_fit_state(){
       gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
       gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
       gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
-      gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
       gtk_widget_hide(GTK_WIDGET(fit_spinner));
       gtk_revealer_set_reveal_child(revealer_info_panel, FALSE);
       gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw to hide any fit
@@ -167,8 +175,6 @@ gboolean print_fit_results(){
 
   free(fitResStr);
 
-
-  fitpar.prevFitNumPeaks = fitpar.numFitPeaks;
   for(uint8_t i=0;i<fitpar.numFitPeaks;i++){
     fitpar.prevFitWidths[i] = fitpar.fitParVal[FITPAR_WIDTH1+(3*i)];
   }
@@ -910,6 +916,12 @@ int startGausFit(){
 
   memset(fitpar.fitParErr,0,sizeof(fitpar.fitParErr));
 
+  fitpar.prevFitStartCh = fitpar.fitStartCh;
+  fitpar.prevFitEndCh = fitpar.fitEndCh;
+  fitpar.prevFitNumPeaks = fitpar.numFitPeaks;
+  memcpy(fitpar.prevFitPeakInitGuess,fitpar.fitPeakInitGuess,sizeof(fitpar.fitPeakInitGuess));
+  fitpar.fitMidCh = (fitpar.fitStartCh + fitpar.fitEndCh) / 2; //used by fitter
+
   //width parameters
   fitpar.widthFGH[0] = 3.;
   fitpar.widthFGH[1] = 2.;
@@ -952,9 +964,6 @@ int startGausFit(){
 
     //assign initial guesses for non-linear params
     for(int32_t i=0;i<fitpar.numFitPeaks;i++){
-      /*if(isCentroidNearOthers(i,10.0)==0){
-        fitpar.fitPeakInitGuess[i] = centroidGuess(fitpar.fitPeakInitGuess[i]); //guess peak positions
-      }*/
       fitpar.fitParVal[FITPAR_AMP1+(3*i)] = getSpBinVal(0,(int)fitpar.fitPeakInitGuess[i]) - fitpar.fitParVal[FITPAR_BGCONST] - fitpar.fitParVal[FITPAR_BGLIN]*fitpar.fitPeakInitGuess[i];
       fitpar.fitParVal[FITPAR_POS1+(3*i)] = fitpar.fitPeakInitGuess[i];
       fitpar.fitParFree[FITPAR_AMP1+(3*i)] = 1; //free amplitude

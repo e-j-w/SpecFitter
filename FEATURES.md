@@ -16,9 +16,11 @@
 This code uses an iterative least-squares fitter based on the `gf3` code from [RadWare](https://radware.phy.ornl.gov/), with similar features to that code:
 
 * Fit multiple symmetric or skewed Gaussian peak shapes on quadratic/linear/constant background.
+  * Also can fit background only and obtain an estimate for the area above the background.
 * Relative peak widths may be fixed (recommended for gamma-ray spectroscopy) or allowed to freely vary.
 * A step function can be used to compensate for background being different on either side of the peak (useful for handling Compton scattering in gamma-ray spectroscopy).
 * Weight the fit by the data (taking background subtraction into account) or by the fit function.  Or don't weight the fit at all.
+* Re-fit using the same fit bounds and peak position(s), for instance to compare results between similar spectra.
 
 ### Manage data
 

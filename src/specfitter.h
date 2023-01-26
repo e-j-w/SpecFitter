@@ -58,7 +58,7 @@ GtkGesture *spectrum_drag_gesture;
 GtkRevealer *revealer_info_panel;
 GtkBox *fit_button_box, *fit_display_button_box;
 GtkLabel *fit_panel_label, *fit_info_label;
-GtkButton *fit_cancel_button, *fit_fit_button, *fit_preferences_button, *fit_dismiss_button;
+GtkButton *fit_cancel_button, *fit_fit_button, *fit_refit_button, *fit_preferences_button, *fit_dismiss_button;
 GtkSpinner *fit_spinner;
 //Calibration dialog
 GtkWidget *calibrate_ok_button, *remove_calibration_button;
@@ -231,7 +231,6 @@ struct {
   long double fitParVal[6+(3*MAX_FIT_PK)]; //parameter values found by the fitter
   long double fitParErr[6+(3*MAX_FIT_PK)]; //errors in parameter values
   long double areaVal[MAX_FIT_PK], areaErr[MAX_FIT_PK]; //areas of peaks and errors
-  long double prevFitWidths[MAX_FIT_PK];
   long double chisq; //fit chisq
   uint8_t fitParFree[6+(3*MAX_FIT_PK)]; //whether individual parameters are fixed or free
   uint8_t numFreePar; //number of fit parameters which have been freed
@@ -246,6 +245,9 @@ struct {
   uint8_t stepFunction; //0=no step function, 1=step function
   uint8_t weightMode; //uses values from fit_weight_mode_enum: 0=weight using data (properly weighting for background subtraction), 1=weight using fit, 2=no weights
   uint8_t prevFitNumPeaks; //number of peaks in the previous fit
+  int32_t prevFitStartCh, prevFitEndCh;
+  float prevFitPeakInitGuess[MAX_FIT_PK]; //previous fit guess of peak positions, in channels
+  long double prevFitWidths[MAX_FIT_PK];
 } fitpar;
 
 enum fit_type_enum{FITTYPE_SYMMETRIC, FITTYPE_SKEWED, FITTYPE_BGONLY, FITTYPE_ENUM_LENGTH};

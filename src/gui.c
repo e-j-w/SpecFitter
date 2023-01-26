@@ -85,6 +85,7 @@ void setSpOpenView(const char spOpened){
     gtk_widget_set_sensitive(GTK_WIDGET(append_button),FALSE);
     gtk_widget_set_sensitive(GTK_WIDGET(fit_button),FALSE);
     gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
+    gtk_widget_set_sensitive(GTK_WIDGET(fit_refit_button),FALSE);
     gtk_widget_set_sensitive(GTK_WIDGET(manage_spectra_button),FALSE);
     gtk_widget_set_sensitive(GTK_WIDGET(autoscale_button),FALSE);
     gtk_widget_set_sensitive(GTK_WIDGET(display_button),FALSE);
@@ -1954,11 +1955,60 @@ void on_fit_button_clicked(){
   
 }
 
+void on_refit_button_clicked(){
+  //do some checks, since this can be activated from a keyboard shortcut
+  //spectrum must be open to fit
+  if(rawdata.openedSp){
+    //cannot be already fitting
+    if((guiglobals.fittingSp < FITSTATE_FITTING)||(guiglobals.fittingSp == FITSTATE_FITCOMPLETE)){
+      //must be displaying only a single spectrum
+      if(drawing.multiplotMode < MULTIPLOT_OVERLAY_COMMON){
+        //re-fitting must be valid
+        if(fitpar.prevFitStartCh >= 0){
+          //safe to re-fit
+          fitpar.numFreePar = 0;
+          fitpar.fitStartCh = fitpar.prevFitStartCh;
+          fitpar.fitEndCh = fitpar.prevFitEndCh;
+          fitpar.numFitPeaks = fitpar.prevFitNumPeaks;
+          memcpy(fitpar.fitPeakInitGuess,fitpar.prevFitPeakInitGuess,sizeof(fitpar.prevFitPeakInitGuess));
+          on_fit_fit_button_clicked();
+        }else{
+          GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+          GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot re-fit data!");
+          char errMsg[256];
+          snprintf(errMsg,256,"Cannot re-fit data, as no previous fit was performed or the fit type was changed since the previous fit.");
+          gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
+          gtk_dialog_run (GTK_DIALOG (message_dialog));
+          gtk_widget_destroy (message_dialog);
+        }
+      }else{
+        GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+        GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot re-fit data!");
+        char errMsg[256];
+        snprintf(errMsg,256,"The fitter cannot be used while multiple spectra are being displayed.  Display a single spectrum or sum of spectra, and then try again.");
+        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
+        gtk_dialog_run (GTK_DIALOG (message_dialog));
+        gtk_widget_destroy (message_dialog);
+      }
+    }
+  }
+  
+}
+
 void on_fit_fit_button_clicked(){
   startGausFit(); //perform the fit
   manualSpectrumAreaDraw();
   //update widgets
   update_gui_fit_state();
+}
+
+void on_fit_refit_button_clicked(){
+  fitpar.fitStartCh = fitpar.prevFitStartCh;
+  fitpar.fitEndCh = fitpar.prevFitEndCh;
+  fitpar.numFitPeaks = fitpar.prevFitNumPeaks;
+  memcpy(fitpar.fitPeakInitGuess,fitpar.prevFitPeakInitGuess,sizeof(fitpar.prevFitPeakInitGuess));
+
+  on_fit_fit_button_clicked();
 }
 
 void on_fit_cancel_button_clicked(){
@@ -2099,6 +2149,9 @@ void on_preferences_apply_button_clicked(){
       //the fit type was changed, clear the fit
       guiglobals.fittingSp = FITSTATE_NOTFITTING;
     }
+    //prevent re-fitting with a different fit mode
+    gtk_widget_set_sensitive(GTK_WIDGET(fit_refit_button),FALSE);
+    fitpar.prevFitStartCh = -1; //used to invalidate re-fits
   }
   if(fitpar.bgType != (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(background_type_combobox))){
     if(guiglobals.fittingSp == FITSTATE_FITCOMPLETE){
@@ -2319,6 +2372,7 @@ void iniitalizeUIElements(){
   fit_info_label = GTK_LABEL(gtk_builder_get_object(builder, "fit_info_label"));
   fit_cancel_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_cancel_button"));
   fit_fit_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_fit_button"));
+  fit_refit_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_refit_button"));
   fit_preferences_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_preferences_button"));
   fit_dismiss_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_dismiss_button"));
   fit_spinner = GTK_SPINNER(gtk_builder_get_object(builder, "fit_spinner"));
@@ -2444,6 +2498,7 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(sum_all_button), "clicked", G_CALLBACK(on_sum_all_button_clicked), NULL);
   g_signal_connect(G_OBJECT(fit_button), "clicked", G_CALLBACK(on_fit_button_clicked), NULL);
   g_signal_connect(G_OBJECT(fit_fit_button), "clicked", G_CALLBACK(on_fit_fit_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(fit_refit_button), "clicked", G_CALLBACK(on_fit_refit_button_clicked), NULL);
   g_signal_connect(G_OBJECT(fit_cancel_button), "clicked", G_CALLBACK(on_fit_cancel_button_clicked), NULL);
   g_signal_connect(G_OBJECT(fit_preferences_button), "clicked", G_CALLBACK(on_fit_preferences_button_clicked), NULL);
   g_signal_connect(G_OBJECT(fit_dismiss_button), "clicked", G_CALLBACK(on_fit_dismiss_button_clicked), NULL);
@@ -2505,6 +2560,7 @@ void iniitalizeUIElements(){
 
   //setup keyboard shortcuts
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_f, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_fit_button_clicked), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_r, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_refit_button_clicked), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_c, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_calibrate_button_clicked), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_p, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(show_multiplot_window), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_v, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(show_view_window), NULL, 0));
@@ -2518,7 +2574,7 @@ void iniitalizeUIElements(){
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_s, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(cycle_multiplot_mode_down), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_d, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(cycle_sp_up), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_a, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(cycle_sp_down), NULL, 0));
-  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_r, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_rename_displayed_view), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_n, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_rename_displayed_view), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_o, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_open_button_clicked), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_a, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_append_button_clicked), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_s, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_save_button_clicked), NULL, 0));
@@ -2593,6 +2649,8 @@ void iniitalizeUIElements(){
   fitpar.stepFunction = 0;
   fitpar.fitStartCh = -1;
   fitpar.fitEndCh = -1;
+  fitpar.prevFitStartCh = -1;
+  fitpar.prevFitEndCh = -1;
   fitpar.numFitPeaks = 0;
   fitpar.fitType = FITTYPE_SYMMETRIC;
   fitpar.bgType = 2; //default to quadratic BG

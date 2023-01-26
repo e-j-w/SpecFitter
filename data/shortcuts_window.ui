@@ -77,7 +77,7 @@
             <child>
               <object class="GtkShortcutsShortcut">
                 <property name="visible">1</property>
-                <property name="accelerator">R</property>
+                <property name="accelerator">N</property>
                 <property name="title" translatable="yes" context="shortcut window">Rename currently displayed spectrum/view</property>
               </object>
             </child>
@@ -86,6 +86,13 @@
                 <property name="visible">1</property>
                 <property name="accelerator">F</property>
                 <property name="title" translatable="yes" context="shortcut window">Fit the displayed spectrum</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="visible">1</property>
+                <property name="accelerator">R</property>
+                <property name="title" translatable="yes" context="shortcut window">Re-fit the displayed spectrum</property>
               </object>
             </child>
           </object>
