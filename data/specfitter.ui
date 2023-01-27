@@ -1790,6 +1790,8 @@ binning factors will be preserved.</property>
     <property name="title" translatable="yes">Advanced Plotting</property>
     <property name="modal">True</property>
     <property name="window_position">center-always</property>
+    <property name="default_width">600</property>
+    <property name="default_height">600</property>
     <property name="type_hint">dialog</property>
     <property name="gravity">center</property>
     <property name="attached_to">window</property>
