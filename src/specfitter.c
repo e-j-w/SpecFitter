@@ -23,6 +23,7 @@ int main(int argc, char *argv[]){
 
   //open a file if requested from the command line
   if(argc > 1){
+    currentFolderSelection = g_path_get_dirname(argv[1]); //set current directory (for file chooser) to the location of the first file
     openSingleFile(argv[1],0);
     for(int32_t i=2;i<argc;i++){
       openSingleFile(argv[i],1);

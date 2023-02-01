@@ -25,6 +25,7 @@ Author: Jonathan Williams
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
+  <object class="GtkAccelGroup" id="calibration_window_accelgroup"/>
   <object class="GtkAccelGroup" id="comment_window_accelgroup"/>
   <object class="GtkEntryCompletion" id="commententrycompletion"/>
   <object class="GtkAdjustment" id="contract_adjustment">
@@ -161,6 +162,9 @@ Author: Jonathan Williams
     <property name="type_hint">dialog</property>
     <property name="gravity">center</property>
     <property name="attached_to">window</property>
+    <accel-groups>
+      <group name="calibration_window_accelgroup"/>
+    </accel-groups>
     <child>
       <placeholder/>
     </child>
@@ -528,7 +532,7 @@ Author: Jonathan Williams
               <object class="GtkButton" id="options_ok_button">
                 <property name="label">Apply</property>
                 <property name="width_request">100</property>
-                <property name="height_request">40</property>
+                <property name="height_request">30</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -651,7 +655,7 @@ Author: Jonathan Williams
               <object class="GtkButton" id="comment_ok_button">
                 <property name="label">Apply</property>
                 <property name="width_request">100</property>
-                <property name="height_request">40</property>
+                <property name="height_request">30</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -1231,7 +1235,7 @@ binning factors will be preserved.</property>
               <object class="GtkButton" id="export_image_save_button">
                 <property name="label">Export Image</property>
                 <property name="width_request">100</property>
-                <property name="height_request">40</property>
+                <property name="height_request">30</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -1396,7 +1400,7 @@ binning factors will be preserved.</property>
               <object class="GtkButton" id="export_options_save_button">
                 <property name="label">Export</property>
                 <property name="width_request">100</property>
-                <property name="height_request">40</property>
+                <property name="height_request">30</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -2302,12 +2306,13 @@ They will then appear on this panel.</property>
                   <object class="GtkButton" id="multiplot_ok_button">
                     <property name="label">Plot</property>
                     <property name="width_request">100</property>
-                    <property name="height_request">40</property>
+                    <property name="height_request">30</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Plot the selected spectra.</property>
                     <property name="halign">end</property>
+                    <property name="valign">center</property>
                     <style>
                       <class name="suggested-action"/>
                     </style>
@@ -2320,11 +2325,12 @@ They will then appear on this panel.</property>
                 <child>
                   <object class="GtkButton" id="manage_delete_button">
                     <property name="label" translatable="yes">Remove selected</property>
-                    <property name="height_request">40</property>
+                    <property name="height_request">30</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Remove the selected spectra/views from the current session.</property>
+                    <property name="valign">center</property>
                     <style>
                       <class name="destructive-action"/>
                     </style>
@@ -3047,7 +3053,7 @@ Weight by fit function - Weights are proportional to the fit function values det
                   <object class="GtkButton" id="preferences_apply_button">
                     <property name="label">Apply</property>
                     <property name="width_request">100</property>
-                    <property name="height_request">40</property>
+                    <property name="height_request">30</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>

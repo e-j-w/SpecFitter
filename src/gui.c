@@ -512,6 +512,9 @@ void on_open_button_clicked(){
 
   GtkFileChooserNative *native = gtk_file_chooser_native_new ("Open Data File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
   file_open_dialog = GTK_FILE_CHOOSER(native);
+  if(currentFolderSelection != NULL){
+    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection);
+  }
   gtk_file_chooser_set_select_multiple(file_open_dialog, TRUE);
   file_filter = gtk_file_filter_new();
   gtk_file_filter_set_name(file_filter,"Spectrum Data (.jf3, .txt, .mca, .fmca, .spe, .chn, .C)");
@@ -529,6 +532,7 @@ void on_open_button_clicked(){
   int32_t openErr = 0; //to track if there are any errors when opening spectra
   if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
 
+    currentFolderSelection = gtk_file_chooser_get_current_folder(file_open_dialog);
     rawdata.numSpOpened = 0; //reset the open spectra
     rawdata.numChComments = 0; //reset the number of comments
     rawdata.numViews = 0; //reset the number of views
@@ -635,6 +639,9 @@ void on_append_button_clicked(){
   
   GtkFileChooserNative *native = gtk_file_chooser_native_new ("Add More Data File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
   file_open_dialog = GTK_FILE_CHOOSER(native);
+  if(currentFolderSelection != NULL){
+    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection);
+  }
   gtk_file_chooser_set_select_multiple(file_open_dialog, TRUE);
   file_filter = gtk_file_filter_new();
   gtk_file_filter_set_name(file_filter,"Spectrum Data (.jf3, .txt, .mca, .fmca, .spe, .chn, .C)");
@@ -652,6 +659,7 @@ void on_append_button_clicked(){
   int32_t openErr = 0; //to track if there are any errors when opening spectra
   if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
 
+    currentFolderSelection = gtk_file_chooser_get_current_folder(file_open_dialog);
     char *filename = NULL;
     GSList *file_list = gtk_file_chooser_get_filenames(file_open_dialog);
     for(i=0;i<g_slist_length(file_list);i++){
@@ -731,6 +739,9 @@ void on_save_button_clicked(){
 
   GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Spectrum Data", window, GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
   file_save_dialog = GTK_FILE_CHOOSER(native);
+  if(currentFolderSelection != NULL){
+    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection);
+  }
   gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
   gtk_file_chooser_set_do_overwrite_confirmation(file_save_dialog, TRUE);
   file_filter = gtk_file_filter_new();
@@ -739,8 +750,9 @@ void on_save_button_clicked(){
   gtk_file_chooser_add_filter(file_save_dialog,file_filter);
 
   int32_t saveErr = 0; //to track if there are any errors when opening spectra
-  if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
+  if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
 
+    currentFolderSelection = gtk_file_chooser_get_current_folder(file_open_dialog);
     char *fn = NULL;
     char *tok, fileName[256];
     fn = gtk_file_chooser_get_filename(file_save_dialog);
@@ -939,6 +951,9 @@ void on_export_save_button_clicked(){
 
   GtkFileChooserNative *native = gtk_file_chooser_native_new ("Export Spectrum Data", window, GTK_FILE_CHOOSER_ACTION_SAVE, "_Export", "_Cancel");
   file_save_dialog = GTK_FILE_CHOOSER(native);
+  if(currentFolderSelection != NULL){
+    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection);
+  }
   gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
   gtk_file_chooser_set_do_overwrite_confirmation(file_save_dialog, TRUE);
   file_filter = gtk_file_filter_new();
@@ -966,8 +981,9 @@ void on_export_save_button_clicked(){
   }
 
   int32_t saveErr = 0; //to track if there are any errors when opening spectra
-  if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
+  if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
     
+    currentFolderSelection = gtk_file_chooser_get_current_folder(file_open_dialog);
     char *fn = NULL;
     char *tok, fileName[256];
     fn = gtk_file_chooser_get_filename(file_save_dialog);
@@ -1038,6 +1054,9 @@ void on_export_image_button_clicked(){
 
   GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Image File", window, GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
   file_save_dialog = GTK_FILE_CHOOSER(native);
+  if(currentFolderSelection != NULL){
+    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection);
+  }
   gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
   gtk_file_chooser_set_do_overwrite_confirmation(file_save_dialog, TRUE);
   file_filter = gtk_file_filter_new();
@@ -1050,6 +1069,7 @@ void on_export_image_button_clicked(){
   int32_t saveErr = 0; //to track if there are any errors when opening spectra
   if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
     
+    currentFolderSelection = gtk_file_chooser_get_current_folder(file_open_dialog);
     char *fn = NULL;
     char *tok, fileName[256];
     fn = gtk_file_chooser_get_filename(file_save_dialog);
@@ -2310,6 +2330,8 @@ void iniitalizeUIElements(){
   spIconPixbuf = gdk_pixbuf_new_from_resource("/resources/icon-spectrum-symbolic", NULL);
   spIconPixbufDark = gdk_pixbuf_new_from_resource("/resources/icon-spectrum-symbolic-dark", NULL);
 
+  currentFolderSelection = NULL;
+
   //windows
   window = GTK_WINDOW(gtk_builder_get_object(builder, "window"));
   g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL); //quit the program when closing the window
@@ -2334,7 +2356,9 @@ void iniitalizeUIElements(){
   main_window_accelgroup = GTK_ACCEL_GROUP(gtk_builder_get_object(builder, "main_window_accelgroup"));
   gtk_window_add_accel_group (window, main_window_accelgroup);
   comment_window_accelgroup = GTK_ACCEL_GROUP(gtk_builder_get_object(builder, "comment_window_accelgroup"));
-  gtk_window_add_accel_group (window, comment_window_accelgroup);
+  //gtk_window_add_accel_group(comment_window, comment_window_accelgroup);
+  calibration_window_accelgroup = GTK_ACCEL_GROUP(gtk_builder_get_object(builder, "calibration_window_accelgroup"));
+  //gtk_window_add_accel_group(calibrate_window, calibration_window_accelgroup);
   
   //header bar
   header_bar = GTK_HEADER_BAR(gtk_builder_get_object(builder, "header_bar"));
@@ -2581,6 +2605,8 @@ void iniitalizeUIElements(){
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_q, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(gtk_main_quit), NULL, 0));
   gtk_accel_group_connect(comment_window_accelgroup, GDK_KEY_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_comment_ok_button_clicked), NULL, 0));
   gtk_accel_group_connect(comment_window_accelgroup, GDK_KEY_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_comment_cancel), NULL, 0));
+  gtk_accel_group_connect(calibration_window_accelgroup, GDK_KEY_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_calibrate_ok_button_clicked), NULL, 0));
+  gtk_accel_group_connect(calibration_window_accelgroup, GDK_KEY_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_remove_calibration_button_clicked), NULL, 0));
 
   //set attributes
   gtk_tree_view_column_add_attribute(multiplot_column2,multiplot_cr2, "active",1);

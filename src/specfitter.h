@@ -64,6 +64,7 @@ GtkSpinner *fit_spinner;
 GtkWidget *calibrate_ok_button, *remove_calibration_button;
 GtkWindow *calibrate_window;
 GtkEntry *cal_entry_unit, *cal_entry_const, *cal_entry_lin, *cal_entry_quad, *cal_entry_y_axis;
+GtkAccelGroup *calibration_window_accelgroup;
 //comment dialog
 GtkWindow *comment_window;
 GtkEntry *comment_entry;
@@ -134,6 +135,8 @@ GtkBuilder *builder;
 GdkPixbuf *appIcon, *spIconPixbuf, *spIconPixbufDark;
 //timing
 GdkFrameClock *frameClock;
+//other
+gchar *currentFolderSelection; //folder selection for file choosers
 
 //non-GTK GUI globals
 struct {
