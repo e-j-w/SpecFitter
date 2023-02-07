@@ -1136,6 +1136,9 @@ void on_zoom_scale_changed(GtkRange *range){
 void on_contract_scale_changed(GtkRange *range){
   int32_t oldContractFactor = drawing.contractFactor;
   drawing.contractFactor = (uint8_t)gtk_range_get_value(range); //modify the contraction factor
+  if(drawing.contractFactor == 0){
+    drawing.contractFactor = 1; //guard against divide by 0 elsewhere
+  }
   if(guiglobals.fittingSp == FITSTATE_FITCOMPLETE){
     int32_t i;
     //rescale fit (optimization - don't refit)

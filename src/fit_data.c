@@ -189,7 +189,10 @@ double getFWHM(double chan, double widthF, double widthG, double widthH){
 //get the value of the fitted gaussian term for a given x value
 long double evalGaussTerm(const int32_t peakNum, long double xChVal){
   long double xvalFit = xChVal/(1.0*drawing.contractFactor);
-  long double evalG = expl(-0.5* powl((xvalFit-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)]),2.0)/(powl(fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)],2.0)));
+  long double evalG = 0.;
+  if(fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)] != 0.){
+    evalG = expl(-0.5* powl((xvalFit-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)]),2.0)/(powl(fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)],2.0)));
+  }
   //printf("peakNum: %i, xvalFit: %f, pos: %f, width: %f, eval: %f\n",peakNum,xvalFit,fitpar.fitParVal[FITPAR_POS1+(3*peakNum)],fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)],evalG);
   return evalG;
 }
@@ -197,7 +200,10 @@ long double evalGaussTerm(const int32_t peakNum, long double xChVal){
 //get the value of the fitted skewed gaussian term for a given x value
 long double evalSkewedGaussTerm(const int32_t peakNum, const long double xChVal){
   long double xvalFit = xChVal/(1.0*drawing.contractFactor);
-  long double evalG = expl((xvalFit-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/fitpar.fitParVal[FITPAR_BETA]) * erfcl( (xvalFit-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/(1.41421356*fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)]) + fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)]/(1.41421356*fitpar.fitParVal[FITPAR_BETA]) ) ;
+  long double evalG = 0.;
+  if((fitpar.fitParVal[FITPAR_BETA] != 0.)&&(fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)] != 0.)){
+    evalG = expl((xvalFit-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/fitpar.fitParVal[FITPAR_BETA]) * erfcl( (xvalFit-fitpar.fitParVal[FITPAR_POS1+(3*peakNum)])/(1.41421356*fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)]) + fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)]/(1.41421356*fitpar.fitParVal[FITPAR_BETA]) );
+  }
   //printf("peakNum: %i, xvalFit: %f, pos: %f, width: %f, eval: %f\n",peakNum,xvalFit,fitpar.fitParVal[FITPAR_POS1+(3*peakNum)],fitpar.fitParVal[FITPAR_WIDTH1+(3*peakNum)],evalG);
   return evalG;
 }
@@ -396,6 +402,9 @@ int eval(long double *pars, uint8_t *freepars, long double *derivs, int ichan, l
   for(i = 0; i < npks; ++i){
     x = x1 - pars[i*3 + 6];
     width  = pars[i*3 + 7]; // normalization factor of 2.35482 omitted due to differences in how RadWare and this program report FWHM
+    if(width == 0.){
+      continue; //no width, go to next peak
+    }
     h      = pars[i*3 + 8];
     w = x / (width*1.41421356);
     if(fabsl(w) > 4.f){

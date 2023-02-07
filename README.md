@@ -1,6 +1,6 @@
 # **SpecFitter**
 
-A program for gamma-ray spectroscopy or similar data analysis.  Uses [GTK](https://www.gtk.org/) for the user interface.  This is a hobby project, things should mostly work but all the typical disclaimers apply.
+A program for gamma-ray spectroscopy or similar data analysis.  Uses [GTK](https://www.gtk.org/) for the user interface.  Things should mostly work (I'm using this to analyze real data), but results are not guaranteed and all the typical disclaimers apply (ie. there's no warranty).
 
 A list of features is [here](FEATURES.md).
 
@@ -13,7 +13,7 @@ A list of features is [here](FEATURES.md).
 
 ### Compatibility
 
-This program has been tested on CentOS 7, Ubuntu 18.04/20.04, and Arch Linux (as of January 2023) under the GNOME desktop environment.  It should work on any Linux distro that satisfies the listed build dependencies.  It may be possible to build this on other platforms where GTK is [available](https://www.gtk.org/docs/installations/), but that hasn't been tested.
+This program has been tested on CentOS 7, Ubuntu 18.04/20.04, and Arch Linux (as of February 2023) under the GNOME desktop environment.  It should work on any Linux distro that satisfies the listed build dependencies.  It may be possible to build this on other platforms where GTK is [available](https://www.gtk.org/docs/installations/), but that hasn't been tested.
 
 ### Build dependencies
 
