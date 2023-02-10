@@ -2321,6 +2321,12 @@ void cycle_sp_down(){
   cycle_sp(0);
 }
 
+void on_escape_button(){
+  if(gtk_revealer_get_reveal_child(revealer_info_panel)){
+    on_fit_cancel_button_clicked();
+  }
+}
+
 
 void iniitalizeUIElements(){
 
@@ -2606,6 +2612,7 @@ void iniitalizeUIElements(){
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_a, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_append_button_clicked), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_s, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_save_button_clicked), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_q, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(gtk_main_quit), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_escape_button), NULL, 0));
   gtk_accel_group_connect(comment_window_accelgroup, GDK_KEY_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_comment_ok_button_clicked), NULL, 0));
   gtk_accel_group_connect(comment_window_accelgroup, GDK_KEY_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_comment_cancel), NULL, 0));
   gtk_accel_group_connect(calibration_window_accelgroup, GDK_KEY_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_calibrate_ok_button_clicked), NULL, 0));
