@@ -43,8 +43,8 @@ int main(int argc, char *argv[]){
   //setup config file
   char dirPath[256];
   strcpy(dirPath,"");
-  strcat(dirPath,getenv("HOME"));
-  strcat(dirPath,"/.config/specfitter");
+  strcat(dirPath,g_get_user_config_dir());
+  strcat(dirPath,"/specfitter");
   struct stat st = {0};
   if (stat(dirPath, &st) == -1) {
     //config directory doesn't exist, make it
