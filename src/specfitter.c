@@ -46,7 +46,7 @@ int main(int argc, char *argv[]){
   strcat(dirPath,g_get_user_config_dir());
   strcat(dirPath,"/specfitter");
   struct stat st = {0};
-  if (stat(dirPath, &st) == -1) {
+  if(stat(dirPath, &st) == -1){
     //config directory doesn't exist, make it
     mkdir(dirPath, 0700);
     printf("Setup configuration file directory: %s\n",dirPath);

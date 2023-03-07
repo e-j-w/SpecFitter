@@ -65,7 +65,9 @@ gboolean update_gui_fit_state(){
       gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
       gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),TRUE);
       gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(contract_scale),TRUE);
       gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_refit_button),FALSE);
       gtk_widget_hide(GTK_WIDGET(fit_spinner));
       gtk_revealer_set_reveal_child(revealer_info_panel, FALSE);
       gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw to hide any fit
