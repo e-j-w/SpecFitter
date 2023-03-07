@@ -33,7 +33,7 @@ float getCursorChannel(const double cursorx, const double cursory){
   GdkRectangle dasize;  // GtkDrawingArea size
   GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
   // Determine GtkDrawingArea dimensions
-  gdk_window_get_geometry (gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
+  gdk_window_get_geometry(gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
   if((cursorx > XORIGIN)&&(cursory < (dasize.height - YORIGIN))){
     
     float cursorChan = (float)(drawing.lowerLimit + (((cursorx)-XORIGIN)/(dasize.width-XORIGIN))*(drawing.upperLimit - drawing.lowerLimit));
@@ -50,7 +50,7 @@ float getCursorYVal(const double cursorx, const double cursory){
   GdkRectangle dasize;  // GtkDrawingArea size
   GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
   // Determine GtkDrawingArea dimensions
-  gdk_window_get_geometry (gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
+  gdk_window_get_geometry(gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
   if((cursorx > XORIGIN)&&(cursory < (dasize.height - YORIGIN))){
     float cursorVal;
     switch(drawing.multiplotMode){
@@ -87,7 +87,7 @@ int getCommentAtCursor(const double cursorx, const double cursory){
   GdkRectangle dasize;  // GtkDrawingArea size
   GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
   // Determine GtkDrawingArea dimensions
-  gdk_window_get_geometry (gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
+  gdk_window_get_geometry(gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
   if((cursorx > XORIGIN)&&(cursory < ((double)dasize.height - YORIGIN))){
     float cursorCh = getCursorChannel(cursorx, cursory);
     float cursorYVal = getCursorYVal(cursorx, cursory);
@@ -526,7 +526,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
     return;
   }
 
-  if ((event->type == GDK_BUTTON_PRESS) && (event->button == 3)){
+  if((event->type == GDK_BUTTON_PRESS) && (event->button == 3)){
     //right mouse button being pressed
     float cursorChan = getCursorChannel(event->x, event->y);
     switch(guiglobals.fittingSp){
@@ -560,7 +560,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
           }else{
             if(cursorChan > fitpar.fitStartCh){
               fitpar.fitEndCh = (int)cursorChan;
-            }else if (cursorChan < fitpar.fitStartCh){
+            }else if(cursorChan < fitpar.fitStartCh){
               fitpar.fitEndCh = fitpar.fitStartCh; //swap
               fitpar.fitStartCh = (int)cursorChan;
             }
@@ -622,7 +622,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
               if(drawing.displayedView >= 0){
                 rawdata.chanCommentSp[(int)rawdata.numChComments] = (uint8_t)drawing.displayedView;
                 gtk_button_set_label(comment_ok_button,"Apply");
-              }else if (drawing.displayedView == -2){
+              }else if(drawing.displayedView == -2){
                 //this is a view that hasn't been saved yet
                 if(rawdata.numViews >= MAXNVIEWS){
                   printf("Cannot add any more views.\n");
@@ -692,8 +692,8 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
                   GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
                   GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot add comment!");
                   gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Adding a comment would require the current view to be saved, however the maximum number of custom views has been reached.  Older custom views must be deleted before more can be added.");
-                  gtk_dialog_run (GTK_DIALOG (message_dialog));
-                  gtk_widget_destroy (message_dialog);
+                  gtk_dialog_run(GTK_DIALOG(message_dialog));
+                  gtk_widget_destroy(message_dialog);
                   return;
                 }
                 rawdata.chanCommentView[(int)rawdata.numChComments] = 1;
@@ -1345,8 +1345,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     return;
   }
 
-  if (drawing.multiPlots[0] >= NSPECT)
-  {
+  if(drawing.multiPlots[0] >= NSPECT){
     printf("Spectrum number too high (%i)!\n", drawing.multiPlots[0]);
     return;
   }
@@ -1544,7 +1543,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           numTickPerSp = 2;
         for(int32_t i=0;i<drawing.numMultiplotSp;i++){
           yTickDist = getDistBetweenYAxisTicks(drawing.scaleLevelMax[i] - drawing.scaleLevelMin[i],numTickPerSp);
-          cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
+          cairo_set_source_rgb(cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
           for(yTick=0.;yTick<drawing.scaleLevelMax[i];yTick+=yTickDist){
             drawYAxisTick(yTick, i, cr, width, height, plotFontSize, drawGridLines);
           }
@@ -1558,8 +1557,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           if((drawing.scaleLevelMin[i] < 0.0) && (drawing.scaleLevelMax[i] > 0.0)){
             cairo_set_line_width(cr, 1.0*scaleFactor);
             cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
-            cairo_move_to (cr, XORIGIN, getAxisYPos(0.0,i,height));
-            cairo_line_to (cr, width, getAxisYPos(0.0,i,height));
+            cairo_move_to(cr, XORIGIN, getAxisYPos(0.0,i,height));
+            cairo_line_to(cr, width, getAxisYPos(0.0,i,height));
             cairo_stroke(cr);
           }
           cairo_set_line_width(cr, 2.0*scaleFactor);
@@ -1570,7 +1569,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       //overlay (independent scaling)
       for(int32_t i=0;i<drawing.numMultiplotSp;i++){
         double labelOffset = 0.4*((double)i+1.0)/((double)(drawing.numMultiplotSp)*1.0);
-        cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
+        cairo_set_source_rgb(cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
         drawYAxisTick((double)drawing.scaleLevelMax[i]*(0.3 + labelOffset), i, cr, width, height, plotFontSize, drawGridLines); //draw one axis tick near the middle of the axis, per spectrum
         drawYAxisTick(0.0, i, cr, width, height, plotFontSize, drawGridLines); //always draw the zero label on the y axis
       }
@@ -1623,8 +1622,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         if((drawing.scaleLevelMin[0] < 0.0) && (drawing.scaleLevelMax[0] > 0.0)){
           cairo_set_line_width(cr, 1.0*scaleFactor);
           cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
-          cairo_move_to (cr, XORIGIN, getAxisYPos(0.0,0,height));
-          cairo_line_to (cr, width, getAxisYPos(0.0,0,height));
+          cairo_move_to(cr, XORIGIN, getAxisYPos(0.0,0,height));
+          cairo_line_to(cr, width, getAxisYPos(0.0,0,height));
           cairo_stroke(cr);
         }
         cairo_set_line_width(cr, 2.0*scaleFactor);
@@ -1784,9 +1783,9 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     if((drawing.lowerLimit < fitpar.fitEndCh)&&(drawing.upperLimit > fitpar.fitStartCh)){
       cairo_set_line_width(cr, 3.0*scaleFactor);
       //cairo_set_source_rgb(cr, 0.5, 0.5, 0.5);
-      cairo_set_source_rgb (cr, 0.0, 0.0, 0.8);
+      cairo_set_source_rgb(cr, 0.0, 0.0, 0.8);
       float fitDrawX, nextFitDrawX, nextXpos;
-      float fitSkipFactor = 0.5f*(float)(binSkipFactor*fitpar.numFitPeaks);
+      float fitSkipFactor = 0.5f*(float)(binSkipFactor);
       if(fitSkipFactor <= 0.0f){
         fitSkipFactor = 0.5f;
       }
@@ -1867,8 +1866,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   //draw axis lines
   cairo_set_line_width(cr, 1.0*scaleFactor);
   setTextColor(cr);
-  cairo_move_to (cr, XORIGIN, YORIGIN);
-  cairo_line_to (cr, XORIGIN, height);
+  cairo_move_to(cr, XORIGIN, YORIGIN);
+  cairo_line_to(cr, XORIGIN, height);
   switch(drawing.multiplotMode){
     case MULTIPLOT_STACKED:
       //stacked
@@ -1883,8 +1882,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     case MULTIPLOT_NONE:
     default:
       //single plot
-      cairo_move_to (cr, XORIGIN, YORIGIN);
-      cairo_line_to (cr, width, YORIGIN);
+      cairo_move_to(cr, XORIGIN, YORIGIN);
+      cairo_line_to(cr, width, YORIGIN);
       break;
   }
   cairo_stroke(cr);
@@ -1928,7 +1927,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       float cursorPos = getXPosFromCh((float)(fitpar.fitStartCh), width, 0);
       if(cursorPos>=0){
         cairo_set_line_width(cr, 2.0*scaleFactor);
-        cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
+        cairo_set_source_rgb(cr, 0.5, 0.5, 0.5);
         cairo_move_to(cr, cursorPos, -YORIGIN);
         cairo_line_to(cr, cursorPos, -height);
         cairo_stroke(cr);
@@ -1938,7 +1937,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       float cursorPos = getXPosFromCh((float)(fitpar.fitEndCh), width, 0);
       if(cursorPos>=0){
         cairo_set_line_width(cr, 2.0*scaleFactor);
-        cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
+        cairo_set_source_rgb(cr, 0.5, 0.5, 0.5);
         cairo_move_to(cr, cursorPos, -YORIGIN);
         cairo_line_to(cr, cursorPos, -height);
         cairo_stroke(cr);
@@ -1947,7 +1946,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     //draw peak position indicators
     if((guiglobals.fittingSp >= FITSTATE_SETTINGPEAKS)&&(guiglobals.fittingSp < FITSTATE_FITCOMPLETE)){
       //put markers at guessed positions
-      cairo_set_source_rgb (cr, 0.0, 0.0, 0.8);
+      cairo_set_source_rgb(cr, 0.0, 0.0, 0.8);
       cairo_set_line_width(cr, 2.0*scaleFactor);
       for(int32_t i=0;i<fitpar.numFitPeaks;i++){
         if((fitpar.fitPeakInitGuess[i] > drawing.lowerLimit)&&(fitpar.fitPeakInitGuess[i] < drawing.upperLimit)){
@@ -1958,7 +1957,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       }
     }else if(guiglobals.fittingSp == FITSTATE_FITCOMPLETE){
       //put markers at fitted positions
-      cairo_set_source_rgb (cr, 0.0, 0.0, 0.8);
+      cairo_set_source_rgb(cr, 0.0, 0.0, 0.8);
       cairo_set_line_width(cr, 2.0*scaleFactor);
       for(int32_t i=0;i<fitpar.numFitPeaks;i++){
         if((fitpar.fitParVal[FITPAR_POS1+(3*i)] > drawing.lowerLimit)&&(fitpar.fitParVal[FITPAR_POS1+(3*i)] < drawing.upperLimit)){
@@ -1972,7 +1971,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
 
   //draw comment indicators
   if(drawComments){
-    cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
+    cairo_set_source_rgb(cr, 0.5, 0.5, 0.5);
     switch (drawing.multiplotMode){
       case MULTIPLOT_SUMMED:
         //sum view
@@ -2091,7 +2090,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   //draw cursor at mouse position
   if(guiglobals.drawSpCursor == 1){
     //printf("Drawing cursor!\n");
-     cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
+    cairo_set_source_rgb(cr, 0.5, 0.5, 0.5);
     cairo_set_line_width(cr, 1.0);
     setTextColor(cr);
     cairo_move_to(cr, guiglobals.cursorPosX, -YORIGIN);
