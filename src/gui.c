@@ -2001,8 +2001,8 @@ void on_refit_button_clicked(){
           char errMsg[256];
           snprintf(errMsg,256,"Cannot re-fit data, as no previous fit was performed or the fit type was changed since the previous fit.");
           gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
-          gtk_dialog_run (GTK_DIALOG (message_dialog));
-          gtk_widget_destroy (message_dialog);
+          gtk_dialog_run(GTK_DIALOG(message_dialog));
+          gtk_widget_destroy(message_dialog);
         }
       }else{
         GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
@@ -2010,8 +2010,8 @@ void on_refit_button_clicked(){
         char errMsg[256];
         snprintf(errMsg,256,"The fitter cannot be used while multiple spectra are being displayed.  Display a single spectrum or sum of spectra, and then try again.");
         gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
-        gtk_dialog_run (GTK_DIALOG (message_dialog));
-        gtk_widget_destroy (message_dialog);
+        gtk_dialog_run(GTK_DIALOG(message_dialog));
+        gtk_widget_destroy(message_dialog);
       }
     }
   }

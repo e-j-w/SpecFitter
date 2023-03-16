@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <math.h>
 #include <libgen.h>
+#include <glib/gstdio.h>
 #include <sys/stat.h>
 
 #include "lin_eq_solver.h"
