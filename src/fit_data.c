@@ -113,61 +113,69 @@ gboolean print_fit_results(){
   char fitParStr[3][50];
 
   int32_t length = 0;
-  if((fitpar.peakWidthMethod == 2)&&(fitpar.prevFitNumPeaks > 0)){
-    length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Peak widths were fixed to previous fit values.\n\n");
-  }else if(fitpar.peakWidthMethod == 1){
-    length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Relative peak widths were fixed.\n\n");
-  }
-  for(int32_t i=0;i<fitpar.numFitPeaks;i++){
-    getFormattedValAndUncertainty((double)fitpar.areaVal[i],(double)fitpar.areaErr[i],fitParStr[0],50,1,guiglobals.roundErrors);
-    if(calpar.calMode == 1){
-      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_POS1+(3*i)]),getCalWidth((double)fitpar.fitParErr[FITPAR_POS1+(3*i)]),fitParStr[1],50,1,guiglobals.roundErrors);
-      getFormattedValAndUncertainty(2.35482*getCalWidth((double)fitpar.fitParVal[FITPAR_WIDTH1+(3*i)]),2.35482*getCalWidth((double)fitpar.fitParErr[FITPAR_WIDTH1+(3*i)]),fitParStr[2],50,1,guiglobals.roundErrors);
-    }else{
-      getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_POS1+(3*i)],(double)fitpar.fitParErr[FITPAR_POS1+(3*i)],fitParStr[1],50,1,guiglobals.roundErrors);
-      getFormattedValAndUncertainty(2.35482*(double)fitpar.fitParVal[FITPAR_WIDTH1+(3*i)],2.35482*(double)fitpar.fitParErr[FITPAR_WIDTH1+(3*i)],fitParStr[2],50,1,guiglobals.roundErrors);
-    }
-    int32_t len = snprintf(fitResStr+length,(uint64_t)(strSize-length),"Peak %i\nArea: %s\nCentroid: %s\nFWHM: %s\n\n",i+1,fitParStr[0],fitParStr[1],fitParStr[2]);
-    if((len < 0)||(len >= strSize-length)){
-      break;
-    }
-    length += len;
-  }
-  if(calpar.calMode == 1){
-    getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BGCONST]),getCalWidth((double)fitpar.fitParErr[FITPAR_BGCONST]),fitParStr[0],50,1,guiglobals.roundErrors);
-    getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BGLIN]),getCalWidth((double)fitpar.fitParErr[FITPAR_BGLIN]),fitParStr[1],50,1,guiglobals.roundErrors);
-    getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BGQUAD]),getCalWidth((double)fitpar.fitParErr[FITPAR_BGQUAD]),fitParStr[2],50,1,guiglobals.roundErrors);
-  }else{
+  if(fitpar.fitType == FITTYPE_SUMREGION){
     getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BGCONST],(double)fitpar.fitParErr[FITPAR_BGCONST],fitParStr[0],50,1,guiglobals.roundErrors);
-    getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BGLIN],(double)fitpar.fitParErr[FITPAR_BGLIN],fitParStr[1],50,1,guiglobals.roundErrors);
-    getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BGQUAD],(double)fitpar.fitParErr[FITPAR_BGQUAD],fitParStr[2],50,1,guiglobals.roundErrors);
-  }
-  length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Chisq/NDF: %Lf\n\nBackground\nA: %s\nB: %s\nC: %s\n\n",fitpar.chisq,fitParStr[0],fitParStr[1],fitParStr[2]);
-  if(fitpar.fitType == FITTYPE_BGONLY){
-    //background fit only
-    getFormattedValAndUncertainty((double)evalAreaAboveBG(),(double)evalAreaAboveBGErr(),fitParStr[0],50,1,guiglobals.roundErrors);
-    length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Area above background: %s\n\n",fitParStr[0]);
-  }
-  if(fitpar.fitType == FITTYPE_SKEWED){
-    //print peak skew parameters
-    if(calpar.calMode == 1){
-      getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_R],(double)fitpar.fitParErr[FITPAR_R],fitParStr[0],50,1,guiglobals.roundErrors);
-      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BETA]),getCalWidth((double)fitpar.fitParErr[FITPAR_BETA]),fitParStr[1],50,1,guiglobals.roundErrors);
-    }else{
-      getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_R],(double)fitpar.fitParErr[FITPAR_R],fitParStr[0],50,1,guiglobals.roundErrors);
-      getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BETA],(double)fitpar.fitParErr[FITPAR_BETA],fitParStr[1],50,1,guiglobals.roundErrors);
+    length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Area of region: %s\n",fitParStr[0]);
+  }else{
+
+    if((fitpar.peakWidthMethod == 2)&&(fitpar.prevFitNumPeaks > 0)){
+      length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Peak widths were fixed to previous fit values.\n\n");
+    }else if(fitpar.peakWidthMethod == 1){
+      length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Relative peak widths were fixed.\n\n");
     }
-    length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Skew component amplitude: %s %%\nBeta (skewness): %s",fitParStr[0],fitParStr[1]);
-  }
-  if(fitpar.stepFunction == 1){
-    //print step function parameter
-    if(calpar.calMode == 1){
-      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_STEP]),getCalWidth((double)fitpar.fitParErr[FITPAR_STEP]),fitParStr[0],50,1,guiglobals.roundErrors);
-    }else{
-      getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_STEP],(double)fitpar.fitParErr[FITPAR_STEP],fitParStr[0],50,1,guiglobals.roundErrors);
+    for(int32_t i=0;i<fitpar.numFitPeaks;i++){
+      getFormattedValAndUncertainty((double)fitpar.areaVal[i],(double)fitpar.areaErr[i],fitParStr[0],50,1,guiglobals.roundErrors);
+      if(calpar.calMode == 1){
+        getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_POS1+(3*i)]),getCalWidth((double)fitpar.fitParErr[FITPAR_POS1+(3*i)]),fitParStr[1],50,1,guiglobals.roundErrors);
+        getFormattedValAndUncertainty(2.35482*getCalWidth((double)fitpar.fitParVal[FITPAR_WIDTH1+(3*i)]),2.35482*getCalWidth((double)fitpar.fitParErr[FITPAR_WIDTH1+(3*i)]),fitParStr[2],50,1,guiglobals.roundErrors);
+      }else{
+        getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_POS1+(3*i)],(double)fitpar.fitParErr[FITPAR_POS1+(3*i)],fitParStr[1],50,1,guiglobals.roundErrors);
+        getFormattedValAndUncertainty(2.35482*(double)fitpar.fitParVal[FITPAR_WIDTH1+(3*i)],2.35482*(double)fitpar.fitParErr[FITPAR_WIDTH1+(3*i)],fitParStr[2],50,1,guiglobals.roundErrors);
+      }
+      int32_t len = snprintf(fitResStr+length,(uint64_t)(strSize-length),"Peak %i\nArea: %s\nCentroid: %s\nFWHM: %s\n\n",i+1,fitParStr[0],fitParStr[1],fitParStr[2]);
+      if((len < 0)||(len >= strSize-length)){
+        break;
+      }
+      length += len;
     }
-    length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"\n\nStep: %s",fitParStr[0]);
+    if(calpar.calMode == 1){
+      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BGCONST]),getCalWidth((double)fitpar.fitParErr[FITPAR_BGCONST]),fitParStr[0],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BGLIN]),getCalWidth((double)fitpar.fitParErr[FITPAR_BGLIN]),fitParStr[1],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BGQUAD]),getCalWidth((double)fitpar.fitParErr[FITPAR_BGQUAD]),fitParStr[2],50,1,guiglobals.roundErrors);
+    }else{
+      getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BGCONST],(double)fitpar.fitParErr[FITPAR_BGCONST],fitParStr[0],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BGLIN],(double)fitpar.fitParErr[FITPAR_BGLIN],fitParStr[1],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BGQUAD],(double)fitpar.fitParErr[FITPAR_BGQUAD],fitParStr[2],50,1,guiglobals.roundErrors);
+    }
+    length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Chisq/NDF: %Lf\n\nBackground\nA: %s\nB: %s\nC: %s\n\n",fitpar.chisq,fitParStr[0],fitParStr[1],fitParStr[2]);
+    if(fitpar.fitType == FITTYPE_BGONLY){
+      //background fit only
+      getFormattedValAndUncertainty((double)evalAreaAboveBG(),(double)evalAreaAboveBGErr(),fitParStr[0],50,1,guiglobals.roundErrors);
+      length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Area above background: %s\n\n",fitParStr[0]);
+    }
+    if(fitpar.fitType == FITTYPE_SKEWED){
+      //print peak skew parameters
+      if(calpar.calMode == 1){
+        getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_R],(double)fitpar.fitParErr[FITPAR_R],fitParStr[0],50,1,guiglobals.roundErrors);
+        getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BETA]),getCalWidth((double)fitpar.fitParErr[FITPAR_BETA]),fitParStr[1],50,1,guiglobals.roundErrors);
+      }else{
+        getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_R],(double)fitpar.fitParErr[FITPAR_R],fitParStr[0],50,1,guiglobals.roundErrors);
+        getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BETA],(double)fitpar.fitParErr[FITPAR_BETA],fitParStr[1],50,1,guiglobals.roundErrors);
+      }
+      length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Skew component amplitude: %s %%\nBeta (skewness): %s",fitParStr[0],fitParStr[1]);
+    }
+    if(fitpar.stepFunction == 1){
+      //print step function parameter
+      if(calpar.calMode == 1){
+        getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_STEP]),getCalWidth((double)fitpar.fitParErr[FITPAR_STEP]),fitParStr[0],50,1,guiglobals.roundErrors);
+      }else{
+        getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_STEP],(double)fitpar.fitParErr[FITPAR_STEP],fitParStr[0],50,1,guiglobals.roundErrors);
+      }
+      length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"\n\nStep: %s",fitParStr[0]);
+    }
+
   }
+  
 
   //print to the console
   length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"\n");
@@ -932,6 +940,21 @@ int startGausFit(){
   fitpar.prevFitNumPeaks = fitpar.numFitPeaks;
   memcpy(fitpar.prevFitPeakInitGuess,fitpar.fitPeakInitGuess,sizeof(fitpar.fitPeakInitGuess));
   fitpar.fitMidCh = (fitpar.fitStartCh + fitpar.fitEndCh) / 2; //used by fitter
+
+  if(fitpar.fitType == FITTYPE_SUMREGION){
+    //just sum the region
+    fitpar.fitParVal[FITPAR_BGCONST] = 0.; //we'll store the fit result here
+    fitpar.fitParErr[FITPAR_BGCONST] = 0.;
+    for(int i = fitpar.fitStartCh; i < fitpar.fitEndCh; i += drawing.contractFactor){
+      fitpar.fitParVal[FITPAR_BGCONST] += getSpBinVal(0,i);
+      fitpar.fitParErr[FITPAR_BGCONST] += getSpBinFitWeight(0,i);
+    }
+    fitpar.fitParErr[FITPAR_BGCONST] = sqrtl(fitpar.fitParErr[FITPAR_BGCONST]);
+    guiglobals.fittingSp = FITSTATE_FITCOMPLETE;
+    g_idle_add(update_gui_fit_state,NULL);
+    g_idle_add(print_fit_results,NULL);
+    return 1;
+  }
 
   //width parameters
   fitpar.widthFGH[0] = 3.;

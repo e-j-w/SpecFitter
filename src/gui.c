@@ -29,10 +29,15 @@ void showPreferences(int page){
   }else{
     gtk_revealer_set_reveal_child(skew_parameters_revealer, FALSE);
   }
-  if(fitpar.fitType == FITTYPE_BGONLY){
+  if((fitpar.fitType == FITTYPE_BGONLY)||(fitpar.fitType == FITTYPE_SUMREGION)){
     gtk_revealer_set_reveal_child(peak_parameters_revealer, FALSE);
   }else{
     gtk_revealer_set_reveal_child(peak_parameters_revealer, TRUE);
+  }
+  if(fitpar.fitType == FITTYPE_SUMREGION){
+    gtk_revealer_set_reveal_child(background_parameters_revealer, FALSE);
+  }else{
+    gtk_revealer_set_reveal_child(background_parameters_revealer, TRUE);
   }
   gtk_window_present(preferences_window); //show the window
 }
@@ -2137,18 +2142,23 @@ void on_toggle_step_function(GtkToggleButton *togglebutton){
 
 void on_peak_shape_changed(GtkComboBox *combo_box){
   int entry = gtk_combo_box_get_active(combo_box);
-  if((entry >=0)&&(entry <= 2)){
-    if(entry == 1){
+  if((entry >=0)&&(entry < FITTYPE_ENUM_LENGTH)){
+    if(entry == FITTYPE_SKEWED){
       gtk_revealer_set_reveal_child(skew_parameters_revealer, TRUE);
       gtk_widget_set_sensitive(GTK_WIDGET(skew_amplitude_spinbutton),fitpar.fixSkewAmplitide);
-    gtk_widget_set_sensitive(GTK_WIDGET(beta_spinbutton),fitpar.fixBeta);
+      gtk_widget_set_sensitive(GTK_WIDGET(beta_spinbutton),fitpar.fixBeta);
     }else{
       gtk_revealer_set_reveal_child(skew_parameters_revealer, FALSE);
     }
-    if(entry == 2){
+    if((entry == FITTYPE_BGONLY)||(entry == FITTYPE_SUMREGION)){
       gtk_revealer_set_reveal_child(peak_parameters_revealer, FALSE);
     }else{
       gtk_revealer_set_reveal_child(peak_parameters_revealer, TRUE);
+    }
+    if(entry == FITTYPE_SUMREGION){
+      gtk_revealer_set_reveal_child(background_parameters_revealer, FALSE);
+    }else{
+      gtk_revealer_set_reveal_child(background_parameters_revealer, TRUE);
     }
   }
 }
@@ -2488,6 +2498,7 @@ void iniitalizeUIElements(){
   spectrum_gridline_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "spectrum_gridline_checkbutton"));
   skew_parameters_revealer = GTK_REVEALER(gtk_builder_get_object(builder, "skew_parameters_revealer"));
   peak_parameters_revealer = GTK_REVEALER(gtk_builder_get_object(builder, "peak_parameters_revealer"));
+  background_parameters_revealer = GTK_REVEALER(gtk_builder_get_object(builder, "background_parameters_revealer"));
   fix_skew_amplitude_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "fix_skew_amplitude_checkbutton"));
   skew_amplitude_spinbutton = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "skew_amplitude_spinbutton"));
   fix_beta_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "fix_beta_checkbutton"));

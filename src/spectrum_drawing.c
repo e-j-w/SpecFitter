@@ -569,8 +569,8 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
         //check if both limits have been set
         if((fitpar.fitStartCh >= 0)&&(fitpar.fitEndCh >=0)){
           printf("Fit limits: channel %i through %i\n",fitpar.fitStartCh,fitpar.fitEndCh);
-          if(fitpar.fitType == FITTYPE_BGONLY){
-            //background only, start the fit right away
+          if((fitpar.fitType == FITTYPE_BGONLY)||(fitpar.fitType == FITTYPE_SUMREGION)){
+            //background only or sum region fit, start the fit right away
             on_fit_fit_button_clicked(); //gui.c
           }else{
             guiglobals.fittingSp = FITSTATE_SETTINGPEAKS;
@@ -824,7 +824,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event){
       char *statusBarLabelp = statusBarLabel;
       char binValStr[50];
       //char *binValStrp = binValStr;
-      float binVal;
+      float binVal, errVal;
       int32_t i;
       switch(drawing.highlightedPeak){
         case -1:
@@ -848,11 +848,13 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event){
               }
               for(i=0;i<(drawing.numMultiplotSp-1);i++){
                 binVal = getDispSpBinVal(i,cursorChanRounded-drawing.lowerLimit);
-                getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,guiglobals.showBinErrors,guiglobals.roundErrors);
+                errVal = getDispSpBinErr(i,cursorChanRounded-drawing.lowerLimit);
+                getFormattedValAndUncertainty(binVal,errVal,binValStr,50,guiglobals.showBinErrors,guiglobals.roundErrors);
                 statusBarLabelp += snprintf(statusBarLabelp,17," %s,", binValStr);
               }
               binVal = getDispSpBinVal(drawing.numMultiplotSp-1,cursorChanRounded-drawing.lowerLimit);
-              getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,guiglobals.showBinErrors,guiglobals.roundErrors);
+              errVal = getDispSpBinErr(drawing.numMultiplotSp-1,cursorChanRounded-drawing.lowerLimit);
+              getFormattedValAndUncertainty(binVal,errVal,binValStr,50,guiglobals.showBinErrors,guiglobals.roundErrors);
               binValStr[15] = '\0'; //truncate string (staying safe with sprintf, working around compiler warning when using snprintf instead)
               statusBarLabelp += sprintf(statusBarLabelp," %s", binValStr);
               break;
@@ -861,7 +863,8 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event){
             default:
               //single plot
               binVal = getDispSpBinVal(0,cursorChanRounded-drawing.lowerLimit);
-              getFormattedValAndUncertainty(binVal,sqrt(fabs(binVal)),binValStr,50,guiglobals.showBinErrors,guiglobals.roundErrors);
+              errVal = getDispSpBinErr(0,cursorChanRounded-drawing.lowerLimit);
+              getFormattedValAndUncertainty(binVal,errVal,binValStr,50,guiglobals.showBinErrors,guiglobals.roundErrors);
               if(calpar.calMode == 1){
                 int32_t cursorChanEnd = cursorChanRounded + drawing.contractFactor;
                 float cal_lowerChanLimit = (float)(getCalVal(cursorChanRounded));
@@ -1780,86 +1783,90 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
 
   //draw fit
   if((guiglobals.fittingSp == FITSTATE_FITCOMPLETE)&&(showFit>0)){
-    if((drawing.lowerLimit < fitpar.fitEndCh)&&(drawing.upperLimit > fitpar.fitStartCh)){
-      cairo_set_line_width(cr, 3.0*scaleFactor);
-      //cairo_set_source_rgb(cr, 0.5, 0.5, 0.5);
-      cairo_set_source_rgb(cr, 0.0, 0.0, 0.8);
-      float fitDrawX, nextFitDrawX, nextXpos;
-      float fitSkipFactor = 0.5f*(float)(binSkipFactor);
-      if(fitSkipFactor <= 0.0f){
-        fitSkipFactor = 0.5f;
-      }
-      //draw each peak
-      /*for(int32_t i=0;i<fitpar.numFitPeaks;i++){
-        fitDrawX=(float)(fitpar.fitStartCh);
-        fitDrawX = floorf((float)(fitpar.fitParVal[FITPAR_POS1+(3*i)] - 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*i)]));
-        nextXpos = getXPosFromCh(fitDrawX,width,1);
-        if(nextXpos > 0){
-          cairo_move_to(cr, nextXpos, getYPos((float)(evalFitOnePeak(fitDrawX,i)),0,height));
-        }else{
-          cairo_move_to(cr, XORIGIN, getYPos((float)(evalFitOnePeak((float)drawing.lowerLimit,i)),0,height,YORIGIN));
+    if(fitpar.fitType != FITTYPE_SUMREGION){
+      
+      if((drawing.lowerLimit < fitpar.fitEndCh)&&(drawing.upperLimit > fitpar.fitStartCh)){
+        cairo_set_line_width(cr, 3.0*scaleFactor);
+        //cairo_set_source_rgb(cr, 0.5, 0.5, 0.5);
+        cairo_set_source_rgb(cr, 0.0, 0.0, 0.8);
+        float fitDrawX, nextFitDrawX, nextXpos;
+        float fitSkipFactor = 0.5f*(float)(binSkipFactor);
+        if(fitSkipFactor <= 0.0f){
+          fitSkipFactor = 0.5f;
         }
-        for(; fitDrawX<=floorf((float)(fitpar.fitParVal[FITPAR_POS1+(3*i)] + 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*i)])); fitDrawX+= fitSkipFactor){
-          nextFitDrawX = fitDrawX + fitSkipFactor;
-          nextXpos = getXPosFromCh(nextFitDrawX,width,1);
+        //draw each peak
+        /*for(int32_t i=0;i<fitpar.numFitPeaks;i++){
+          fitDrawX=(float)(fitpar.fitStartCh);
+          fitDrawX = floorf((float)(fitpar.fitParVal[FITPAR_POS1+(3*i)] - 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*i)]));
+          nextXpos = getXPosFromCh(fitDrawX,width,1);
           if(nextXpos > 0){
-            cairo_line_to(cr, nextXpos, getYPos((float)(evalFitOnePeak(nextFitDrawX,i)),0,height));
+            cairo_move_to(cr, nextXpos, getYPos((float)(evalFitOnePeak(fitDrawX,i)),0,height));
+          }else{
+            cairo_move_to(cr, XORIGIN, getYPos((float)(evalFitOnePeak((float)drawing.lowerLimit,i)),0,height,YORIGIN));
           }
-        }
-      }*/
-      //draw background
-      cairo_set_line_width(cr, 1.0*scaleFactor);
-      fitDrawX=(float)(fitpar.fitStartCh);
-      nextXpos = getXPosFromCh(fitDrawX,width,1);
-      if(nextXpos > 0){
-        cairo_move_to(cr, nextXpos, getYPos((float)(evalFitBG(fitDrawX)),0,height));
-      }else{
-        cairo_move_to(cr, XORIGIN, getYPos((float)(evalFitBG((float)drawing.lowerLimit)),0,height));
-      }
-      for(; fitDrawX<=(float)(fitpar.fitEndCh); fitDrawX+= fitSkipFactor){
-        nextFitDrawX = fitDrawX + fitSkipFactor;
-        nextXpos = getXPosFromCh(nextFitDrawX,width,1);
-        if(nextXpos > 0){
-          cairo_line_to(cr, nextXpos, getYPos((float)(evalFitBG(nextFitDrawX)),0,height));
-        }
-      }
-      cairo_stroke(cr);
-      //draw sum of peaks
-      cairo_set_line_width(cr, 3.0*scaleFactor);
-      fitDrawX=(float)(fitpar.fitStartCh);
-      nextXpos = getXPosFromCh(fitDrawX,width,1);
-      if(nextXpos > 0){
-        cairo_move_to(cr, nextXpos, getYPos((float)(evalFit(fitDrawX)),0,height));
-      }else{
-        cairo_move_to(cr, XORIGIN, getYPos((float)(evalFit((float)drawing.lowerLimit)),0,height));
-      }
-      for(; fitDrawX<=(float)(fitpar.fitEndCh); fitDrawX+= fitSkipFactor){
-        nextFitDrawX = fitDrawX + fitSkipFactor;
-        nextXpos = getXPosFromCh(nextFitDrawX,width,1);
-        if(nextXpos > 0){
-          cairo_line_to(cr, nextXpos, getYPos((float)(evalFit(nextFitDrawX)),0,height));
-        }
-      }
-      cairo_stroke(cr);
-      //draw highlighed peak
-      if((drawing.highlightedPeak >= 0)&&(drawing.highlightedPeak <= fitpar.numFitPeaks)&&(showFit>1)){
-        cairo_set_line_width(cr, 6.0*scaleFactor);
-        fitDrawX = floorf((float)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)] - 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]));
+          for(; fitDrawX<=floorf((float)(fitpar.fitParVal[FITPAR_POS1+(3*i)] + 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*i)])); fitDrawX+= fitSkipFactor){
+            nextFitDrawX = fitDrawX + fitSkipFactor;
+            nextXpos = getXPosFromCh(nextFitDrawX,width,1);
+            if(nextXpos > 0){
+              cairo_line_to(cr, nextXpos, getYPos((float)(evalFitOnePeak(nextFitDrawX,i)),0,height));
+            }
+          }
+        }*/
+        //draw background
+        cairo_set_line_width(cr, 1.0*scaleFactor);
+        fitDrawX=(float)(fitpar.fitStartCh);
         nextXpos = getXPosFromCh(fitDrawX,width,1);
         if(nextXpos > 0){
-          cairo_move_to(cr, nextXpos, getYPos((float)(evalFitOnePeak(fitDrawX,drawing.highlightedPeak)),0,height));
+          cairo_move_to(cr, nextXpos, getYPos((float)(evalFitBG(fitDrawX)),0,height));
         }else{
-          cairo_move_to(cr, XORIGIN, getYPos((float)(evalFitOnePeak((float)drawing.lowerLimit,drawing.highlightedPeak)),0,height));
+          cairo_move_to(cr, XORIGIN, getYPos((float)(evalFitBG((float)drawing.lowerLimit)),0,height));
         }
-        for(; fitDrawX<=floorf((float)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)] + 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)])); fitDrawX+= fitSkipFactor){
+        for(; fitDrawX<=(float)(fitpar.fitEndCh); fitDrawX+= fitSkipFactor){
           nextFitDrawX = fitDrawX + fitSkipFactor;
           nextXpos = getXPosFromCh(nextFitDrawX,width,1);
           if(nextXpos > 0){
-            cairo_line_to(cr, nextXpos, getYPos((float)(evalFitOnePeak(nextFitDrawX,drawing.highlightedPeak)),0,height));
+            cairo_line_to(cr, nextXpos, getYPos((float)(evalFitBG(nextFitDrawX)),0,height));
           }
         }
         cairo_stroke(cr);
+        //draw sum of peaks
+        cairo_set_line_width(cr, 3.0*scaleFactor);
+        fitDrawX=(float)(fitpar.fitStartCh);
+        nextXpos = getXPosFromCh(fitDrawX,width,1);
+        if(nextXpos > 0){
+          cairo_move_to(cr, nextXpos, getYPos((float)(evalFit(fitDrawX)),0,height));
+        }else{
+          cairo_move_to(cr, XORIGIN, getYPos((float)(evalFit((float)drawing.lowerLimit)),0,height));
+        }
+        for(; fitDrawX<=(float)(fitpar.fitEndCh); fitDrawX+= fitSkipFactor){
+          nextFitDrawX = fitDrawX + fitSkipFactor;
+          nextXpos = getXPosFromCh(nextFitDrawX,width,1);
+          if(nextXpos > 0){
+            cairo_line_to(cr, nextXpos, getYPos((float)(evalFit(nextFitDrawX)),0,height));
+          }
+        }
+        cairo_stroke(cr);
+        //draw highlighed peak
+        if((drawing.highlightedPeak >= 0)&&(drawing.highlightedPeak <= fitpar.numFitPeaks)&&(showFit>1)){
+          cairo_set_line_width(cr, 6.0*scaleFactor);
+          fitDrawX = floorf((float)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)] - 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]));
+          nextXpos = getXPosFromCh(fitDrawX,width,1);
+          if(nextXpos > 0){
+            cairo_move_to(cr, nextXpos, getYPos((float)(evalFitOnePeak(fitDrawX,drawing.highlightedPeak)),0,height));
+          }else{
+            cairo_move_to(cr, XORIGIN, getYPos((float)(evalFitOnePeak((float)drawing.lowerLimit,drawing.highlightedPeak)),0,height));
+          }
+          for(; fitDrawX<=floorf((float)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)] + 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)])); fitDrawX+= fitSkipFactor){
+            nextFitDrawX = fitDrawX + fitSkipFactor;
+            nextXpos = getXPosFromCh(nextFitDrawX,width,1);
+            if(nextXpos > 0){
+              cairo_line_to(cr, nextXpos, getYPos((float)(evalFitOnePeak(nextFitDrawX,drawing.highlightedPeak)),0,height));
+            }
+          }
+          cairo_stroke(cr);
+        }
       }
+
     }
   }
 

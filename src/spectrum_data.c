@@ -261,6 +261,9 @@ float getSpBinValOrWeight(const int32_t dispSpNum, const int32_t bin, const int3
 float getDispSpBinVal(const int32_t dispSpNum, const int32_t bin){
   return getSpBinValOrWeight(dispSpNum,drawing.lowerLimit+bin,0);
 }
+float getDispSpBinErr(const int32_t dispSpNum, const int32_t bin){
+  return sqrtf(getSpBinValOrWeight(dispSpNum,drawing.lowerLimit+bin,1));
+}
 float getSpBinVal(const int32_t dispSpNum, const int32_t bin){
   return getSpBinValOrWeight(dispSpNum,bin,0);
 }

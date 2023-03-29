@@ -11,10 +11,6 @@ Author: Jonathan Williams
   <!-- interface-description A spectrum viewer in GTK. -->
   <!-- interface-copyright Jonathan Williams and contributors -->
   <!-- interface-authors Jonathan Williams -->
-  <object class="GtkMenu">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-  </object>
   <object class="GtkImage" id="add_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -2488,49 +2484,21 @@ They will then appear on this panel.</property>
                 <property name="margin_top">10</property>
                 <property name="margin_bottom">10</property>
                 <property name="orientation">vertical</property>
-                <property name="spacing">10</property>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="orientation">vertical</property>
+                    <property name="tooltip_text" translatable="yes">Set the type of fit to perform.
+Gaussian peaks - Fit peaks with a symmetric Guassian shape.
+Skewed peaks - Fit peaks with a shape that is the sum of two Guassians, one of them skewed via convolution with an exponential tail on the low-energy side (can represent incomplete charge collection in a detector).
+Background only - Do not fit any peaks.  Will estimate the area of the region above the background.
+Sum counts - Only show the total number of counts in the fit region.</property>
+                    <property name="spacing">10</property>
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Set the shape of the peaks used in the fit.
-Symmetric - Guassian peak shape.
-Skewed - Shape is the sum of two Guassian shapes, one of them skewed via convolution with an exponential tail on the low-energy side (can represent incomplete charge collection in a detector).</property>
-                        <property name="spacing">10</property>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Fit type</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkComboBoxText" id="peak_shape_combobox">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="active">0</property>
-                            <items>
-                              <item id="&lt;Enter ID&gt;" translatable="yes">Gaussian peaks</item>
-                              <item translatable="yes">Skewed peaks (low energy tail)</item>
-                              <item translatable="yes">Background only</item>
-                            </items>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
+                        <property name="label" translatable="yes">Fit type</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -2539,224 +2507,21 @@ Skewed - Shape is the sum of two Guassian shapes, one of them skewed via convolu
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkRevealer" id="skew_parameters_revealer">
+                      <object class="GtkComboBoxText" id="peak_shape_combobox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="reveal_child">True</property>
-                        <child>
-                          <object class="GtkBox">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="margin_top">10</property>
-                            <property name="orientation">vertical</property>
-                            <property name="spacing">8</property>
-                            <child>
-                              <object class="GtkBox">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip_text" translatable="yes">Whether to fix the amplitude of the skewed Gaussian component in the peak fit, and the percentage value to fix it to.</property>
-                                <property name="spacing">10</property>
-                                <child>
-                                  <object class="GtkCheckButton" id="fix_skew_amplitude_checkbutton">
-                                    <property name="label" translatable="yes"> Fix skewed component amplitude</property>
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">False</property>
-                                    <property name="draw_indicator">True</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">0</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkSpinButton" id="skew_amplitude_spinbutton">
-                                    <property name="visible">True</property>
-                                    <property name="sensitive">False</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="width_chars">4</property>
-                                    <property name="input_purpose">number</property>
-                                    <property name="adjustment">skew_amplitude_adjustment</property>
-                                    <property name="digits">1</property>
-                                    <property name="numeric">True</property>
-                                    <property name="value">10</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">1</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkLabel">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="halign">start</property>
-                                    <property name="label" translatable="yes">%</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">False</property>
-                                    <property name="position">2</property>
-                                  </packing>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkBox">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip_text" translatable="yes">Whether to fix the decay constant of the skewed Gaussian component in the peak fit, and the value to fix it to.</property>
-                                <property name="spacing">10</property>
-                                <child>
-                                  <object class="GtkCheckButton" id="fix_beta_checkbutton">
-                                    <property name="label" translatable="yes"> Fix beta (skewness)</property>
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">False</property>
-                                    <property name="draw_indicator">True</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">0</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkSpinButton" id="beta_spinbutton">
-                                    <property name="visible">True</property>
-                                    <property name="sensitive">False</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="width_chars">4</property>
-                                    <property name="text" translatable="yes">10.0</property>
-                                    <property name="input_purpose">number</property>
-                                    <property name="adjustment">beta_adjustment</property>
-                                    <property name="digits">1</property>
-                                    <property name="numeric">True</property>
-                                    <property name="value">5</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">1</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkLabel">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="halign">start</property>
-                                    <property name="label" translatable="yes">channels</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">False</property>
-                                    <property name="position">2</property>
-                                  </packing>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                          </object>
-                        </child>
+                        <property name="active">0</property>
+                        <items>
+                          <item id="&lt;Enter ID&gt;" translatable="yes">Gaussian peaks</item>
+                          <item translatable="yes">Skewed peaks (low energy tail)</item>
+                          <item translatable="yes">Background only</item>
+                          <item translatable="yes">Sum counts in region</item>
+                        </items>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkRevealer" id="peak_parameters_revealer">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="reveal_child">True</property>
-                        <child>
-                          <object class="GtkBox">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="margin_top">10</property>
-                            <property name="orientation">vertical</property>
-                            <property name="spacing">8</property>
-                            <child>
-                              <object class="GtkBox">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip_text" translatable="yes">The method to use to determine peak widths.
-Fit freely - Widths allowed to vary freely.
-Fix relative widths - force peak widths to follow a quadratic relationship with the channel number when more than one peak is fit.  Recommended for gamma-ray spectroscopy.
-Fix to previous fit values - use the width values from the previous fit.  If no peaks have been fit yet, this is equivalent to 'fit freely'.</property>
-                                <property name="spacing">10</property>
-                                <child>
-                                  <object class="GtkLabel">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">Peak widths</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">0</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkComboBoxText" id="peak_width_combobox">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="active">0</property>
-                                    <items>
-                                      <item id="&lt;Enter ID&gt;" translatable="yes">Fit freely</item>
-                                      <item translatable="yes">Fix relative widths</item>
-                                      <item translatable="yes">Fix to previous fit values</item>
-                                    </items>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">1</property>
-                                  </packing>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkCheckButton" id="step_function_checkbutton">
-                                <property name="label" translatable="yes"> Use step function</property>
-                                <property name="name">drop_empty_checkbox</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">If checked, will use a step function to compensate for the background being larger on one side of each peak.</property>
-                                <property name="halign">start</property>
-                                <property name="draw_indicator">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
                       </packing>
                     </child>
                   </object>
@@ -2767,39 +2532,80 @@ Fix to previous fit values - use the width values from the previous fit.  If no 
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox">
+                  <object class="GtkRevealer" id="peak_parameters_revealer">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="tooltip_text" translatable="yes">Set the form of the background used in the fit.</property>
-                    <property name="spacing">10</property>
+                    <property name="reveal_child">True</property>
                     <child>
-                      <object class="GtkLabel">
+                      <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Background type</property>
+                        <property name="margin_top">10</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">8</property>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="tooltip_text" translatable="yes">The method to use to determine peak widths.
+Fit freely - Widths allowed to vary freely.
+Fix relative widths - force peak widths to follow a quadratic relationship with the channel number when more than one peak is fit.  Recommended for gamma-ray spectroscopy.
+Fix to previous fit values - use the width values from the previous fit.  If no peaks have been fit yet, this is equivalent to 'fit freely'.</property>
+                            <property name="spacing">10</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">Peak widths</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkComboBoxText" id="peak_width_combobox">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="active">0</property>
+                                <items>
+                                  <item id="&lt;Enter ID&gt;" translatable="yes">Fit freely</item>
+                                  <item translatable="yes">Fix relative widths</item>
+                                  <item translatable="yes">Fix to previous fit values</item>
+                                </items>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="step_function_checkbutton">
+                            <property name="label" translatable="yes"> Use step function</property>
+                            <property name="name">drop_empty_checkbox</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="tooltip_text" translatable="yes">If checked, will use a step function to compensate for the background being larger on one side of each peak.</property>
+                            <property name="halign">start</property>
+                            <property name="draw_indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                       </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkComboBoxText" id="background_type_combobox">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="active">2</property>
-                        <items>
-                          <item id="&lt;Enter ID&gt;" translatable="yes">Constant</item>
-                          <item translatable="yes">Linear</item>
-                          <item translatable="yes">Quadratic</item>
-                        </items>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
                     </child>
                   </object>
                   <packing>
@@ -2809,47 +2615,248 @@ Fix to previous fit values - use the width values from the previous fit.  If no 
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox">
+                  <object class="GtkRevealer" id="skew_parameters_revealer">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="tooltip_text" translatable="yes">Set the technique used for weighting individual channels in the fit.
-Weight by scaled data - Weights are proportional to the data value, taking into account the effects of scaling for summed or subtracted spectra.
-Weight by fit function - Weights are proportional to the fit function values determined during each fit iteration.</property>
-                    <property name="spacing">10</property>
+                    <property name="reveal_child">True</property>
                     <child>
-                      <object class="GtkLabel">
+                      <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Fit weighting mode</property>
+                        <property name="margin_top">10</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">8</property>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="tooltip_text" translatable="yes">Whether to fix the amplitude of the skewed Gaussian component in the peak fit, and the percentage value to fix it to.</property>
+                            <property name="spacing">10</property>
+                            <child>
+                              <object class="GtkCheckButton" id="fix_skew_amplitude_checkbutton">
+                                <property name="label" translatable="yes"> Fix skewed component amplitude</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="draw_indicator">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSpinButton" id="skew_amplitude_spinbutton">
+                                <property name="visible">True</property>
+                                <property name="sensitive">False</property>
+                                <property name="can_focus">True</property>
+                                <property name="width_chars">4</property>
+                                <property name="input_purpose">number</property>
+                                <property name="adjustment">skew_amplitude_adjustment</property>
+                                <property name="digits">1</property>
+                                <property name="numeric">True</property>
+                                <property name="value">10</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">%</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="tooltip_text" translatable="yes">Whether to fix the decay constant of the skewed Gaussian component in the peak fit, and the value to fix it to.</property>
+                            <property name="spacing">10</property>
+                            <child>
+                              <object class="GtkCheckButton" id="fix_beta_checkbutton">
+                                <property name="label" translatable="yes"> Fix beta (skewness)</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="draw_indicator">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSpinButton" id="beta_spinbutton">
+                                <property name="visible">True</property>
+                                <property name="sensitive">False</property>
+                                <property name="can_focus">True</property>
+                                <property name="width_chars">4</property>
+                                <property name="text" translatable="yes">10.0</property>
+                                <property name="input_purpose">number</property>
+                                <property name="adjustment">beta_adjustment</property>
+                                <property name="digits">1</property>
+                                <property name="numeric">True</property>
+                                <property name="value">5</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">channels</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                       </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkComboBoxText" id="weight_mode_combobox">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="active">0</property>
-                        <items>
-                          <item id="&lt;Enter ID&gt;" translatable="yes">Weight by scaled data</item>
-                          <item translatable="yes">Weight by fit function</item>
-                          <item translatable="yes">No weighting</item>
-                        </items>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
                     </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">7</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkRevealer" id="background_parameters_revealer">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="reveal_child">True</property>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="margin_top">10</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">8</property>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="tooltip_text" translatable="yes">Set the form of the background used in the fit.</property>
+                            <property name="spacing">10</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">Background type</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkComboBoxText" id="background_type_combobox">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="active">2</property>
+                                <items>
+                                  <item id="&lt;Enter ID&gt;" translatable="yes">Constant</item>
+                                  <item translatable="yes">Linear</item>
+                                  <item translatable="yes">Quadratic</item>
+                                </items>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="tooltip_text" translatable="yes">Set the technique used for weighting individual channels in the fit.
+Weight by scaled data - Weights are proportional to the data value, taking into account the effects of scaling for summed or subtracted spectra.
+Weight by fit function - Weights are proportional to the fit function values determined during each fit iteration.</property>
+                            <property name="spacing">10</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">Fit weighting mode</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkComboBoxText" id="weight_mode_combobox">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="active">0</property>
+                                <items>
+                                  <item id="&lt;Enter ID&gt;" translatable="yes">Weight by scaled data</item>
+                                  <item translatable="yes">Weight by fit function</item>
+                                  <item translatable="yes">No weighting</item>
+                                </items>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">4</property>
                   </packing>
                 </child>
               </object>

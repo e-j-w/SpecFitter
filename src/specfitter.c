@@ -98,8 +98,6 @@ int main(int argc, char *argv[]){
     gtk_widget_set_sensitive(GTK_WIDGET(append_button),TRUE);
   }
 
-  
-
   setupUITheme(); //see gui.c
 
   //startup UI
