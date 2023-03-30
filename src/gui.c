@@ -464,6 +464,7 @@ void openSingleFile(char *filename, int32_t append){
       gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);
       gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened+rawdata.numViews);
       gtk_spin_button_set_value(spectrum_selector, sel+1);
+      gtk_combo_box_set_active(GTK_COMBO_BOX(value_mode_combobox),drawing.valueDrawMode); //set the default entry
     }else{
       //no spectra with any data in the selected file
       openErr = 2;
@@ -2228,6 +2229,29 @@ void on_about_button_clicked(){
   gtk_window_present(GTK_WINDOW(about_dialog)); //show the window
 }
 
+void on_subtract_errors(){
+  drawing.valueDrawMode = VALUE_MINUSERR;
+  gtk_combo_box_set_active(GTK_COMBO_BOX(value_mode_combobox),VALUE_MINUSERR);
+  manualSpectrumAreaDraw();
+}
+void on_add_errors(){
+  drawing.valueDrawMode = VALUE_PLUSERR;
+  gtk_combo_box_set_active(GTK_COMBO_BOX(value_mode_combobox),VALUE_PLUSERR);
+  manualSpectrumAreaDraw();
+}
+void on_reset_errors(){
+  drawing.valueDrawMode = VALUE_DATA;
+  gtk_combo_box_set_active(GTK_COMBO_BOX(value_mode_combobox),VALUE_DATA);
+  manualSpectrumAreaDraw();
+}
+
+void on_value_mode_combobox_changed(){
+  int32_t valueMode = gtk_combo_box_get_active(GTK_COMBO_BOX(value_mode_combobox));
+  if((valueMode >= 0)&&(valueMode < VALUE_ENUM_LENGTH)){
+    drawing.valueDrawMode = (uint8_t)valueMode;
+  }
+}
+
 void on_toggle_autoscale(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton))
     drawing.autoScale=1;
@@ -2517,6 +2541,7 @@ void iniitalizeUIElements(){
   spectrum_selector = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spectrumselector"));
   spectrum_selector_adjustment = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "spectrum_selector_adjustment"));
   display_spectrumname_label = GTK_LABEL(gtk_builder_get_object(builder, "display_spectrumname_label"));
+  value_mode_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "value_mode_combobox"));
   autoscale_button = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "autoscalebutton"));
   logscale_button = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "logscalebutton"));
   cursor_draw_button = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "cursordrawbutton"));
@@ -2553,6 +2578,7 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(comment_entry), "changed", G_CALLBACK(on_comment_entry_changed), NULL);
   g_signal_connect(G_OBJECT(remove_calibration_button), "clicked", G_CALLBACK(on_remove_calibration_button_clicked), NULL);
   g_signal_connect(G_OBJECT(spectrum_selector), "value-changed", G_CALLBACK(on_spectrum_selector_changed), NULL);
+  g_signal_connect(G_OBJECT(value_mode_combobox), "changed", G_CALLBACK(on_value_mode_combobox_changed), NULL);
   g_signal_connect(G_OBJECT(autoscale_button), "toggled", G_CALLBACK(on_toggle_autoscale), NULL);
   g_signal_connect(G_OBJECT(logscale_button), "toggled", G_CALLBACK(on_toggle_logscale), NULL);
   g_signal_connect(G_OBJECT(cursor_draw_button), "toggled", G_CALLBACK(on_toggle_cursor), NULL);
@@ -2614,6 +2640,9 @@ void iniitalizeUIElements(){
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_equal, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_zoom_in_x), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_plus, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_zoom_in_x), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_minus, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_zoom_out_x), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_bracketleft, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_subtract_errors), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_bracketright, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_add_errors), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_backslash, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_reset_errors), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_w, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(cycle_multiplot_mode_up), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_s, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(cycle_multiplot_mode_down), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_d, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(cycle_sp_up), NULL, 0));
@@ -2648,6 +2677,7 @@ void iniitalizeUIElements(){
   drawing.contractFactor = 1;
   drawing.autoScale = 1;
   drawing.logScale = 0;
+  drawing.valueDrawMode = VALUE_DATA;
   drawing.zoomingSpX = 0;
   drawing.zoomingSpY = 0;
   drawing.zoomXLastFrameTime = 0;

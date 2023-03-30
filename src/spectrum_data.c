@@ -264,6 +264,20 @@ float getDispSpBinVal(const int32_t dispSpNum, const int32_t bin){
 float getDispSpBinErr(const int32_t dispSpNum, const int32_t bin){
   return sqrtf(getSpBinValOrWeight(dispSpNum,drawing.lowerLimit+bin,1));
 }
+float getDispSpBinValAdj(const int32_t dispSpNum, const int32_t bin){
+  switch(drawing.valueDrawMode){
+    case VALUE_PLUSERR:
+      return getDispSpBinVal(dispSpNum,bin) + getDispSpBinErr(dispSpNum,bin);
+      break;
+    case VALUE_MINUSERR:
+      return getDispSpBinVal(dispSpNum,bin) - getDispSpBinErr(dispSpNum,bin);
+      break;
+    case VALUE_DATA:
+    default:
+      return getDispSpBinVal(dispSpNum,bin);
+      break;
+  }
+}
 float getSpBinVal(const int32_t dispSpNum, const int32_t bin){
   return getSpBinValOrWeight(dispSpNum,bin,0);
 }

@@ -1384,7 +1384,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       case MULTIPLOT_OVERLAY_INDEPENDENT:
         //overlay (independent scaling)
         for(int32_t j=0;j<drawing.numMultiplotSp;j++){
-          currentVal[j] = getDispSpBinVal(j, i);
+          currentVal[j] = getDispSpBinValAdj(j, i);
           if(currentVal[j] > maxVal[j]){
             maxVal[j] = currentVal[j];
           }
@@ -1396,7 +1396,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       case MULTIPLOT_OVERLAY_COMMON:
         //overlay (common scaling)
         for(int32_t j=0;j<drawing.numMultiplotSp;j++){
-          currentVal[0] = getDispSpBinVal(j, i);
+          currentVal[0] = getDispSpBinValAdj(j, i);
           if(currentVal[0] > maxVal[0]){
             maxVal[0] = currentVal[0];
           }
@@ -1408,7 +1408,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       case MULTIPLOT_SUMMED:
         //summed
       case MULTIPLOT_NONE:
-        currentVal[0] = getDispSpBinVal(0, i);
+        currentVal[0] = getDispSpBinValAdj(0, i);
         if(currentVal[0] > maxVal[0]){
           maxVal[0] = currentVal[0];
         }
@@ -1694,15 +1694,15 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     case MULTIPLOT_OVERLAY_INDEPENDENT:
       //overlay (independent scaling)
       for(int32_t i=0;i<drawing.numMultiplotSp;i++){
-        cairo_move_to(cr, getXPos(startBin,width), getYPos(getDispSpBinVal(i,startBin),i,height));
+        cairo_move_to(cr, getXPos(startBin,width), getYPos(getDispSpBinValAdj(i,startBin),i,height));
         for(int32_t j=startBin;j<range;j+=binSkipFactor){
 
           //draw high values even if they were going to be interpolated over
           if(binSkipFactor > drawing.contractFactor){
             for(int32_t k=0;k<binSkipFactor;k++){
-              if(getDispSpBinVal(i, j+k) > drawing.scaleLevelMax[i]*0.8){
-                currentVal[0] = getDispSpBinVal(i, j);
-                nextVal = getDispSpBinVal(i, j+k);
+              if(getDispSpBinValAdj(i, j+k) > drawing.scaleLevelMax[i]*0.8){
+                currentVal[0] = getDispSpBinValAdj(i, j);
+                nextVal = getDispSpBinValAdj(i, j+k);
                 cairo_line_to(cr, getXPos(j+k,width), getYPos(currentVal[0],i,height));
                 cairo_line_to(cr, getXPos(j+k,width), getYPos(nextVal,i,height));
                 break;
@@ -1710,8 +1710,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
             }
           }
 
-          currentVal[0] = getDispSpBinVal(i, j);
-          nextVal = getDispSpBinVal(i, j+binSkipFactor);
+          currentVal[0] = getDispSpBinValAdj(i, j);
+          nextVal = getDispSpBinValAdj(i, j+binSkipFactor);
           cairo_line_to(cr, getXPos(j+binSkipFactor,width), getYPos(currentVal[0],i,height));
           cairo_line_to(cr, getXPos(j+binSkipFactor,width), getYPos(nextVal,i,height));
         }
@@ -1723,15 +1723,15 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     case MULTIPLOT_OVERLAY_COMMON:
       //overlay (common scaling)
       for(int32_t i=0;i<drawing.numMultiplotSp;i++){
-        cairo_move_to(cr, getXPos(startBin,width), getYPos(getDispSpBinVal(i,startBin),0,height));
+        cairo_move_to(cr, getXPos(startBin,width), getYPos(getDispSpBinValAdj(i,startBin),0,height));
         for(int32_t j=startBin;j<range;j+=binSkipFactor){
 
           //draw high values even if they were going to be interpolated over
           if(binSkipFactor > drawing.contractFactor){
             for(int32_t k=0;k<binSkipFactor;k++){
-              if(getDispSpBinVal(i, j+k) > drawing.scaleLevelMax[0]*0.8){
-                currentVal[0] = getDispSpBinVal(i, j);
-                nextVal = getDispSpBinVal(i, j+k);
+              if(getDispSpBinValAdj(i, j+k) > drawing.scaleLevelMax[0]*0.8){
+                currentVal[0] = getDispSpBinValAdj(i, j);
+                nextVal = getDispSpBinValAdj(i, j+k);
                 cairo_line_to(cr, getXPos(j+k,width), getYPos(currentVal[0],0,height));
                 cairo_line_to(cr, getXPos(j+k,width), getYPos(nextVal,0,height));
                 break;
@@ -1739,8 +1739,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
             }
           }
 
-          currentVal[0] = getDispSpBinVal(i, j);
-          nextVal = getDispSpBinVal(i, j+binSkipFactor);
+          currentVal[0] = getDispSpBinValAdj(i, j);
+          nextVal = getDispSpBinValAdj(i, j+binSkipFactor);
           cairo_line_to(cr, getXPos(j+binSkipFactor,width), getYPos(currentVal[0],0,height));
           cairo_line_to(cr, getXPos(j+binSkipFactor,width), getYPos(nextVal,0,height));
         }
@@ -1752,15 +1752,15 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     case MULTIPLOT_SUMMED:
       //summed
     case MULTIPLOT_NONE:
-      cairo_move_to(cr, getXPos(startBin,width), getYPos(getDispSpBinVal(0,startBin),0,height));
+      cairo_move_to(cr, getXPos(startBin,width), getYPos(getDispSpBinValAdj(0,startBin),0,height));
       for(int32_t i=startBin;i<range;i+=binSkipFactor){
 
         //draw high values even if they were going to be interpolated over
         if(binSkipFactor > drawing.contractFactor){
           for(int32_t k=0;k<binSkipFactor;k++){
-            if(getDispSpBinVal(0, i+k) > drawing.scaleLevelMax[0]*0.8){
-              currentVal[0] = getDispSpBinVal(0, i);
-              nextVal = getDispSpBinVal(0, i+k);
+            if(getDispSpBinValAdj(0, i+k) > drawing.scaleLevelMax[0]*0.8){
+              currentVal[0] = getDispSpBinValAdj(0, i);
+              nextVal = getDispSpBinValAdj(0, i+k);
               cairo_line_to(cr, getXPos(i+k,width), getYPos(currentVal[0],0,height));
               cairo_line_to(cr, getXPos(i+k,width), getYPos(nextVal,0,height));
               break;
@@ -1768,8 +1768,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           }
         }
 
-        currentVal[0] = getDispSpBinVal(0, i);
-        nextVal = getDispSpBinVal(0, i+binSkipFactor);
+        currentVal[0] = getDispSpBinValAdj(0, i);
+        nextVal = getDispSpBinValAdj(0, i+binSkipFactor);
         //printf("Here! x=%f,y=%f,yorig=%f xclip=%f %f\n",getXPos(i,width), rawdata.hist[drawing.multiPlots[0]][drawing.lowerLimit+i],rawdata.hist[drawing.multiPlots[0]][drawing.lowerLimit+i],0,width);
         cairo_line_to(cr, getXPos(i+binSkipFactor,width), getYPos(currentVal[0],0,height));
         cairo_line_to(cr, getXPos(i+binSkipFactor,width), getYPos(nextVal,0,height));
@@ -1899,7 +1899,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
 
   //draw axis labels
   setTextColor(cr);
-  char axisLabel[16],axisYLabel[32];
+  char axisLabel[16],axisYLabel[64];
   cairo_text_extents_t extents; //for getting dimensions needed to center text labels
   //x axis
   if(calpar.calMode == 0){
@@ -1909,7 +1909,18 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   }else{
     //set labels to calibrated units
     strcpy(axisLabel,calpar.calUnit);
-    sprintf(axisYLabel,"%s",calpar.calYUnit);
+    switch(drawing.valueDrawMode){
+      case VALUE_PLUSERR:
+        sprintf(axisYLabel,"%s (errors added)",calpar.calYUnit);
+        break;
+      case VALUE_MINUSERR:
+        sprintf(axisYLabel,"%s (errors subtracted)",calpar.calYUnit);
+        break;
+      case VALUE_DATA:
+      default:
+        sprintf(axisYLabel,"%s",calpar.calYUnit);
+        break;
+    }
   }
   cairo_text_extents(cr, axisLabel, &extents);
   cairo_set_font_size(cr, plotFontSize*1.2);
@@ -1957,7 +1968,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       cairo_set_line_width(cr, 2.0*scaleFactor);
       for(int32_t i=0;i<fitpar.numFitPeaks;i++){
         if((fitpar.fitPeakInitGuess[i] > drawing.lowerLimit)&&(fitpar.fitPeakInitGuess[i] < drawing.upperLimit)){
-          cairo_arc(cr,getXPosFromCh(fitpar.fitPeakInitGuess[i],width,1),(-0.002*(height)*30.0)-getYPos(getDispSpBinVal(0,(int)(fitpar.fitPeakInitGuess[i])-drawing.lowerLimit),0,height),5.,0.,2*G_PI);
+          cairo_arc(cr,getXPosFromCh(fitpar.fitPeakInitGuess[i],width,1),(-0.002*(height)*30.0)-getYPos(getDispSpBinValAdj(0,(int)(fitpar.fitPeakInitGuess[i])-drawing.lowerLimit),0,height),5.,0.,2*G_PI);
         }
         cairo_stroke_preserve(cr);
         cairo_fill(cr);

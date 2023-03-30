@@ -47,6 +47,7 @@ GtkBox *no_sp_box;
 GtkImage *no_sp_image;
 //display menu
 GtkSpinButton *spectrum_selector;
+GtkComboBoxText *value_mode_combobox;
 GtkCheckButton *autoscale_button, *logscale_button, *cursor_draw_button;
 GtkLabel *display_spectrumname_label;
 GtkScale *contract_scale, *zoom_scale; //*pan_scale;
@@ -194,6 +195,7 @@ struct {
   float zoomLevel, zoomToLevel; //1.0 = zoomed out fully (on x axis)
   uint8_t autoScale; //0=don't autoscale y axis, 1=autoscale y axis
   uint8_t logScale; //0=draw in linear scale, 1=draw in log scale (y-axis)
+  uint8_t valueDrawMode; //values from value_drawmode_enum
   char zoomingSpX, zoomingSpY; //0 if no zoom motion, 1 if zooming
   gint64 zoomXStartFrameTime, zoomYStartFrameTime; //the frames at which the x and y-scale zooms were started
   gint64 zoomXLastFrameTime, zoomYLastFrameTime; //the most recent frames during the x and y-scale zooms
@@ -259,3 +261,4 @@ enum fit_weight_mode_enum{FITWEIGHT_DATA, FITWEIGHT_FIT, FITWEIGHT_NONE, FITWEIG
 enum fit_par_enum{FITPAR_BGCONST,FITPAR_BGLIN,FITPAR_BGQUAD,FITPAR_R,FITPAR_BETA,FITPAR_STEP,FITPAR_POS1,FITPAR_WIDTH1,FITPAR_AMP1,FITPAR_ENUM_LENGTH};
 enum fit_state_enum{FITSTATE_NOTFITTING, FITSTATE_SETTINGLIMITS, FITSTATE_SETTINGPEAKS, FITSTATE_FITTING, FITSTATE_FITCOMPLETE, FITSTATE_ENUM_LENGTH};
 enum multiplot_mode_enum{MULTIPLOT_NONE, MULTIPLOT_SUMMED, MULTIPLOT_OVERLAY_COMMON, MULTIPLOT_OVERLAY_INDEPENDENT, MULTIPLOT_STACKED, MULTIPLOT_ENUM_LENGTH};
+enum value_drawmode_enum{VALUE_DATA, VALUE_PLUSERR, VALUE_MINUSERR, VALUE_ENUM_LENGTH};

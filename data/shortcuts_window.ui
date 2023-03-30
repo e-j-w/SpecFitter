@@ -146,6 +146,27 @@
             <child>
               <object class="GtkShortcutsShortcut">
                 <property name="visible">1</property>
+                <property name="accelerator">bracketleft</property>
+                <property name="title" translatable="yes" context="shortcut window">Subtract errors from data</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="visible">1</property>
+                <property name="accelerator">bracketright</property>
+                <property name="title" translatable="yes" context="shortcut window">Add errors to data</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="visible">1</property>
+                <property name="accelerator">backslash</property>
+                <property name="title" translatable="yes" context="shortcut window">Do not add/subtract errors from data</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="visible">1</property>
                 <property name="accelerator">plus</property>
                 <property name="title" translatable="yes" context="shortcut window">Zoom in view</property>
               </object>
