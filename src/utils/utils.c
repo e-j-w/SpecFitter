@@ -26,16 +26,16 @@ void getFormattedValAndUncertainty(const double val, const double err, char *str
   int sigf = 0;
   if(fabs(errc) > 1.95){
     while(fabs(errc) >= 19.5){
-      errc /= 10;
+      errc /= 10.;
       sigf++;
       if(sigf > 100){
         printf("WARNING: stuck on getFormattedValAndUncertainty loop 1.\n");
         break; //safety
       }
     }
-  }else if((fabs(errc) < 1.95)&&(errc != 0)){
+  }else if((fabs(errc) < 1.95)&&(errc != 0.)){
     while(fabs(errc) <= 1.95){
-      errc *= 10;
+      errc *= 10.;
       sigf--;
       if(sigf > 100){
         printf("WARNING: stuck on getFormattedValAndUncertainty loop 2.\n");
@@ -47,7 +47,7 @@ void getFormattedValAndUncertainty(const double val, const double err, char *str
   }
 
   //round the value based on the sig fig
-  valc /= pow(10,sigf);
+  valc /= pow(10.,sigf);
   if(roundErr)
     valc = round(valc);
 

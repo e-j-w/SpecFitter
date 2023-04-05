@@ -264,16 +264,20 @@ long double evalFitOnePeakNoBG(const long double xChVal, const int32_t peak){
     return 0.0;
 
   long double pkVal = 0.;
-  long double h, r, r1, r2, u, u1, u2, u3, u5, u7,  w, x, x1, y, y1, z, beta;
+  long double h, r, r1, r2, u, u1, u2, u3, u5, u7,  w, x, x1, y = 0.0, y1 = 0.0, z, beta;
   uint8_t notail = 0;
   
-  if(fitpar.fitParFree[3] == 0 && fitpar.fitParVal[3] == 0.f){
+  if(fitpar.fitParFree[3] == 0 && fitpar.fitParVal[3] == 0.0){
     notail = 1;
   }else{
     notail = 0;
+    beta = fitpar.fitParVal[4];
+    if(beta == 0.){
+      beta = 0.001; //handle symmetric peak case
+    }
     y = fitpar.fitParVal[peak*3 + 7] / (fitpar.fitParVal[4] * 3.33021838);
-    if(y > 4.f){
-      y1 = 0.f;
+    if(y > 4.0){
+      y1 = 0.0;
       notail = 1;
     }else{
       y1 = erfcl(y);
@@ -282,13 +286,16 @@ long double evalFitOnePeakNoBG(const long double xChVal, const int32_t peak){
 
   x1 = xChVal;
   x = x1 - fitpar.fitParVal[peak*3 + 6];
-  long double width  = fitpar.fitParVal[peak*3 + 7]; // normalization factor of 2.35482 omitted due to differences in how RadWare and this program report FWHM
-  h      = fitpar.fitParVal[peak*3 + 8];
+  long double width = fitpar.fitParVal[peak*3 + 7]; // normalization factor of 2.35482 omitted due to differences in how RadWare and this program report FWHM
+  if(width == 0.0){
+    return 0.0;
+  }
+  h = fitpar.fitParVal[peak*3 + 8];
   w = x / (width*1.41421356);
-  if(fabsl(w) > 4.f){
-    u1 = 0.f;
-    u3 = 0.f;
-    if(x < 0.f) u3 = 2.f;
+  if(fabsl(w) > 4.0){
+    u1 = 0.0;
+    u3 = 0.0;
+    if(x < 0.0) u3 = 2.0;
   }else{
     u1 = expl(-w*w);
     u3 = erfcl(w);
@@ -298,24 +305,24 @@ long double evalFitOnePeakNoBG(const long double xChVal, const int32_t peak){
     u = u1 + fitpar.fitParVal[5] * u3 / 200.;
     pkVal += h * u;
   }else{
-    r = fitpar.fitParVal[3] / 100.f;
-    r1 = 1.f - r;
+    r = fitpar.fitParVal[3] / 100.0;
+    r1 = 1.0 - r;
     beta = fitpar.fitParVal[4];
     z = w + y;
     if((r2 = x / beta, fabsl(r2)) > 12.){
-      u5 = 0.f;
-      u7 = 0.f;
+      u5 = 0.0;
+      u7 = 0.0;
     }else{
       u7 = expl(x / beta) / y1;
-      if(fabsl(z) > 4.f){
-        u5 = 0.f;
-        if (z < 0.f) u5 = 2.f;
+      if(fabsl(z) > 4.0){
+        u5 = 0.0;
+        if(z < 0.0) u5 = 2.0;
       }else{
         u5 = erfcl(z);
       }
     }
     u2 = u7 * u5;
-    u = r1 * u1 + r * u2 + fitpar.fitParVal[5] * u3 / 200.f;
+    u = r1 * u1 + r * u2 + fitpar.fitParVal[5] * u3 / 200.0;
     pkVal += h * u;
   }
   
@@ -347,8 +354,8 @@ void evalPeakAreas(){
   long double pkwidth;
 
   /* calc. areas, centroids and errors */
-  r = fitpar.fitParVal[3] / 50.f;
-  r1 = 1.f - r * .5f;
+  r = fitpar.fitParVal[3] / 50.0;
+  r1 = 1.0 - r * .5;
   beta = fitpar.fitParVal[4];
   if(beta == 0.){
     beta = 0.001; //handle symmetric peak case
@@ -365,10 +372,9 @@ void evalPeakAreas(){
     area = r * beta * d + pkwidth * 1.06446705f * r1;
     fitpar.areaVal[i] = area * fitpar.fitParVal[ic + 1] / (1.0*drawing.contractFactor);
     eh = area * fitpar.fitParErr[ic + 1];
-    er = (beta * 2.f * d - pkwidth * 1.06446705f) * fitpar.fitParErr[3] / 100.f;
-    eb = r * d * (y * 2.f * y + 1.f - d * 1.12837917f * y) * fitpar.fitParErr[4];
-    ew = (r1 * 1.06446705f + r * .600561216f * d *
-	  (d / 1.77245385f - y)) * fitpar.fitParErr[ic];
+    er = (beta * 2.0 * d - pkwidth * 1.06446705f) * fitpar.fitParErr[3] / 100.0;
+    eb = r * d * (y * 2.0 * y + 1.0 - d * 1.12837917f * y) * fitpar.fitParErr[4];
+    ew = (r1 * 1.06446705f + r * .600561216f * d * (d / 1.77245385f - y)) * fitpar.fitParErr[ic];
     fitpar.areaErr[i] = sqrtl(eh * eh + fitpar.fitParVal[ic+1] * fitpar.fitParVal[ic+1] * (er * er + eb * eb + ew * ew));
     fitpar.areaErr[i] /= (1.0*drawing.contractFactor);
   }
@@ -385,15 +391,21 @@ int eval(long double *pars, uint8_t *freepars, long double *derivs, int ichan, l
   if(mode == -9){
     /* mode = -9 ; initialise, i.e calculate NOTAIL,Y,Y1,Y2 */
     notail = 1;
-    if(freepars[3] == 0 && pars[3] == 0.f) return 0;
+    if(freepars[3] == 0 && pars[3] == 0.0) return 0;
     notail = 0;
+    if(pars[4] == 0.0){
+      pars[4] = 0.0001; //guard against divide by zero
+    }
     for(i = 0; i < npks; ++i){
       y[i] = pars[i*3 + 7] / (pars[4] * 3.33021838);
-      if(y[i] > 4.f){
-        y1[i] = 0.f;
+      if(y[i] > 4.0){
+        y1[i] = 0.0;
         notail = 1;
       }else{
         y1[i] = erfcl(y[i]);
+        if(y1[i] == 0.0){
+          y1[i] = 0.0001; //guard against divide by zero
+        }
         y2[i] = (expl(-y[i] * y[i]) * 1.12837917 / y1[i]);
       }
     }
@@ -404,23 +416,23 @@ int eval(long double *pars, uint8_t *freepars, long double *derivs, int ichan, l
   if(mode >= 1){
     derivs[1] = x;
     derivs[2] = x*x;
-    derivs[3] = 0.f;
-    derivs[4] = 0.f;
-    derivs[5] = 0.f;
+    derivs[3] = 0.0;
+    derivs[4] = 0.0;
+    derivs[5] = 0.0;
   }
   x1 = (double)(ichan);
   for(i = 0; i < npks; ++i){
     x = x1 - pars[i*3 + 6];
-    width  = pars[i*3 + 7]; // normalization factor of 2.35482 omitted due to differences in how RadWare and this program report FWHM
+    width = pars[i*3 + 7]; // normalization factor of 2.35482 omitted due to differences in how RadWare and this program report FWHM
     if(width == 0.){
       continue; //no width, go to next peak
     }
-    h      = pars[i*3 + 8];
+    h = pars[i*3 + 8];
     w = x / (width*1.41421356);
-    if(fabsl(w) > 4.f){
-      u1 = 0.f;
-      u3 = 0.f;
-      if(x < 0.f) u3 = 2.f;
+    if(fabsl(w) > 4.0){
+      u1 = 0.0;
+      u3 = 0.0;
+      if(x < 0.0) u3 = 2.0;
     }else{
       u1 = expl(-w*w);
       u3 = erfcl(w);
@@ -444,36 +456,36 @@ int eval(long double *pars, uint8_t *freepars, long double *derivs, int ichan, l
       }
       continue;
     }
-    r = pars[3] / 100.f;
-    r1 = 1.f - r;
+    r = pars[3] / 100.0;
+    r1 = 1.0 - r;
     beta = pars[4];
     z = w + y[i];
     if((r2 = x / beta, fabsl(r2)) > 12.){
-      u5 = 0.f;
-      u6 = 0.f;
-      u7 = 0.f;
+      u5 = 0.0;
+      u6 = 0.0;
+      u7 = 0.0;
     }else{
       u7 = expl(x / beta) / y1[i];
-      if(fabsl(z) > 4.f){
-        u5 = 0.f;
-        if (z < 0.f) u5 = 2.f;
-        u6 = 0.f;
+      if(fabsl(z) > 4.0){
+        u5 = 0.0;
+        if (z < 0.0) u5 = 2.0;
+        u6 = 0.0;
       }else{
         u5 = erfcl(z);
         u6 = expl(-z * z) * 1.12837917;
       }
     }
     u2 = u7 * u5;
-    u = r1 * u1 + r * u2 + pars[5] * u3 / 200.f;
+    u = r1 * u1 + r * u2 + pars[5] * u3 / 200.0;
     *fit += h * u;
     /* calculate derivs only for mode.ge.1 */
     if(mode >= 1){
       u8 = u5 * y2[i];
       derivs[3] += h * (u2 - u1) / 100.;
       derivs[4] += r * h * u7 * (y[i] * (u6 - u8) - u5 * x / beta) / beta;
-      derivs[5] += h * u3 / 200.f;
-      a = u1 * (r1 * w + pars[5] / 354.49077) * 2.f;
-      derivs[i*3 + 6] = h * (a + r*u7*(u6 - u5*2.f*y[i])) / (width*1.41421356);
+      derivs[5] += h * u3 / 200.0;
+      a = u1 * (r1 * w + pars[5] / 354.49077) * 2.0;
+      derivs[i*3 + 6] = h * (a + r*u7*(u6 - u5*2.0*y[i])) / (width*1.41421356);
       derivs[i*3 + 7] = h * (w*a + r*u7*(u6 * (w - y[i]) + u8*y[i])) * 1.41421356f / (width*2.35482);
       derivs[i*3 + 8] = u;
     }
@@ -490,8 +502,8 @@ void performGausFit(){
   lin_eq_type linEq;
   linEq.dim = 0;
 
-  int maxits = 300; //fitter iterations
-  long double alpha[MAX_DIM][MAX_DIM], ddat;
+  int maxits = 500; //maximum number of fitter iterations
+  long double alpha[MAX_DIM][MAX_DIM];
   long double diff, beta[MAX_DIM], b[MAX_DIM], delta[MAX_DIM], fixed[MAX_DIM], ers[MAX_DIM];
   long double chisq1, flamda, dat, fit, r1;
   int i, j, k, l, m, conv = 0, nits, test, nextp[MAX_DIM];
@@ -510,21 +522,21 @@ void performGausFit(){
     fixed[i] = (double)fitpar.fitParFree[i];
   }
   /* set up fixed relative widths */
-  uint8_t rwfixed = 0;
+  uint8_t relWidthFixed = 0;
   if(fitpar.peakWidthMethod == 1){
     uint8_t niw = 0;
     //loop over width parameters for all peaks
-    for(j = 7; j < npars; j += 3){
+    for(j = FITPAR_WIDTH1; j < npars; j += 3){
       if(fitpar.fitParFree[j] == 1) miw = j;
       /* miw = highest fitted (non-fixed) width par. no. */
       niw = (uint8_t)(niw + fitpar.fitParFree[j]);
     }
     /* niw = no. of fitted (non-fixed) widths */
     if(niw > 1){
-      for(j = 7; j <= miw; j += 3){
+      for(j = FITPAR_WIDTH1; j <= miw; j += 3){
 	      fitpar.fitParFree[j] = 0;
       }
-      rwfixed = 1;
+      relWidthFixed = 1;
       linEq.dim = (uint8_t)(linEq.dim - niw + 1);
       nip1 = linEq.dim;
     }
@@ -545,7 +557,7 @@ void performGausFit(){
   for(j = 0; j < npars; ++j){
     if(fitpar.fitParFree[j] != 0) nextp[k++] = j;
   }
-  if(rwfixed) nextp[k++] = miw;
+  if(relWidthFixed) nextp[k++] = miw;
   if(k != linEq.dim){
     //probably the number of free parameters supplied is incorrect
     printf("FIT ERROR: Number of fit parameters is incorrect (%i %u).\n",k,linEq.dim);
@@ -558,21 +570,21 @@ void performGausFit(){
   flamda = .001f;
   nits = 0;
   test = 0;
-  derivs[0] = 1.f;
+  derivs[0] = 1.0;
   for(i = 0; i < npars; ++i){
-    fitpar.fitParErr[i] = 0.f;
+    fitpar.fitParErr[i] = 0.0;
     b[i] = fitpar.fitParVal[i];
   }
 
   /* evaluate fit, alpha & beta matrices, & chisq */
  NEXT_ITERATION:
   for(j = 0; j < linEq.dim; ++j){
-    beta[j] = 0.f;
+    beta[j] = 0.0;
     for(k = 0; k <= j; ++k){
-      alpha[k][j] = 0.f;
+      alpha[k][j] = 0.0;
     }
   }
-  chisq1 = 0.f;
+  chisq1 = 0.0;
   eval(fitpar.fitParVal, fitpar.fitParFree, derivs, 0, &fit, fitpar.numFitPeaks, -9);
 
   for(i = fitpar.fitStartCh; i <= fitpar.fitEndCh; i += drawing.contractFactor){
@@ -586,11 +598,10 @@ void performGausFit(){
     }else{
       dat = 1.;
     }
-    if (dat < 1.f) dat = 1.f;
-    ddat = (double) dat;
+    if(dat < 1.0) dat = 1.0;
     chisq1 += diff * diff / dat;
-    if(rwfixed){
-      for (k = 7; k < miw; k += 3) {
+    if(relWidthFixed){
+      for(k = FITPAR_WIDTH1; k < miw; k += 3){
         derivs[miw] += fixed[k] * derivs[k];
       }
     }
@@ -598,26 +609,29 @@ void performGausFit(){
       j = nextp[l];
       beta[l] += diff * derivs[j] / dat;
       for(m = 0; m <= l; ++m){
-        alpha[m][l] += (double)derivs[j] * (double)derivs[nextp[m]] / ddat;
+        alpha[m][l] += (double)derivs[j] * (double)derivs[nextp[m]] / dat;
       }
     }
   }
   chisq1 /= (float)(fitpar.ndf);
   /* invert modified curvature matrix to find new parameters */
  INVERT_MATRIX:
+  if(flamda < 0.0){
+    flamda = 0.0; //probably not needed
+  }
   for(j = 0; j < linEq.dim; ++j){
-    if (alpha[j][j] * alpha[j][j] == 0.) {
-      printf("Cannot - diagonal element no. %d equal to zero.\n", j);
+    if(alpha[j][j] * alpha[j][j] == 0.){
+      printf("Cannot fit - diagonal element no. %d equal to zero.\n", j);
       goto QUIT;
     }
   }
-  linEq.matrix[0][0] = flamda + 1.f;
+  linEq.matrix[0][0] = flamda + 1.0;
   for(j = 1; j < linEq.dim; ++j){
     for(k = 0; k < j; ++k){
       linEq.matrix[k][j] = alpha[k][j] / sqrtl(alpha[j][j] * alpha[k][k]);
       linEq.matrix[j][k] = linEq.matrix[k][j];
     }
-    linEq.matrix[j][j] = flamda + 1.f;
+    linEq.matrix[j][j] = flamda + 1.0;
   }
   linEq.dim = linEq.dim;
   //invert matrix
@@ -627,7 +641,7 @@ void performGausFit(){
   }
   if(!test){
     for(j = 0; j < linEq.dim; ++j){
-      delta[j] = 0.f;
+      delta[j] = 0.0;
       for(k = 0; k < linEq.dim; ++k){
         delta[j] += beta[k] * linEq.inv_matrix[k][j] / sqrtl(alpha[j][j] * alpha[k][k]);
       }
@@ -637,13 +651,13 @@ void performGausFit(){
       j = nextp[l];
       b[j] = fitpar.fitParVal[j] + delta[l];
     }
-    if(rwfixed && (nip1>0)){
-      for(j = 7; j <= miw - 3; j += 3){
+    if(relWidthFixed && (nip1>0)){
+      for(j = FITPAR_WIDTH1; j <= miw - 3; j += 3){
         b[j] = fitpar.fitParVal[j] + fixed[j] * delta[nip1-1];
       }
     }
-    for(j = 7; j <= npars; j += 3){
-      if (b[j] < 0.0f) b[j] = fabsl(b[j]);
+    for(j = FITPAR_WIDTH1; j <= npars; j += 3){
+      if(b[j] < 0.0f) b[j] = fabsl(b[j]);
     }
     /* if chisq increased, increase flamda and try again */
     fitpar.chisq = 0.;
@@ -659,12 +673,12 @@ void performGausFit(){
       }else{
         dat = 1.;
       }
-      if(dat < 1.f) dat = 1.f;
+      if(dat < 1.0) dat = 1.0;
       fitpar.chisq += diff * diff / dat;
     }
     fitpar.chisq /= (long double)(fitpar.ndf);
-    if(fitpar.chisq > chisq1 && flamda < 2.f){
-      flamda *= 10.f;
+    if(fitpar.chisq > chisq1 && flamda < 2.0){
+      flamda *= 10.0;
       goto INVERT_MATRIX;
     }
   }
@@ -673,19 +687,19 @@ void performGausFit(){
   conv = 1;
   for(j = 0; j < linEq.dim; ++j){
     if(linEq.inv_matrix[j][j] < 0.) linEq.inv_matrix[j][j] = 0.;
-    ers[j] = sqrtl(linEq.inv_matrix[j][j] / alpha[j][j]) * sqrtl(flamda + 1.f);
-    if((r1 = delta[j], fabsl(r1)) >= ers[j] / 100.f) conv = 0;
+    ers[j] = sqrtl(linEq.inv_matrix[j][j] / alpha[j][j]) * sqrtl(flamda + 1.0);
+    if((r1 = delta[j], fabsl(r1)) >= ers[j] / 100.0) conv = 0;
   }
   if(!test){
     for(j = 0; j < npars; ++j){
       fitpar.fitParVal[j] = b[j];
     }
-    flamda /= 10.f;
+    flamda /= 10.0;
     ++nits;
     if (!conv && nits < maxits) goto NEXT_ITERATION;
     /* re-do matrix inversion with FLAMDA=0
        to calculate errors */
-    flamda = 0.f;
+    flamda = 0.0;
     test = 1;
     goto INVERT_MATRIX;
   }
@@ -694,8 +708,8 @@ void performGausFit(){
   for(l = 0; l < linEq.dim; ++l){
     fitpar.fitParErr[nextp[l]] = ers[l];
   }
-  if(rwfixed && (nip1>0)){
-    for (j = 7; j <= miw; j += 3) {
+  if(relWidthFixed && (nip1>0)){
+    for(j = FITPAR_WIDTH1; j <= miw; j += 3){
       fitpar.fitParFree[j] = (uint8_t)(fixed[j]);
       fitpar.fitParErr[j] = fixed[j] * ers[nip1 - 1];
     }
@@ -703,7 +717,18 @@ void performGausFit(){
 
   evalPeakAreas(); //get areas/errors
 
-  if(rwfixed) printf("Relative widths fixed.\n");
+  if(relWidthFixed) printf("Relative widths fixed.\n");
+
+  //check peak positions
+  //the program can hang if the best fit values
+  //are extremely far from any valid channel
+  for(uint8_t peakNum=0;peakNum<fitpar.numFitPeaks;peakNum++){
+    long double peakPos = fitpar.fitParVal[FITPAR_POS1+(3*peakNum)];
+    if((peakPos < fitpar.fitStartCh)||(peakPos > fitpar.fitEndCh)){
+      printf("Fit converged but peak %u was outside the fit range.\n",peakNum);
+      goto QUIT;
+    }
+  }
 
   if(conv){
     printf("Converged after %d fit iterations.\n", nits);
@@ -724,7 +749,7 @@ void performGausFit(){
     return;
   }
   printf("Failed to converge after %d iterations.\nWARNING: do not believe quoted parameter values!\n", nits);
-  if(rwfixed){
+  if(relWidthFixed){
     for(i = 6; i < npars; ++i){
       fitpar.fitParFree[i] = (uint8_t)(fixed[i]);
     }
@@ -736,7 +761,7 @@ void performGausFit(){
   return;
 
  QUIT:
-  if(rwfixed){
+  if(relWidthFixed){
     for(i = 6; i < npars; ++i){
       fitpar.fitParFree[i] = (uint8_t)(fixed[i]);
     }
@@ -916,18 +941,6 @@ float centroidGuess(const float centroidInit){
   return centroidVal;
 }
 
-/*int isCentroidNearOthers(const int32_t centInd, const float dist){
-  
-  for(int32_t i=0;i<fitpar.numFitPeaks;i++){
-    if(i!=centInd){
-      if(fabs(fitpar.fitPeakInitGuess[centInd] - fitpar.fitPeakInitGuess[i])<dist){
-        return 1;
-      }
-    }
-  }
-  return 0;
-}*/
-
 int startGausFit(){
 
   guiglobals.fittingSp = FITSTATE_FITTING;
@@ -1081,7 +1094,6 @@ int startGausFit(){
         break;
     }
   }
-  
   
   //printf("Initial guesses: %f %f %f %f %f %f %f %f\n",fitpar.fitParVal[FITPAR_BGCONST],fitpar.fitParVal[FITPAR_BGLIN],fitpar.fitParVal[FITPAR_BGQUAD],fitpar.fitParVal[FITPAR_R],fitpar.fitParVal[FITPAR_BETA],fitpar.fitParVal[FITPAR_AMP1],fitpar.fitParVal[FITPAR_POS1],fitpar.fitParVal[FITPAR_WIDTH1]);
 
