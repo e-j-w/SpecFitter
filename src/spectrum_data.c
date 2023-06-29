@@ -262,7 +262,7 @@ float getDispSpBinVal(const int32_t dispSpNum, const int32_t bin){
   return getSpBinValOrWeight(dispSpNum,drawing.lowerLimit+bin,0);
 }
 float getDispSpBinErr(const int32_t dispSpNum, const int32_t bin){
-  return sqrtf(getSpBinValOrWeight(dispSpNum,drawing.lowerLimit+bin,1));
+  return sqrtf(fabsf(getSpBinValOrWeight(dispSpNum,drawing.lowerLimit+bin,1)));
 }
 float getDispSpBinValAdj(const int32_t dispSpNum, const int32_t bin){
   switch(drawing.valueDrawMode){
