@@ -2,12 +2,14 @@ GLIB_COMPILE_RESOURCES = `pkg-config --variable=glib_compile_resources gio-2.0`
 
 RESOURCES = $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir=./data --generate-dependencies data/specfitter.gresource.xml)
 
-CFLAGS = -I. -I./src/utils -O2 -Wall -Wextra -Wshadow -Wunreachable-code -Wpointer-arith -Wcast-align -Wformat-security -Wstack-protector -Wconversion -std=c99 -DGDK_DISABLE_DEPRECATED -DGTK_DISABLE_DEPRECATED
+CFLAGS = -I. -I./src/utils -O2  -Wall -Wextra -Wshadow -Wunreachable-code -Wpointer-arith -Wcast-align -Wformat-security -Wstack-protector -Wconversion -std=c99 -DGDK_DISABLE_DEPRECATED -DGTK_DISABLE_DEPRECATED
+# skippable warnings
+CFLAGS += -Wno-implicit-function-declaration -Wno-deprecated-declarations
 
 all: src/utils/lin_eq_solver.o src/utils/utils.o specfitter-resources.c specfitter
 
 specfitter: src/specfitter.c src/specfitter.h src/gui.c src/read_data.c src/read_config.c src/write_data.c src/fit_data.c src/spectrum_drawing.c src/spectrum_data.c specfitter-resources.c src/utils/lin_eq_solver.o src/utils/utils.o
-	gcc src/specfitter.c $(CFLAGS) -lm `pkg-config --cflags --libs gtk+-3.0` -export-dynamic -o specfitter src/utils/lin_eq_solver.o src/utils/utils.o
+	gcc src/specfitter.c $(CFLAGS) -lm `pkg-config --cflags --libs gtk4` -export-dynamic -o specfitter src/utils/lin_eq_solver.o src/utils/utils.o
 
 specfitter-resources.c: data/specfitter.gresource.xml data/specfitter.ui data/shortcuts_window.ui $(RESOURCES)
 	$(GLIB_COMPILE_RESOURCES) data/specfitter.gresource.xml --target=specfitter-resources.c --sourcedir=./data --generate-source

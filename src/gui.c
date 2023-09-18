@@ -4,6 +4,10 @@
 //the various UI elements used in the program.  Initialization
 //routines at the bottom of the file.
 
+void hide_on_delete(GtkWidget *widget){
+  gtk_widget_set_visible(widget,FALSE); //hide the widget
+}
+
 void showPreferences(int page){
   gtk_notebook_set_current_page(preferences_notebook,page);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(discard_empty_checkbutton),rawdata.dropEmptySpectra);
@@ -519,7 +523,7 @@ void on_open_button_clicked(){
   GtkFileChooserNative *native = gtk_file_chooser_native_new ("Open Data File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
   file_open_dialog = GTK_FILE_CHOOSER(native);
   if(currentFolderSelection != NULL){
-    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection);
+    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection,NULL);
   }
   gtk_file_chooser_set_select_multiple(file_open_dialog, TRUE);
   file_filter = gtk_file_filter_new();
@@ -646,7 +650,7 @@ void on_append_button_clicked(){
   GtkFileChooserNative *native = gtk_file_chooser_native_new ("Add More Data File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
   file_open_dialog = GTK_FILE_CHOOSER(native);
   if(currentFolderSelection != NULL){
-    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection);
+    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection,NULL);
   }
   gtk_file_chooser_set_select_multiple(file_open_dialog, TRUE);
   file_filter = gtk_file_filter_new();
@@ -746,7 +750,7 @@ void on_save_button_clicked(){
   GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Spectrum Data", window, GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
   file_save_dialog = GTK_FILE_CHOOSER(native);
   if(currentFolderSelection != NULL){
-    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection);
+    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection,NULL);
   }
   gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
   gtk_file_chooser_set_do_overwrite_confirmation(file_save_dialog, TRUE);
@@ -958,7 +962,7 @@ void on_export_save_button_clicked(){
   GtkFileChooserNative *native = gtk_file_chooser_native_new ("Export Spectrum Data", window, GTK_FILE_CHOOSER_ACTION_SAVE, "_Export", "_Cancel");
   file_save_dialog = GTK_FILE_CHOOSER(native);
   if(currentFolderSelection != NULL){
-    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection);
+    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection,NULL);
   }
   gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
   gtk_file_chooser_set_do_overwrite_confirmation(file_save_dialog, TRUE);
@@ -1061,7 +1065,7 @@ void on_export_image_button_clicked(){
   GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Image File", window, GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
   file_save_dialog = GTK_FILE_CHOOSER(native);
   if(currentFolderSelection != NULL){
-    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection);
+    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection,NULL);
   }
   gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
   gtk_file_chooser_set_do_overwrite_confirmation(file_save_dialog, TRUE);
@@ -2367,8 +2371,8 @@ void iniitalizeUIElements(){
   int32_t i;
 
   //import UI layout and graphics data
-  builder = gtk_builder_new_from_resource("/resources/specfitter.ui"); //get UI layout from XML file
-  gtk_builder_add_from_resource(builder, "/resources/shortcuts_window.ui", NULL);
+  builder = gtk_builder_new_from_resource("/resources/specfitter-gtk4.ui"); //get UI layout from XML file
+  gtk_builder_add_from_resource(builder, "/resources/shortcuts_window-gtk4.ui", NULL);
   appIcon = gdk_pixbuf_new_from_resource("/resources/specfitter-application-icon.svg", NULL);
   spIconPixbuf = gdk_pixbuf_new_from_resource("/resources/icon-spectrum-symbolic", NULL);
   spIconPixbufDark = gdk_pixbuf_new_from_resource("/resources/icon-spectrum-symbolic-dark", NULL);
@@ -2377,7 +2381,7 @@ void iniitalizeUIElements(){
 
   //windows
   window = GTK_WINDOW(gtk_builder_get_object(builder, "window"));
-  g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL); //quit the program when closing the window
+  g_signal_connect(window, "destroy", G_CALLBACK(g_application_quit), NULL); //quit the program when closing the window
   calibrate_window = GTK_WINDOW(gtk_builder_get_object(builder, "calibration_window"));
   gtk_window_set_transient_for(calibrate_window, window); //center calibrate window on main window
   comment_window = GTK_WINDOW(gtk_builder_get_object(builder, "comment_window"));
@@ -2425,7 +2429,7 @@ void iniitalizeUIElements(){
   display_button = GTK_BUTTON(gtk_builder_get_object(builder, "display_button"));
   no_sp_image = GTK_IMAGE(gtk_builder_get_object(builder, "no_sp_image"));
   spectrum_drawing_area = GTK_WIDGET(gtk_builder_get_object(builder, "spectrumdrawingarea"));
-  spectrum_drag_gesture = gtk_gesture_drag_new(spectrum_drawing_area); //without this, cannot click away from menus onto the drawing area, needs further investigation
+  spectrum_drag_gesture = gtk_gesture_drag_new(); //without this, cannot click away from menus onto the drawing area, needs further investigation
   zoom_scale = GTK_SCALE(gtk_builder_get_object(builder, "zoom_scale"));
   shortcuts_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "shortcuts_button"));
   about_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "about_button"));
@@ -2617,16 +2621,16 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(manage_cr1), "edited", G_CALLBACK(on_manage_name_cell_edited), NULL);
   g_signal_connect(G_OBJECT(manage_cr2), "toggled", G_CALLBACK(on_manage_cell_toggled), NULL);
   g_signal_connect(G_OBJECT(export_mode_combobox), "changed", G_CALLBACK(on_export_mode_combobox_changed), NULL);
-  g_signal_connect(G_OBJECT(calibrate_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect(G_OBJECT(comment_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect(G_OBJECT(multiplot_manage_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect(G_OBJECT(export_options_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect(G_OBJECT(export_image_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(calibrate_window), "delete-event", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(comment_window), "delete-event", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(multiplot_manage_window), "delete-event", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(export_options_window), "delete-event", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(export_image_window), "delete-event", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect(G_OBJECT(preferences_window), "delete-event", G_CALLBACK(on_preferences_cancel_button_clicked), NULL);
-  g_signal_connect(G_OBJECT(preferences_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect(G_OBJECT(shortcuts_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect(G_OBJECT(help_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect(G_OBJECT(about_dialog), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(preferences_window), "delete-event", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(shortcuts_window), "delete-event", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(help_window), "delete-event", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(about_dialog), "delete-event", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
 
   //setup keyboard shortcuts
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_f, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_fit_button_clicked), NULL, 0));
@@ -2651,7 +2655,7 @@ void iniitalizeUIElements(){
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_o, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_open_button_clicked), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_a, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_append_button_clicked), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_s, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_save_button_clicked), NULL, 0));
-  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_q, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(gtk_main_quit), NULL, 0));
+  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_q, (GdkModifierType)4, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(g_application_quit), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_escape_button), NULL, 0));
   gtk_accel_group_connect(comment_window_accelgroup, GDK_KEY_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_comment_ok_button_clicked), NULL, 0));
   gtk_accel_group_connect(comment_window_accelgroup, GDK_KEY_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_comment_cancel), NULL, 0));

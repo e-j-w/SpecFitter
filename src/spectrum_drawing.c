@@ -30,13 +30,11 @@ void setGridLineColor(cairo_t *cr){
 //converts cursor position units to channel units on the displayed spectrum
 //return value is float to allow sub-channel prescision, cast it to int32_t if needed
 float getCursorChannel(const double cursorx, const double cursory){
-  GdkRectangle dasize;  // GtkDrawingArea size
-  GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
-  // Determine GtkDrawingArea dimensions
-  gdk_window_get_geometry(gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
-  if((cursorx > XORIGIN)&&(cursory < (dasize.height - YORIGIN))){
+  int width = gtk_widget_get_size(GTK_WIDGET(window),GTK_ORIENTATION_HORIZONTAL);
+  int height = gtk_widget_get_size(GTK_WIDGET(window),GTK_ORIENTATION_HORIZONTAL);
+  if((cursorx > XORIGIN)&&(cursory < (height - YORIGIN))){
     
-    float cursorChan = (float)(drawing.lowerLimit + (((cursorx)-XORIGIN)/(dasize.width-XORIGIN))*(drawing.upperLimit - drawing.lowerLimit));
+    float cursorChan = (float)(drawing.lowerLimit + (((cursorx)-XORIGIN)/(width-XORIGIN))*(drawing.upperLimit - drawing.lowerLimit));
     //printf("chan: %f\n",cursorChan);
     return cursorChan;
     //return cursorChan - fmod(cursorChan,drawing.contractFactor);
@@ -47,11 +45,8 @@ float getCursorChannel(const double cursorx, const double cursory){
 //converts cursor position units to y-value on the displayed spectrum
 //this is the value on the displayed y-axis, at the cursor postion
 float getCursorYVal(const double cursorx, const double cursory){
-  GdkRectangle dasize;  // GtkDrawingArea size
-  GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
-  // Determine GtkDrawingArea dimensions
-  gdk_window_get_geometry(gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
-  if((cursorx > XORIGIN)&&(cursory < (dasize.height - YORIGIN))){
+  int height = gtk_widget_get_size(GTK_WIDGET(window),GTK_ORIENTATION_HORIZONTAL);
+  if((cursorx > XORIGIN)&&(cursory < (height - YORIGIN))){
     float cursorVal;
     switch(drawing.multiplotMode){
       case MULTIPLOT_SUMMED:
@@ -59,12 +54,12 @@ float getCursorYVal(const double cursorx, const double cursory){
         //single plot mode
         if(drawing.logScale){
           if(drawing.scaleLevelMin[0] > 0){
-            cursorVal = powf(10.0f,(float)((dasize.height-YORIGIN - cursory)*log10(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/(dasize.height-YORIGIN))) + drawing.scaleLevelMin[0];
+            cursorVal = powf(10.0f,(float)((height-YORIGIN - cursory)*log10(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/(height-YORIGIN))) + drawing.scaleLevelMin[0];
           }else{
-            cursorVal = powf(10.0f,(float)((dasize.height-YORIGIN - cursory)*log10(drawing.scaleLevelMax[0])/(dasize.height-YORIGIN)));
+            cursorVal = powf(10.0f,(float)((height-YORIGIN - cursory)*log10(drawing.scaleLevelMax[0])/(height-YORIGIN)));
           }
         }else{
-          cursorVal = drawing.scaleLevelMax[0] - (float)(((cursory)/(dasize.height-YORIGIN)))*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0]);
+          cursorVal = drawing.scaleLevelMax[0] - (float)(((cursory)/(height-YORIGIN)))*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0]);
           //printf("cursorVal: %f, scaleLevelMin: %f, scaleLevelMax: %f\n",cursorVal,drawing.scaleLevelMin[0],drawing.scaleLevelMax[0]);
         }
         break;
@@ -84,11 +79,9 @@ float getCursorYVal(const double cursorx, const double cursory){
 //some shameless magic numbers used to map channel and y-values to comment indicator size
 int getCommentAtCursor(const double cursorx, const double cursory){
 
-  GdkRectangle dasize;  // GtkDrawingArea size
-  GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
-  // Determine GtkDrawingArea dimensions
-  gdk_window_get_geometry(gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
-  if((cursorx > XORIGIN)&&(cursory < ((double)dasize.height - YORIGIN))){
+  int width = gtk_widget_get_size(GTK_WIDGET(window),GTK_ORIENTATION_HORIZONTAL);
+  int height = gtk_widget_get_size(GTK_WIDGET(window),GTK_ORIENTATION_HORIZONTAL);
+  if((cursorx > XORIGIN)&&(cursory < ((double)height - YORIGIN))){
     float cursorCh = getCursorChannel(cursorx, cursory);
     float cursorYVal = getCursorYVal(cursorx, cursory);
     //printf("cursorCh: %f, cursorYVal: %f\n",cursorCh,cursorYVal);
@@ -99,7 +92,7 @@ int getCommentAtCursor(const double cursorx, const double cursory){
           if(rawdata.chanCommentView[i] == 1){
             if(rawdata.chanCommentSp[i] == drawing.displayedView){
               //check proximity to channel
-              if(fabsf((float)rawdata.chanCommentCh[i] - cursorCh) < (30.0f*((float)(drawing.upperLimit - drawing.lowerLimit)/(float)dasize.width))){
+              if(fabsf((float)rawdata.chanCommentCh[i] - cursorCh) < (30.0f*((float)(drawing.upperLimit - drawing.lowerLimit)/(float)width))){
                 //check proximity to y-val
                 float chYVal = rawdata.chanCommentVal[i];
                 if(chYVal < drawing.scaleLevelMin[0]){
@@ -107,7 +100,7 @@ int getCommentAtCursor(const double cursorx, const double cursory){
                 }else if(chYVal > drawing.scaleLevelMax[0]){
                   chYVal = drawing.scaleLevelMax[0];
                 }
-                if(fabs(chYVal - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/(float)dasize.height)){
+                if(fabs(chYVal - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/(float)height)){
                   return i; //this comment is close
                 }
               }
@@ -122,7 +115,7 @@ int getCommentAtCursor(const double cursorx, const double cursory){
             if(rawdata.chanCommentView[i] == 0){
               if(rawdata.chanCommentSp[i] == drawing.multiPlots[0]){
                 //check proximity to channel
-                if(fabsf((float)rawdata.chanCommentCh[i] - cursorCh) < (30.0f*((float)(drawing.upperLimit - drawing.lowerLimit)/(float)dasize.width))){
+                if(fabsf((float)rawdata.chanCommentCh[i] - cursorCh) < (30.0f*((float)(drawing.upperLimit - drawing.lowerLimit)/(float)width))){
                   //check proximity to y-val
                   float chYVal = rawdata.chanCommentVal[i];
                   if(chYVal < drawing.scaleLevelMin[0]){
@@ -130,7 +123,7 @@ int getCommentAtCursor(const double cursorx, const double cursory){
                   }else if(chYVal > drawing.scaleLevelMax[0]){
                     chYVal = drawing.scaleLevelMax[0];
                   }
-                  if(fabs(chYVal - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/(float)dasize.height)){
+                  if(fabs(chYVal - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/(float)height)){
                     return i; //this comment is close
                   }
                 }
@@ -143,7 +136,7 @@ int getCommentAtCursor(const double cursorx, const double cursory){
             if(rawdata.chanCommentView[i] == 1){
               if(rawdata.chanCommentSp[i] == drawing.displayedView){
                 //check proximity to channel
-                if(fabsf((float)rawdata.chanCommentCh[i] - cursorCh) < (30.0f*((float)(drawing.upperLimit - drawing.lowerLimit)/(float)dasize.width))){
+                if(fabsf((float)rawdata.chanCommentCh[i] - cursorCh) < (30.0f*((float)(drawing.upperLimit - drawing.lowerLimit)/(float)width))){
                   //check proximity to y-val
                   float chYVal = rawdata.chanCommentVal[i];
                   if(chYVal < drawing.scaleLevelMin[0]){
@@ -151,7 +144,7 @@ int getCommentAtCursor(const double cursorx, const double cursory){
                   }else if(chYVal > drawing.scaleLevelMax[0]){
                     chYVal = drawing.scaleLevelMax[0];
                   }
-                  if(fabs(chYVal - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/(float)dasize.height)){
+                  if(fabs(chYVal - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/(float)height)){
                     return i; //this comment is close
                   }
                 }
@@ -379,46 +372,50 @@ void on_zoom_out_x(){
 }
 
 //function handling mouse wheel scrolling to zoom the displayed spectrum
-void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
+void on_spectrum_scroll(GtkWidget *widget, GdkScrollEvent *event){
   if(!rawdata.openedSp){
     return;
   }
 
-  if(e->x < XORIGIN){
+  double evtx,evty,deltax,deltay;
+  gdk_event_get_position(GDK_EVENT(event),&evtx,&evty);
+  gdk_scroll_event_get_deltas(GDK_EVENT(event),&deltax,&deltay);
+
+  if(evtx < XORIGIN){
     //out of plot range
     return;
   }
 
   //get scroll direction
-  //printf("direction: %i, delta_x: %f, delta_y: %f\n",e->direction,e->delta_x,e->delta_y);
-  if((e->direction == GDK_SCROLL_UP)||(e->direction == GDK_SCROLL_DOWN)){
-    guiglobals.scrollDir = e->direction;
-  }else if(e->direction == GDK_SCROLL_SMOOTH){
-    if(e->delta_y==1.000){
+  //printf("direction: %i, delta_x: %f, delta_y: %f\n",gdk_event_get_direction(GDK_EVENT(event)),deltax,deltay);
+  if((gdk_event_get_direction(GDK_EVENT(event)) == GDK_SCROLL_UP)||(gdk_event_get_direction(GDK_EVENT(event)) == GDK_SCROLL_DOWN)){
+    guiglobals.scrollDir = (uint8_t)gdk_event_get_direction(GDK_EVENT(event));
+  }else if(gdk_event_get_direction(GDK_EVENT(event)) == GDK_SCROLL_SMOOTH){
+    if(deltay==1.000){
       //mouse wheel down
       guiglobals.scrollDir = GDK_SCROLL_DOWN;
       guiglobals.accSmoothScrollDelta = 1.0;
-    }else if(e->delta_y==-1.000){
+    }else if(deltay==-1.000){
       //mouse wheel up
       guiglobals.scrollDir = GDK_SCROLL_UP;
       guiglobals.accSmoothScrollDelta = 1.0;
-    }else if(e->delta_y>0.0){
+    }else if(deltay>0.0){
       //touchpad scroll down
       if(guiglobals.scrollDir != GDK_SCROLL_DOWN){
         guiglobals.scrollDir = GDK_SCROLL_DOWN;
         return; //skip a frame to account for spurious touchpad inputs
       }else{
-        guiglobals.accSmoothScrollDelta = guiglobals.accSmoothScrollDelta + 0.25*e->delta_y;
+        guiglobals.accSmoothScrollDelta = guiglobals.accSmoothScrollDelta + 0.25*deltay;
       }
-    }else if(e->delta_y<0.0){
+    }else if(deltay<0.0){
       //touchpad scroll up
       if(guiglobals.scrollDir != GDK_SCROLL_UP){
         guiglobals.scrollDir = GDK_SCROLL_UP;
         return; //skip a frame to account for spurious touchpad inputs
       }else{
-        guiglobals.accSmoothScrollDelta = guiglobals.accSmoothScrollDelta - 0.25*e->delta_y;
+        guiglobals.accSmoothScrollDelta = guiglobals.accSmoothScrollDelta - 0.25*deltay;
       }
-    }else if((e->delta_x==0.0)&&(e->delta_y==0.0)){
+    }else if((deltax==0.0)&&(deltay==0.0)){
       //GTK bug lol (https://bugzilla.gnome.org/show_bug.cgi?id=675959)
       if(drawing.zoomLevel > 1.0){
         guiglobals.scrollDir = GDK_SCROLL_UP;
@@ -433,18 +430,15 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
   }
 
   if((guiglobals.scrollDir == GDK_SCROLL_DOWN)&&(drawing.zoomLevel > 1.0)){
-    //printf("Scrolling down at %f %f!\n",e->x,e->y);
+    //printf("Scrolling down at %f %f!\n",evtx,evty);
     on_zoom_out_x();
     //handle zooming that follows cursor
-    GdkRectangle dasize;  // GtkDrawingArea size
-    GdkWindow *wwindow = gtk_widget_get_window(widget);
-    // Determine GtkDrawingArea dimensions
-    gdk_window_get_geometry(wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
+    int width = gtk_widget_get_size(GTK_WIDGET(window),GTK_ORIENTATION_HORIZONTAL);
     if(guiglobals.useZoomAnimations){
       if(drawing.zoomingSpX){
         return;
       }
-      if(e->direction == GDK_SCROLL_SMOOTH){
+      if(gdk_event_get_direction(GDK_EVENT(event)) == GDK_SCROLL_SMOOTH){
         if(guiglobals.accSmoothScrollDelta < 0.25){
           return;
         }
@@ -455,7 +449,7 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
         drawing.zoomToLevel = drawing.zoomLevel * 0.5f;
       }
       if((drawing.upperLimit - drawing.lowerLimit)>0){
-        drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-XORIGIN)/(dasize.width-XORIGIN)*(drawing.upperLimit - drawing.lowerLimit));
+        drawing.xChanFocus = drawing.lowerLimit + (int)(((evtx)-XORIGIN)/(width-XORIGIN)*(drawing.upperLimit - drawing.lowerLimit));
         drawing.zoomFocusFrac = (float)((drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit));
       }else{
         drawing.zoomFocusFrac = 0.5f;
@@ -465,7 +459,7 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
       gtk_widget_add_tick_callback(widget, zoom_out_tick_callback, NULL, NULL);
     }else{
       if((drawing.upperLimit - drawing.lowerLimit)>0){
-        drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-XORIGIN)/(dasize.width-XORIGIN)*(drawing.upperLimit - drawing.lowerLimit));
+        drawing.xChanFocus = drawing.lowerLimit + (int)(((evtx)-XORIGIN)/(width-XORIGIN)*(drawing.upperLimit - drawing.lowerLimit));
         drawing.zoomFocusFrac = (float)((drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit));
       }else{
         drawing.zoomFocusFrac = 0.5f;
@@ -476,16 +470,13 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
     }
   }else if((guiglobals.scrollDir != GDK_SCROLL_DOWN)&&(drawing.zoomLevel < 1024.0)){
     //handle zooming that follows cursor
-    //printf("Scrolling up at %f %f!\n",e->x,e->y);
-    GdkRectangle dasize;  // GtkDrawingArea size
-    GdkWindow *wwindow = gtk_widget_get_window(widget);
-    // Determine GtkDrawingArea dimensions
-    gdk_window_get_geometry(wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
+    //printf("Scrolling up at %f %f!\n",evtx,evty);
+    int width = gtk_widget_get_size(GTK_WIDGET(window),GTK_ORIENTATION_HORIZONTAL);
     if(guiglobals.useZoomAnimations){
       if(drawing.zoomingSpX){
         return;
       }
-      if(e->direction == GDK_SCROLL_SMOOTH){
+      if(gdk_event_get_direction(GDK_EVENT(event)) == GDK_SCROLL_SMOOTH){
         if(guiglobals.accSmoothScrollDelta < 0.25){
           return;
         }
@@ -496,7 +487,7 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
         drawing.zoomToLevel = drawing.zoomLevel * 2.0f;
       }
       if((drawing.upperLimit - drawing.lowerLimit)>0){
-        drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-XORIGIN)/(dasize.width-XORIGIN)*(drawing.upperLimit - drawing.lowerLimit));
+        drawing.xChanFocus = drawing.lowerLimit + (int)(((evtx)-XORIGIN)/(width-XORIGIN)*(drawing.upperLimit - drawing.lowerLimit));
         drawing.zoomFocusFrac = (float)((drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit));
       }else{
         drawing.zoomFocusFrac = 0.5f;
@@ -506,7 +497,7 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
       gtk_widget_add_tick_callback(widget, zoom_in_tick_callback, NULL, NULL);
     }else{
       if((drawing.upperLimit - drawing.lowerLimit)>0){
-        drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-XORIGIN)/(dasize.width-XORIGIN)*(drawing.upperLimit - drawing.lowerLimit));
+        drawing.xChanFocus = drawing.lowerLimit + (int)(((evtx)-XORIGIN)/(width-XORIGIN)*(drawing.upperLimit - drawing.lowerLimit));
         drawing.zoomFocusFrac = (float)((drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit));
       }else{
         drawing.zoomFocusFrac = 0.5f;
@@ -519,16 +510,19 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
   
 }
 
-void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
+void on_spectrum_click(GtkWidget *widget, GdkButtonEvent *event){
   
   if(widget==NULL){
     printf("on_spectrum_click - no widget.\n");
     return;
   }
 
-  if((event->type == GDK_BUTTON_PRESS) && (event->button == 3)){
+  double evtx,evty;
+  gdk_event_get_position(GDK_EVENT(event),&evtx,&evty);
+
+  if((gdk_event_get_event_type(GDK_EVENT(event)) == GDK_BUTTON_PRESS) && (gdk_event_get_button(event) == 3)){
     //right mouse button being pressed
-    float cursorChan = getCursorChannel(event->x, event->y);
+    float cursorChan = getCursorChannel(evtx,evty);
     switch(guiglobals.fittingSp){
       case FITSTATE_FITCOMPLETE:
         //fit being displayed, clear it on right click
@@ -583,19 +577,19 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
       default:
         break;
     }
-  }else if((event->type == GDK_DOUBLE_BUTTON_PRESS) && (event->button == 1)){
-    //double click
+  }else if((gdk_event_get_event_type(GDK_EVENT(event)) == GDK_BUTTON_PRESS) && (gdk_event_get_event_button(event) == 2)){
+    //right click (previously double click, but this seems to be removed in GTK4)
     if(rawdata.openedSp){
       float cursorChan, cursorYVal;
-      cursorChan = getCursorChannel(event->x, event->y);
-      cursorYVal = getCursorYVal(event->x, event->y);
+      cursorChan = getCursorChannel(evtx,evty);
+      cursorYVal = getCursorYVal(evtx,evty);
       if(cursorChan >= 0){
-        //user has double clicked on the displayed spectrum
+        //user has right clicked on the displayed spectrum
         switch(drawing.multiplotMode){
           case MULTIPLOT_SUMMED:
             //summed single plot
             //offer option to create a new summed spectrum and comment on that
-            guiglobals.commentEditInd = getCommentAtCursor(event->x, event->y);
+            guiglobals.commentEditInd = getCommentAtCursor(evtx,evty);
             if((guiglobals.commentEditInd >= 0)&&(guiglobals.commentEditInd < NCHCOM)){
               guiglobals.commentEditMode=0;
               gtk_window_set_title(comment_window,"Edit Comment");
@@ -653,7 +647,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
             //single plot being displayed
             //open a dialog for the user to write a comment
             //printf("Double click on channel %f, value %f\n",cursorChan,cursorYVal);
-            guiglobals.commentEditInd = getCommentAtCursor(event->x, event->y);
+            guiglobals.commentEditInd = getCommentAtCursor(evtx,evty);
             if((guiglobals.commentEditInd >= 0)&&(guiglobals.commentEditInd < NCHCOM)){
               guiglobals.commentEditMode=0;
               gtk_window_set_title(comment_window,"Edit Comment");
@@ -729,7 +723,7 @@ void on_spectrum_unclick(){
   guiglobals.draggingSp = 0;
 }
 
-void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event){
+void on_spectrum_cursor_motion(GtkWidget *widget, GdkEvent *event){
 
   if(widget==NULL){
     printf("WARNING: on_spectrum_cursor_motion - no widget.\n");
@@ -740,8 +734,11 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event){
     return;
   }
 
-  //printf("Cursor pos: %f %f\n",event->x,event->y);
-  if (event->state & GDK_BUTTON1_MASK){
+  double evtx,evty;
+  gdk_event_get_position(event,&evtx,&evty);
+
+  //printf("Cursor pos: %f %f\n",evtx,evty);
+  if(gdk_event_get_modifier_state(event) & GDK_BUTTON1_MASK){
     //left mouse button being pressed
     if(guiglobals.draggingSp == 0){
       //start drag
@@ -750,20 +747,17 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event){
         guiglobals.drawSpCursor = 0; //hide vertical cursor while dragging
       guiglobals.dragstartul=drawing.upperLimit;
       guiglobals.dragstartll=drawing.lowerLimit;
-      guiglobals.dragStartX = (float)event->x;
+      guiglobals.dragStartX = (float)evtx;
       drawing.xChanFocus = (drawing.upperLimit + drawing.lowerLimit)/2;
       drawing.zoomFocusFrac = 0.5;
       //printf("Drag started! dragstartll=%i, dragstartul=%i\n",guiglobals.dragstartll,guiglobals.dragstartul);
     }else{
       //continue drag
       //printf("Drag updated!\n");
-      GdkRectangle dasize;  // GtkDrawingArea size
-      GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
-      // Determine GtkDrawingArea dimensions
-      gdk_window_get_geometry (gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
-      drawing.xChanFocus = (int)((guiglobals.dragstartul + guiglobals.dragstartll)/2. + ((guiglobals.dragStartX - event->x)/(dasize.width-XORIGIN))*(guiglobals.dragstartul - guiglobals.dragstartll));
+      int width = gtk_widget_get_size(GTK_WIDGET(window),GTK_ORIENTATION_HORIZONTAL);
+      drawing.xChanFocus = (int)((guiglobals.dragstartul + guiglobals.dragstartll)/2. + ((guiglobals.dragStartX - evtx)/(width-XORIGIN))*(guiglobals.dragstartul - guiglobals.dragstartll));
       drawing.zoomFocusFrac = 0.5;
-      //printf("startx = %f, x = %f, drawing.lowerLimit = %i, drawing.upperLimit = %i, width = %i, focus = %i\n",guiglobals.dragStartX,event->x,drawing.lowerLimit,drawing.upperLimit,dasize.width,drawing.xChanFocus);
+      //printf("startx = %f, x = %f, drawing.lowerLimit = %i, drawing.upperLimit = %i, width = %i, focus = %i\n",guiglobals.dragStartX,x,drawing.lowerLimit,drawing.upperLimit,width,drawing.xChanFocus);
       gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
     }
   }else{
@@ -774,13 +768,13 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event){
     guiglobals.draggingSp = 0;
   }
 
-  int32_t cursorChan = (int)getCursorChannel(event->x, event->y);
+  int32_t cursorChan = (int)getCursorChannel(evtx,evty);
   int32_t cursorChanRounded = cursorChan - (cursorChan % drawing.contractFactor); //channel at the start of the bin (if rebinned)
   //printf("cursorChan: %i\n",cursorChan);
 
   if(cursorChan >= 0){
 
-    signed char commentToHighlight = (signed char)getCommentAtCursor(event->x, event->y);
+    signed char commentToHighlight = (signed char)getCommentAtCursor(evtx,evty);
     if(commentToHighlight != drawing.highlightedComment){
       //highlight the comment
       drawing.highlightedComment = commentToHighlight;
@@ -908,8 +902,8 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event){
     //draw cursor on plot (expensive, requires redraw of plot itself)
     if((guiglobals.draggingSp == 0)&&(guiglobals.drawSpCursor != -1)){
       //don't redraw if the cursor hasn't moved, that would be st00pid
-      if(fabs(guiglobals.cursorPosX - event->x) >= 1.0){
-        guiglobals.cursorPosX = (float)(event->x);
+      if(fabs(guiglobals.cursorPosX - evtx) >= 1.0){
+        guiglobals.cursorPosX = (float)evtx;
         guiglobals.drawSpCursor = 1; //draw vertical cursor
         gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
       }
@@ -2129,10 +2123,8 @@ void drawSpectrumArea(GtkWidget *widget, cairo_t *cr){
   //printf("Drawing spectrum!\n");
 
   cairo_set_antialias(cr,CAIRO_ANTIALIAS_FAST); //antialias setting, doesn't apply to text
-  GdkRectangle dasize;  // GtkDrawingArea size
-  GdkWindow *wwindow = gtk_widget_get_window(widget);
-  // Determine GtkDrawingArea dimensions
-  gdk_window_get_geometry(wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
+  int width = gtk_widget_get_size(GTK_WIDGET(window),GTK_ORIENTATION_HORIZONTAL);
+  int height = gtk_widget_get_size(GTK_WIDGET(window),GTK_ORIENTATION_HORIZONTAL);
 
-  drawSpectrum(cr, (float)dasize.width, (float)dasize.height, 1.0, guiglobals.drawSpLabels, guiglobals.drawGridLines, 2, guiglobals.drawSpComments, 1);
+  drawSpectrum(cr, (float)width, (float)height, 1.0, guiglobals.drawSpLabels, guiglobals.drawGridLines, 2, guiglobals.drawSpComments, 1);
 }

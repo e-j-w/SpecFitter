@@ -1,0 +1,2047 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.14.0 -->
+<interface>
+  <!-- interface-name specfitter-gtk4.ui -->
+  <requires lib="gtk" version="4.0"/>
+  <object class="GtkImage" id="add_image">
+    <property name="icon-name">list-add-symbolic</property>
+  </object>
+  <object class="GtkAdjustment" id="beta_adjustment">
+    <property name="page-increment">10</property>
+    <property name="step-increment">1</property>
+    <property name="upper">100</property>
+  </object>
+  <object class="GtkEntryCompletion" id="commententrycompletion"/>
+  <object class="GtkAdjustment" id="contract_adjustment">
+    <property name="lower">1</property>
+    <property name="page-increment">10</property>
+    <property name="page-size">1</property>
+    <property name="step-increment">1</property>
+    <property name="upper">51</property>
+    <property name="value">1</property>
+  </object>
+  <object class="GtkEntryCompletion" id="entrycompletion1"/>
+  <object class="GtkEntryCompletion" id="entrycompletion2"/>
+  <object class="GtkAdjustment" id="export_image_h_res_adjustment">
+    <property name="lower">600</property>
+    <property name="page-increment">100</property>
+    <property name="step-increment">1</property>
+    <property name="upper">10000</property>
+  </object>
+  <object class="GtkAdjustment" id="export_image_v_res_adjustment">
+    <property name="lower">400</property>
+    <property name="page-increment">100</property>
+    <property name="step-increment">1</property>
+    <property name="upper">10000</property>
+  </object>
+  <object class="GtkListStore" id="manage_liststore">
+    <columns>
+      <column type="gchararray"/>
+      <column type="gboolean"/>
+      <column type="gint"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="multiplot_liststore">
+    <columns>
+      <column type="gchararray"/>
+      <column type="gboolean"/>
+      <column type="gchararray"/>
+      <column type="gint"/>
+    </columns>
+  </object>
+  <object class="GtkAdjustment" id="pan_adjustment">
+    <property name="page-increment">10</property>
+    <property name="step-increment">0.01</property>
+    <property name="upper">100</property>
+  </object>
+  <object class="GtkAdjustment" id="scale_adjustment">
+    <property name="lower">-100</property>
+    <property name="page-increment">10</property>
+    <property name="step-increment">0.01</property>
+    <property name="upper">100</property>
+    <property name="value">1</property>
+  </object>
+  <object class="GtkAdjustment" id="skew_amplitude_adjustment">
+    <property name="page-increment">10</property>
+    <property name="step-increment">1</property>
+    <property name="upper">100</property>
+    <property name="value">10</property>
+  </object>
+  <object class="GtkAdjustment" id="spectrum_selector_adjustment">
+    <property name="page-increment">10</property>
+    <property name="step-increment">1</property>
+    <property name="upper">100</property>
+  </object>
+  <object class="GtkImage" id="undo_image">
+    <property name="icon-name">edit-undo-symbolic</property>
+  </object>
+  <object class="GtkListStore" id="view_liststore">
+    <columns>
+      <column type="gchararray"/>
+      <column type="gint"/>
+    </columns>
+  </object>
+  <object class="GtkAdjustment" id="zoom_adjustment">
+    <property name="page-increment">1</property>
+    <property name="step-increment">1</property>
+    <property name="upper">10</property>
+  </object>
+  <object class="GtkAboutDialog" id="about_dialog">
+    <property name="artists">Jonathan Williams</property>
+    <property name="authors">Jonathan Williams</property>
+    <property name="comments" translatable="yes">A GTK-based spectroscopy tool.</property>
+    <property name="copyright" translatable="yes">© Jonathan Williams, 2020-2023</property>
+    <property name="license-type">gpl-3-0</property>
+    <property name="modal">1</property>
+    <property name="program-name">SpecFitter</property>
+    <property name="website">https://github.com/e-j-w/specfitter</property>
+    <property name="website-label" translatable="yes">Source Repository</property>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <property name="visible">0</property>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="calibration_window">
+    <property name="child">
+      <object class="GtkBox">
+        <property name="margin-bottom">10</property>
+        <property name="margin-end">10</property>
+        <property name="margin-start">10</property>
+        <property name="margin-top">10</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">10</property>
+        <child>
+          <object class="GtkBox" id="tab1_box">
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkBox">
+                <property name="halign">center</property>
+                <property name="spacing">10</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">X-axis label:</property>
+                    <property name="width-request">82</property>
+                    <property name="xalign">1</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="calibration_unit_entry">
+                    <property name="completion">entrycompletion1</property>
+                    <property name="focusable">1</property>
+                    <property name="max-length">12</property>
+                    <property name="placeholder-text" translatable="yes">Enter units...</property>
+                    <property name="tooltip-text" translatable="yes">The units that will be displayed after calibrating the spectrum.</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">eg. 'Energy (keV)'</property>
+                    <property name="sensitive">0</property>
+                    <property name="width-request">120</property>
+                    <property name="xalign">0</property>
+                    <attributes>
+                      <attribute name="style" value="italic"/>
+                    </attributes>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="halign">center</property>
+                <property name="spacing">10</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">Y-axis label:</property>
+                    <property name="width-request">82</property>
+                    <property name="xalign">1</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="y_axis_entry">
+                    <property name="completion">entrycompletion2</property>
+                    <property name="focusable">1</property>
+                    <property name="max-length">28</property>
+                    <property name="placeholder-text" translatable="yes">Enter label...</property>
+                    <property name="tooltip-text" translatable="yes">The units that will be displayed on the y-axis.</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">eg. 'Counts'</property>
+                    <property name="sensitive">0</property>
+                    <property name="width-request">120</property>
+                    <property name="xalign">0</property>
+                    <attributes>
+                      <attribute name="style" value="italic"/>
+                    </attributes>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparator"/>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">10</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="halign">center</property>
+                    <property name="label" translatable="yes">Enter x-axis calibration parameter values:</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="halign">center</property>
+                    <property name="spacing">10</property>
+                    <child>
+                      <object class="GtkEntry" id="cal_entry_const">
+                        <property name="focusable">1</property>
+                        <property name="input-purpose">number</property>
+                        <property name="max-length">50</property>
+                        <property name="placeholder-text" translatable="yes">0.0</property>
+                        <property name="tooltip-text" translatable="yes">The constant calibration parameter.</property>
+                        <property name="truncate-multiline">1</property>
+                        <property name="width-chars">10</property>
+                        <property name="width-request">120</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="cal_entry_lin">
+                        <property name="focusable">1</property>
+                        <property name="input-purpose">number</property>
+                        <property name="max-length">50</property>
+                        <property name="placeholder-text" translatable="yes">0.0</property>
+                        <property name="tooltip-text" translatable="yes">The linear calibration parameter.</property>
+                        <property name="truncate-multiline">1</property>
+                        <property name="width-chars">10</property>
+                        <property name="width-request">120</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="cal_entry_quad">
+                        <property name="focusable">1</property>
+                        <property name="input-purpose">number</property>
+                        <property name="max-length">50</property>
+                        <property name="placeholder-text" translatable="yes">0.0</property>
+                        <property name="tooltip-text" translatable="yes">The quadratic calibration parameter.</property>
+                        <property name="truncate-multiline">1</property>
+                        <property name="width-chars">10</property>
+                        <property name="width-request">120</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="halign">center</property>
+                    <property name="spacing">10</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="yes">Constant</property>
+                        <property name="width-request">120</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="yes">Linear</property>
+                        <property name="width-request">120</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="yes">Quadratic</property>
+                        <property name="width-request">120</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparator"/>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="hexpand">1</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkButton" id="remove_calibration_button">
+                <property name="focusable">1</property>
+                <property name="halign">end</property>
+                <property name="hexpand">0</property>
+                <property name="label" translatable="yes"> Undo Calibration</property>
+                <property name="receives-default">1</property>
+                <property name="tooltip-text" translatable="yes">Remove an existing calibration, and revert to displaying data uncalibrated.</property>
+                <style>
+                  <class name="destructive-action"/>
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="options_ok_button">
+                <property name="focusable">1</property>
+                <property name="halign">end</property>
+                <property name="height-request">30</property>
+                <property name="label">Apply</property>
+                <property name="receives-default">1</property>
+                <property name="tooltip-text" translatable="yes">Apply all changes and return.</property>
+                <property name="width-request">100</property>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+    <property name="modal">1</property>
+    <property name="resizable">0</property>
+    <property name="title" translatable="yes">Calibration and Axis Labels</property>
+    <!-- Custom fragments -->
+    <accel-groups>
+      <group name="calibration_window_accelgroup"/>
+    </accel-groups>
+  </object>
+  <object class="GtkWindow" id="comment_window">
+    <property name="child">
+      <object class="GtkBox">
+        <property name="margin-bottom">10</property>
+        <property name="margin-end">10</property>
+        <property name="margin-start">10</property>
+        <property name="margin-top">10</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">10</property>
+        <child>
+          <object class="GtkBox" id="tab1_box1">
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkEntry" id="comment_entry">
+                <property name="completion">commententrycompletion</property>
+                <property name="focusable">1</property>
+                <property name="halign">start</property>
+                <property name="max-length">255</property>
+                <property name="placeholder-text" translatable="yes">Enter text...</property>
+                <property name="valign">start</property>
+                <property name="width-request">400</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparator"/>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="hexpand">1</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkButton" id="remove_comment_button">
+                <property name="focusable">1</property>
+                <property name="halign">end</property>
+                <property name="hexpand">0</property>
+                <property name="label" translatable="yes">Delete Comment</property>
+                <property name="receives-default">1</property>
+                <property name="tooltip-text" translatable="yes">Delete the comment.  Cannot be undone.</property>
+                <style>
+                  <class name="destructive-action"/>
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="comment_ok_button">
+                <property name="focusable">1</property>
+                <property name="halign">end</property>
+                <property name="height-request">30</property>
+                <property name="label">Apply</property>
+                <property name="receives-default">1</property>
+                <property name="width-request">100</property>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+    <property name="modal">1</property>
+    <property name="resizable">0</property>
+    <property name="title" translatable="yes">Add or Edit Comment</property>
+    <!-- Custom fragments -->
+    <accel-groups>
+      <group name="comment_window_accelgroup"/>
+    </accel-groups>
+  </object>
+  <object class="GtkPopover" id="display_popover">
+    <property name="child">
+      <object class="GtkBox">
+        <property name="margin-bottom">10</property>
+        <property name="margin-end">10</property>
+        <property name="margin-start">10</property>
+        <property name="margin-top">10</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">10</property>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkBox">
+                <property name="hexpand">1</property>
+                <property name="spacing">6</property>
+                <property name="vexpand">1</property>
+                <child>
+                  <object class="GtkBox">
+                    <property name="hexpand">1</property>
+                    <property name="spacing">10</property>
+                    <property name="tooltip-text" translatable="yes">Select the spectrum to display.</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="hexpand">1</property>
+                        <property name="label" translatable="yes">Display View:</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkSeparator">
+                    <property name="halign">center</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="multiplot_button">
+                    <property name="focusable">1</property>
+                    <property name="hexpand">1</property>
+                    <property name="label" translatable="yes">Advanced...</property>
+                    <property name="receives-default">1</property>
+                    <property name="tooltip-text" translatable="yes">Advanced plotting options - set scaling options, plot multiple spectra from the opened file(s) at once.</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="display_spectrumname_label">
+                <property name="ellipsize">end</property>
+                <property name="label" translatable="yes">Spectrum name goes here</property>
+                <attributes>
+                  <attribute name="style" value="italic"/>
+                </attributes>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkSeparator"/>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="spacing">6</property>
+            <property name="vexpand">1</property>
+            <child>
+              <object class="GtkBox">
+                <property name="halign">center</property>
+                <property name="hexpand">1</property>
+                <property name="spacing">10</property>
+                <property name="tooltip-text" translatable="yes">Select the data to plot.</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="halign">center</property>
+                    <property name="hexpand">1</property>
+                    <property name="label" translatable="yes">Plot:</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkComboBoxText" id="value_mode_combobox">
+                    <property name="active">0</property>
+                    <property name="halign">center</property>
+                    <property name="hexpand">1</property>
+                    <property name="valign">center</property>
+                    <items>
+                      <item id="&lt;Enter ID&gt;">Original data values</item>
+                      <item>(Values + Errors)</item>
+                      <item>(Values - Errors)</item>
+                    </items>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparator"/>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="halign">center</property>
+                <property name="hexpand">1</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">10</property>
+                <child>
+                  <object class="GtkCheckButton" id="autoscalebutton">
+                    <property name="active">1</property>
+                    <property name="focusable">1</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes"> Vertical Autoscale</property>
+                    <property name="tooltip-text" translatable="yes">If checked, the displayed spectrum will be automatically scaled on the vertical axis to fit visible features.</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="logscalebutton">
+                    <property name="focusable">1</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes"> Logarithmic Scale</property>
+                    <property name="tooltip-text" translatable="yes">If checked, will display the y-axis in logarithmic scale (omitting negative values).</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="cursordrawbutton">
+                    <property name="focusable">1</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes"> Show Cursor</property>
+                    <property name="tooltip-text" translatable="yes">If checked, will show a vertical cursor on the plot indicating the mouse position.</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkSeparator"/>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="halign">center</property>
+            <property name="spacing">10</property>
+            <property name="tooltip-text" translatable="yes">Change the rebinning factor of the spectrum (number of channels per bin).</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">Channels / Bin</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkScale" id="contract_scale">
+                <property name="adjustment">contract_adjustment</property>
+                <property name="digits">0</property>
+                <property name="draw-value">1</property>
+                <property name="focusable">1</property>
+                <property name="halign">start</property>
+                <property name="hexpand">1</property>
+                <property name="round-digits">0</property>
+                <property name="show-fill-level">1</property>
+                <property name="value-pos">right</property>
+                <property name="width-request">320</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+  </object>
+  <object class="GtkWindow" id="export_image_window">
+    <property name="child">
+      <object class="GtkBox">
+        <property name="margin-bottom">10</property>
+        <property name="margin-end">10</property>
+        <property name="margin-start">10</property>
+        <property name="margin-top">10</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">10</property>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkLabel" id="export_image_description_label">
+                <property name="justify">center</property>
+                <property name="label" translatable="yes">The currently displayed spectrum or view will be exported
+to an image file.  The displayed region, scaling and
+binning factors will be preserved.</property>
+                <property name="wrap">1</property>
+                <attributes>
+                  <attribute name="style" value="italic"/>
+                </attributes>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparator"/>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="spacing">10</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">Image resolution:</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkSpinButton" id="export_h_res_spinbutton">
+                    <property name="adjustment">export_image_h_res_adjustment</property>
+                    <property name="climb-rate">1</property>
+                    <property name="focusable">1</property>
+                    <property name="numeric">1</property>
+                    <property name="tooltip-text" translatable="yes">The horizontal resolution of the exported image.</property>
+                    <property name="value">1200</property>
+                    <property name="width-chars">5</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">×</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkSpinButton" id="export_v_res_spinbutton">
+                    <property name="adjustment">export_image_v_res_adjustment</property>
+                    <property name="climb-rate">1</property>
+                    <property name="focusable">1</property>
+                    <property name="numeric">1</property>
+                    <property name="text" translatable="yes">1200</property>
+                    <property name="tooltip-text" translatable="yes">The vertical resolution of the exported image.</property>
+                    <property name="value">800</property>
+                    <property name="width-chars">5</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="export_image_label_checkbutton">
+                <property name="active">1</property>
+                <property name="focusable">1</property>
+                <property name="label" translatable="yes"> Show histogram name labels</property>
+                <property name="tooltip-text" translatable="yes">If checked, the exported image will include name labels for individual histograms.</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="export_image_fit_checkbutton">
+                <property name="active">1</property>
+                <property name="focusable">1</property>
+                <property name="label" translatable="yes"> Show fit(s)</property>
+                <property name="tooltip-text" translatable="yes">If checked, the exported image will contain any peak fits which are currently displayed.</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="export_image_gridline_checkbutton">
+                <property name="active">1</property>
+                <property name="focusable">1</property>
+                <property name="label" translatable="yes"> Show grid lines</property>
+                <property name="tooltip-text" translatable="yes">If checked, the exported image will contain grid lines corresponding to x and y-axis values.</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="spacing">10</property>
+                <property name="tooltip-text" translatable="yes">Set the size of axis and tick labels.  Larger sizes may be more legible when printed.</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">Axis and tick label size:</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkComboBoxText" id="export_axissize_combobox">
+                    <property name="active">1</property>
+                    <items>
+                      <item>Small</item>
+                      <item>Normal</item>
+                      <item>Large</item>
+                      <item>Extra Large</item>
+                    </items>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparator"/>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="hexpand">1</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkButton" id="export_image_save_button">
+                <property name="focusable">1</property>
+                <property name="halign">end</property>
+                <property name="height-request">30</property>
+                <property name="label">Export Image</property>
+                <property name="receives-default">1</property>
+                <property name="tooltip-text" translatable="yes">Apply all changes and return.</property>
+                <property name="width-request">100</property>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+    <property name="modal">1</property>
+    <property name="resizable">0</property>
+    <property name="title" translatable="yes">Image Export Settings</property>
+  </object>
+  <object class="GtkWindow" id="export_options_window">
+    <property name="child">
+      <object class="GtkBox">
+        <property name="margin-bottom">10</property>
+        <property name="margin-end">10</property>
+        <property name="margin-start">10</property>
+        <property name="margin-top">10</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">10</property>
+        <child>
+          <object class="GtkBox" id="tab1_box2">
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkBox">
+                <property name="halign">center</property>
+                <property name="spacing">10</property>
+                <child>
+                  <object class="GtkLabel" id="export_description_label">
+                    <property name="label" translatable="yes">Export to .spe format:</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkComboBoxText" id="export_mode_combobox">
+                    <property name="active">0</property>
+                    <items>
+                      <item>All spectra (separate files)</item>
+                    </items>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkRevealer" id="export_options_revealer">
+                <property name="child">
+                  <object class="GtkCheckButton" id="export_rebin_checkbutton">
+                    <property name="active">1</property>
+                    <property name="focusable">1</property>
+                    <property name="label" translatable="yes"> Apply rebin and scaling factors to exported data</property>
+                    <property name="tooltip-text" translatable="yes">If checked, the rebin and scaling factors set in the display menu will be applied to exported spectra (ie. the spectra will be exported as drawn, rather than as originally imported).</property>
+                  </object>
+                </property>
+                <property name="reveal-child">1</property>
+                <property name="transition-type">slide-up</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="export_note_label">
+                <property name="label" translatable="yes">NOTE: Exported data will be truncated to the first 4096 bins.</property>
+                <attributes>
+                  <attribute name="style" value="italic"/>
+                </attributes>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparator"/>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="hexpand">1</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkButton" id="export_options_save_button">
+                <property name="focusable">1</property>
+                <property name="halign">end</property>
+                <property name="height-request">30</property>
+                <property name="label">Export</property>
+                <property name="receives-default">1</property>
+                <property name="tooltip-text" translatable="yes">Apply all changes and return.</property>
+                <property name="width-request">100</property>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+    <property name="modal">1</property>
+    <property name="resizable">0</property>
+    <property name="title" translatable="yes">Data Export Settings</property>
+  </object>
+  <object class="GtkWindow" id="help_window">
+    <property name="child">
+      <object class="GtkBox">
+        <property name="margin-bottom">20</property>
+        <property name="margin-end">20</property>
+        <property name="margin-start">20</property>
+        <property name="margin-top">20</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">10</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="halign">start</property>
+            <property name="label" translatable="yes">Getting Started</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
+          </object>
+        </child>
+        <child>
+          <object class="GtkSeparator"/>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="halign">start</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">center</property>
+                <property name="label" translatable="yes">Start by opening spectra/histograms using the</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="open_button1">
+                <property name="halign">center</property>
+                <property name="label" translatable="yes">Open...</property>
+                <property name="receives-default">1</property>
+                <property name="sensitive">0</property>
+                <property name="width-request">80</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">center</property>
+                <property name="label" translatable="yes">button at the top-left.</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="halign">start</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">center</property>
+                <property name="label" translatable="yes">Additional spectra/histograms can be appended to the session using the</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="append_button1">
+                <property name="halign">center</property>
+                <property name="receives-default">1</property>
+                <property name="sensitive">0</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="halign">start</property>
+                    <property name="icon-name">list-add-symbolic</property>
+                    <property name="sensitive">0</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">center</property>
+                <property name="label" translatable="yes">button.</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="halign">start</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">center</property>
+                <property name="label" translatable="yes">The displayed data can be changed using the</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="focusable">1</property>
+                <property name="halign">center</property>
+                <property name="receives-default">1</property>
+                <property name="sensitive">0</property>
+                <child>
+                  <object class="GtkImage" id="display_button_icon1">
+                    <property name="halign">start</property>
+                    <property name="icon-name">document-edit-symbolic</property>
+                    <property name="sensitive">0</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">center</property>
+                <property name="label" translatable="yes">menu at the top-right.</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="halign">start</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">center</property>
+                <property name="label" translatable="yes">Different spectra/histograms can be displayed together or summed using the</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="halign">start</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkButton" id="multiplot_button1">
+                <property name="halign">center</property>
+                <property name="label" translatable="yes">Advanced...</property>
+                <property name="receives-default">1</property>
+                <property name="sensitive">0</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">options in the</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="focusable">1</property>
+                <property name="halign">center</property>
+                <property name="receives-default">1</property>
+                <property name="sensitive">0</property>
+                <child>
+                  <object class="GtkImage" id="display_button_icon2">
+                    <property name="halign">start</property>
+                    <property name="icon-name">document-edit-symbolic</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">menu.</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="halign">start</property>
+            <property name="label" translatable="yes">Tips &amp; Tricks</property>
+            <property name="margin-top">10</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
+          </object>
+        </child>
+        <child>
+          <object class="GtkSeparator"/>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="halign">start</property>
+            <property name="label" translatable="yes">- The mouse wheel can be used to zoom into or out of the displayed spectrum or 
+  histogram.  The zoom focus follows the mouse cursor.
+- When zoomed in, click and drag to pan the view.
+- Double click anywhere on an opened spectrum or histogram to add/edit a comment there.</property>
+          </object>
+        </child>
+      </object>
+    </property>
+    <property name="modal">1</property>
+    <property name="resizable">0</property>
+    <property name="title" translatable="yes">Help</property>
+    <property name="width-request">400</property>
+  </object>
+  <object class="GtkWindow" id="multiplot_manage_window">
+    <property name="child">
+      <object class="GtkBox">
+        <property name="margin-bottom">10</property>
+        <property name="margin-end">10</property>
+        <property name="margin-start">10</property>
+        <property name="margin-top">10</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">10</property>
+        <child>
+          <object class="GtkStack" id="multiplot_manage_stack">
+            <property name="transition-type">crossfade</property>
+            <child>
+              <object class="GtkStackPage">
+                <property name="child">
+                  <object class="GtkBox" id="multiplot_box">
+                    <property name="name">page0</property>
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">10</property>
+                    <property name="vexpand">1</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes">Select spectra to plot:</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkScrolledWindow">
+                        <property name="child">
+                          <object class="GtkViewport">
+                            <property name="child">
+                              <object class="GtkTreeView" id="multiplot_tree_view">
+                                <property name="activate-on-single-click">1</property>
+                                <property name="enable-grid-lines">horizontal</property>
+                                <property name="focusable">1</property>
+                                <property name="height-request">100</property>
+                                <property name="model">multiplot_liststore</property>
+                                <property name="search-column">0</property>
+                                <property name="width-request">500</property>
+                                <child internal-child="selection">
+                                  <object class="GtkTreeSelection">
+                                    <property name="mode">multiple</property>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkTreeViewColumn" id="multiplot_column1">
+                                    <property name="clickable">1</property>
+                                    <property name="expand">1</property>
+                                    <property name="sort-column-id">0</property>
+                                    <property name="sort-indicator">1</property>
+                                    <property name="spacing">6</property>
+                                    <property name="title" translatable="yes">Spectrum Name</property>
+                                    <child>
+                                      <object class="GtkCellRendererText" id="multiplot_cr1"/>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkTreeViewColumn" id="multiplot_column2">
+                                    <property name="alignment">0.5</property>
+                                    <property name="fixed-width">80</property>
+                                    <property name="max-width">80</property>
+                                    <property name="sizing">fixed</property>
+                                    <property name="spacing">6</property>
+                                    <property name="title" translatable="yes">Plot?</property>
+                                    <child>
+                                      <object class="GtkCellRendererToggle" id="multiplot_cr2"/>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkTreeViewColumn" id="multiplot_column3">
+                                    <property name="fixed-width">120</property>
+                                    <property name="min-width">120</property>
+                                    <property name="spacing">6</property>
+                                    <property name="title" translatable="yes">Scale Factor</property>
+                                    <child>
+                                      <object class="GtkCellRendererSpin" id="multiplot_cr3">
+                                        <property name="adjustment">scale_adjustment</property>
+                                        <property name="alignment">center</property>
+                                        <property name="climb-rate">0.10000000000000001</property>
+                                        <property name="digits">2</property>
+                                        <property name="editable">1</property>
+                                        <property name="height">40</property>
+                                        <property name="max-width-chars">4</property>
+                                        <property name="placeholder-text">1.00</property>
+                                        <property name="width-chars">4</property>
+                                        <property name="xpad">6</property>
+                                        <property name="ypad">6</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </property>
+                          </object>
+                        </property>
+                        <property name="focusable">1</property>
+                        <property name="hscrollbar-policy">never</property>
+                        <property name="min-content-height">200</property>
+                        <property name="vexpand">1</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="spacing">10</property>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="orientation">vertical</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label" translatable="yes">Select plotting mode:</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label" translatable="yes">(for multiple spectra)</property>
+                                <attributes>
+                                  <attribute name="style" value="italic"/>
+                                </attributes>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkComboBoxText" id="multiplot_mode_combobox">
+                            <property name="active">0</property>
+                            <items>
+                              <item>Sum Spectra</item>
+                              <item>Overlay (common scaling)</item>
+                              <item>Overlay (independent scaling)</item>
+                              <item>Stacked View</item>
+                            </items>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="multiplot_make_view_button">
+                            <property name="focusable">1</property>
+                            <property name="label" translatable="yes">Save as view...</property>
+                            <property name="receives-default">1</property>
+                            <property name="tooltip-text" translatable="yes">Save the selected view, so that it can be recalled later.</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="name">page0</property>
+                <property name="title" translatable="yes">Spectra</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkStackPage">
+                <property name="child">
+                  <object class="GtkBox" id="view_box">
+                    <property name="name">page1</property>
+                    <property name="orientation">vertical</property>
+                    <property name="vexpand">1</property>
+                    <child>
+                      <object class="GtkBox" id="view_list_box">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">10</property>
+                        <property name="vexpand">1</property>
+                        <property name="visible">0</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">Select a custom view to plot:</property>
+                            <attributes>
+                              <attribute name="weight" value="bold"/>
+                            </attributes>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkScrolledWindow">
+                            <property name="child">
+                              <object class="GtkViewport">
+                                <property name="child">
+                                  <object class="GtkTreeView" id="view_tree_view">
+                                    <property name="enable-grid-lines">horizontal</property>
+                                    <property name="focusable">1</property>
+                                    <property name="height-request">100</property>
+                                    <property name="model">view_liststore</property>
+                                    <property name="search-column">0</property>
+                                    <property name="width-request">500</property>
+                                    <child internal-child="selection">
+                                      <object class="GtkTreeSelection"/>
+                                    </child>
+                                    <child>
+                                      <object class="GtkTreeViewColumn" id="view_column1">
+                                        <property name="clickable">1</property>
+                                        <property name="expand">1</property>
+                                        <property name="sort-column-id">0</property>
+                                        <property name="sort-indicator">1</property>
+                                        <property name="spacing">6</property>
+                                        <property name="title" translatable="yes">View Name</property>
+                                        <child>
+                                          <object class="GtkCellRendererText" id="view_cr1">
+                                            <property name="height">40</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </property>
+                              </object>
+                            </property>
+                            <property name="focusable">1</property>
+                            <property name="hscrollbar-policy">never</property>
+                            <property name="min-content-height">200</property>
+                            <property name="vexpand">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="no_view_box">
+                        <property name="halign">center</property>
+                        <property name="height-request">200</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">10</property>
+                        <property name="valign">center</property>
+                        <property name="vexpand">1</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label" translatable="yes">No Custom Views Created</property>
+                            <property name="valign">end</property>
+                            <property name="vexpand">1</property>
+                            <attributes>
+                              <attribute name="weight" value="bold"/>
+                              <attribute name="size" value="19456"/>
+                            </attributes>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="justify">center</property>
+                            <property name="label" translatable="yes">Create custom views of multiple spectra using the 
+'Save as view...' button in the Spectra panel.
+They will then appear on this panel.</property>
+                            <property name="valign">start</property>
+                            <property name="vexpand">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="name">page1</property>
+                <property name="title" translatable="yes">Custom Views</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkStackPage">
+                <property name="child">
+                  <object class="GtkBox" id="manage_box">
+                    <property name="name">page2</property>
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">10</property>
+                    <property name="vexpand">1</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes">Rename or remove spectra/views from this session:</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkScrolledWindow">
+                        <property name="child">
+                          <object class="GtkViewport">
+                            <property name="child">
+                              <object class="GtkTreeView" id="manage_tree_view">
+                                <property name="activate-on-single-click">1</property>
+                                <property name="enable-grid-lines">horizontal</property>
+                                <property name="focusable">1</property>
+                                <property name="height-request">100</property>
+                                <property name="model">manage_liststore</property>
+                                <property name="search-column">0</property>
+                                <property name="width-request">500</property>
+                                <child internal-child="selection">
+                                  <object class="GtkTreeSelection">
+                                    <property name="mode">multiple</property>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkTreeViewColumn" id="manage_column1">
+                                    <property name="clickable">1</property>
+                                    <property name="expand">1</property>
+                                    <property name="sort-column-id">0</property>
+                                    <property name="sort-indicator">1</property>
+                                    <property name="spacing">6</property>
+                                    <property name="title" translatable="yes">Spectrum or View Name (double click name to edit)</property>
+                                    <child>
+                                      <object class="GtkCellRendererText" id="manage_cr1">
+                                        <property name="editable">1</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkTreeViewColumn" id="manage_column2">
+                                    <property name="alignment">0.5</property>
+                                    <property name="max-width">200</property>
+                                    <property name="sizing">autosize</property>
+                                    <property name="spacing">6</property>
+                                    <property name="title" translatable="yes">Remove?</property>
+                                    <child>
+                                      <object class="GtkCellRendererToggle" id="manage_cr2">
+                                        <property name="height">40</property>
+                                        <property name="xpad">6</property>
+                                        <property name="ypad">6</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </property>
+                          </object>
+                        </property>
+                        <property name="focusable">1</property>
+                        <property name="hscrollbar-policy">never</property>
+                        <property name="min-content-height">200</property>
+                        <property name="vexpand">1</property>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="name">page2</property>
+                <property name="title" translatable="yes">Rename/Remove</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkSeparator"/>
+        </child>
+        <child>
+          <object class="GtkBox" id="multiplot_manage_bottom_box">
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkStack" id="multiplot_manage_button_stack">
+                <property name="transition-type">crossfade</property>
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="child">
+                      <object class="GtkButton" id="multiplot_ok_button">
+                        <property name="focusable">1</property>
+                        <property name="halign">end</property>
+                        <property name="height-request">30</property>
+                        <property name="label">Plot</property>
+                        <property name="receives-default">1</property>
+                        <property name="tooltip-text" translatable="yes">Plot the selected spectra.</property>
+                        <property name="valign">center</property>
+                        <property name="width-request">100</property>
+                        <style>
+                          <class name="suggested-action"/>
+                        </style>
+                      </object>
+                    </property>
+                    <property name="name">page0</property>
+                    <property name="title" translatable="yes">page0</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="child">
+                      <object class="GtkButton" id="manage_delete_button">
+                        <property name="focusable">1</property>
+                        <property name="height-request">30</property>
+                        <property name="label" translatable="yes">Remove selected</property>
+                        <property name="receives-default">1</property>
+                        <property name="tooltip-text" translatable="yes">Remove the selected spectra/views from the current session.</property>
+                        <property name="valign">center</property>
+                        <style>
+                          <class name="destructive-action"/>
+                        </style>
+                      </object>
+                    </property>
+                    <property name="name">page1</property>
+                    <property name="title" translatable="yes">page1</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkStackSwitcher" id="multiplot_manage_stack_switcher">
+                <property name="height-request">20</property>
+                <property name="stack">multiplot_manage_stack</property>
+                <property name="valign">center</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+    <property name="default-height">600</property>
+    <property name="default-width">600</property>
+    <property name="modal">1</property>
+    <property name="title" translatable="yes">Advanced Plotting</property>
+  </object>
+  <object class="GtkWindow" id="preferences_window">
+    <property name="child">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">10</property>
+        <property name="width-request">400</property>
+        <child>
+          <object class="GtkNotebook" id="preferences_notebook">
+            <property name="focusable">1</property>
+            <child>
+              <object class="GtkNotebookPage">
+                <property name="child">
+                  <object class="GtkBox" id="data_preferences_box">
+                    <property name="margin-bottom">10</property>
+                    <property name="margin-end">10</property>
+                    <property name="margin-start">10</property>
+                    <property name="margin-top">10</property>
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">10</property>
+                    <child>
+                      <object class="GtkCheckButton" id="discard_empty_checkbutton">
+                        <property name="focusable">1</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes"> Discard empty spectra on import</property>
+                        <property name="name">drop_empty_checkbox</property>
+                        <property name="tooltip-text" translatable="yes">If checked, empty spectra will be automatically disarded from any opened file(s).</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="autozoom_checkbutton">
+                        <property name="focusable">1</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes"> Automatically zoom when opening spectra</property>
+                        <property name="tooltip-text" translatable="yes">If checked, will automatically zoom into the region containing data the first time spectrum data is opened.</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="bin_errors_checkbutton">
+                        <property name="focusable">1</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes"> Show bin value uncertainties</property>
+                        <property name="tooltip-text" translatable="yes">If checked, will show uncertainties for bin values, and round both the value and uncertainty to the appropriate numer of significant figures.</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="round_errors_checkbutton">
+                        <property name="focusable">1</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes"> Round uncertainty values to 10% precision</property>
+                        <property name="tooltip-text" translatable="yes">If checked, will assume that uncertainty values are known to within 10% and round to the appropriate number of significant figures (eg. an uncertainty of 241 becomes 200, 184 becomes 180).</property>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="tab">
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">Data</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkNotebookPage">
+                <property name="child">
+                  <object class="GtkBox" id="fit_preferences_box">
+                    <property name="margin-bottom">10</property>
+                    <property name="margin-end">10</property>
+                    <property name="margin-start">10</property>
+                    <property name="margin-top">10</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="spacing">10</property>
+                        <property name="tooltip-text" translatable="yes">Set the type of fit to perform.
+Gaussian peaks - Fit peaks with a symmetric Guassian shape.
+Skewed peaks - Fit peaks with a shape that is the sum of two Guassians, one of them skewed via convolution with an exponential tail on the low-energy side (can represent incomplete charge collection in a detector).
+Background only - Do not fit any peaks.  Will estimate the area of the region above the background.
+Sum counts - Only show the total number of counts in the fit region.</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label" translatable="yes">Fit type</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkComboBoxText" id="peak_shape_combobox">
+                            <property name="active">0</property>
+                            <items>
+                              <item id="&lt;Enter ID&gt;">Gaussian peaks</item>
+                              <item>Skewed peaks (low energy tail)</item>
+                              <item>Background only</item>
+                              <item>Sum counts in region</item>
+                            </items>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkRevealer" id="peak_parameters_revealer">
+                        <property name="child">
+                          <object class="GtkBox">
+                            <property name="margin-top">10</property>
+                            <property name="orientation">vertical</property>
+                            <property name="spacing">8</property>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="spacing">10</property>
+                                <property name="tooltip-text" translatable="yes">The method to use to determine peak widths.
+Fit freely - Widths allowed to vary freely.
+Fix relative widths - force peak widths to follow a quadratic relationship with the channel number when more than one peak is fit.  Recommended for gamma-ray spectroscopy.
+Fix to previous fit values - use the width values from the previous fit.  If no peaks have been fit yet, this is equivalent to 'fit freely'.</property>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="label" translatable="yes">Peak widths</property>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkComboBoxText" id="peak_width_combobox">
+                                    <property name="active">0</property>
+                                    <items>
+                                      <item id="&lt;Enter ID&gt;">Fit freely</item>
+                                      <item>Fix relative widths</item>
+                                      <item>Fix to previous fit values</item>
+                                    </items>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkCheckButton" id="step_function_checkbutton">
+                                <property name="focusable">1</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes"> Use step function</property>
+                                <property name="name">drop_empty_checkbox</property>
+                                <property name="tooltip-text" translatable="yes">If checked, will use a step function to compensate for the background being larger on one side of each peak.</property>
+                              </object>
+                            </child>
+                          </object>
+                        </property>
+                        <property name="reveal-child">1</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkRevealer" id="skew_parameters_revealer">
+                        <property name="child">
+                          <object class="GtkBox">
+                            <property name="margin-top">10</property>
+                            <property name="orientation">vertical</property>
+                            <property name="spacing">8</property>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="spacing">10</property>
+                                <property name="tooltip-text" translatable="yes">Whether to fix the amplitude of the skewed Gaussian component in the peak fit, and the percentage value to fix it to.</property>
+                                <child>
+                                  <object class="GtkCheckButton" id="fix_skew_amplitude_checkbutton">
+                                    <property name="focusable">1</property>
+                                    <property name="label" translatable="yes"> Fix skewed component amplitude</property>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkSpinButton" id="skew_amplitude_spinbutton">
+                                    <property name="adjustment">skew_amplitude_adjustment</property>
+                                    <property name="digits">1</property>
+                                    <property name="focusable">1</property>
+                                    <property name="numeric">1</property>
+                                    <property name="sensitive">0</property>
+                                    <property name="value">10</property>
+                                    <property name="width-chars">4</property>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="halign">center</property>
+                                    <property name="label" translatable="yes">%</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="spacing">10</property>
+                                <property name="tooltip-text" translatable="yes">Whether to fix the decay constant of the skewed Gaussian component in the peak fit, and the value to fix it to.</property>
+                                <child>
+                                  <object class="GtkCheckButton" id="fix_beta_checkbutton">
+                                    <property name="focusable">1</property>
+                                    <property name="label" translatable="yes"> Fix beta (skewness)</property>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkSpinButton" id="beta_spinbutton">
+                                    <property name="adjustment">beta_adjustment</property>
+                                    <property name="digits">1</property>
+                                    <property name="focusable">1</property>
+                                    <property name="numeric">1</property>
+                                    <property name="sensitive">0</property>
+                                    <property name="text" translatable="yes">10.0</property>
+                                    <property name="value">5</property>
+                                    <property name="width-chars">4</property>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="halign">center</property>
+                                    <property name="label" translatable="yes">channels</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </property>
+                        <property name="reveal-child">1</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkRevealer" id="background_parameters_revealer">
+                        <property name="child">
+                          <object class="GtkBox">
+                            <property name="margin-top">10</property>
+                            <property name="orientation">vertical</property>
+                            <property name="spacing">8</property>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="spacing">10</property>
+                                <property name="tooltip-text" translatable="yes">Set the form of the background used in the fit.</property>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="label" translatable="yes">Background type</property>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkComboBoxText" id="background_type_combobox">
+                                    <property name="active">2</property>
+                                    <items>
+                                      <item id="&lt;Enter ID&gt;">Constant</item>
+                                      <item>Linear</item>
+                                      <item>Quadratic</item>
+                                    </items>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="spacing">10</property>
+                                <property name="tooltip-text" translatable="yes">Set the technique used for weighting individual channels in the fit.
+Weight by scaled data - Weights are proportional to the data value, taking into account the effects of scaling for summed or subtracted spectra.
+Weight by fit function - Weights are proportional to the fit function values determined during each fit iteration.</property>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="label" translatable="yes">Fit weighting mode</property>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkComboBoxText" id="weight_mode_combobox">
+                                    <property name="active">0</property>
+                                    <items>
+                                      <item id="&lt;Enter ID&gt;">Weight by scaled data</item>
+                                      <item>Weight by fit function</item>
+                                      <item>No weighting</item>
+                                    </items>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </property>
+                        <property name="reveal-child">1</property>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="position">1</property>
+                <property name="tab">
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">Fitting</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkNotebookPage">
+                <property name="child">
+                  <object class="GtkBox" id="look_preferences_box">
+                    <property name="margin-bottom">10</property>
+                    <property name="margin-end">10</property>
+                    <property name="margin-start">10</property>
+                    <property name="margin-top">10</property>
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">10</property>
+                    <child>
+                      <object class="GtkCheckButton" id="spectrum_label_checkbutton">
+                        <property name="focusable">1</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes"> Draw descriptive labels for spectra</property>
+                        <property name="tooltip-text" translatable="yes">If checked, will draw text labels identifying the displayed spectra.</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="spectrum_comment_checkbutton">
+                        <property name="focusable">1</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes"> Draw comments on spectra</property>
+                        <property name="tooltip-text" translatable="yes">If checked, will draw comments which have been written for the displayed spectra.</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="spectrum_gridline_checkbutton">
+                        <property name="focusable">1</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes"> Draw grid lines on spectra</property>
+                        <property name="tooltip-text" translatable="yes">If checked, will draw grid lines on displayed spectra.</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="animation_checkbutton">
+                        <property name="focusable">1</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes"> Enable animations</property>
+                        <property name="tooltip-text" translatable="yes">If checked, animations will be enabled for drawing spectra.  Disable if low latency is preferred.</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="dark_theme_checkbutton">
+                        <property name="focusable">1</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes"> Prefer dark theme</property>
+                        <property name="tooltip-text" translatable="yes">If checked, will use the dark GTK theme variant if available.</property>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="position">2</property>
+                <property name="tab">
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">Look &amp; Feel</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="margin-bottom">10</property>
+            <property name="margin-end">10</property>
+            <property name="margin-start">10</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkBox">
+                <property name="halign">end</property>
+                <property name="spacing">10</property>
+                <child>
+                  <object class="GtkButton" id="preferences_apply_button">
+                    <property name="focusable">1</property>
+                    <property name="halign">end</property>
+                    <property name="height-request">30</property>
+                    <property name="label">Apply</property>
+                    <property name="receives-default">1</property>
+                    <property name="width-request">100</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+    <property name="modal">1</property>
+    <property name="resizable">0</property>
+    <property name="title" translatable="yes">Preferences</property>
+    <property name="width-request">400</property>
+  </object>
+  <object class="GtkPopoverMenu" id="primary_menu">
+    <property name="child">
+      <object class="GtkBox" id="main_menu_box">
+        <property name="margin-bottom">10</property>
+        <property name="margin-end">10</property>
+        <property name="margin-start">10</property>
+        <property name="margin-top">10</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">5</property>
+        <child>
+          <object class="GtkSeparator"/>
+        </child>
+        <child>
+          <object class="GtkSeparator"/>
+        </child>
+        <child>
+          <object class="GtkSeparator"/>
+        </child>
+      </object>
+    </property>
+    <child>
+      <object class="GtkBox" id="saveas_menu_box">
+        <property name="margin-bottom">10</property>
+        <property name="margin-end">10</property>
+        <property name="margin-start">10</property>
+        <property name="margin-top">10</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">5</property>
+        <child>
+          <object class="GtkSeparator"/>
+        </child>
+        <child>
+          <object class="GtkSeparator"/>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="window">
+    <property name="child">
+      <object class="GtkBox" id="box1">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkBox">
+            <property name="vexpand">1</property>
+            <child>
+              <object class="GtkOverlay">
+                <property name="child">
+                  <object class="GtkBox" id="no_sp_box">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">10</property>
+                    <child>
+                      <object class="GtkImage" id="no_sp_image">
+                        <property name="icon-name">dialog-information-symbolic</property>
+                        <property name="icon-size">6</property>
+                        <property name="pixel-size">30</property>
+                        <property name="valign">end</property>
+                        <property name="vexpand">1</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="yes">No data has been opened</property>
+                        <property name="valign">start</property>
+                        <property name="vexpand">1</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="hexpand">1</property>
+                <child type="overlay">
+                  <object class="GtkDrawingArea" id="spectrumdrawingarea"/>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkRevealer" id="revealer_info_panel">
+                <property name="child">
+                  <object class="GtkBox">
+                    <property name="margin-bottom">6</property>
+                    <property name="margin-end">10</property>
+                    <property name="margin-start">10</property>
+                    <property name="margin-top">6</property>
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">10</property>
+                    <child>
+                      <object class="GtkLabel" id="fit_panel_label">
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes">Fit panel</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="baseline-position">top</property>
+                        <property name="spacing">10</property>
+                        <property name="valign">start</property>
+                        <child>
+                          <object class="GtkSpinner" id="fit_spinner">
+                            <property name="halign">start</property>
+                            <property name="visible">0</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkScrolledWindow">
+                            <property name="child">
+                              <object class="GtkViewport">
+                                <property name="child">
+                                  <object class="GtkLabel" id="fit_info_label">
+                                    <property name="label" translatable="yes">Right-click to set upper and lower fit bounds.</property>
+                                    <property name="max-width-chars">12</property>
+                                    <property name="width-chars">12</property>
+                                    <property name="width-request">120</property>
+                                    <property name="wrap">1</property>
+                                    <property name="xalign">0</property>
+                                  </object>
+                                </property>
+                              </object>
+                            </property>
+                            <property name="focusable">1</property>
+                            <property name="hscrollbar-policy">never</property>
+                            <property name="min-content-height">90</property>
+                            <property name="propagate-natural-height">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="fit_display_button_box">
+                        <property name="margin-bottom">20</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">10</property>
+                        <child>
+                          <object class="GtkButton" id="fit_dismiss_button">
+                            <property name="focusable">1</property>
+                            <property name="halign">center</property>
+                            <property name="label">Dismiss</property>
+                            <property name="receives-default">1</property>
+                            <property name="width-request">100</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="fit_button_box">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">10</property>
+                        <child>
+                          <object class="GtkButton" id="fit_fit_button">
+                            <property name="focusable">1</property>
+                            <property name="halign">center</property>
+                            <property name="label" translatable="yes">Fit!</property>
+                            <property name="receives-default">1</property>
+                            <property name="width-request">100</property>
+                            <style>
+                              <class name="suggested-action"/>
+                            </style>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="fit_refit_button">
+                            <property name="focusable">1</property>
+                            <property name="halign">center</property>
+                            <property name="label" translatable="yes">Re-fit</property>
+                            <property name="receives-default">1</property>
+                            <property name="width-request">100</property>
+                            <style>
+                              <class name="suggested-action"/>
+                            </style>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="fit_preferences_button">
+                            <property name="focusable">1</property>
+                            <property name="halign">center</property>
+                            <property name="label" translatable="yes">Settings...</property>
+                            <property name="receives-default">1</property>
+                            <property name="width-request">100</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="fit_cancel_button">
+                            <property name="focusable">1</property>
+                            <property name="halign">center</property>
+                            <property name="label">Cancel</property>
+                            <property name="receives-default">1</property>
+                            <property name="width-request">100</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="transition-type">slide-left</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="margin-bottom">2</property>
+            <property name="margin-end">10</property>
+            <property name="margin-start">10</property>
+            <property name="margin-top">2</property>
+            <property name="spacing">10</property>
+            <property name="valign">end</property>
+            <child>
+              <object class="GtkLabel" id="bottom_info_text">
+                <property name="ellipsize">end</property>
+                <property name="halign">start</property>
+                <property name="label" translatable="yes">No spectrum loaded.</property>
+                <property name="valign">center</property>
+                <attributes>
+                  <attribute name="style" value="normal"/>
+                </attributes>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="spacing">6</property>
+                <property name="tooltip-text" translatable="yes">Zoom the spectrum in and out.</property>
+                <property name="valign">center</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="icon-name">zoom-out-symbolic</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkScale" id="zoom_scale">
+                    <property name="adjustment">zoom_adjustment</property>
+                    <property name="digits">0</property>
+                    <property name="show-fill-level">1</property>
+                    <property name="valign">center</property>
+                    <property name="value-pos">right</property>
+                    <property name="width-request">250</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkImage">
+                    <property name="icon-name">zoom-in-symbolic</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+    <property name="default-height">400</property>
+    <property name="default-width">600</property>
+    <property name="height-request">580</property>
+    <property name="title" translatable="yes">SpecFitter</property>
+    <property name="width-request">800</property>
+    <child type="titlebar">
+      <object class="GtkHeaderBar" id="header_bar">
+        <child>
+          <object class="GtkMenuButton" id="primary_menu_button">
+            <property name="direction">none</property>
+            <property name="focusable">1</property>
+            <property name="popover">primary_menu</property>
+            <property name="receives-default">1</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkMenuButton" id="display_button">
+            <property name="focusable">1</property>
+            <property name="popover">display_popover</property>
+            <property name="receives-default">1</property>
+            <property name="tooltip-text" translatable="yes">Show display options for the loaded spectra.</property>
+            <child>
+              <object class="GtkImage" id="display_button_icon">
+                <property name="icon-name">document-edit-symbolic</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

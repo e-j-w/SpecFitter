@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <object class="GtkShortcutsWindow" id="shortcuts_window">
+    <property name="modal">1</property>
+    <child>
+      <object class="GtkShortcutsSection">
+        <property name="section-name">shortcuts</property>
+        <property name="max-height">6</property>
+        <child>
+          <object class="GtkShortcutsGroup">
+            <property name="title" translatable="1" context="shortcut window">General</property>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">&lt;ctrl&gt;O</property>
+                <property name="title" translatable="1" context="shortcut window">Open new file(s)</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">&lt;ctrl&gt;A</property>
+                <property name="title" translatable="1" context="shortcut window">Append file(s) to session</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">&lt;ctrl&gt;S</property>
+                <property name="title" translatable="1" context="shortcut window">Save session (.jf3 file) to disk</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">&lt;ctrl&gt;Q</property>
+                <property name="title" translatable="1" context="shortcut window">Quit the application</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcutsGroup">
+            <property name="title" translatable="1" context="shortcut window">Analysis</property>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">C</property>
+                <property name="title" translatable="1" context="shortcut window">Change calibration parameters</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">P</property>
+                <property name="title" translatable="1" context="shortcut window">Show advanced plotting options</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">V</property>
+                <property name="title" translatable="1" context="shortcut window">Show saved custom views</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">M</property>
+                <property name="title" translatable="1" context="shortcut window">Manage (rename/delete) imported data</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">N</property>
+                <property name="title" translatable="1" context="shortcut window">Rename currently displayed spectrum/view</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">F</property>
+                <property name="title" translatable="1" context="shortcut window">Fit the displayed spectrum</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">R</property>
+                <property name="title" translatable="1" context="shortcut window">Re-fit the displayed spectrum</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcutsGroup">
+            <property name="title" translatable="1" context="shortcut window">Display</property>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">L</property>
+                <property name="title" translatable="1" context="shortcut window">Toggle logarithmic scale</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">Z</property>
+                <property name="title" translatable="1" context="shortcut window">Toggle cursor</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">W</property>
+                <property name="title" translatable="1" context="shortcut window">Cycle plotting mode up (when a multi-spectrum view is displayed)</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">S</property>
+                <property name="title" translatable="1" context="shortcut window">Cycle plotting mode down (when a multi-spectrum view is displayed)</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">A</property>
+                <property name="title" translatable="1" context="shortcut window">Cycle displayed spectrum/view up</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">D</property>
+                <property name="title" translatable="1" context="shortcut window">Cycle displayed spectrum/view down</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">bracketleft</property>
+                <property name="title" translatable="1" context="shortcut window">Subtract errors from data</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">bracketright</property>
+                <property name="title" translatable="1" context="shortcut window">Add errors to data</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">backslash</property>
+                <property name="title" translatable="1" context="shortcut window">Do not add/subtract errors from data</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">plus</property>
+                <property name="title" translatable="1" context="shortcut window">Zoom in view</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">minus</property>
+                <property name="title" translatable="1" context="shortcut window">Zoom out view</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

@@ -4,7 +4,6 @@
 #include <string.h>
 #include <signal.h>
 #include <gtk/gtk.h>
-#include <gtk/gtkx.h>
 #include <cairo.h>
 #include <ctype.h>
 #include <stdint.h>
