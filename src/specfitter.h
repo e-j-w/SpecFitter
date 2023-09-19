@@ -41,7 +41,7 @@ GtkButton *help_button;
 GtkLabel *bottom_info_text;
 GtkFileChooser *file_open_dialog, *file_save_dialog;
 GtkFileFilter *file_filter;
-GtkShortcutController *main_window_sc;
+GtkEventController *main_window_sc;
 GtkBox *no_sp_box;
 GtkImage *no_sp_image;
 //display menu
@@ -136,6 +136,7 @@ GdkPixbuf *appIcon, *spIconPixbuf, *spIconPixbufDark;
 GdkFrameClock *frameClock;
 //other
 GFile *currentFolderSelection; //folder selection for file choosers
+GtkEventController *spec_scroll_controller;
 
 //non-GTK GUI globals
 struct {

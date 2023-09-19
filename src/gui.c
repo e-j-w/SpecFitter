@@ -547,7 +547,7 @@ void on_open_button_clicked(){
     rawdata.numChComments = 0; //reset the number of comments
     rawdata.numViews = 0; //reset the number of views
     char *filename = NULL;
-    GFile *gfile;
+    GFile *gfile = NULL;
     GListModel *file_list = gtk_file_chooser_get_files(file_open_dialog);
     for(i=0;i<g_list_model_get_n_items(file_list);i++){
       gfile = g_list_model_get_item(file_list,i);
@@ -674,7 +674,7 @@ void on_append_button_clicked(){
 
     currentFolderSelection = gtk_file_chooser_get_current_folder(file_open_dialog);
     char *filename = NULL;
-    GFile *gfile;
+    GFile *gfile = NULL;
     GListModel *file_list = gtk_file_chooser_get_files(file_open_dialog);
     for(i=0;i<g_list_model_get_n_items(file_list);i++){
       gfile = g_list_model_get_item(file_list,i);
@@ -1208,17 +1208,17 @@ void on_calibrate_button_clicked(){
 void on_calibrate_ok_button_clicked(){
 
   //apply settings here!
-  strncpy(calpar.calUnit,gtk_entry_get_text(cal_entry_unit),12);
+  strncpy(calpar.calUnit,gtk_entry_buffer_get_text(gtk_entry_get_buffer(cal_entry_unit)),12);
   if(strcmp(calpar.calUnit,"")==0){
     strncpy(calpar.calUnit,"Cal. Units",12);
   }
-  strncpy(calpar.calYUnit,gtk_entry_get_text(cal_entry_y_axis),28);
+  strncpy(calpar.calYUnit,gtk_entry_buffer_get_text(gtk_entry_get_buffer(cal_entry_y_axis)),28);
   if(strcmp(calpar.calYUnit,"")==0){
     strncpy(calpar.calYUnit,"Value",28);
   }
-  double constPar = strtod(gtk_entry_get_text(cal_entry_const),NULL);
-  double linPar =  strtod(gtk_entry_get_text(cal_entry_lin),NULL);
-  double quadPar = strtod(gtk_entry_get_text(cal_entry_quad),NULL);
+  double constPar = strtod(gtk_entry_buffer_get_text(gtk_entry_get_buffer(cal_entry_const)),NULL);
+  double linPar =  strtod(gtk_entry_buffer_get_text(gtk_entry_get_buffer(cal_entry_lin)),NULL);
+  double quadPar = strtod(gtk_entry_buffer_get_text(gtk_entry_get_buffer(cal_entry_quad)),NULL);
   if(!((linPar==0.0)&&(quadPar==0.0))){
     //not all calibration parameters are zero, calibration is valid
     calpar.calMode=1;
@@ -1306,7 +1306,7 @@ void on_comment_entry_changed(GtkEntry *entry){
       //editing spectrum/view channel comment
       if(guiglobals.commentEditInd>=0){
         const gchar *entryText;
-        entryText = gtk_entry_get_text(entry);
+        entryText = gtk_entry_buffer_get_text(gtk_entry_get_buffer(entry));
         if(strncmp(entryText,rawdata.chanComment[guiglobals.commentEditInd],256)==0){
           gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
           return;
@@ -1316,7 +1316,7 @@ void on_comment_entry_changed(GtkEntry *entry){
     }else if(guiglobals.commentEditMode==1){
       //editing spectrum/view title
       const gchar *entryText;
-      entryText = gtk_entry_get_text(entry);
+      entryText = gtk_entry_buffer_get_text(gtk_entry_get_buffer(entry));
       if(drawing.displayedView == -1){
         if(strncmp(entryText,rawdata.histComment[drawing.multiPlots[0]],256)==0){
           gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
@@ -1335,7 +1335,7 @@ void on_comment_entry_changed(GtkEntry *entry){
 }
 void on_comment_ok_button_clicked(){
 
-  if(strcmp(gtk_entry_get_text(comment_entry),"")!=0){
+  if(strcmp(gtk_entry_buffer_get_text(gtk_entry_get_buffer(comment_entry)),"")!=0){
     if(guiglobals.commentEditMode==0){
       //editing spectrum/view channel comment
       if(guiglobals.commentEditInd == -1){
@@ -1358,12 +1358,12 @@ void on_comment_ok_button_clicked(){
             rawdata.numViews++;
           }
         }
-        strncpy(rawdata.chanComment[(int)rawdata.numChComments],gtk_entry_get_text(comment_entry),256);
+        strncpy(rawdata.chanComment[(int)rawdata.numChComments],gtk_entry_buffer_get_text(gtk_entry_get_buffer(comment_entry)),256);
         rawdata.numChComments++;
       }else{
         //editing an existing comment
         if(guiglobals.commentEditInd < NCHCOM){
-          strncpy(rawdata.chanComment[guiglobals.commentEditInd],gtk_entry_get_text(comment_entry),256);
+          strncpy(rawdata.chanComment[guiglobals.commentEditInd],gtk_entry_buffer_get_text(gtk_entry_get_buffer(comment_entry)),256);
         }
       }
     }else if(guiglobals.commentEditMode==1){
@@ -1379,13 +1379,13 @@ void on_comment_ok_button_clicked(){
           memcpy(&rawdata.viewScaleFactor[rawdata.numViews],&drawing.scaleFactor,sizeof(drawing.scaleFactor));
           memcpy(&rawdata.viewMultiPlots[rawdata.numViews],&drawing.multiPlots,sizeof(drawing.multiPlots));
 
-          strncpy(rawdata.viewComment[rawdata.numViews],gtk_entry_get_text(comment_entry),256);
+          strncpy(rawdata.viewComment[rawdata.numViews],gtk_entry_buffer_get_text(gtk_entry_get_buffer(comment_entry)),256);
           rawdata.numViews++;
         }
       }else if(drawing.displayedView == -1){
-        strncpy(rawdata.histComment[drawing.multiPlots[0]],gtk_entry_get_text(comment_entry),256);
+        strncpy(rawdata.histComment[drawing.multiPlots[0]],gtk_entry_buffer_get_text(gtk_entry_get_buffer(comment_entry)),256);
       }else{
-        strncpy(rawdata.viewComment[drawing.displayedView],gtk_entry_get_text(comment_entry),256);
+        strncpy(rawdata.viewComment[drawing.displayedView],gtk_entry_buffer_get_text(gtk_entry_get_buffer(comment_entry)),256);
       }
     }
 
@@ -2412,11 +2412,11 @@ void iniitalizeUIElements(){
   gtk_window_set_transient_for(GTK_WINDOW(help_window), window); //center help window on main window
   about_dialog = GTK_ABOUT_DIALOG(gtk_builder_get_object(builder, "about_dialog"));
   gtk_window_set_transient_for(GTK_WINDOW(about_dialog), window); //center about dialog on main window
-  main_window_accelgroup = GTK_ACCEL_GROUP(gtk_builder_get_object(builder, "main_window_accelgroup"));
-  gtk_window_add_accel_group (window, main_window_accelgroup);
-  comment_window_accelgroup = GTK_ACCEL_GROUP(gtk_builder_get_object(builder, "comment_window_accelgroup"));
+  //main_window_accelgroup = GTK_ACCEL_GROUP(gtk_builder_get_object(builder, "main_window_accelgroup"));
+  //gtk_window_add_accel_group (window, main_window_accelgroup);
+  //comment_window_accelgroup = GTK_ACCEL_GROUP(gtk_builder_get_object(builder, "comment_window_accelgroup"));
   //gtk_window_add_accel_group(comment_window, comment_window_accelgroup);
-  calibration_window_accelgroup = GTK_ACCEL_GROUP(gtk_builder_get_object(builder, "calibration_window_accelgroup"));
+  //calibration_window_accelgroup = GTK_ACCEL_GROUP(gtk_builder_get_object(builder, "calibration_window_accelgroup"));
   //gtk_window_add_accel_group(calibrate_window, calibration_window_accelgroup);
   
   //header bar
@@ -2443,8 +2443,8 @@ void iniitalizeUIElements(){
   spectrum_drawing_area = GTK_WIDGET(gtk_builder_get_object(builder, "spectrumdrawingarea"));
   spectrum_drag_gesture = gtk_gesture_drag_new(); //without this, cannot click away from menus onto the drawing area, needs further investigation
   zoom_scale = GTK_SCALE(gtk_builder_get_object(builder, "zoom_scale"));
-  shortcuts_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "shortcuts_button"));
-  about_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "about_button"));
+  shortcuts_button = GTK_BUTTON(gtk_builder_get_object(builder, "shortcuts_button"));
+  about_button = GTK_BUTTON(gtk_builder_get_object(builder, "about_button"));
   bottom_info_text = GTK_LABEL(gtk_builder_get_object(builder, "bottom_info_text"));
   no_sp_box = GTK_BOX(gtk_builder_get_object(builder, "no_sp_box"));
 
@@ -2526,7 +2526,7 @@ void iniitalizeUIElements(){
   export_image_save_button = GTK_BUTTON(gtk_builder_get_object(builder, "export_image_save_button"));
 
   //preferences window UI elements
-  preferences_button = GTK_MODEL_BUTTON(gtk_builder_get_object(builder, "preferences_button"));
+  preferences_button = GTK_BUTTON(gtk_builder_get_object(builder, "preferences_button"));
   preferences_notebook = GTK_NOTEBOOK(gtk_builder_get_object(builder, "preferences_notebook"));
   discard_empty_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "discard_empty_checkbutton"));
   bin_errors_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "bin_errors_checkbutton"));
@@ -2617,7 +2617,8 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(autozoom_checkbutton), "toggled", G_CALLBACK(on_toggle_autozoom), NULL);
   g_signal_connect(G_OBJECT(preferences_apply_button), "clicked", G_CALLBACK(on_preferences_apply_button_clicked), NULL);
   g_signal_connect(G_OBJECT(preferences_button), "clicked", G_CALLBACK(on_preferences_button_clicked), NULL);
-  gtk_widget_set_events(spectrum_drawing_area, gtk_widget_get_events(spectrum_drawing_area) | GDK_SCROLL_MASK | GDK_SMOOTH_SCROLL_MASK | GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK); //allow mouse scrolling over the drawing area
+  spec_scroll_controller = gtk_event_controller_scroll_new(GTK_EVENT_CONTROLLER_SCROLL_VERTICAL);
+  gtk_widget_add_controller(spectrum_drawing_area,GTK_EVENT_CONTROLLER(spec_scroll_controller));
   g_signal_connect(G_OBJECT(zoom_scale), "value-changed", G_CALLBACK(on_zoom_scale_changed), NULL);
   g_signal_connect(G_OBJECT(contract_scale), "value-changed", G_CALLBACK(on_contract_scale_changed), NULL);
   g_signal_connect(G_OBJECT(shortcuts_button), "clicked", G_CALLBACK(on_shortcuts_button_clicked), NULL);
@@ -2645,7 +2646,7 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(about_dialog), "delete-event", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
 
   //setup keyboard shortcuts
-  main_window_sc = gtk_shortcut_controller_new();
+  main_window_sc = GTK_EVENT_CONTROLLER(gtk_shortcut_controller_new());
   //gtk_shortcut_controller_add_shortcut(GTK_SHORTCUT_CONTROLLER(main_window_sc),gtk_shortcut_new(gtk_shortcut_trigger_parse_string("F"),GtkShortcutAction* action));
 
   /*gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_f, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_fit_button_clicked), NULL, 0));
@@ -2765,7 +2766,7 @@ void iniitalizeUIElements(){
   //setup app icon
   gtk_window_set_default_icon(appIcon);
   gtk_window_set_icon(window,appIcon);
-  gtk_about_dialog_set_logo(about_dialog, appIcon);
+  gtk_about_dialog_set_logo(about_dialog,NULL); //sets about dialog to use the default icon
 
   //setup frame clock, for timing animations
   gtk_widget_realize(GTK_WIDGET(window));
