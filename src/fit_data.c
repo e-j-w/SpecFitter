@@ -82,11 +82,11 @@ gboolean print_fit_error(){
   GtkWidget *message_dialog;
 
   //show a dialog box
-  flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+  flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
   message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, "Fit error");
   gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"An error was encountered during the fit process.\nTry again using a different fit range, peak position(s), or fit options.");
-  gtk_dialog_run (GTK_DIALOG (message_dialog));
-  gtk_widget_destroy (message_dialog);
+  g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+  gtk_widget_show(message_dialog);
 
   return FALSE; //stop running
 }
@@ -97,11 +97,11 @@ gboolean print_fit_dubious(){
   GtkWidget *message_dialog;
 
   //show a dialog box
-  flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+  flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
   message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, "Fit failed to converge");
   gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"The fit failed to converge.  The quoted parameter values and errors may be incorrect.\nTry again using a different fit range, peak position(s), or fit options.");
-  gtk_dialog_run (GTK_DIALOG (message_dialog));
-  gtk_widget_destroy (message_dialog);
+  g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+  gtk_widget_show(message_dialog);
 
   return FALSE; //stop running
 }

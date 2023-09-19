@@ -35,13 +35,13 @@ int main(int argc, char *argv[]){
     if(g_mkdir_with_parents(dirPath, 0700)==0){
       printf("Setup configuration file directory: %s\n",dirPath);
     }else{
-      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
       GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error: cannot set up configuration file");
       char errMsg[256];
       snprintf(errMsg,256,"Couldn't create the configuration file directory at: %s",dirPath);
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
-      gtk_dialog_run(GTK_DIALOG(message_dialog));
-      gtk_widget_destroy(message_dialog);
+      g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+      gtk_widget_show(message_dialog);
       return 0;
     }
   }
@@ -56,23 +56,23 @@ int main(int argc, char *argv[]){
       if((configFile = fopen(dirPath, "r")) != NULL){ //open the config file
         readConfigFile(configFile,calpar.calMode);
       }else{
-        GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+        GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
         GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error: cannot read configuration file");
         char errMsg[256];
         snprintf(errMsg,256,"Couldn't read the configuration file at: %s",dirPath);
         gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
-        gtk_dialog_run(GTK_DIALOG(message_dialog));
-        gtk_widget_destroy(message_dialog);
+        g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+        gtk_widget_show(message_dialog);
         return 0;
       }
     }else{
-      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
       GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_WARNING, GTK_BUTTONS_CLOSE, "Cannot read configuration file");
       char warnMsg[256];
       snprintf(warnMsg,256,"Couldn't read the configuration file at: %s, will fall back to default values.",dirPath);
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",warnMsg);
-      gtk_dialog_run(GTK_DIALOG(message_dialog));
-      gtk_widget_destroy(message_dialog);
+      g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+      gtk_widget_show(message_dialog);
     }
   }else{
     readConfigFile(configFile,calpar.calMode);

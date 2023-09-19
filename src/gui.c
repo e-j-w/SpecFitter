@@ -485,7 +485,7 @@ void openSingleFile(char *filename, int32_t append){
   }
   
   if(openErr>0){
-    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
     GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error opening spectrum data!");
     char errMsg[256];
     switch(openErr){
@@ -503,8 +503,8 @@ void openSingleFile(char *filename, int32_t append){
         break;
     }
     gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
-    gtk_dialog_run (GTK_DIALOG (message_dialog));
-    gtk_widget_destroy (message_dialog);
+    g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+    gtk_widget_show(message_dialog);
     exit(-1); //quit the application
   }
 
@@ -593,7 +593,7 @@ void on_open_button_clicked(){
     }
 
     if(openErr>0){
-      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL ;
       GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error opening spectrum data!");
       char errMsg[256];
       switch(openErr){
@@ -611,8 +611,8 @@ void on_open_button_clicked(){
           break;
       }
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
-      gtk_dialog_run (GTK_DIALOG (message_dialog));
-      gtk_widget_destroy (message_dialog);
+      g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+      gtk_widget_show(message_dialog);
     }else{
       rawdata.numFilesOpened = (uint8_t)g_list_model_get_n_items(file_list);
       //set the title of the opened spectrum in the header bar
@@ -706,7 +706,7 @@ void on_append_button_clicked(){
     }
 
     if(openErr>0){
-      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL ;
       GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error opening spectrum data!");
       char errMsg[256];
       switch(openErr){
@@ -724,8 +724,8 @@ void on_append_button_clicked(){
           break;
       }
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
-      gtk_dialog_run (GTK_DIALOG (message_dialog));
-      gtk_widget_destroy (message_dialog);
+      g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+      gtk_widget_show(message_dialog);
     }else{
       rawdata.numFilesOpened = (uint8_t)(rawdata.numFilesOpened + g_list_model_get_n_items(file_list));
       //set the title of the opened spectrum in the header bar
@@ -781,7 +781,7 @@ void on_save_button_clicked(){
     saveErr = writeJF3(fileName, rawdata.hist);
 
     if(saveErr>0){
-      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL ;
       GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error saving spectrum data!");
       char errMsg[512];
       switch(saveErr){
@@ -793,8 +793,8 @@ void on_save_button_clicked(){
           break;
       }
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
-      gtk_dialog_run(GTK_DIALOG(message_dialog));
-      gtk_widget_destroy(message_dialog);
+      g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+      gtk_widget_show(message_dialog);
     }else{
       //update the status bar
       char saveMsg[512];
@@ -1027,7 +1027,7 @@ void on_export_save_button_clicked(){
     }
 
     if(saveErr>0){
-      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL ;
       GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error exporting spectrum data!");
       char errMsg[256];
       switch(saveErr){
@@ -1042,8 +1042,8 @@ void on_export_save_button_clicked(){
           break;
       }
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
-      gtk_dialog_run (GTK_DIALOG (message_dialog));
-      gtk_widget_destroy (message_dialog);
+      g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+      gtk_widget_show(message_dialog);
     }else{
       //update the status bar
       char saveMsg[256];
@@ -1111,7 +1111,7 @@ void on_export_image_button_clicked(){
     cairo_surface_destroy(imgSurf);
 
     if(saveErr>0){
-      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL ;
       GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error saving image file!");
       char errMsg[256];
       switch(saveErr){
@@ -1123,8 +1123,8 @@ void on_export_image_button_clicked(){
           break;
       }
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
-      gtk_dialog_run(GTK_DIALOG(message_dialog));
-      gtk_widget_destroy(message_dialog);
+      g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+      gtk_widget_show(message_dialog);
     }else{
       //update the status bar
       char saveMsg[256];
@@ -1180,24 +1180,24 @@ void on_calibrate_button_clicked(){
     char str[256];
     if(calpar.calpar[0]!=0.0){
       sprintf(str,"%.3f",calpar.calpar[0]);
-      gtk_entry_set_text(cal_entry_const,str);
+      gtk_entry_buffer_set_text(gtk_entry_get_buffer(cal_entry_const),str,-1);
     }else{
-      gtk_entry_set_text(cal_entry_const,"");
+      gtk_entry_buffer_set_text(gtk_entry_get_buffer(cal_entry_const),"",-1);
     }
     if(calpar.calpar[1]!=0.0){
       sprintf(str,"%.3f",calpar.calpar[1]);
-      gtk_entry_set_text(cal_entry_lin,str);
+      gtk_entry_buffer_set_text(gtk_entry_get_buffer(cal_entry_lin),str,-1);
     }else{
-      gtk_entry_set_text(cal_entry_lin,"");
+      gtk_entry_buffer_set_text(gtk_entry_get_buffer(cal_entry_lin),"",-1);
     }
     if(calpar.calpar[2]!=0.0){
       sprintf(str,"%.3f",calpar.calpar[2]);
-      gtk_entry_set_text(cal_entry_quad,str);
+      gtk_entry_buffer_set_text(gtk_entry_get_buffer(cal_entry_quad),str,-1);
     }else{
-      gtk_entry_set_text(cal_entry_quad,"");
+      gtk_entry_buffer_set_text(gtk_entry_get_buffer(cal_entry_quad),"",-1);
     }
-    gtk_entry_set_text(cal_entry_unit,calpar.calUnit);
-    gtk_entry_set_text(cal_entry_y_axis,calpar.calYUnit);
+    gtk_entry_buffer_set_text(gtk_entry_get_buffer(cal_entry_unit),calpar.calUnit,-1);
+    gtk_entry_buffer_set_text(gtk_entry_get_buffer(cal_entry_y_axis),calpar.calYUnit,-1);
     gtk_widget_set_sensitive(GTK_WIDGET(remove_calibration_button),TRUE);
   }else{
     gtk_widget_set_sensitive(GTK_WIDGET(remove_calibration_button),FALSE);
@@ -1230,11 +1230,11 @@ void on_calibrate_ok_button_clicked(){
     gtk_widget_hide(GTK_WIDGET(calibrate_window)); //close the calibration window
     manualSpectrumAreaDraw();
   }else{
-    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
     GtkWidget *message_dialog = gtk_message_dialog_new(calibrate_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Invalid calibration!");
     gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"At least one of the linear or quadratic calibration parameters must be non-zero.");
-    gtk_dialog_run(GTK_DIALOG(message_dialog));
-    gtk_widget_destroy(message_dialog);
+    g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+    gtk_widget_show(message_dialog);
     //gtk_window_set_transient_for(message_dialog, calibrate_window); //center massage dialog on calibrate window
   }
   
@@ -1267,26 +1267,26 @@ void on_rename_displayed_view(){
     if(rawdata.numViews < MAXNVIEWS){
       gtk_window_set_title(comment_window,"Name View");
       gtk_button_set_label(comment_ok_button,"Save View and Apply");
-      gtk_entry_set_text(comment_entry,"");
+      gtk_entry_buffer_set_text(gtk_entry_get_buffer(comment_entry),"",-1);
     }else{
       printf("Cannot name/create another view.\n");
-      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL ;
       GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot rename and save view!");
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"This view must be saved in order to be renamed, however the maximum number of views has been reached.  Older views must be deleted first.");
-      gtk_dialog_run(GTK_DIALOG(message_dialog));
-      gtk_widget_destroy(message_dialog);
+      g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+      gtk_widget_show(message_dialog);
       return;
     }
   }else if(drawing.displayedView == -1){
     //showing a spectrum, not a view
     gtk_window_set_title(comment_window,"Rename Spectrum");
     gtk_button_set_label(comment_ok_button,"Apply");
-    gtk_entry_set_text(comment_entry,rawdata.histComment[drawing.multiPlots[0]]);
+    gtk_entry_buffer_set_text(gtk_entry_get_buffer(comment_entry),rawdata.histComment[drawing.multiPlots[0]],-1);
   }else{
     //showing a view
     gtk_window_set_title(comment_window,"Rename View");
     gtk_button_set_label(comment_ok_button,"Apply");
-    gtk_entry_set_text(comment_entry,rawdata.viewComment[drawing.displayedView]);
+    gtk_entry_buffer_set_text(gtk_entry_get_buffer(comment_entry),rawdata.viewComment[drawing.displayedView],-1);
   }
 
   gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
@@ -1559,11 +1559,11 @@ void on_multiplot_make_view_button_clicked(){
 
   if(rawdata.numViews >= MAXNVIEWS){
     //show an error dialog
-    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL ;
     GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_manage_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot create view!");
     gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Too many views have been created.  Remove one first before creating a new one.");
-    gtk_dialog_run(GTK_DIALOG(message_dialog));
-    gtk_widget_destroy(message_dialog);
+    g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+    gtk_widget_show(message_dialog);
     return;
   }
 
@@ -1591,14 +1591,14 @@ void on_multiplot_make_view_button_clicked(){
 
   if(rawdata.viewNumMultiplotSp[rawdata.numViews] > MAX_DISP_SP){
     //show an error dialog
-    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL ;
     GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_manage_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Invalid selection for view!");
     char errStr[256];
     snprintf(errStr,256,"The maximum number of spectra\nthat may be plotted at once is %i.",MAX_DISP_SP);
     gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errStr);
 
-    gtk_dialog_run(GTK_DIALOG(message_dialog));
-    gtk_widget_destroy(message_dialog);
+    g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+    gtk_widget_show(message_dialog);
     
   }else{
     //set drawing mode for view
@@ -1674,7 +1674,7 @@ void on_multiplot_ok_button_clicked(){
     if(drawing.numMultiplotSp > MAX_DISP_SP){
 
       //show an error dialog
-      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+      GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL ;
       GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_manage_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Invalid selection!");
       char errStr[256];
       snprintf(errStr,256,"The maximum number of spectra\nthat may be plotted at once is %i.",MAX_DISP_SP);
@@ -1686,8 +1686,8 @@ void on_multiplot_ok_button_clicked(){
       drawing.numMultiplotSp = 1;
       gtk_spin_button_set_value(spectrum_selector, drawing.multiPlots[0]+1);
 
-      gtk_dialog_run (GTK_DIALOG (message_dialog));
-      gtk_widget_destroy (message_dialog);
+      g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+      gtk_widget_show(message_dialog);
     }else{
 
       //set drawing mode
@@ -1858,6 +1858,7 @@ void on_manage_cell_toggled(GtkCellRendererToggle *c, gchar *path_string){
   //gtk_widget_queue_draw(GTK_WIDGET(multiplot_window));
 }
 
+
 void on_manage_delete_button_clicked(){
 
   GtkTreeIter iter;
@@ -1872,21 +1873,8 @@ void on_manage_delete_button_clicked(){
     gtk_tree_model_get(model,&iter,1,&val,2,&spInd,-1); //get whether the spectrum is selected and the spectrum index
     if(spInd < NSPECT){
       if(val==TRUE){
-        if(getFirstViewDependingOnSp(spInd-deletedSpCounter)>=0){
-          char messageStr[512];
-          snprintf(messageStr,512,"One or more saved views depends on the data: %s\nRemoving the data will remove the view(s) as well.",rawdata.histComment[spInd-deletedSpCounter]);
-          GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
-          GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_manage_window, flags, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO, "Delete data?");
-          gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",messageStr);
-          if (gtk_dialog_run(GTK_DIALOG(message_dialog)) == GTK_RESPONSE_YES){
-            deleteSpectrumOrView(spInd-deletedSpCounter); //remember that indices are changed each time a spectrum is deleted
-            deletedSpCounter++;
-          }
-          gtk_widget_destroy(message_dialog);
-        }else{
-          deleteSpectrumOrView(spInd-deletedSpCounter); //remember that indices are changed each time a spectrum is deleted
-          deletedSpCounter++;
-        }
+        deleteSpectrumOrView(spInd-deletedSpCounter); //remember that indices are changed each time a spectrum is deleted
+        deletedSpCounter++;
       }
     }
     readingTreeModel = gtk_tree_model_iter_next(model, &iter);
@@ -1923,14 +1911,14 @@ void on_sum_all_button_clicked(){
   if(rawdata.numSpOpened > MAX_DISP_SP){
     //too many spectra opened to sum
     //show an error dialog
-    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL ;
     GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Too many spectra to show summed view!");
     char errStr[256];
     snprintf(errStr,256,"The current session contains %i spectra, cannot sum all of them.\nThe maximum number of spectra that may be plotted at once is %i.\n\nCustomized sum and overlay views can be made using the Advanced Plotting dialog.",rawdata.numSpOpened,MAX_DISP_SP);
     gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errStr);
 
-    gtk_dialog_run (GTK_DIALOG (message_dialog));
-    gtk_widget_destroy (message_dialog);
+    g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+    gtk_widget_show(message_dialog);
     return;
   }
 
@@ -1987,13 +1975,13 @@ void on_fit_button_clicked(){
         update_gui_fit_state();
         gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw to hide any fit
       }else{
-        GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+        GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
         GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot fit data!");
         char errMsg[256];
         snprintf(errMsg,256,"The fitter cannot be used while multiple spectra are being displayed.  Display a single spectrum or sum of spectra, and then try again.");
         gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
-        gtk_dialog_run (GTK_DIALOG (message_dialog));
-        gtk_widget_destroy (message_dialog);
+        g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+        gtk_widget_show(message_dialog);
       }
     }
   }
@@ -2018,22 +2006,22 @@ void on_refit_button_clicked(){
           memcpy(fitpar.fitPeakInitGuess,fitpar.prevFitPeakInitGuess,sizeof(fitpar.prevFitPeakInitGuess));
           on_fit_fit_button_clicked();
         }else{
-          GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+          GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL ;
           GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot re-fit data!");
           char errMsg[256];
           snprintf(errMsg,256,"Cannot re-fit data, as no previous fit was performed or the fit type was changed since the previous fit.");
           gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
-          gtk_dialog_run(GTK_DIALOG(message_dialog));
-          gtk_widget_destroy(message_dialog);
+          g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+          gtk_widget_show(message_dialog);
         }
       }else{
-        GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+        GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL ;
         GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot re-fit data!");
         char errMsg[256];
         snprintf(errMsg,256,"The fitter cannot be used while multiple spectra are being displayed.  Display a single spectrum or sum of spectra, and then try again.");
         gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errMsg);
-        gtk_dialog_run(GTK_DIALOG(message_dialog));
-        gtk_widget_destroy(message_dialog);
+        g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+        gtk_widget_show(message_dialog);
       }
     }
   }

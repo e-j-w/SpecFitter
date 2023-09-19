@@ -595,17 +595,17 @@ void on_spectrum_click(GtkWidget *widget, GdkButtonEvent *event){
               gtk_window_set_title(comment_window,"Edit Comment");
               gtk_widget_set_sensitive(GTK_WIDGET(remove_comment_button),TRUE);
               gtk_widget_set_visible(GTK_WIDGET(remove_comment_button),TRUE);
-              gtk_entry_set_text(comment_entry, rawdata.chanComment[guiglobals.commentEditInd]);
+              gtk_entry_buffer_set_text(gtk_entry_get_buffer(comment_entry),rawdata.chanComment[guiglobals.commentEditInd],-1);
               gtk_button_set_label(comment_ok_button,"Apply");
               gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
             }else{
               if(rawdata.numChComments >= NCHCOM){
                 printf("Cannot add any more comments.\n");
-                GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+                GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
                 GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot add comment!");
                 gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"The maximum number of comments has been reached.  Older comments must be deleted before more can be added.");
-                gtk_dialog_run(GTK_DIALOG(message_dialog));
-                gtk_widget_destroy(message_dialog);
+                g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+                gtk_widget_show(message_dialog);
                 return;
               }
               gtk_widget_set_sensitive(GTK_WIDGET(remove_comment_button),FALSE);
@@ -620,11 +620,11 @@ void on_spectrum_click(GtkWidget *widget, GdkButtonEvent *event){
                 //this is a view that hasn't been saved yet
                 if(rawdata.numViews >= MAXNVIEWS){
                   printf("Cannot add any more views.\n");
-                  GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+                  GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
                   GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot add comment!");
                   gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Adding a comment would require the current view to be saved, however the maximum number of custom views has been reached.  Older custom views must be deleted before more can be added.");
-                  gtk_dialog_run(GTK_DIALOG(message_dialog));
-                  gtk_widget_destroy(message_dialog);
+                  g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+                  gtk_widget_show(message_dialog);
                   return;
                 }
                 rawdata.chanCommentSp[(int)rawdata.numChComments] = rawdata.numViews;
@@ -635,7 +635,7 @@ void on_spectrum_click(GtkWidget *widget, GdkButtonEvent *event){
               guiglobals.commentEditMode=0;
               gtk_window_set_title(comment_window,"Add Comment");
               gtk_widget_set_visible(GTK_WIDGET(remove_comment_button),FALSE);
-              gtk_entry_set_text(comment_entry, "");
+              gtk_entry_buffer_set_text(gtk_entry_get_buffer(comment_entry),"",-1);
               gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
             }
             //re-enable comment display
@@ -653,17 +653,17 @@ void on_spectrum_click(GtkWidget *widget, GdkButtonEvent *event){
               gtk_window_set_title(comment_window,"Edit Comment");
               gtk_widget_set_sensitive(GTK_WIDGET(remove_comment_button),TRUE);
               gtk_widget_set_visible(GTK_WIDGET(remove_comment_button),TRUE);
-              gtk_entry_set_text(comment_entry, rawdata.chanComment[guiglobals.commentEditInd]);
+              gtk_entry_buffer_set_text(gtk_entry_get_buffer(comment_entry),rawdata.chanComment[guiglobals.commentEditInd],-1);
               gtk_button_set_label(comment_ok_button,"Apply");
               gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
             }else{
               if(rawdata.numChComments >= NCHCOM){
                 printf("Cannot add any more comments.\n");
-                GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+                GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
                 GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot add comment!");
                 gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"The maximum number of comments has been reached.  Older comments must be deleted before more can be added.");
-                gtk_dialog_run(GTK_DIALOG(message_dialog));
-                gtk_widget_destroy(message_dialog);
+                g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+                gtk_widget_show(message_dialog);
                 return;
               }
               gtk_widget_set_sensitive(GTK_WIDGET(remove_comment_button),FALSE);
@@ -683,11 +683,11 @@ void on_spectrum_click(GtkWidget *widget, GdkButtonEvent *event){
                 //commenting on a view that hasn't been saved yet
                 if(rawdata.numViews >= MAXNVIEWS){
                   printf("Cannot add any more views.\n");
-                  GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+                  GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
                   GtkWidget *message_dialog = gtk_message_dialog_new(window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot add comment!");
                   gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Adding a comment would require the current view to be saved, however the maximum number of custom views has been reached.  Older custom views must be deleted before more can be added.");
-                  gtk_dialog_run(GTK_DIALOG(message_dialog));
-                  gtk_widget_destroy(message_dialog);
+                  g_signal_connect_swapped(message_dialog,"response",G_CALLBACK(gtk_window_destroy),message_dialog); // Ensure that the dialog box is destroyed when the user responds
+                  gtk_widget_show(message_dialog);
                   return;
                 }
                 rawdata.chanCommentView[(int)rawdata.numChComments] = 1;
@@ -699,7 +699,7 @@ void on_spectrum_click(GtkWidget *widget, GdkButtonEvent *event){
               guiglobals.commentEditMode=0;
               gtk_window_set_title(comment_window,"Add Comment");
               gtk_widget_set_visible(GTK_WIDGET(remove_comment_button),FALSE);
-              gtk_entry_set_text(comment_entry, "");
+              gtk_entry_buffer_set_text(gtk_entry_get_buffer(comment_entry),"",-1);
               gtk_widget_set_sensitive(GTK_WIDGET(comment_ok_button),FALSE);
             }
             //re-enable comment display
@@ -2114,7 +2114,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
 }
 
 //update the spectrum drawing area
-void drawSpectrumArea(GtkWidget *widget, cairo_t *cr){
+void drawSpectrumArea(cairo_t *cr){
 
   if(!rawdata.openedSp){
     return;
