@@ -41,7 +41,7 @@ GtkButton *help_button;
 GtkLabel *bottom_info_text;
 GtkFileChooser *file_open_dialog, *file_save_dialog;
 GtkFileFilter *file_filter;
-GtkAccelGroup *main_window_accelgroup;
+GtkShortcutController *main_window_sc;
 GtkBox *no_sp_box;
 GtkImage *no_sp_image;
 //display menu
@@ -65,15 +65,13 @@ GtkSpinner *fit_spinner;
 GtkWidget *calibrate_ok_button, *remove_calibration_button;
 GtkWindow *calibrate_window;
 GtkEntry *cal_entry_unit, *cal_entry_const, *cal_entry_lin, *cal_entry_quad, *cal_entry_y_axis;
-GtkAccelGroup *calibration_window_accelgroup;
 //comment dialog
 GtkWindow *comment_window;
 GtkEntry *comment_entry;
 GtkButton *comment_ok_button, *remove_comment_button;
-GtkAccelGroup *comment_window_accelgroup;
 //'About' dialog
 GtkAboutDialog *about_dialog;
-GtkModelButton *about_button;
+GtkButton *about_button;
 //MultiPlot and manage dialog
 GtkWindow *multiplot_manage_window;
 GtkStack *multiplot_manage_stack, *multiplot_manage_button_stack;
@@ -113,7 +111,7 @@ GtkCheckButton *export_image_label_checkbutton, *export_image_fit_checkbutton, *
 GtkComboBoxText *export_axissize_combobox;
 GtkButton *export_image_save_button;
 //preferences dialog
-GtkModelButton *preferences_button;
+GtkButton *preferences_button;
 GtkWindow *preferences_window;
 GtkNotebook *preferences_notebook;
 GtkCheckButton *discard_empty_checkbutton, *bin_errors_checkbutton, *round_errors_checkbutton, *dark_theme_checkbutton;
@@ -126,7 +124,7 @@ GtkButton *preferences_apply_button;
 GtkComboBoxText *background_type_combobox, *peak_shape_combobox, *peak_width_combobox, *weight_mode_combobox;
 GtkCheckButton *animation_checkbutton;
 //shortcuts window
-GtkModelButton *shortcuts_button;
+GtkButton *shortcuts_button;
 GtkShortcutsWindow *shortcuts_window;
 //help window
 GtkWindow *help_window;
@@ -137,7 +135,7 @@ GdkPixbuf *appIcon, *spIconPixbuf, *spIconPixbufDark;
 //timing
 GdkFrameClock *frameClock;
 //other
-gchar *currentFolderSelection; //folder selection for file choosers
+GFile *currentFolderSelection; //folder selection for file choosers
 
 //non-GTK GUI globals
 struct {

@@ -547,9 +547,11 @@ void on_open_button_clicked(){
     rawdata.numChComments = 0; //reset the number of comments
     rawdata.numViews = 0; //reset the number of views
     char *filename = NULL;
-    GSList *file_list = gtk_file_chooser_get_filenames(file_open_dialog);
-    for(i=0;i<g_slist_length(file_list);i++){
-      filename = g_slist_nth_data(file_list,i);
+    GFile *gfile;
+    GListModel *file_list = gtk_file_chooser_get_files(file_open_dialog);
+    for(i=0;i<g_list_model_get_n_items(file_list);i++){
+      gfile = g_list_model_get_item(file_list,i);
+      filename = g_file_get_path(gfile);
       int32_t numSp = readSpectrumDataFile(filename,rawdata.hist,rawdata.numSpOpened);
       if(numSp > 0){ //see read_data.c
         rawdata.openedSp = 1;
@@ -612,7 +614,7 @@ void on_open_button_clicked(){
       gtk_dialog_run (GTK_DIALOG (message_dialog));
       gtk_widget_destroy (message_dialog);
     }else{
-      rawdata.numFilesOpened = (uint8_t)g_slist_length(file_list);
+      rawdata.numFilesOpened = (uint8_t)g_list_model_get_n_items(file_list);
       //set the title of the opened spectrum in the header bar
       if(rawdata.numFilesOpened > 1){
         char headerBarSub[256];
@@ -622,7 +624,8 @@ void on_open_button_clicked(){
         gtk_header_bar_set_subtitle(header_bar,filename);
       }
     }
-    g_slist_free(file_list);
+    g_object_unref(file_list);
+    g_free(gfile);
     g_free(filename);
   }
   
@@ -671,9 +674,11 @@ void on_append_button_clicked(){
 
     currentFolderSelection = gtk_file_chooser_get_current_folder(file_open_dialog);
     char *filename = NULL;
-    GSList *file_list = gtk_file_chooser_get_filenames(file_open_dialog);
-    for(i=0;i<g_slist_length(file_list);i++){
-      filename = g_slist_nth_data(file_list,i);
+    GFile *gfile;
+    GListModel *file_list = gtk_file_chooser_get_files(file_open_dialog);
+    for(i=0;i<g_list_model_get_n_items(file_list);i++){
+      gfile = g_list_model_get_item(file_list,i);
+      filename = g_file_get_path(gfile);
       int32_t numSp = readSpectrumDataFile(filename,rawdata.hist,rawdata.numSpOpened);
       if(numSp > 0){ //see read_data.c
         rawdata.openedSp = 1;
@@ -722,7 +727,7 @@ void on_append_button_clicked(){
       gtk_dialog_run (GTK_DIALOG (message_dialog));
       gtk_widget_destroy (message_dialog);
     }else{
-      rawdata.numFilesOpened = (uint8_t)(rawdata.numFilesOpened + g_slist_length(file_list));
+      rawdata.numFilesOpened = (uint8_t)(rawdata.numFilesOpened + g_list_model_get_n_items(file_list));
       //set the title of the opened spectrum in the header bar
       if(rawdata.numFilesOpened > 1){
         char headerBarSub[256];
@@ -732,7 +737,8 @@ void on_append_button_clicked(){
         gtk_header_bar_set_subtitle(header_bar,filename);
       }
     }
-    g_slist_free(file_list);
+    g_object_unref(file_list);
+    g_free(gfile);
     g_free(filename);
   }
 
@@ -763,10 +769,11 @@ void on_save_button_clicked(){
   if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
 
     currentFolderSelection = gtk_file_chooser_get_current_folder(file_open_dialog);
-    char *fn = NULL;
-    char *tok, fileName[256];
-    fn = gtk_file_chooser_get_filename(file_save_dialog);
-    tok = strtok (fn,".");
+    GFile *gfile = NULL;
+    char *tok, *fn, fileName[256];
+    gfile = gtk_file_chooser_get_file(file_save_dialog);
+    fn = g_file_get_path(gfile);
+    tok = strtok(fn,".");
     strncpy(fileName,tok,255);
     //save as a .jf3 file by default
     strncat(fileName,".jf3",255);
@@ -794,6 +801,7 @@ void on_save_button_clicked(){
       snprintf(saveMsg,512,"Saved data to file %s.",fileName);
       gtk_label_set_text(bottom_info_text,saveMsg);
     }
+    g_free(gfile);
     g_free(fn);
   }
 
@@ -994,10 +1002,11 @@ void on_export_save_button_clicked(){
   if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
     
     currentFolderSelection = gtk_file_chooser_get_current_folder(file_open_dialog);
-    char *fn = NULL;
-    char *tok, fileName[256];
-    fn = gtk_file_chooser_get_filename(file_save_dialog);
-    tok = strtok (fn,".");
+    GFile *gfile = NULL;
+    char *tok, *fn, fileName[256];
+    gfile = gtk_file_chooser_get_file(file_save_dialog);
+    fn = g_file_get_path(gfile);
+    tok = strtok(fn,".");
     strncpy(fileName,tok,255);
 
     //write file
@@ -1041,6 +1050,7 @@ void on_export_save_button_clicked(){
       snprintf(saveMsg,256,"Successfully exported data.");
       gtk_label_set_text(bottom_info_text,saveMsg);
     }
+    g_free(gfile);
     g_free(fn);
   }
 
@@ -1080,9 +1090,10 @@ void on_export_image_button_clicked(){
   if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
     
     currentFolderSelection = gtk_file_chooser_get_current_folder(file_open_dialog);
-    char *fn = NULL;
-    char *tok, fileName[256];
-    fn = gtk_file_chooser_get_filename(file_save_dialog);
+    GFile *gfile = NULL;
+    char *tok, *fn, fileName[256];
+    gfile = gtk_file_chooser_get_file(file_save_dialog);
+    fn = g_file_get_path(gfile);
     tok = strtok (fn,".");
     snprintf(fileName,256,"%s.png",tok);
 
@@ -1120,6 +1131,7 @@ void on_export_image_button_clicked(){
       snprintf(saveMsg,256,"Successfully saved image.");
       gtk_label_set_text(bottom_info_text,saveMsg);
     }
+    g_free(gfile);
     g_free(fn);
   }
 
@@ -2633,7 +2645,10 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(about_dialog), "delete-event", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
 
   //setup keyboard shortcuts
-  gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_f, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_fit_button_clicked), NULL, 0));
+  main_window_sc = gtk_shortcut_controller_new();
+  //gtk_shortcut_controller_add_shortcut(GTK_SHORTCUT_CONTROLLER(main_window_sc),gtk_shortcut_new(gtk_shortcut_trigger_parse_string("F"),GtkShortcutAction* action));
+
+  /*gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_f, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_fit_button_clicked), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_r, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_refit_button_clicked), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_c, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_calibrate_button_clicked), NULL, 0));
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_p, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(show_multiplot_window), NULL, 0));
@@ -2661,6 +2676,7 @@ void iniitalizeUIElements(){
   gtk_accel_group_connect(comment_window_accelgroup, GDK_KEY_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_comment_cancel), NULL, 0));
   gtk_accel_group_connect(calibration_window_accelgroup, GDK_KEY_Return, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_calibrate_ok_button_clicked), NULL, 0));
   gtk_accel_group_connect(calibration_window_accelgroup, GDK_KEY_Escape, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_remove_calibration_button_clicked), NULL, 0));
+  */
 
   //set attributes
   gtk_tree_view_column_add_attribute(multiplot_column2,multiplot_cr2, "active",1);
