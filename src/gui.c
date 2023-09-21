@@ -516,32 +516,10 @@ void openSingleFile(char *filename, int32_t append){
 
 }
 
-void on_open_button_clicked(){
-
-  uint32_t i,j;
-
-  GtkFileChooserNative *native = gtk_file_chooser_native_new ("Open Data File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
-  file_open_dialog = GTK_FILE_CHOOSER(native);
-  if(currentFolderSelection != NULL){
-    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection,NULL);
-  }
-  gtk_file_chooser_set_select_multiple(file_open_dialog, TRUE);
-  file_filter = gtk_file_filter_new();
-  gtk_file_filter_set_name(file_filter,"Spectrum Data (.jf3, .txt, .mca, .fmca, .spe, .chn, .C)");
-  gtk_file_filter_add_pattern(file_filter,"*.txt");
-  gtk_file_filter_add_pattern(file_filter,"*.mca");
-  gtk_file_filter_add_pattern(file_filter,"*.fmca");
-  gtk_file_filter_add_pattern(file_filter,"*.spe");
-  gtk_file_filter_add_pattern(file_filter,"*.Spe");
-  gtk_file_filter_add_pattern(file_filter,"*.chn");
-  gtk_file_filter_add_pattern(file_filter,"*.Chn");
-  gtk_file_filter_add_pattern(file_filter,"*.C");
-  gtk_file_filter_add_pattern(file_filter,"*.jf3");
-  gtk_file_chooser_add_filter(file_open_dialog,file_filter);
+void on_open_response(GtkNativeDialog *native, int response){
 
   int32_t openErr = 0; //to track if there are any errors when opening spectra
-  if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
-
+  if(response == GTK_RESPONSE_ACCEPT){
     currentFolderSelection = gtk_file_chooser_get_current_folder(file_open_dialog);
     rawdata.numSpOpened = 0; //reset the open spectra
     rawdata.numChComments = 0; //reset the number of comments
@@ -549,14 +527,14 @@ void on_open_button_clicked(){
     char *filename = NULL;
     GFile *gfile = NULL;
     GListModel *file_list = gtk_file_chooser_get_files(file_open_dialog);
-    for(i=0;i<g_list_model_get_n_items(file_list);i++){
+    for(uint32_t i=0;i<g_list_model_get_n_items(file_list);i++){
       gfile = g_list_model_get_item(file_list,i);
       filename = g_file_get_path(gfile);
       int32_t numSp = readSpectrumDataFile(filename,rawdata.hist,rawdata.numSpOpened);
       if(numSp > 0){ //see read_data.c
         rawdata.openedSp = 1;
         //set comments for spectra just opened
-        for (j = rawdata.numSpOpened; j < (uint32_t)(rawdata.numSpOpened+numSp); j++){
+        for(uint32_t j = rawdata.numSpOpened; j < (uint32_t)(rawdata.numSpOpened+numSp); j++){
           //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
           drawing.scaleFactor[j] = 1.00;
         }
@@ -619,16 +597,16 @@ void on_open_button_clicked(){
       if(rawdata.numFilesOpened > 1){
         char headerBarSub[256];
         snprintf(headerBarSub,256,"%i files loaded",rawdata.numFilesOpened);
-        gtk_header_bar_set_subtitle(header_bar,headerBarSub);
+        //gtk_header_bar_set_subtitle(header_bar,headerBarSub); //not in GTK4
       }else{
-        gtk_header_bar_set_subtitle(header_bar,filename);
+        //gtk_header_bar_set_subtitle(header_bar,filename); //not in GTK4
       }
     }
     g_object_unref(file_list);
     g_free(gfile);
     g_free(filename);
   }
-  
+
   //autozoom if needed
   if(guiglobals.autoZoom){
     autoZoom();
@@ -637,20 +615,11 @@ void on_open_button_clicked(){
 
   g_object_unref(native);
   manualSpectrumAreaDraw();
-  
 }
 
+void on_open_button_clicked(){
 
-void on_append_button_clicked(){
-
-  //handle case where this is called by shortcut, and spectra are not open
-  if(rawdata.openedSp == 0){
-    return;
-  }
-
-  uint32_t i,j;
-  
-  GtkFileChooserNative *native = gtk_file_chooser_native_new ("Add More Data File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
+  GtkFileChooserNative *native = gtk_file_chooser_native_new ("Open Data File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
   file_open_dialog = GTK_FILE_CHOOSER(native);
   if(currentFolderSelection != NULL){
     gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection,NULL);
@@ -669,21 +638,27 @@ void on_append_button_clicked(){
   gtk_file_filter_add_pattern(file_filter,"*.jf3");
   gtk_file_chooser_add_filter(file_open_dialog,file_filter);
 
-  int32_t openErr = 0; //to track if there are any errors when opening spectra
-  if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
+  g_signal_connect(native, "response", G_CALLBACK(on_open_response), NULL);
+  gtk_native_dialog_show(GTK_NATIVE_DIALOG(native));
+  
+}
 
+void on_append_response(GtkNativeDialog *native, int response){
+
+  int32_t openErr = 0; //to track if there are any errors when opening spectra
+  if(response == GTK_RESPONSE_ACCEPT){
     currentFolderSelection = gtk_file_chooser_get_current_folder(file_open_dialog);
     char *filename = NULL;
     GFile *gfile = NULL;
     GListModel *file_list = gtk_file_chooser_get_files(file_open_dialog);
-    for(i=0;i<g_list_model_get_n_items(file_list);i++){
+    for(uint32_t i=0;i<g_list_model_get_n_items(file_list);i++){
       gfile = g_list_model_get_item(file_list,i);
       filename = g_file_get_path(gfile);
       int32_t numSp = readSpectrumDataFile(filename,rawdata.hist,rawdata.numSpOpened);
       if(numSp > 0){ //see read_data.c
         rawdata.openedSp = 1;
         //set comments for spectra just opened
-        for (j = rawdata.numSpOpened; j < (uint32_t)(rawdata.numSpOpened+numSp); j++){
+        for(uint32_t j = rawdata.numSpOpened; j < (uint32_t)(rawdata.numSpOpened+numSp); j++){
           //printf("Comment %i: %s\n",j,rawdata.histComment[j]);
           drawing.scaleFactor[j] = 1.00;
         }
@@ -732,42 +707,53 @@ void on_append_button_clicked(){
       if(rawdata.numFilesOpened > 1){
         char headerBarSub[256];
         snprintf(headerBarSub,256,"%i files loaded",rawdata.numFilesOpened);
-        gtk_header_bar_set_subtitle(header_bar,headerBarSub);
+        //gtk_header_bar_set_subtitle(header_bar,headerBarSub); //not in GTK4
       }else{
-        gtk_header_bar_set_subtitle(header_bar,filename);
+        //gtk_header_bar_set_subtitle(header_bar,filename); //not in GTK4
       }
     }
     g_object_unref(file_list);
     g_free(gfile);
     g_free(filename);
   }
-
   g_object_unref(native);
   manualSpectrumAreaDraw();
-  
+
 }
 
-void on_save_button_clicked(){
+void on_append_button_clicked(){
+
   //handle case where this is called by shortcut, and spectra are not open
   if(rawdata.openedSp == 0){
     return;
   }
-
-  GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Spectrum Data", window, GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
-  file_save_dialog = GTK_FILE_CHOOSER(native);
+  
+  GtkFileChooserNative *native = gtk_file_chooser_native_new ("Add More Data File(s)", window, GTK_FILE_CHOOSER_ACTION_OPEN, "_Open", "_Cancel");
+  file_open_dialog = GTK_FILE_CHOOSER(native);
   if(currentFolderSelection != NULL){
     gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection,NULL);
   }
-  gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
-  gtk_file_chooser_set_do_overwrite_confirmation(file_save_dialog, TRUE);
+  gtk_file_chooser_set_select_multiple(file_open_dialog, TRUE);
   file_filter = gtk_file_filter_new();
-  gtk_file_filter_set_name(file_filter,"SpecFitter sessions (.jf3)");
+  gtk_file_filter_set_name(file_filter,"Spectrum Data (.jf3, .txt, .mca, .fmca, .spe, .chn, .C)");
+  gtk_file_filter_add_pattern(file_filter,"*.txt");
+  gtk_file_filter_add_pattern(file_filter,"*.mca");
+  gtk_file_filter_add_pattern(file_filter,"*.fmca");
+  gtk_file_filter_add_pattern(file_filter,"*.spe");
+  gtk_file_filter_add_pattern(file_filter,"*.Spe");
+  gtk_file_filter_add_pattern(file_filter,"*.chn");
+  gtk_file_filter_add_pattern(file_filter,"*.Chn");
+  gtk_file_filter_add_pattern(file_filter,"*.C");
   gtk_file_filter_add_pattern(file_filter,"*.jf3");
-  gtk_file_chooser_add_filter(file_save_dialog,file_filter);
+  gtk_file_chooser_add_filter(file_open_dialog,file_filter);
 
-  int32_t saveErr = 0; //to track if there are any errors when opening spectra
-  if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
+  g_signal_connect(native, "response", G_CALLBACK(on_append_response), NULL);
+  gtk_native_dialog_show(GTK_NATIVE_DIALOG(native));
+  
+}
 
+void on_save_response(GtkNativeDialog *native, int response){
+  if(response == GTK_RESPONSE_ACCEPT){
     currentFolderSelection = gtk_file_chooser_get_current_folder(file_open_dialog);
     GFile *gfile = NULL;
     char *tok, *fn, fileName[256];
@@ -778,7 +764,7 @@ void on_save_button_clicked(){
     //save as a .jf3 file by default
     strncat(fileName,".jf3",255);
     //write file
-    saveErr = writeJF3(fileName, rawdata.hist);
+    int32_t saveErr = writeJF3(fileName, rawdata.hist);
 
     if(saveErr>0){
       GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL ;
@@ -804,8 +790,28 @@ void on_save_button_clicked(){
     g_free(gfile);
     g_free(fn);
   }
-
   g_object_unref(native);
+}
+
+void on_save_button_clicked(){
+  //handle case where this is called by shortcut, and spectra are not open
+  if(rawdata.openedSp == 0){
+    return;
+  }
+
+  GtkFileChooserNative *native = gtk_file_chooser_native_new("Save Spectrum Data", window, GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
+  file_save_dialog = GTK_FILE_CHOOSER(native);
+  if(currentFolderSelection != NULL){
+    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection,NULL);
+  }
+  gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
+  //gtk_file_chooser_set_do_overwrite_confirmation(file_save_dialog, TRUE); //not in GTK4
+  file_filter = gtk_file_filter_new();
+  gtk_file_filter_set_name(file_filter,"SpecFitter sessions (.jf3)");
+  gtk_file_filter_add_pattern(file_filter,"*.jf3");
+  gtk_file_chooser_add_filter(file_save_dialog,file_filter);
+  g_signal_connect(native, "response", G_CALLBACK(on_save_response), NULL);
+  gtk_native_dialog_show(GTK_NATIVE_DIALOG(native));
 }
 
 void on_save_text_button_clicked(){
@@ -962,45 +968,15 @@ void on_export_mode_combobox_changed(){
   }
 }
 
-void on_export_save_button_clicked(){
-  //get export settings
-  int32_t exportMode = gtk_combo_box_get_active(GTK_COMBO_BOX(export_mode_combobox));
-  int32_t rebin = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_rebin_checkbutton));
-
-  GtkFileChooserNative *native = gtk_file_chooser_native_new ("Export Spectrum Data", window, GTK_FILE_CHOOSER_ACTION_SAVE, "_Export", "_Cancel");
-  file_save_dialog = GTK_FILE_CHOOSER(native);
-  if(currentFolderSelection != NULL){
-    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection,NULL);
-  }
-  gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
-  gtk_file_chooser_set_do_overwrite_confirmation(file_save_dialog, TRUE);
-  file_filter = gtk_file_filter_new();
-
-  switch(guiglobals.exportFileType){
-    case 2:
-      //fmca
-      gtk_file_filter_set_name(file_filter,"FMCA files (.fmca)");
-      gtk_file_filter_add_pattern(file_filter,"*.fmca");
-      gtk_file_chooser_add_filter(file_save_dialog,file_filter);
-      break;
-    case 1:
-      //radware
-      gtk_file_filter_set_name(file_filter,"RadWare files (.spe)");
-      gtk_file_filter_add_pattern(file_filter,"*.spe");
-      gtk_file_chooser_add_filter(file_save_dialog,file_filter);
-      break;
-    case 0:
-    default:
-      //text
-      gtk_file_filter_set_name(file_filter,"ASCII files (.txt)");
-      gtk_file_filter_add_pattern(file_filter,"*.txt");
-      gtk_file_chooser_add_filter(file_save_dialog,file_filter);
-      break;
-  }
+void on_export_response(GtkNativeDialog *native, int response){  
 
   int32_t saveErr = 0; //to track if there are any errors when opening spectra
-  if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
-    
+  if(response == GTK_RESPONSE_ACCEPT){
+
+    //get export settings
+    int32_t exportMode = gtk_combo_box_get_active(GTK_COMBO_BOX(export_mode_combobox));
+    int32_t rebin = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_rebin_checkbutton));
+
     currentFolderSelection = gtk_file_chooser_get_current_folder(file_open_dialog);
     GFile *gfile = NULL;
     char *tok, *fn, fileName[256];
@@ -1053,42 +1029,66 @@ void on_export_save_button_clicked(){
     g_free(gfile);
     g_free(fn);
   }
-
   g_object_unref(native);
   gtk_widget_hide(GTK_WIDGET(export_options_window)); //hide the window
+}
+
+void on_export_save_button_clicked(){
+
+  GtkFileChooserNative *native = gtk_file_chooser_native_new ("Export Spectrum Data", window, GTK_FILE_CHOOSER_ACTION_SAVE, "_Export", "_Cancel");
+  file_save_dialog = GTK_FILE_CHOOSER(native);
+  if(currentFolderSelection != NULL){
+    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection,NULL);
+  }
+  gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
+  //gtk_file_chooser_set_do_overwrite_confirmation(file_save_dialog, TRUE); //not in GTK4
+  file_filter = gtk_file_filter_new();
+
+  switch(guiglobals.exportFileType){
+    case 2:
+      //fmca
+      gtk_file_filter_set_name(file_filter,"FMCA files (.fmca)");
+      gtk_file_filter_add_pattern(file_filter,"*.fmca");
+      gtk_file_chooser_add_filter(file_save_dialog,file_filter);
+      break;
+    case 1:
+      //radware
+      gtk_file_filter_set_name(file_filter,"RadWare files (.spe)");
+      gtk_file_filter_add_pattern(file_filter,"*.spe");
+      gtk_file_chooser_add_filter(file_save_dialog,file_filter);
+      break;
+    case 0:
+    default:
+      //text
+      gtk_file_filter_set_name(file_filter,"ASCII files (.txt)");
+      gtk_file_filter_add_pattern(file_filter,"*.txt");
+      gtk_file_chooser_add_filter(file_save_dialog,file_filter);
+      break;
+  }
+
+  g_signal_connect(native, "response", G_CALLBACK(on_export_response), NULL);
+  gtk_native_dialog_show(GTK_NATIVE_DIALOG(native));
+
 }
 
 void on_save_png_button_clicked(){
   gtk_window_present(export_image_window); //show the window
 }
 
-void on_export_image_button_clicked(){
-  
-  //get image file settings
-  int32_t inpAxisScale = gtk_combo_box_get_active(GTK_COMBO_BOX(export_axissize_combobox));
-  uint8_t showFit = (uint8_t)gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_fit_checkbutton));
-  uint8_t showLabels = (uint8_t)gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_label_checkbutton));
-  uint8_t showGridLines = (uint8_t)gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_gridline_checkbutton));
-  int32_t hres = gtk_spin_button_get_value_as_int(export_h_res_spinbutton);
-  int32_t vres = gtk_spin_button_get_value_as_int(export_v_res_spinbutton);
-
-  GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Image File", window, GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
-  file_save_dialog = GTK_FILE_CHOOSER(native);
-  if(currentFolderSelection != NULL){
-    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection,NULL);
-  }
-  gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
-  gtk_file_chooser_set_do_overwrite_confirmation(file_save_dialog, TRUE);
-  file_filter = gtk_file_filter_new();
-  gtk_file_filter_set_name(file_filter,"Image files (.png)");
-  gtk_file_filter_add_pattern(file_filter,"*.png");
-  gtk_file_chooser_add_filter(file_save_dialog,file_filter);
-
-  float scaleFactor = (float)((1.0 + inpAxisScale*0.5)*sqrt((hres*vres)/1000000.0));
+void on_export_image_response(GtkNativeDialog *native, int response){
 
   int32_t saveErr = 0; //to track if there are any errors when opening spectra
-  if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
-    
+  if(response == GTK_RESPONSE_ACCEPT){
+
+    //get image file settings
+    int32_t inpAxisScale = gtk_combo_box_get_active(GTK_COMBO_BOX(export_axissize_combobox));
+    uint8_t showFit = (uint8_t)gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_fit_checkbutton));
+    uint8_t showLabels = (uint8_t)gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_label_checkbutton));
+    uint8_t showGridLines = (uint8_t)gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_image_gridline_checkbutton));
+    int32_t hres = gtk_spin_button_get_value_as_int(export_h_res_spinbutton);
+    int32_t vres = gtk_spin_button_get_value_as_int(export_v_res_spinbutton);
+    float scaleFactor = (float)((1.0 + inpAxisScale*0.5)*sqrt((hres*vres)/1000000.0));
+
     currentFolderSelection = gtk_file_chooser_get_current_folder(file_open_dialog);
     GFile *gfile = NULL;
     char *tok, *fn, fileName[256];
@@ -1134,9 +1134,27 @@ void on_export_image_button_clicked(){
     g_free(gfile);
     g_free(fn);
   }
-
   g_object_unref(native);
-  gtk_widget_hide(GTK_WIDGET(export_image_window)); //hide the window
+  gtk_widget_hide(GTK_WIDGET(export_options_window)); //hide the window
+}
+
+void on_export_image_button_clicked(){
+
+  GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Image File", window, GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
+  file_save_dialog = GTK_FILE_CHOOSER(native);
+  if(currentFolderSelection != NULL){
+    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection,NULL);
+  }
+  gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
+  //gtk_file_chooser_set_do_overwrite_confirmation(file_save_dialog, TRUE); //not in GTK4
+  file_filter = gtk_file_filter_new();
+  gtk_file_filter_set_name(file_filter,"Image files (.png)");
+  gtk_file_filter_add_pattern(file_filter,"*.png");
+  gtk_file_chooser_add_filter(file_save_dialog,file_filter);
+
+  g_signal_connect(native, "response", G_CALLBACK(on_export_image_response), NULL);
+  gtk_native_dialog_show(GTK_NATIVE_DIALOG(native));
+
 }
 
 
@@ -2752,9 +2770,9 @@ void iniitalizeUIElements(){
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autoscale_button), drawing.autoScale);
 
   //setup app icon
-  gtk_window_set_default_icon(appIcon);
-  gtk_window_set_icon(window,appIcon);
-  gtk_about_dialog_set_logo(about_dialog,NULL); //sets about dialog to use the default icon
+  //gtk_window_set_default_icon(appIcon);
+  //gtk_window_set_icon(window,appIcon);
+  //gtk_about_dialog_set_logo(about_dialog,NULL); //sets about dialog to use the default icon
 
   //setup frame clock, for timing animations
   gtk_widget_realize(GTK_WIDGET(window));

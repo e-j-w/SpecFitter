@@ -91,9 +91,9 @@ int main(int argc, char *argv[]){
       char headerBarSub[256];
       rawdata.numFilesOpened = (uint8_t)(argc - 1);
       snprintf(headerBarSub,256,"%i files loaded",rawdata.numFilesOpened);
-      gtk_header_bar_set_subtitle(header_bar,headerBarSub);
+      //gtk_header_bar_set_subtitle(header_bar,headerBarSub); //not in GTK4
     }else{
-      gtk_header_bar_set_subtitle(header_bar,argv[1]);
+      //gtk_header_bar_set_subtitle(header_bar,argv[1]); //not in GTK4
     }
     gtk_widget_set_sensitive(GTK_WIDGET(append_button),TRUE);
   }
@@ -102,7 +102,10 @@ int main(int argc, char *argv[]){
 
   //startup UI
   gtk_widget_show(GTK_WIDGET(window)); //show the window
-  gtk_main(); //start GTK main loop
+  //start GTK main loop
+  while (g_list_model_get_n_items (gtk_window_get_toplevels ()) > 0){
+    g_main_context_iteration (NULL, TRUE);
+  }
 
   return 0;
 }

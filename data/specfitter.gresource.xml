@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/resources">
-    <file preprocess="xml-stripblanks">specfitter.ui</file>
+    <file preprocess="xml-stripblanks">specfitter-gtk4.ui</file>
     <file preprocess="xml-stripblanks">shortcuts_window.ui</file>
     <file>specfitter-application-icon.svg</file>
     <file alias="icon-spectrum-symbolic">icon-spectrum-symbolic.svg</file>

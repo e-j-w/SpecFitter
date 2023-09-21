@@ -62,3 +62,10 @@ This will place the `specfitter` binary in `/usr/bin`, a data-type definition fi
 ## Acknowledgements
 
 The peak fitter is based on [RadWare](https://radware.phy.ornl.gov/) code by David C. Radford with some modifications.  The RadWare source code can be obtained from [this](https://github.com/radforddc/rw05) repository.
+
+## GTK4 porting notes
+
+- Adding comments to spectra is now down with a right click (when not fitting) rather than a double click.
+- Keyboard shortcuts need to be re-worked.
+- Headerbar subtitles need to be re-worked.
+- Window icon may be missing.
