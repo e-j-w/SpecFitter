@@ -227,67 +227,70 @@
     <property name="width-request">800</property>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="header_bar">
+        <property name="can-focus">False</property>
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <child>
           <object class="GtkBox">
+            <property name="can-focus">False</property>
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <child>
               <object class="GtkButton" id="open_button">
+                <property name="can-focus">True</property>
                 <property name="label" translatable="yes">Open...</property>
+                <property name="receives-default">True</property>
+                <property name="tooltip-text" translatable="yes">Open a file containing spectra (.jf3, .txt, .mca, .fmca, .spe format).</property>
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Open a file containing spectra (.jf3, .txt, .mca, .fmca, .spe format).</property>
               </object>
             </child>
             <child>
               <object class="GtkButton" id="append_button">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Append file(s) containing spectra to the already opened spectra.</property>
+                <property name="can-focus">True</property>
                 <property name="halign">start</property>
+                <property name="receives-default">True</property>
+                <property name="tooltip-text" translatable="yes">Append file(s) containing spectra to the already opened spectra.</property>
+                <property name="visible">True</property>
                 <child>
                   <object class="GtkImage">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can-focus">False</property>
                     <property name="halign">start</property>
-                    <property name="icon_name">list-add-symbolic</property>
+                    <property name="icon-name">list-add-symbolic</property>
+                    <property name="visible">True</property>
                   </object>
                 </child>
               </object>
             </child>
           </object>
         </child>
-        <child>
-          <object class="GtkMenuButton" id="display_button">
+        <child type="end">
+          <object class="GtkBox">
+            <property name="can-focus">False</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="halign">end</property>
-            <property name="tooltip_text" translatable="yes">Show display options for the loaded spectra.</property>
-            <property name="popover">display_popover</property>
             <child>
-              <object class="GtkImage" id="display_button_icon">
+              <object class="GtkMenuButton" id="display_button">
+                <property name="can-focus">True</property>
+                <property name="halign">end</property>
+                <property name="popover">display_popover</property>
+                <property name="receives-default">True</property>
+                <property name="tooltip-text" translatable="yes">Show display options for the loaded spectra.</property>
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">document-edit-symbolic</property>
+                <child>
+                  <object class="GtkImage" id="display_button_icon">
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">document-edit-symbolic</property>
+                    <property name="visible">True</property>
+                  </object>
+                </child>
               </object>
             </child>
-          </object>
-        </child>
-        <child>
-          <object class="GtkMenuButton" id="primary_menu_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="direction">none</property>
-            <property name="halign">end</property>
-            <property name="popover">primary_menu</property>
             <child>
-              <placeholder/>
+              <object class="GtkMenuButton" id="primary_menu_button">
+                <property name="can-focus">True</property>
+                <property name="direction">none</property>
+                <property name="halign">end</property>
+                <property name="popover">primary_menu</property>
+                <property name="receives-default">True</property>
+                <property name="visible">True</property>
+              </object>
             </child>
           </object>
         </child>
@@ -2038,99 +2041,99 @@ Weight by fit function - Weights are proportional to the fit function values det
   <object class="GtkPopoverMenu" id="primary_menu">
     <property name="child">
       <object class="GtkBox" id="main_menu_box">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="margin_start">10</property>
-        <property name="margin_end">10</property>
-        <property name="margin_top">10</property>
-        <property name="margin_bottom">10</property>
+        <property name="can-focus">False</property>
+        <property name="margin-bottom">10</property>
+        <property name="margin-end">10</property>
+        <property name="margin-start">10</property>
+        <property name="margin-top">10</property>
         <property name="orientation">vertical</property>
         <property name="spacing">5</property>
+        <property name="visible">True</property>
         <child>
           <object class="GtkButton" id="calibrate_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Specify a calibration and axis labels for displayed spectra.</property>
+            <property name="can-focus">True</property>
             <property name="label" translatable="yes">Calibration / Axis Labels...</property>
+            <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Specify a calibration and axis labels for displayed spectra.</property>
+            <property name="visible">True</property>
           </object>
         </child>
         <child>
           <object class="GtkButton" id="fit_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Fit peaks in the displayed spectrum.</property>
+            <property name="can-focus">True</property>
             <property name="label" translatable="yes">Fit...</property>
+            <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Fit peaks in the displayed spectrum.</property>
+            <property name="visible">True</property>
           </object>
         </child>
         <child>
           <object class="GtkButton" id="manage_spectra_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Rename or delete imported spectra.</property>
+            <property name="can-focus">True</property>
             <property name="label" translatable="yes">Manage Data...</property>
+            <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Rename or delete imported spectra.</property>
+            <property name="visible">True</property>
           </object>
         </child>
         <child>
           <object class="GtkSeparator">
+            <property name="can-focus">False</property>
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
           </object>
         </child>
         <child>
           <object class="GtkButton" id="to_save_menu_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Save the opened spectra to disk.</property>
+            <property name="can-focus">True</property>
             <property name="label" translatable="yes">Save...</property>
+            <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Save the opened spectra to disk.</property>
+            <property name="visible">True</property>
           </object>
         </child>
         <child>
           <object class="GtkSeparator">
+            <property name="can-focus">False</property>
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
           </object>
         </child>
         <child>
           <object class="GtkButton" id="preferences_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
             <property name="label" translatable="yes">Preferences</property>
+            <property name="receives-default">True</property>
+            <property name="visible">True</property>
           </object>
         </child>
         <child>
           <object class="GtkSeparator">
+            <property name="can-focus">False</property>
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
           </object>
         </child>
         <child>
           <object class="GtkButton" id="shortcuts_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
             <property name="label" translatable="yes">Keyboard Shortcuts</property>
+            <property name="receives-default">True</property>
+            <property name="visible">True</property>
           </object>
         </child>
         <child>
           <object class="GtkButton" id="help_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
             <property name="label" translatable="yes">Help</property>
+            <property name="receives-default">True</property>
+            <property name="visible">True</property>
           </object>
         </child>
         <child>
           <object class="GtkButton" id="about_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">More information about this program.</property>
+            <property name="can-focus">True</property>
             <property name="label" translatable="yes">About SpecFitter</property>
+            <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">More information about this program.</property>
+            <property name="visible">True</property>
           </object>
         </child>
       </object>
