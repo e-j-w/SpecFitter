@@ -2570,11 +2570,11 @@ void iniitalizeUIElements(){
   contract_scale = GTK_SCALE(gtk_builder_get_object(builder, "contract_scale"));
 
   //connect signals
-  g_signal_connect(G_OBJECT(spectrum_drawing_area), "draw", G_CALLBACK(drawSpectrumArea), NULL);
-  g_signal_connect(G_OBJECT(spectrum_drawing_area), "scroll-event", G_CALLBACK(on_spectrum_scroll), NULL);
-  g_signal_connect(G_OBJECT(spectrum_drawing_area), "motion-notify-event", G_CALLBACK(on_spectrum_cursor_motion), NULL);
-  g_signal_connect(G_OBJECT(spectrum_drawing_area), "button-press-event", G_CALLBACK(on_spectrum_click), NULL);
-  g_signal_connect(G_OBJECT(spectrum_drawing_area), "button-release-event", G_CALLBACK(on_spectrum_unclick), NULL);
+  gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(spectrum_drawing_area),drawSpectrumArea,NULL,NULL);
+  //g_signal_connect(G_OBJECT(spectrum_drawing_area), "scroll-event", G_CALLBACK(on_spectrum_scroll), NULL);
+  //g_signal_connect(G_OBJECT(spectrum_drawing_area), "motion-notify-event", G_CALLBACK(on_spectrum_cursor_motion), NULL);
+  //g_signal_connect(G_OBJECT(spectrum_drawing_area), "button-press-event", G_CALLBACK(on_spectrum_click), NULL);
+  //g_signal_connect(G_OBJECT(spectrum_drawing_area), "button-release-event", G_CALLBACK(on_spectrum_unclick), NULL);
   g_signal_connect(G_OBJECT(open_button), "clicked", G_CALLBACK(on_open_button_clicked), NULL);
   g_signal_connect(G_OBJECT(append_button), "clicked", G_CALLBACK(on_append_button_clicked), NULL);
   g_signal_connect(G_OBJECT(calibrate_button), "clicked", G_CALLBACK(on_calibrate_button_clicked), NULL);
@@ -2640,16 +2640,16 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(manage_cr1), "edited", G_CALLBACK(on_manage_name_cell_edited), NULL);
   g_signal_connect(G_OBJECT(manage_cr2), "toggled", G_CALLBACK(on_manage_cell_toggled), NULL);
   g_signal_connect(G_OBJECT(export_mode_combobox), "changed", G_CALLBACK(on_export_mode_combobox_changed), NULL);
-  g_signal_connect(G_OBJECT(calibrate_window), "delete-event", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect(G_OBJECT(comment_window), "delete-event", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect(G_OBJECT(multiplot_manage_window), "delete-event", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect(G_OBJECT(export_options_window), "delete-event", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect(G_OBJECT(export_image_window), "delete-event", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect(G_OBJECT(preferences_window), "delete-event", G_CALLBACK(on_preferences_cancel_button_clicked), NULL);
-  g_signal_connect(G_OBJECT(preferences_window), "delete-event", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect(G_OBJECT(shortcuts_window), "delete-event", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect(G_OBJECT(help_window), "delete-event", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
-  g_signal_connect(G_OBJECT(about_dialog), "delete-event", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(calibrate_window), "close-request", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(comment_window), "close-request", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(multiplot_manage_window), "close-request", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(export_options_window), "close-request", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(export_image_window), "close-request", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(preferences_window), "close-request", G_CALLBACK(on_preferences_cancel_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(preferences_window), "close-request", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(shortcuts_window), "close-request", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(help_window), "close-request", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(about_dialog), "close-request", G_CALLBACK(hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
 
   //setup keyboard shortcuts
   main_window_sc = GTK_EVENT_CONTROLLER(gtk_shortcut_controller_new());

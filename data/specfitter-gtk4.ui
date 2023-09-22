@@ -3,6 +3,254 @@
 <interface>
   <!-- interface-name specfitter-gtk4.ui -->
   <requires lib="gtk" version="4.0"/>
+  <object class="GtkWindow" id="window">
+    <property name="child">
+      <object class="GtkBox" id="box1">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkBox">
+            <property name="vexpand">1</property>
+            <child>
+              <object class="GtkOverlay">
+                <property name="child">
+                  <object class="GtkBox" id="no_sp_box">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">10</property>
+                    <child>
+                      <object class="GtkImage" id="no_sp_image">
+                        <property name="icon-name">dialog-information-symbolic</property>
+                        <property name="icon-size">6</property>
+                        <property name="pixel-size">30</property>
+                        <property name="valign">end</property>
+                        <property name="vexpand">1</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="yes">No data has been opened</property>
+                        <property name="valign">start</property>
+                        <property name="vexpand">1</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="hexpand">1</property>
+                <child type="overlay">
+                  <object class="GtkDrawingArea" id="spectrumdrawingarea"/>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkRevealer" id="revealer_info_panel">
+                <property name="child">
+                  <object class="GtkBox">
+                    <property name="margin-bottom">6</property>
+                    <property name="margin-end">10</property>
+                    <property name="margin-start">10</property>
+                    <property name="margin-top">6</property>
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">10</property>
+                    <child>
+                      <object class="GtkLabel" id="fit_panel_label">
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes">Fit panel</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="baseline-position">top</property>
+                        <property name="spacing">10</property>
+                        <property name="valign">start</property>
+                        <child>
+                          <object class="GtkSpinner" id="fit_spinner">
+                            <property name="halign">start</property>
+                            <property name="visible">0</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkScrolledWindow">
+                            <property name="child">
+                              <object class="GtkViewport">
+                                <property name="child">
+                                  <object class="GtkLabel" id="fit_info_label">
+                                    <property name="label" translatable="yes">Right-click to set upper and lower fit bounds.</property>
+                                    <property name="max-width-chars">12</property>
+                                    <property name="width-chars">12</property>
+                                    <property name="width-request">120</property>
+                                    <property name="wrap">1</property>
+                                    <property name="xalign">0</property>
+                                  </object>
+                                </property>
+                              </object>
+                            </property>
+                            <property name="focusable">1</property>
+                            <property name="hscrollbar-policy">never</property>
+                            <property name="min-content-height">90</property>
+                            <property name="propagate-natural-height">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="fit_display_button_box">
+                        <property name="margin-bottom">20</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">10</property>
+                        <child>
+                          <object class="GtkButton" id="fit_dismiss_button">
+                            <property name="focusable">1</property>
+                            <property name="halign">center</property>
+                            <property name="label">Dismiss</property>
+                            <property name="receives-default">1</property>
+                            <property name="width-request">100</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="fit_button_box">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">10</property>
+                        <child>
+                          <object class="GtkButton" id="fit_fit_button">
+                            <property name="focusable">1</property>
+                            <property name="halign">center</property>
+                            <property name="label" translatable="yes">Fit!</property>
+                            <property name="receives-default">1</property>
+                            <property name="width-request">100</property>
+                            <style>
+                              <class name="suggested-action"/>
+                            </style>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="fit_refit_button">
+                            <property name="focusable">1</property>
+                            <property name="halign">center</property>
+                            <property name="label" translatable="yes">Re-fit</property>
+                            <property name="receives-default">1</property>
+                            <property name="width-request">100</property>
+                            <style>
+                              <class name="suggested-action"/>
+                            </style>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="fit_preferences_button">
+                            <property name="focusable">1</property>
+                            <property name="halign">center</property>
+                            <property name="label" translatable="yes">Settings...</property>
+                            <property name="receives-default">1</property>
+                            <property name="width-request">100</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="fit_cancel_button">
+                            <property name="focusable">1</property>
+                            <property name="halign">center</property>
+                            <property name="label">Cancel</property>
+                            <property name="receives-default">1</property>
+                            <property name="width-request">100</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="transition-type">slide-left</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="margin-bottom">2</property>
+            <property name="margin-end">10</property>
+            <property name="margin-start">10</property>
+            <property name="margin-top">2</property>
+            <property name="spacing">10</property>
+            <property name="valign">end</property>
+            <child>
+              <object class="GtkLabel" id="bottom_info_text">
+                <property name="ellipsize">end</property>
+                <property name="halign">start</property>
+                <property name="label" translatable="yes">No spectrum loaded.</property>
+                <property name="valign">center</property>
+                <attributes>
+                  <attribute name="style" value="normal"/>
+                </attributes>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="spacing">6</property>
+                <property name="tooltip-text" translatable="yes">Zoom the spectrum in and out.</property>
+                <property name="valign">center</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="icon-name">zoom-out-symbolic</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkScale" id="zoom_scale">
+                    <property name="adjustment">zoom_adjustment</property>
+                    <property name="digits">0</property>
+                    <property name="show-fill-level">1</property>
+                    <property name="valign">center</property>
+                    <property name="value-pos">right</property>
+                    <property name="width-request">250</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkImage">
+                    <property name="icon-name">zoom-in-symbolic</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+    <property name="default-height">400</property>
+    <property name="default-width">600</property>
+    <property name="height-request">580</property>
+    <property name="title" translatable="yes">SpecFitter</property>
+    <property name="width-request">800</property>
+    <child type="titlebar">
+      <object class="GtkHeaderBar" id="header_bar">
+        <child>
+          <object class="GtkMenuButton" id="primary_menu_button">
+            <property name="direction">none</property>
+            <property name="focusable">1</property>
+            <property name="popover">primary_menu</property>
+            <property name="receives-default">1</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkMenuButton" id="display_button">
+            <property name="focusable">1</property>
+            <property name="popover">display_popover</property>
+            <property name="receives-default">1</property>
+            <property name="tooltip-text" translatable="yes">Show display options for the loaded spectra.</property>
+            <child>
+              <object class="GtkImage" id="display_button_icon">
+                <property name="icon-name">document-edit-symbolic</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
   <object class="GtkImage" id="add_image">
     <property name="icon-name">list-add-symbolic</property>
   </object>
@@ -1857,254 +2105,6 @@ Weight by fit function - Weights are proportional to the fit function values det
         </child>
         <child>
           <object class="GtkSeparator"/>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkWindow" id="window">
-    <property name="child">
-      <object class="GtkBox" id="box1">
-        <property name="orientation">vertical</property>
-        <child>
-          <object class="GtkBox">
-            <property name="vexpand">1</property>
-            <child>
-              <object class="GtkOverlay">
-                <property name="child">
-                  <object class="GtkBox" id="no_sp_box">
-                    <property name="orientation">vertical</property>
-                    <property name="spacing">10</property>
-                    <child>
-                      <object class="GtkImage" id="no_sp_image">
-                        <property name="icon-name">dialog-information-symbolic</property>
-                        <property name="icon-size">6</property>
-                        <property name="pixel-size">30</property>
-                        <property name="valign">end</property>
-                        <property name="vexpand">1</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="label" translatable="yes">No data has been opened</property>
-                        <property name="valign">start</property>
-                        <property name="vexpand">1</property>
-                        <attributes>
-                          <attribute name="weight" value="bold"/>
-                        </attributes>
-                      </object>
-                    </child>
-                  </object>
-                </property>
-                <property name="hexpand">1</property>
-                <child type="overlay">
-                  <object class="GtkDrawingArea" id="spectrumdrawingarea"/>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkRevealer" id="revealer_info_panel">
-                <property name="child">
-                  <object class="GtkBox">
-                    <property name="margin-bottom">6</property>
-                    <property name="margin-end">10</property>
-                    <property name="margin-start">10</property>
-                    <property name="margin-top">6</property>
-                    <property name="orientation">vertical</property>
-                    <property name="spacing">10</property>
-                    <child>
-                      <object class="GtkLabel" id="fit_panel_label">
-                        <property name="halign">start</property>
-                        <property name="label" translatable="yes">Fit panel</property>
-                        <attributes>
-                          <attribute name="weight" value="bold"/>
-                        </attributes>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkBox">
-                        <property name="baseline-position">top</property>
-                        <property name="spacing">10</property>
-                        <property name="valign">start</property>
-                        <child>
-                          <object class="GtkSpinner" id="fit_spinner">
-                            <property name="halign">start</property>
-                            <property name="visible">0</property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkScrolledWindow">
-                            <property name="child">
-                              <object class="GtkViewport">
-                                <property name="child">
-                                  <object class="GtkLabel" id="fit_info_label">
-                                    <property name="label" translatable="yes">Right-click to set upper and lower fit bounds.</property>
-                                    <property name="max-width-chars">12</property>
-                                    <property name="width-chars">12</property>
-                                    <property name="width-request">120</property>
-                                    <property name="wrap">1</property>
-                                    <property name="xalign">0</property>
-                                  </object>
-                                </property>
-                              </object>
-                            </property>
-                            <property name="focusable">1</property>
-                            <property name="hscrollbar-policy">never</property>
-                            <property name="min-content-height">90</property>
-                            <property name="propagate-natural-height">1</property>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkBox" id="fit_display_button_box">
-                        <property name="margin-bottom">20</property>
-                        <property name="orientation">vertical</property>
-                        <property name="spacing">10</property>
-                        <child>
-                          <object class="GtkButton" id="fit_dismiss_button">
-                            <property name="focusable">1</property>
-                            <property name="halign">center</property>
-                            <property name="label">Dismiss</property>
-                            <property name="receives-default">1</property>
-                            <property name="width-request">100</property>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkBox" id="fit_button_box">
-                        <property name="orientation">vertical</property>
-                        <property name="spacing">10</property>
-                        <child>
-                          <object class="GtkButton" id="fit_fit_button">
-                            <property name="focusable">1</property>
-                            <property name="halign">center</property>
-                            <property name="label" translatable="yes">Fit!</property>
-                            <property name="receives-default">1</property>
-                            <property name="width-request">100</property>
-                            <style>
-                              <class name="suggested-action"/>
-                            </style>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="fit_refit_button">
-                            <property name="focusable">1</property>
-                            <property name="halign">center</property>
-                            <property name="label" translatable="yes">Re-fit</property>
-                            <property name="receives-default">1</property>
-                            <property name="width-request">100</property>
-                            <style>
-                              <class name="suggested-action"/>
-                            </style>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="fit_preferences_button">
-                            <property name="focusable">1</property>
-                            <property name="halign">center</property>
-                            <property name="label" translatable="yes">Settings...</property>
-                            <property name="receives-default">1</property>
-                            <property name="width-request">100</property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="fit_cancel_button">
-                            <property name="focusable">1</property>
-                            <property name="halign">center</property>
-                            <property name="label">Cancel</property>
-                            <property name="receives-default">1</property>
-                            <property name="width-request">100</property>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                  </object>
-                </property>
-                <property name="transition-type">slide-left</property>
-              </object>
-            </child>
-          </object>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="margin-bottom">2</property>
-            <property name="margin-end">10</property>
-            <property name="margin-start">10</property>
-            <property name="margin-top">2</property>
-            <property name="spacing">10</property>
-            <property name="valign">end</property>
-            <child>
-              <object class="GtkLabel" id="bottom_info_text">
-                <property name="ellipsize">end</property>
-                <property name="halign">start</property>
-                <property name="label" translatable="yes">No spectrum loaded.</property>
-                <property name="valign">center</property>
-                <attributes>
-                  <attribute name="style" value="normal"/>
-                </attributes>
-              </object>
-            </child>
-            <child>
-              <object class="GtkBox">
-                <property name="spacing">6</property>
-                <property name="tooltip-text" translatable="yes">Zoom the spectrum in and out.</property>
-                <property name="valign">center</property>
-                <child>
-                  <object class="GtkImage">
-                    <property name="icon-name">zoom-out-symbolic</property>
-                    <property name="valign">center</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkScale" id="zoom_scale">
-                    <property name="adjustment">zoom_adjustment</property>
-                    <property name="digits">0</property>
-                    <property name="show-fill-level">1</property>
-                    <property name="valign">center</property>
-                    <property name="value-pos">right</property>
-                    <property name="width-request">250</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkImage">
-                    <property name="icon-name">zoom-in-symbolic</property>
-                    <property name="valign">center</property>
-                  </object>
-                </child>
-              </object>
-            </child>
-          </object>
-        </child>
-      </object>
-    </property>
-    <property name="default-height">400</property>
-    <property name="default-width">600</property>
-    <property name="height-request">580</property>
-    <property name="title" translatable="yes">SpecFitter</property>
-    <property name="width-request">800</property>
-    <child type="titlebar">
-      <object class="GtkHeaderBar" id="header_bar">
-        <child>
-          <object class="GtkMenuButton" id="primary_menu_button">
-            <property name="direction">none</property>
-            <property name="focusable">1</property>
-            <property name="popover">primary_menu</property>
-            <property name="receives-default">1</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkMenuButton" id="display_button">
-            <property name="focusable">1</property>
-            <property name="popover">display_popover</property>
-            <property name="receives-default">1</property>
-            <property name="tooltip-text" translatable="yes">Show display options for the loaded spectra.</property>
-            <child>
-              <object class="GtkImage" id="display_button_icon">
-                <property name="icon-name">document-edit-symbolic</property>
-              </object>
-            </child>
-          </object>
         </child>
       </object>
     </child>

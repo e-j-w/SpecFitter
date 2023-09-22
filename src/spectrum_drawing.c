@@ -2111,17 +2111,19 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
 }
 
 //update the spectrum drawing area
-void drawSpectrumArea(cairo_t *cr){
+void drawSpectrumArea(GtkDrawingArea *area, cairo_t *cr, int width, int height, gpointer data){
 
   if(!rawdata.openedSp){
     return;
   }
 
+  //unused parameters
+  (void)area;
+  (void)data;
+
   //printf("Drawing spectrum!\n");
 
   cairo_set_antialias(cr,CAIRO_ANTIALIAS_FAST); //antialias setting, doesn't apply to text
-  int width = gtk_widget_get_size(GTK_WIDGET(window),GTK_ORIENTATION_HORIZONTAL);
-  int height = gtk_widget_get_size(GTK_WIDGET(window),GTK_ORIENTATION_HORIZONTAL);
 
   drawSpectrum(cr, (float)width, (float)height, 1.0, guiglobals.drawSpLabels, guiglobals.drawGridLines, 2, guiglobals.drawSpComments, 1);
 }
