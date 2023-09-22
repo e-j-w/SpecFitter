@@ -227,24 +227,67 @@
     <property name="width-request">800</property>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="header_bar">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <child>
-          <object class="GtkMenuButton" id="primary_menu_button">
-            <property name="direction">none</property>
-            <property name="focusable">1</property>
-            <property name="popover">primary_menu</property>
-            <property name="receives-default">1</property>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkButton" id="open_button">
+                <property name="label" translatable="yes">Open...</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Open a file containing spectra (.jf3, .txt, .mca, .fmca, .spe format).</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="append_button">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Append file(s) containing spectra to the already opened spectra.</property>
+                <property name="halign">start</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="icon_name">list-add-symbolic</property>
+                  </object>
+                </child>
+              </object>
+            </child>
           </object>
         </child>
         <child>
           <object class="GtkMenuButton" id="display_button">
-            <property name="focusable">1</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="halign">end</property>
+            <property name="tooltip_text" translatable="yes">Show display options for the loaded spectra.</property>
             <property name="popover">display_popover</property>
-            <property name="receives-default">1</property>
-            <property name="tooltip-text" translatable="yes">Show display options for the loaded spectra.</property>
             <child>
               <object class="GtkImage" id="display_button_icon">
-                <property name="icon-name">document-edit-symbolic</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_name">document-edit-symbolic</property>
               </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkMenuButton" id="primary_menu_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="direction">none</property>
+            <property name="halign">end</property>
+            <property name="popover">primary_menu</property>
+            <child>
+              <placeholder/>
             </child>
           </object>
         </child>
@@ -627,7 +670,7 @@
   </object>
   <object class="GtkPopover" id="display_popover">
     <property name="child">
-      <object class="GtkBox">
+      <object class="GtkBox" id="display_popover_childbox">
         <property name="margin-bottom">10</property>
         <property name="margin-end">10</property>
         <property name="margin-start">10</property>

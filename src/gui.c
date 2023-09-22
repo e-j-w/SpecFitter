@@ -2413,7 +2413,7 @@ void iniitalizeUIElements(){
   preferences_window = GTK_WINDOW(gtk_builder_get_object(builder, "preferences_window"));
   gtk_window_set_transient_for(preferences_window, window); //center preferences window on main window
   shortcuts_window = GTK_SHORTCUTS_WINDOW(gtk_builder_get_object(builder, "shortcuts_window"));
-  gtk_window_set_transient_for(GTK_WINDOW(shortcuts_window), window); //center shortcuts window on main window
+  //gtk_window_set_transient_for(GTK_WINDOW(shortcuts_window), window); //center shortcuts window on main window
   help_window = GTK_WINDOW(gtk_builder_get_object(builder, "help_window"));
   gtk_window_set_transient_for(GTK_WINDOW(help_window), window); //center help window on main window
   about_dialog = GTK_ABOUT_DIALOG(gtk_builder_get_object(builder, "about_dialog"));
