@@ -96,13 +96,6 @@
     <property name="program-name">SpecFitter</property>
     <property name="website">https://github.com/e-j-w/specfitter</property>
     <property name="website-label" translatable="yes">Source Repository</property>
-    <child internal-child="vbox">
-      <object class="GtkBox">
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <property name="visible">0</property>
-      </object>
-    </child>
   </object>
   <object class="GtkWindow" id="calibration_window">
     <property name="child">
@@ -316,10 +309,6 @@
     <property name="modal">1</property>
     <property name="resizable">0</property>
     <property name="title" translatable="yes">Calibration and Axis Labels</property>
-    <!-- Custom fragments -->
-    <accel-groups>
-      <group name="calibration_window_accelgroup"/>
-    </accel-groups>
   </object>
   <object class="GtkWindow" id="comment_window">
     <property name="child">
@@ -387,10 +376,6 @@
     <property name="modal">1</property>
     <property name="resizable">0</property>
     <property name="title" translatable="yes">Add or Edit Comment</property>
-    <!-- Custom fragments -->
-    <accel-groups>
-      <group name="comment_window_accelgroup"/>
-    </accel-groups>
   </object>
   <object class="GtkPopover" id="display_popover">
     <property name="child">
@@ -1776,13 +1761,8 @@ Weight by fit function - Weights are proportional to the fit function values det
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Specify a calibration and axis labels for displayed spectra.</property>
-            <property name="text" translatable="yes">Calibration / Axis Labels...</property>
+            <property name="label" translatable="yes">Calibration / Axis Labels...</property>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
         </child>
         <child>
           <object class="GtkButton" id="fit_button">
@@ -1790,13 +1770,8 @@ Weight by fit function - Weights are proportional to the fit function values det
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Fit peaks in the displayed spectrum.</property>
-            <property name="text" translatable="yes">Fit...</property>
+            <property name="label" translatable="yes">Fit...</property>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
         </child>
         <child>
           <object class="GtkButton" id="manage_spectra_button">
@@ -1804,24 +1779,14 @@ Weight by fit function - Weights are proportional to the fit function values det
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Rename or delete imported spectra.</property>
-            <property name="text" translatable="yes">Manage Data...</property>
+            <property name="label" translatable="yes">Manage Data...</property>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
         </child>
         <child>
           <object class="GtkSeparator">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">3</property>
-          </packing>
         </child>
         <child>
           <object class="GtkButton" id="to_save_menu_button">
@@ -1829,75 +1794,44 @@ Weight by fit function - Weights are proportional to the fit function values det
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Save the opened spectra to disk.</property>
-            <property name="text" translatable="yes">Save...</property>
-            <property name="menu_name">submenu1</property>
+            <property name="label" translatable="yes">Save...</property>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">4</property>
-          </packing>
         </child>
         <child>
           <object class="GtkSeparator">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">5</property>
-          </packing>
         </child>
         <child>
           <object class="GtkButton" id="preferences_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="text" translatable="yes">Preferences</property>
+            <property name="label" translatable="yes">Preferences</property>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">6</property>
-          </packing>
         </child>
         <child>
           <object class="GtkSeparator">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">7</property>
-          </packing>
         </child>
         <child>
           <object class="GtkButton" id="shortcuts_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="text" translatable="yes">Keyboard Shortcuts</property>
+            <property name="label" translatable="yes">Keyboard Shortcuts</property>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">8</property>
-          </packing>
         </child>
         <child>
           <object class="GtkButton" id="help_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="text" translatable="yes">Help</property>
+            <property name="label" translatable="yes">Help</property>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">9</property>
-          </packing>
         </child>
         <child>
           <object class="GtkButton" id="about_button">
@@ -1905,13 +1839,8 @@ Weight by fit function - Weights are proportional to the fit function values det
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">More information about this program.</property>
-            <property name="text" translatable="yes">About SpecFitter</property>
+            <property name="label" translatable="yes">About SpecFitter</property>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">10</property>
-          </packing>
         </child>
       </object>
     </property>
