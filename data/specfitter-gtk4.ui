@@ -20,7 +20,7 @@
                       <object class="GtkImage" id="no_sp_image">
                         <property name="icon-name">dialog-information-symbolic</property>
                         <property name="icon-size">6</property>
-                        <property name="pixel-size">30</property>
+                        <property name="pixel-size">32</property>
                         <property name="valign">end</property>
                         <property name="vexpand">1</property>
                       </object>
@@ -180,6 +180,7 @@
               <object class="GtkLabel" id="bottom_info_text">
                 <property name="ellipsize">end</property>
                 <property name="halign">start</property>
+                <property name="hexpand">True</property>
                 <property name="label" translatable="yes">No spectrum loaded.</property>
                 <property name="valign">center</property>
                 <attributes>
@@ -232,7 +233,10 @@
         <child>
           <object class="GtkBox">
             <property name="can-focus">False</property>
-            <property name="visible">True</property>
+            <property name="halign">start</property>
+            <property name="hexpand">True</property>
+            <property name="hexpand-set">True</property>
+            <property name="spacing">5</property>
             <child>
               <object class="GtkButton" id="open_button">
                 <property name="can-focus">True</property>
@@ -259,36 +263,32 @@
                 </child>
               </object>
             </child>
+            <style/>
           </object>
         </child>
         <child type="end">
-          <object class="GtkBox">
-            <property name="can-focus">False</property>
+          <object class="GtkMenuButton" id="primary_menu_button">
+            <property name="can-focus">True</property>
+            <property name="direction">none</property>
+            <property name="halign">end</property>
+            <property name="margin-end">-2</property>
+            <property name="popover">primary_menu</property>
+            <property name="receives-default">True</property>
+            <property name="visible">True</property>
+          </object>
+        </child>
+        <child type="end">
+          <object class="GtkMenuButton" id="display_button">
+            <property name="can-focus">True</property>
+            <property name="halign">end</property>
+            <property name="popover">display_popover</property>
+            <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Show display options for the loaded spectra.</property>
             <property name="visible">True</property>
             <child>
-              <object class="GtkMenuButton" id="display_button">
-                <property name="can-focus">True</property>
-                <property name="halign">end</property>
-                <property name="popover">display_popover</property>
-                <property name="receives-default">True</property>
-                <property name="tooltip-text" translatable="yes">Show display options for the loaded spectra.</property>
-                <property name="visible">True</property>
-                <child>
-                  <object class="GtkImage" id="display_button_icon">
-                    <property name="can-focus">False</property>
-                    <property name="icon-name">document-edit-symbolic</property>
-                    <property name="visible">True</property>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkMenuButton" id="primary_menu_button">
-                <property name="can-focus">True</property>
-                <property name="direction">none</property>
-                <property name="halign">end</property>
-                <property name="popover">primary_menu</property>
-                <property name="receives-default">True</property>
+              <object class="GtkImage" id="display_button_icon">
+                <property name="can-focus">False</property>
+                <property name="icon-name">document-edit-symbolic</property>
                 <property name="visible">True</property>
               </object>
             </child>
