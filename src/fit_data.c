@@ -350,13 +350,13 @@ long double evalFitOnePeak(const long double xChVal, const int32_t peak){
 //based on gffin from RadWare gf3_subs.c
 void evalPeakAreas(){
   long double area, d, r, y, r1, eb, eh, er, ew, beta;
-  int   i, ic;
+  int i, ic;
   long double pkwidth;
 
   /* calc. areas, centroids and errors */
-  r = fitpar.fitParVal[3] / 50.0;
+  r = fitpar.fitParVal[FITPAR_R] / 50.0;
   r1 = 1.0 - r * .5;
-  beta = fitpar.fitParVal[4];
+  beta = fitpar.fitParVal[FITPAR_BETA];
   if(beta == 0.){
     beta = 0.001; //handle symmetric peak case
   }
@@ -718,6 +718,11 @@ void performGausFit(){
   evalPeakAreas(); //get areas/errors
 
   if(relWidthFixed) printf("Relative widths fixed.\n");
+
+  //correct peak positions for bin width
+  for(uint8_t peakNum=0;peakNum<fitpar.numFitPeaks;peakNum++){
+    fitpar.fitParVal[FITPAR_POS1+(3*peakNum)] += ((double)drawing.contractFactor/2.0);
+  }
 
   //check peak positions
   //the program can hang if the best fit values

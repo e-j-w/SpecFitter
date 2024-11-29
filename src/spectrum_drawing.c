@@ -940,13 +940,11 @@ float getXPos(const int32_t bin, const float width){
 //get the screen position of a channel (or fractional channel)
 //returns -1 if offscreen
 //if halfBinOffset=1, will offset by half a bin (for drawing fits)
-float getXPosFromCh(const float chVal, const float width, const uint8_t halfBinOffset){
+float getXPosFromCh(const float chVal, const float width){
   if((chVal < drawing.lowerLimit)||(chVal > drawing.upperLimit)){
     return -1;
   }
   float bin = chVal - (float)(drawing.lowerLimit);
-  if(halfBinOffset)
-    bin += ((float)drawing.contractFactor/2.0f);
   return (float)(XORIGIN + ((double)bin*(width-XORIGIN)/((double)(drawing.upperLimit-drawing.lowerLimit))));
 }
 
@@ -1798,7 +1796,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         /*for(int32_t i=0;i<fitpar.numFitPeaks;i++){
           fitDrawX=(float)(fitpar.fitStartCh);
           fitDrawX = floorf((float)(fitpar.fitParVal[FITPAR_POS1+(3*i)] - 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*i)]));
-          nextXpos = getXPosFromCh(fitDrawX,width,1);
+          nextXpos = getXPosFromCh(fitDrawX,width);
           if(nextXpos > 0){
             cairo_move_to(cr, nextXpos, getYPos((float)(evalFitOnePeak(fitDrawX,i)),0,height));
           }else{
@@ -1806,7 +1804,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           }
           for(; fitDrawX<=floorf((float)(fitpar.fitParVal[FITPAR_POS1+(3*i)] + 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*i)])); fitDrawX+= fitSkipFactor){
             nextFitDrawX = fitDrawX + fitSkipFactor;
-            nextXpos = getXPosFromCh(nextFitDrawX,width,1);
+            nextXpos = getXPosFromCh(nextFitDrawX,width);
             if(nextXpos > 0){
               cairo_line_to(cr, nextXpos, getYPos((float)(evalFitOnePeak(nextFitDrawX,i)),0,height));
             }
@@ -1815,7 +1813,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         //draw background
         cairo_set_line_width(cr, 1.0*scaleFactor);
         fitDrawX=(float)(fitpar.fitStartCh);
-        nextXpos = getXPosFromCh(fitDrawX,width,1);
+        nextXpos = getXPosFromCh(fitDrawX,width);
         if(nextXpos > 0){
           cairo_move_to(cr, nextXpos, getYPos((float)(evalFitBG(fitDrawX)),0,height));
         }else{
@@ -1823,7 +1821,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         }
         for(; fitDrawX<=(float)(fitpar.fitEndCh); fitDrawX+= fitSkipFactor){
           nextFitDrawX = fitDrawX + fitSkipFactor;
-          nextXpos = getXPosFromCh(nextFitDrawX,width,1);
+          nextXpos = getXPosFromCh(nextFitDrawX,width);
           if(nextXpos > 0){
             cairo_line_to(cr, nextXpos, getYPos((float)(evalFitBG(nextFitDrawX)),0,height));
           }
@@ -1832,7 +1830,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         //draw sum of peaks
         cairo_set_line_width(cr, 3.0*scaleFactor);
         fitDrawX=(float)(fitpar.fitStartCh);
-        nextXpos = getXPosFromCh(fitDrawX,width,1);
+        nextXpos = getXPosFromCh(fitDrawX,width);
         if(nextXpos > 0){
           cairo_move_to(cr, nextXpos, getYPos((float)(evalFit(fitDrawX)),0,height));
         }else{
@@ -1840,7 +1838,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         }
         for(; fitDrawX<=(float)(fitpar.fitEndCh); fitDrawX+= fitSkipFactor){
           nextFitDrawX = fitDrawX + fitSkipFactor;
-          nextXpos = getXPosFromCh(nextFitDrawX,width,1);
+          nextXpos = getXPosFromCh(nextFitDrawX,width);
           if(nextXpos > 0){
             cairo_line_to(cr, nextXpos, getYPos((float)(evalFit(nextFitDrawX)),0,height));
           }
@@ -1850,7 +1848,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         if((drawing.highlightedPeak >= 0)&&(drawing.highlightedPeak <= fitpar.numFitPeaks)&&(showFit>1)){
           cairo_set_line_width(cr, 6.0*scaleFactor);
           fitDrawX = floorf((float)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)] - 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]));
-          nextXpos = getXPosFromCh(fitDrawX,width,1);
+          nextXpos = getXPosFromCh(fitDrawX,width);
           if(nextXpos > 0){
             cairo_move_to(cr, nextXpos, getYPos((float)(evalFitOnePeak(fitDrawX,drawing.highlightedPeak)),0,height));
           }else{
@@ -1858,7 +1856,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           }
           for(; fitDrawX<=floorf((float)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)] + 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)])); fitDrawX+= fitSkipFactor){
             nextFitDrawX = fitDrawX + fitSkipFactor;
-            nextXpos = getXPosFromCh(nextFitDrawX,width,1);
+            nextXpos = getXPosFromCh(nextFitDrawX,width);
             if(nextXpos > 0){
               cairo_line_to(cr, nextXpos, getYPos((float)(evalFitOnePeak(nextFitDrawX,drawing.highlightedPeak)),0,height));
             }
@@ -1942,7 +1940,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
 
     //draw cursors at fit limits if needed
     if(fitpar.fitStartCh >= 0){
-      float cursorPos = getXPosFromCh((float)(fitpar.fitStartCh), width, 0);
+      float cursorPos = getXPosFromCh((float)(fitpar.fitStartCh),width);
       if(cursorPos>=0){
         cairo_set_line_width(cr, 2.0*scaleFactor);
         cairo_set_source_rgb(cr, 0.5, 0.5, 0.5);
@@ -1952,7 +1950,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       }
     }
     if(fitpar.fitEndCh >= 0){
-      float cursorPos = getXPosFromCh((float)(fitpar.fitEndCh), width, 0);
+      float cursorPos = getXPosFromCh((float)(fitpar.fitEndCh),width);
       if(cursorPos>=0){
         cairo_set_line_width(cr, 2.0*scaleFactor);
         cairo_set_source_rgb(cr, 0.5, 0.5, 0.5);
@@ -1968,7 +1966,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       cairo_set_line_width(cr, 2.0*scaleFactor);
       for(int32_t i=0;i<fitpar.numFitPeaks;i++){
         if((fitpar.fitPeakInitGuess[i] > drawing.lowerLimit)&&(fitpar.fitPeakInitGuess[i] < drawing.upperLimit)){
-          cairo_arc(cr,getXPosFromCh(fitpar.fitPeakInitGuess[i],width,1),(-0.002*(height)*30.0)-getYPos(getDispSpBinValAdj(0,(int)(fitpar.fitPeakInitGuess[i])-drawing.lowerLimit),0,height),5.,0.,2*G_PI);
+          cairo_arc(cr,getXPosFromCh(fitpar.fitPeakInitGuess[i],width),(-0.002*(height)*30.0)-getYPos(getDispSpBinValAdj(0,(int)(fitpar.fitPeakInitGuess[i])-drawing.lowerLimit),0,height),5.,0.,2*G_PI);
         }
         cairo_stroke_preserve(cr);
         cairo_fill(cr);
@@ -1979,7 +1977,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       cairo_set_line_width(cr, 2.0*scaleFactor);
       for(int32_t i=0;i<fitpar.numFitPeaks;i++){
         if((fitpar.fitParVal[FITPAR_POS1+(3*i)] > drawing.lowerLimit)&&(fitpar.fitParVal[FITPAR_POS1+(3*i)] < drawing.upperLimit)){
-          cairo_arc(cr,getXPosFromCh((float)(fitpar.fitParVal[FITPAR_POS1+(3*i)]),width,1),(-0.002*(height)*30.0)-getYPos((float)(evalFit(fitpar.fitParVal[FITPAR_POS1+(3*i)])),0,height),5.,0.,2*G_PI);
+          cairo_arc(cr,getXPosFromCh((float)(fitpar.fitParVal[FITPAR_POS1+(3*i)]),width),(-0.002*(height)*30.0)-getYPos((float)(evalFit(fitpar.fitParVal[FITPAR_POS1+(3*i)])),0,height),5.,0.,2*G_PI);
         }
         cairo_stroke_preserve(cr);
         cairo_fill(cr);
@@ -2010,7 +2008,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
                     }else if(chYVal > drawing.scaleLevelMax[0]){
                       chYVal = drawing.scaleLevelMax[0];
                     }
-                    float xc = getXPosFromCh((float)(rawdata.chanCommentCh[i]),width,1);
+                    float xc = getXPosFromCh((float)(rawdata.chanCommentCh[i]),width);
                     float yc = -1.0f*getYPos(chYVal,0,height);
                     float radius = 14.0;
                     cairo_arc(cr,xc,yc,radius,0.,2*G_PI);
@@ -2047,7 +2045,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
                       }else if(chYVal > drawing.scaleLevelMax[0]){
                         chYVal = drawing.scaleLevelMax[0];
                       }
-                      float xc = getXPosFromCh((float)(rawdata.chanCommentCh[i]),width,1);
+                      float xc = getXPosFromCh((float)(rawdata.chanCommentCh[i]),width);
                       float yc = -1.0f*getYPos(chYVal,0,height);
                       float radius = 14.0;
                       cairo_arc(cr,xc,yc,radius,0.,2*G_PI);
@@ -2081,7 +2079,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
                       }else if(chYVal > drawing.scaleLevelMax[0]){
                         chYVal = drawing.scaleLevelMax[0];
                       }
-                      float xc = getXPosFromCh((float)(rawdata.chanCommentCh[i]),width,1);
+                      float xc = getXPosFromCh((float)(rawdata.chanCommentCh[i]),width);
                       float yc = -1.0f*getYPos(chYVal,0,height);
                       float radius = 14.0;
                       cairo_arc(cr,xc,yc,radius,0.,2*G_PI);
