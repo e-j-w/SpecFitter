@@ -12,7 +12,7 @@ void on_fit_fit_button_clicked();
 
 //set the default text color, depending on the theme
 void setTextColor(cairo_t *cr){
-  if(guiglobals.preferDarkTheme){
+  if(guiglobals.usingDarkTheme){
     cairo_set_source_rgb(cr, 0.7, 0.7, 0.7);
   }else{
     cairo_set_source_rgb(cr, 0.3, 0.3, 0.3);
@@ -20,7 +20,7 @@ void setTextColor(cairo_t *cr){
 }
 //set the default text color, depending on the theme
 void setGridLineColor(cairo_t *cr){
-  if(guiglobals.preferDarkTheme){
+  if(guiglobals.usingDarkTheme){
     cairo_set_source_rgb(cr, 0.3, 0.3, 0.3);
   }else{
     cairo_set_source_rgb(cr, 0.8, 0.8, 0.8);

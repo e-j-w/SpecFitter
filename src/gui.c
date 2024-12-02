@@ -47,8 +47,10 @@ void setupUITheme(){
   //set whether dark theme is preferred
   g_object_set(gtk_settings_get_default(),"gtk-application-prefer-dark-theme", guiglobals.preferDarkTheme, NULL);
   if(guiglobals.preferDarkTheme){
+    guiglobals.usingDarkTheme = 1;
     gtk_image_set_from_pixbuf(no_sp_image, spIconPixbufDark);
   }else{
+    guiglobals.usingDarkTheme = 0;
     gtk_image_set_from_pixbuf(no_sp_image, spIconPixbuf);
   }
 
@@ -59,6 +61,7 @@ void setupUITheme(){
   g_object_get(settings, "gtk-theme-name", &themeName, NULL);
   //printf("Theme: %s\n",themeName);
   if((strcmp(themeName,"Yaru-dark")==0)||(strcmp(themeName,"Adwaita-dark")==0)){
+    guiglobals.usingDarkTheme = 1;
     gtk_image_set_from_pixbuf(no_sp_image, spIconPixbufDark);
   }
 
@@ -2715,6 +2718,7 @@ void iniitalizeUIElements(){
   guiglobals.roundErrors = 0;
   guiglobals.autoZoom = 1;
   guiglobals.preferDarkTheme = 0;
+  guiglobals.usingDarkTheme = 0;
   guiglobals.useZoomAnimations = 1;
   guiglobals.exportFileType = 0;
   fitpar.fixSkewAmplitide = 0;

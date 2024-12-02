@@ -161,6 +161,7 @@ struct {
   uint8_t commentEditMode; //0=editing comment, 1=editing view title
   int32_t commentEditInd;
   uint8_t preferDarkTheme; //0=prefer light, 1=prefer dark
+  uint8_t usingDarkTheme;
   uint8_t useZoomAnimations; //0=don't use, 1=use
   uint8_t exportFileType; //0=text, 1=radware
 } guiglobals;

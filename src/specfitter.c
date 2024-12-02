@@ -19,6 +19,7 @@
 int main(int argc, char *argv[]){
   
   gtk_init(&argc, &argv); //initialize GTK
+  memset(&rawdata,0,sizeof(rawdata));
   iniitalizeUIElements(); //see gui.c
 
   //setup config file
