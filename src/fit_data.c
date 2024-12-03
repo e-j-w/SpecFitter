@@ -109,7 +109,7 @@ gboolean print_fit_dubious(){
 gboolean print_fit_results(){
 
   const int32_t strSize = 1024;
-  char *fitResStr = malloc((size_t)strSize);
+  char *fitResStr = calloc(1,(size_t)strSize);
   char fitParStr[3][50];
 
   int32_t length = 0;
@@ -720,6 +720,8 @@ void performGausFit(){
   if(relWidthFixed) printf("Relative widths fixed.\n");
 
   //correct peak positions for bin width
+  //radware assumes bin value is at center of bin,
+  //specfitter assumes bin value is at start of bin
   for(uint8_t peakNum=0;peakNum<fitpar.numFitPeaks;peakNum++){
     fitpar.fitParVal[FITPAR_POS1+(3*peakNum)] += ((double)drawing.contractFactor/2.0);
   }

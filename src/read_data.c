@@ -698,8 +698,8 @@ int readROOT(const char *filename, double outHist[NSPECT][S32K], const uint32_t 
   uint32_t histNum=0;
   int32_t ind;
   double val;
-  char *str = malloc(1024);
-  char *histName = malloc(256);
+  char *str = calloc(1,1024);
+  char *histName = calloc(1,256);
   strncpy(histName,"",256);
 
   //read the input file

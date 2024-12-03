@@ -40,8 +40,7 @@ uint8_t get_inv(lin_eq_type *lin_eq){
   long double s;//storage variable
 
   //allocate the identity matrix to be transformed to the inverse
-  long double *id = malloc(MAX_DIM*MAX_DIM*sizeof(long double));
-  memset(id,0,MAX_DIM*MAX_DIM*sizeof(long double));
+  long double *id = calloc(1,MAX_DIM*MAX_DIM*sizeof(long double));
   for(i=0;i<n;i++)
     for(j=0;j<n;j++)
       if(i==j)
