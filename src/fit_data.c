@@ -954,10 +954,8 @@ int startGausFit(){
   g_idle_add(update_gui_fit_state,NULL);
 
   memset(fitpar.fitParErr,0,sizeof(fitpar.fitParErr));
-
   fitpar.prevFitStartCh = fitpar.fitStartCh;
   fitpar.prevFitEndCh = fitpar.fitEndCh;
-  fitpar.prevFitNumPeaks = fitpar.numFitPeaks;
   memcpy(fitpar.prevFitPeakInitGuess,fitpar.fitPeakInitGuess,sizeof(fitpar.fitPeakInitGuess));
   fitpar.fitMidCh = (fitpar.fitStartCh + fitpar.fitEndCh) / 2; //used by fitter
 
@@ -1108,6 +1106,8 @@ int startGausFit(){
     printf("WARNING: Couldn't initialize thread for fit, will try on the main thread.\n");
     performGausFit(); //try non-threaded fit
   }
+
+  fitpar.prevFitNumPeaks = fitpar.numFitPeaks;
   
   return 1;
 }
