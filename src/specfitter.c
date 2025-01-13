@@ -1,4 +1,4 @@
-/* © J. Williams, 2020-2023 */
+/* © J. Williams, 2020-2025 */
 // SpecFitter - A spectrum viewer/analysis app using GTK3, for gamma-ray spectroscopy or similar
 
 //definitions and global variables

@@ -1,4 +1,4 @@
-/* © J. Williams, 2020-2023 */
+/* © J. Williams, 2020-2025 */
 
 #include <stdlib.h>
 #include <string.h>
@@ -23,7 +23,7 @@
 #define MAX_FIT_PK    10 //maximum number of peaks which may be fit at once (when changing, also change MAX_DIM in lin_eq_solver.h)
 
 /* Data file specs (be careful if changing these, can break compatibility) */
-#define S32K      32768 //maximum number of channels per spectrum in .mca and .fmca (changing breaks file compatibility)
+#define S32K      32768 //maximum number of channels per spectrum in .mca, .fmca, and .dmca (changing breaks file compatibility)
 #define NSPECT    128   //maximum number of spectra which may be opened at once (for compatibility should be 255 or less)
 #define MAXNVIEWS 128   //maximum number of views which can be saved by the user
 #define NCHCOM    1000  //maximum number of comments that can be placed by the user on individual channels
@@ -37,7 +37,7 @@ GtkPopover *display_popover;
 GtkButton *calibrate_button;
 GtkButton *manage_spectra_button;
 GtkButton *to_save_menu_button, *save_button, *save_button_radware;
-GtkButton *save_button_fmca, *save_button_text, *save_button_png;
+GtkButton *save_button_fmca, *save_button_dmca, *save_button_text, *save_button_png;
 GtkButton *help_button;
 GtkLabel *bottom_info_text;
 GtkFileChooser *file_open_dialog, *file_save_dialog;
@@ -163,7 +163,7 @@ struct {
   uint8_t preferDarkTheme; //0=prefer light, 1=prefer dark
   uint8_t usingDarkTheme;
   uint8_t useZoomAnimations; //0=don't use, 1=use
-  uint8_t exportFileType; //0=text, 1=radware
+  uint8_t exportFileType; //0=text, 1=radware, 2=fmca, 3=dmca
 } guiglobals;
 
 //raw histogram data globals
@@ -200,8 +200,8 @@ struct {
   char zoomingSpX, zoomingSpY; //0 if no zoom motion, 1 if zooming
   gint64 zoomXStartFrameTime, zoomYStartFrameTime; //the frames at which the x and y-scale zooms were started
   gint64 zoomXLastFrameTime, zoomYLastFrameTime; //the most recent frames during the x and y-scale zooms
-  float scaleToLevelMax[MAX_DISP_SP], scaleToLevelMin[MAX_DISP_SP]; //the y scale values to zoom to
-  float scaleLevelMax[MAX_DISP_SP], scaleLevelMin[MAX_DISP_SP]; //the y scale values, ie. the maximum and minimum values to show on the y axis
+  double scaleToLevelMax[MAX_DISP_SP], scaleToLevelMin[MAX_DISP_SP]; //the y scale values to zoom to
+  double scaleLevelMax[MAX_DISP_SP], scaleLevelMin[MAX_DISP_SP]; //the y scale values, ie. the maximum and minimum values to show on the y axis
   uint8_t contractFactor; //the number of channels per bin (default=1)
   uint8_t multiplotMode; //uses values from multiplot_mode_enum: 0=no multiplot, 1=summed spectra, 2=overlay spectra (common scaling), 3=overlay spectra (independent scaling), 4=stacked view
   uint8_t numMultiplotSp; //number of spectra to show in multiplot mode

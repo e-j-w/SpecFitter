@@ -1,4 +1,4 @@
-/* © J. Williams, 2020-2023 */
+/* © J. Williams, 2020-2025 */
 
 //This file contains routines for drawing spectra using Cairo.
 //The main routine is drawSpectrum (near the bottom), helper 
@@ -46,25 +46,25 @@ float getCursorChannel(const double cursorx, const double cursory){
 
 //converts cursor position units to y-value on the displayed spectrum
 //this is the value on the displayed y-axis, at the cursor postion
-float getCursorYVal(const double cursorx, const double cursory){
+double getCursorYVal(const double cursorx, const double cursory){
   GdkRectangle dasize;  // GtkDrawingArea size
   GdkWindow *gwindow = gtk_widget_get_window(spectrum_drawing_area);
   // Determine GtkDrawingArea dimensions
   gdk_window_get_geometry(gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
   if((cursorx > XORIGIN)&&(cursory < (dasize.height - YORIGIN))){
-    float cursorVal;
+    double cursorVal;
     switch(drawing.multiplotMode){
       case MULTIPLOT_SUMMED:
       case MULTIPLOT_NONE:
         //single plot mode
         if(drawing.logScale){
           if(drawing.scaleLevelMin[0] > 0){
-            cursorVal = powf(10.0f,(float)((dasize.height-YORIGIN - cursory)*log10(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/(dasize.height-YORIGIN))) + drawing.scaleLevelMin[0];
+            cursorVal = pow(10.0f,(dasize.height-YORIGIN - cursory)*log10(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/(dasize.height-YORIGIN)) + drawing.scaleLevelMin[0];
           }else{
-            cursorVal = powf(10.0f,(float)((dasize.height-YORIGIN - cursory)*log10(drawing.scaleLevelMax[0])/(dasize.height-YORIGIN)));
+            cursorVal = pow(10.0f,(dasize.height-YORIGIN - cursory)*log10(drawing.scaleLevelMax[0])/(dasize.height-YORIGIN));
           }
         }else{
-          cursorVal = drawing.scaleLevelMax[0] - (float)(((cursory)/(dasize.height-YORIGIN)))*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0]);
+          cursorVal = drawing.scaleLevelMax[0] - ((cursory)/(dasize.height-YORIGIN))*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0]);
           //printf("cursorVal: %f, scaleLevelMin: %f, scaleLevelMax: %f\n",cursorVal,drawing.scaleLevelMin[0],drawing.scaleLevelMax[0]);
         }
         break;
@@ -89,8 +89,8 @@ int getCommentAtCursor(const double cursorx, const double cursory){
   // Determine GtkDrawingArea dimensions
   gdk_window_get_geometry(gwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
   if((cursorx > XORIGIN)&&(cursory < ((double)dasize.height - YORIGIN))){
-    float cursorCh = getCursorChannel(cursorx, cursory);
-    float cursorYVal = getCursorYVal(cursorx, cursory);
+    double cursorCh = getCursorChannel(cursorx, cursory);
+    double cursorYVal = getCursorYVal(cursorx, cursory);
     //printf("cursorCh: %f, cursorYVal: %f\n",cursorCh,cursorYVal);
     switch(drawing.multiplotMode){
       case MULTIPLOT_SUMMED:
@@ -99,15 +99,15 @@ int getCommentAtCursor(const double cursorx, const double cursory){
           if(rawdata.chanCommentView[i] == 1){
             if(rawdata.chanCommentSp[i] == drawing.displayedView){
               //check proximity to channel
-              if(fabsf((float)rawdata.chanCommentCh[i] - cursorCh) < (30.0f*((float)(drawing.upperLimit - drawing.lowerLimit)/(float)dasize.width))){
+              if(fabs((double)rawdata.chanCommentCh[i] - cursorCh) < (30.0*((drawing.upperLimit - drawing.lowerLimit)/(double)dasize.width))){
                 //check proximity to y-val
-                float chYVal = rawdata.chanCommentVal[i];
+                double chYVal = rawdata.chanCommentVal[i];
                 if(chYVal < drawing.scaleLevelMin[0]){
                   chYVal = drawing.scaleLevelMin[0];
                 }else if(chYVal > drawing.scaleLevelMax[0]){
                   chYVal = drawing.scaleLevelMax[0];
                 }
-                if(fabs(chYVal - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/(float)dasize.height)){
+                if(fabs(chYVal - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/(double)dasize.height)){
                   return i; //this comment is close
                 }
               }
@@ -122,15 +122,15 @@ int getCommentAtCursor(const double cursorx, const double cursory){
             if(rawdata.chanCommentView[i] == 0){
               if(rawdata.chanCommentSp[i] == drawing.multiPlots[0]){
                 //check proximity to channel
-                if(fabsf((float)rawdata.chanCommentCh[i] - cursorCh) < (30.0f*((float)(drawing.upperLimit - drawing.lowerLimit)/(float)dasize.width))){
+                if(fabs((double)rawdata.chanCommentCh[i] - cursorCh) < (30.0*((drawing.upperLimit - drawing.lowerLimit)/(double)dasize.width))){
                   //check proximity to y-val
-                  float chYVal = rawdata.chanCommentVal[i];
+                  double chYVal = rawdata.chanCommentVal[i];
                   if(chYVal < drawing.scaleLevelMin[0]){
                     chYVal = drawing.scaleLevelMin[0];
                   }else if(chYVal > drawing.scaleLevelMax[0]){
                     chYVal = drawing.scaleLevelMax[0];
                   }
-                  if(fabs(chYVal - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/(float)dasize.height)){
+                  if(fabs(chYVal - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/(double)dasize.height)){
                     return i; //this comment is close
                   }
                 }
@@ -143,15 +143,15 @@ int getCommentAtCursor(const double cursorx, const double cursory){
             if(rawdata.chanCommentView[i] == 1){
               if(rawdata.chanCommentSp[i] == drawing.displayedView){
                 //check proximity to channel
-                if(fabsf((float)rawdata.chanCommentCh[i] - cursorCh) < (30.0f*((float)(drawing.upperLimit - drawing.lowerLimit)/(float)dasize.width))){
+                if(fabs((double)rawdata.chanCommentCh[i] - cursorCh) < (30.0*((drawing.upperLimit - drawing.lowerLimit)/(double)dasize.width))){
                   //check proximity to y-val
-                  float chYVal = rawdata.chanCommentVal[i];
+                  double chYVal = rawdata.chanCommentVal[i];
                   if(chYVal < drawing.scaleLevelMin[0]){
                     chYVal = drawing.scaleLevelMin[0];
                   }else if(chYVal > drawing.scaleLevelMax[0]){
                     chYVal = drawing.scaleLevelMax[0];
                   }
-                  if(fabs(chYVal - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/(float)dasize.height)){
+                  if(fabs(chYVal - cursorYVal) < (30.0*(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0])/(double)dasize.height)){
                     return i; //this comment is close
                   }
                 }
@@ -247,30 +247,30 @@ gboolean zoom_y_callback(){
   }
 
   gint64 frameTime = gdk_frame_clock_get_frame_time(frameClock);
-  float linFac = 0.00001f*(float)(frameTime-drawing.zoomYLastFrameTime);
-  float diffFac = 0.00002f*(float)(frameTime-drawing.zoomYLastFrameTime);
+  double linFac = 0.00001*(double)(frameTime-drawing.zoomYLastFrameTime);
+  double diffFac = 0.00002*(double)(frameTime-drawing.zoomYLastFrameTime);
   int32_t i;
   for(i=0;i<drawing.numMultiplotSp;i++){
     if(drawing.scaleToLevelMax[i] == drawing.scaleLevelMin[i]){
       drawing.scaleLevelMax[i] = drawing.scaleLevelMin[i];
     }else if(drawing.scaleLevelMax[i] > drawing.scaleToLevelMax[i]){
-      drawing.scaleLevelMax[i] -= diffFac*(drawing.scaleLevelMax[i]-drawing.scaleToLevelMax[i]) + linFac*fabsf(drawing.scaleLevelMax[i]);
+      drawing.scaleLevelMax[i] -= diffFac*(drawing.scaleLevelMax[i]-drawing.scaleToLevelMax[i]) + linFac*fabs(drawing.scaleLevelMax[i]);
       if(drawing.scaleLevelMax[i] <= drawing.scaleToLevelMax[i]){
         drawing.scaleLevelMax[i] = drawing.scaleToLevelMax[i];
       }
     }else if(drawing.scaleLevelMax[i] < drawing.scaleToLevelMax[i]){
-      drawing.scaleLevelMax[i] += diffFac*(drawing.scaleToLevelMax[i]-drawing.scaleLevelMax[i]) + linFac*fabsf(drawing.scaleLevelMax[i]);
+      drawing.scaleLevelMax[i] += diffFac*(drawing.scaleToLevelMax[i]-drawing.scaleLevelMax[i]) + linFac*fabs(drawing.scaleLevelMax[i]);
       if(drawing.scaleLevelMax[i] >= drawing.scaleToLevelMax[i]){
         drawing.scaleLevelMax[i] = drawing.scaleToLevelMax[i];
       }
     }
     if(drawing.scaleLevelMin[i] < drawing.scaleToLevelMin[i]){
-      drawing.scaleLevelMin[i] += diffFac*(drawing.scaleToLevelMin[i]-drawing.scaleLevelMin[i]) + linFac*fabsf(drawing.scaleLevelMin[i]);
+      drawing.scaleLevelMin[i] += diffFac*(drawing.scaleToLevelMin[i]-drawing.scaleLevelMin[i]) + linFac*fabs(drawing.scaleLevelMin[i]);
       if(drawing.scaleLevelMin[i] >= drawing.scaleToLevelMin[i]){
         drawing.scaleLevelMin[i] = drawing.scaleToLevelMin[i];
       }
     }else if(drawing.scaleLevelMin[i] > drawing.scaleToLevelMin[i]){
-      drawing.scaleLevelMin[i] -= diffFac*(drawing.scaleLevelMin[i]-drawing.scaleToLevelMin[i]) + linFac*fabsf(drawing.scaleLevelMin[i]);
+      drawing.scaleLevelMin[i] -= diffFac*(drawing.scaleLevelMin[i]-drawing.scaleToLevelMin[i]) + linFac*fabs(drawing.scaleLevelMin[i]);
       if(drawing.scaleLevelMin[i] <= drawing.scaleToLevelMin[i]){
         drawing.scaleLevelMin[i] = drawing.scaleToLevelMin[i];
       }
@@ -586,7 +586,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
   }else if((event->type == GDK_DOUBLE_BUTTON_PRESS) && (event->button == 1)){
     //double click
     if(rawdata.openedSp){
-      float cursorChan, cursorYVal;
+      double cursorChan, cursorYVal;
       cursorChan = getCursorChannel(event->x, event->y);
       cursorYVal = getCursorYVal(event->x, event->y);
       if(cursorChan >= 0){
@@ -616,7 +616,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
               }
               gtk_widget_set_sensitive(GTK_WIDGET(remove_comment_button),FALSE);
               //setup comment data
-              rawdata.chanCommentVal[(int)rawdata.numChComments] = cursorYVal;
+              rawdata.chanCommentVal[(int)rawdata.numChComments] = (float)cursorYVal;
               rawdata.chanCommentCh[(int)rawdata.numChComments] = (int)cursorChan;
               rawdata.chanCommentView[(int)rawdata.numChComments] = 1;
               if(drawing.displayedView >= 0){
@@ -674,7 +674,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
               }
               gtk_widget_set_sensitive(GTK_WIDGET(remove_comment_button),FALSE);
               //setup comment data
-              rawdata.chanCommentVal[(int)rawdata.numChComments] = cursorYVal;
+              rawdata.chanCommentVal[(int)rawdata.numChComments] = (float)cursorYVal;
               rawdata.chanCommentCh[(int)rawdata.numChComments] = (int)cursorChan;
               if(drawing.displayedView == -1){
                 //commenting on a raw spectrum, not a view
@@ -824,7 +824,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event){
       char *statusBarLabelp = statusBarLabel;
       char binValStr[50];
       //char *binValStrp = binValStr;
-      float binVal, errVal;
+      double binVal, errVal;
       int32_t i;
       switch(drawing.highlightedPeak){
         case -1:
@@ -836,8 +836,8 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event){
               //multiple visible plots
               if(calpar.calMode == 1){
                 int32_t cursorChanEnd = cursorChanRounded + drawing.contractFactor;
-                float cal_lowerChanLimit = (float)(getCalVal(cursorChanRounded));
-                float cal_upperChanLimit = (float)(getCalVal(cursorChanEnd));
+                double cal_lowerChanLimit = getCalVal(cursorChanRounded);
+                double cal_upperChanLimit = getCalVal(cursorChanEnd);
                 statusBarLabelp += snprintf(statusBarLabelp,50,"%s: %0.1f - %0.1f, Values:", calpar.calUnit, cal_lowerChanLimit, cal_upperChanLimit);
               }else{
                 if(drawing.contractFactor <= 1){
@@ -883,10 +883,10 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event){
         default:
           //print highlighted peak info
           if(calpar.calMode == 1){
-            float calCentr = (float)(getCalVal((double)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)])));
-            float calWidth = (float)(getCalWidth((double)(fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)])));
-            float calCentrErr = (float)(getCalWidth((double)(fitpar.fitParErr[FITPAR_POS1+(3*drawing.highlightedPeak)])));
-            float calWidthErr = (float)(getCalWidth((double)(fitpar.fitParErr[FITPAR_WIDTH1+(3*drawing.highlightedPeak)])));
+            double calCentr = getCalVal((double)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)]));
+            double calWidth = getCalWidth((double)(fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]));
+            double calCentrErr = getCalWidth((double)(fitpar.fitParErr[FITPAR_POS1+(3*drawing.highlightedPeak)]));
+            double calWidthErr = getCalWidth((double)(fitpar.fitParErr[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]));
             char fitParStr[3][50];
             getFormattedValAndUncertainty((double)fitpar.areaVal[drawing.highlightedPeak],(double)fitpar.areaErr[drawing.highlightedPeak],fitParStr[0],50,1,guiglobals.roundErrors);
             getFormattedValAndUncertainty(calCentr,calCentrErr,fitParStr[1],50,1,guiglobals.roundErrors);
@@ -949,7 +949,7 @@ float getXPosFromCh(const float chVal, const float width){
 }
 
 //get the y-coordinate for drawing a specific bin value
-float getYPos(const float val, const int32_t multiplotSpNum, const float height){
+float getYPos(const double val, const int32_t multiplotSpNum, const float height){
   double pos, minVal;
   switch(drawing.multiplotMode){
     case MULTIPLOT_STACKED:
@@ -958,9 +958,9 @@ float getYPos(const float val, const int32_t multiplotSpNum, const float height)
       if(drawing.logScale){
         if((val > 0)&&(drawing.scaleLevelMax[multiplotSpNum] > 0)){
           if(drawing.scaleLevelMin[multiplotSpNum] > 0){
-            pos = YORIGIN + (height-YORIGIN)*(double)((multiplotSpNum/(drawing.numMultiplotSp*1.0)) + (1.0/(drawing.numMultiplotSp*1.0))*(log10f(val - drawing.scaleLevelMin[multiplotSpNum])/log10f(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])));
+            pos = YORIGIN + (height-YORIGIN)*(double)((multiplotSpNum/(drawing.numMultiplotSp*1.0)) + (1.0/(drawing.numMultiplotSp*1.0))*(log10(val - drawing.scaleLevelMin[multiplotSpNum])/log10(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])));
           }else{
-            pos = YORIGIN + (height-YORIGIN)*(double)((multiplotSpNum/(drawing.numMultiplotSp*1.0)) + (1.0/(drawing.numMultiplotSp*1.0))*(log10f(val)/log10f(drawing.scaleLevelMax[multiplotSpNum])));
+            pos = YORIGIN + (height-YORIGIN)*(double)((multiplotSpNum/(drawing.numMultiplotSp*1.0)) + (1.0/(drawing.numMultiplotSp*1.0))*(log10(val)/log10(drawing.scaleLevelMax[multiplotSpNum])));
           }
         }else{
           pos = minVal;
@@ -1055,9 +1055,9 @@ float getAxisYPos(const float axisVal, const int32_t multiplotSpNum, const float
       if(drawing.logScale){
         if((axisVal > 0)&&(drawing.scaleLevelMax[multiplotSpNum] > 0)){
           if(drawing.scaleLevelMin[multiplotSpNum] > 0){
-            posVal = (1.0/drawing.numMultiplotSp)*(YORIGIN-height)*log10(axisVal - drawing.scaleLevelMin[multiplotSpNum])/log10f(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]) + (YORIGIN-height)*(float)(multiplotSpNum/(drawing.numMultiplotSp*1.0)) - YORIGIN;
+            posVal = (1.0/drawing.numMultiplotSp)*(YORIGIN-height)*log10(axisVal - drawing.scaleLevelMin[multiplotSpNum])/log10(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]) + (YORIGIN-height)*(float)(multiplotSpNum/(drawing.numMultiplotSp*1.0)) - YORIGIN;
           }else{
-            posVal = (1.0/drawing.numMultiplotSp)*(YORIGIN-height)*log10(axisVal)/log10f(drawing.scaleLevelMax[multiplotSpNum]) + (YORIGIN-height)*(float)(multiplotSpNum/(drawing.numMultiplotSp*1.0)) - YORIGIN;
+            posVal = (1.0/drawing.numMultiplotSp)*(YORIGIN-height)*log10(axisVal)/log10(drawing.scaleLevelMax[multiplotSpNum]) + (YORIGIN-height)*(float)(multiplotSpNum/(drawing.numMultiplotSp*1.0)) - YORIGIN;
           }
         }else{
           posVal = (YORIGIN-height)*(multiplotSpNum/(drawing.numMultiplotSp*1.0)) - YORIGIN;
@@ -1074,9 +1074,9 @@ float getAxisYPos(const float axisVal, const int32_t multiplotSpNum, const float
       if(drawing.logScale){
         if((axisVal > 0)&&(drawing.scaleLevelMax[multiplotSpNum] > 0)){
           if(drawing.scaleLevelMin[multiplotSpNum] > 0){
-            posVal = (YORIGIN-height)*log10f(axisVal - drawing.scaleLevelMin[multiplotSpNum])/log10f(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]) - YORIGIN;
+            posVal = (YORIGIN-height)*log10(axisVal - drawing.scaleLevelMin[multiplotSpNum])/log10(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]) - YORIGIN;
           }else{
-            posVal = (YORIGIN-height)*log10f(axisVal)/log10f(drawing.scaleLevelMax[multiplotSpNum]) - YORIGIN;
+            posVal = (YORIGIN-height)*log10(axisVal)/log10(drawing.scaleLevelMax[multiplotSpNum]) - YORIGIN;
           }    
         }else{
           posVal = -YORIGIN;
@@ -1368,12 +1368,12 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   setPlotLimits(); //setup the x range to plot over
 
   //get the maximum/minimum y values of the displayed region
-  float maxVal[MAX_DISP_SP];
-  float minVal[MAX_DISP_SP];
-  float currentVal[MAX_DISP_SP];
+  double maxVal[MAX_DISP_SP];
+  double minVal[MAX_DISP_SP];
+  double currentVal[MAX_DISP_SP];
   for(int32_t i=0;i<drawing.numMultiplotSp;i++){
-    minVal[i] = (float)(BIG_NUMBER);
-    maxVal[i] = (float)(SMALL_NUMBER);
+    minVal[i] = (double)(BIG_NUMBER);
+    maxVal[i] = (double)(SMALL_NUMBER);
   }
   for(int32_t i=0;i<(drawing.upperLimit-drawing.lowerLimit-1);i+=drawing.contractFactor){
     switch(drawing.multiplotMode){
@@ -1516,9 +1516,10 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       //stacked
       if(drawing.logScale){
         for(int32_t i=0;i<drawing.numMultiplotSp;i++){
-          float rangeVal = drawing.scaleLevelMax[i] - drawing.scaleLevelMin[i];
-          if(rangeVal > drawing.scaleLevelMax[i])
+          double rangeVal = drawing.scaleLevelMax[i] - drawing.scaleLevelMin[i];
+          if(rangeVal > drawing.scaleLevelMax[i]){
             rangeVal = drawing.scaleLevelMax[i];
+          }
           int32_t numTickUsed = 0;
           if(rangeVal >= 1000.){
             //logarithmic scale ticks in base-10
@@ -1543,7 +1544,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         if(numTickPerSp < 2)
           numTickPerSp = 2;
         for(int32_t i=0;i<drawing.numMultiplotSp;i++){
-          yTickDist = getDistBetweenYAxisTicks(drawing.scaleLevelMax[i] - drawing.scaleLevelMin[i],numTickPerSp);
+          yTickDist = getDistBetweenYAxisTicks((float)(drawing.scaleLevelMax[i] - drawing.scaleLevelMin[i]),numTickPerSp);
           cairo_set_source_rgb(cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
           for(yTick=0.;yTick<drawing.scaleLevelMax[i];yTick+=yTickDist){
             drawYAxisTick(yTick, i, cr, width, height, plotFontSize, drawGridLines);
@@ -1608,7 +1609,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         }
       }else{
         numTickPerSp = (int)(height/(4.0f*YORIGIN)) + 1;
-        yTickDist = getDistBetweenYAxisTicks(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0],numTickPerSp);
+        yTickDist = getDistBetweenYAxisTicks((float)(drawing.scaleLevelMax[0] - drawing.scaleLevelMin[0]),numTickPerSp);
         for(yTick=0.;yTick<drawing.scaleLevelMax[0];yTick+=yTickDist){
           drawYAxisTick(yTick, 0, cr, width, height, plotFontSize, drawGridLines);
         }
@@ -1685,7 +1686,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
 
   //draw the actual histogram
   int32_t range = drawing.upperLimit-drawing.lowerLimit;
-  float nextVal;
+  double nextVal;
   switch(drawing.multiplotMode){
     case MULTIPLOT_STACKED:
       //stacked
@@ -2002,7 +2003,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
                     }else{
                       cairo_set_line_width(cr, 4.0*scaleFactor);
                     }
-                    float chYVal = rawdata.chanCommentVal[i];
+                    double chYVal = (double)rawdata.chanCommentVal[i];
                     if(chYVal < drawing.scaleLevelMin[0]){
                       chYVal = drawing.scaleLevelMin[0];
                     }else if(chYVal > drawing.scaleLevelMax[0]){
@@ -2039,7 +2040,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
                       }else{
                         cairo_set_line_width(cr, 4.0*scaleFactor);
                       }
-                      float chYVal = rawdata.chanCommentVal[i];
+                      double chYVal = (double)rawdata.chanCommentVal[i];
                       if(chYVal < drawing.scaleLevelMin[0]){
                         chYVal = drawing.scaleLevelMin[0];
                       }else if(chYVal > drawing.scaleLevelMax[0]){
@@ -2073,7 +2074,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
                       }else{
                         cairo_set_line_width(cr, 4.0*scaleFactor);
                       }
-                      float chYVal = rawdata.chanCommentVal[i];
+                      double chYVal = (double)rawdata.chanCommentVal[i];
                       if(chYVal < drawing.scaleLevelMin[0]){
                         chYVal = drawing.scaleLevelMin[0];
                       }else if(chYVal > drawing.scaleLevelMax[0]){

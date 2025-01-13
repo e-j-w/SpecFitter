@@ -1,4 +1,4 @@
-/* © J. Williams, 2020-2023 */
+/* © J. Williams, 2020-2025 */
 
 //routine to write a .jf3 file
 //header containing: file format version number (uint8_t), number of spectra (uint8_t), label for each spactrum (each 256 element char array),
@@ -209,12 +209,12 @@ int exportSPE(const char *filePrefix, const int exportMode, const int rebin){
         //write histogram
         if(rebin){
           for(int32_t j=0;j<(arraySize*drawing.contractFactor);j+=drawing.contractFactor){
-            val = getSpBinValRaw(i,j,drawing.scaleFactor[i],drawing.contractFactor);
+            val = (float)getSpBinValRaw(i,j,drawing.scaleFactor[i],drawing.contractFactor);
             fwrite(&val,sizeof(float),1,out);
           }
         }else{
           for(int32_t j=0;j<arraySize;j++){
-            val = getSpBinValRaw(i,j,1,1);
+            val = (float)getSpBinValRaw(i,j,1,1);
             fwrite(&val,sizeof(float),1,out);
           }
         }
@@ -247,7 +247,7 @@ int exportSPE(const char *filePrefix, const int exportMode, const int rebin){
       int32_t numBinsWritten = 0;
       for(int32_t j=0;j<S32K;j+=drawing.contractFactor){
         if(numBinsWritten < arraySize){
-          val = getSpBinValOrWeight(0,j,0);
+          val = (float)getSpBinValOrWeight(0,j,0);
           fwrite(&val,sizeof(float),1,out);
           numBinsWritten++;
         }else{
@@ -294,12 +294,12 @@ int exportSPE(const char *filePrefix, const int exportMode, const int rebin){
       //write histogram
       if(rebin){
         for(int32_t i=0;i<(arraySize*drawing.contractFactor);i+=drawing.contractFactor){
-          val = getSpBinValRaw(spID,i,drawing.scaleFactor[spID],drawing.contractFactor);
+          val = (float)getSpBinValRaw(spID,i,drawing.scaleFactor[spID],drawing.contractFactor);
           fwrite(&val,sizeof(float),1,out);
         }
       }else{
         for(int32_t i=0;i<arraySize;i++){
-          val = getSpBinValRaw(spID,i,1,1);
+          val = (float)getSpBinValRaw(spID,i,1,1);
           fwrite(&val,sizeof(float),1,out);
         }
       }
@@ -335,12 +335,12 @@ int exportFMCA(const char *filePrefix, const int exportMode, const int rebin){
         //write histogram
         if(rebin){
           for(int32_t j=0;j<(S32K*drawing.contractFactor);j+=drawing.contractFactor){
-            val = getSpBinValRaw(i,j,drawing.scaleFactor[i],drawing.contractFactor);
+            val = (float)getSpBinValRaw(i,j,drawing.scaleFactor[i],drawing.contractFactor);
             fwrite(&val,sizeof(float),1,out);
           }
         }else{
           for(int32_t j=0;j<S32K;j++){
-            val = getSpBinValRaw(i,j,1,1);
+            val = (float)getSpBinValRaw(i,j,1,1);
             fwrite(&val,sizeof(float),1,out);
           }
         }
@@ -353,7 +353,7 @@ int exportFMCA(const char *filePrefix, const int exportMode, const int rebin){
 
       //write histogram
       for(int32_t j=0;j<S32K;j+=drawing.contractFactor){
-        val = getSpBinValOrWeight(0,j,0);
+        val = (float)getSpBinValOrWeight(0,j,0);
         fwrite(&val,sizeof(float),1,out);
       }
       fclose(out);
@@ -373,13 +373,91 @@ int exportFMCA(const char *filePrefix, const int exportMode, const int rebin){
       //write histogram
       if(rebin){
         for(int32_t i=0;i<(S32K*drawing.contractFactor);i+=drawing.contractFactor){
-          val = getSpBinValRaw(spID,i,drawing.scaleFactor[spID],drawing.contractFactor);
+          val = (float)getSpBinValRaw(spID,i,drawing.scaleFactor[spID],drawing.contractFactor);
           fwrite(&val,sizeof(float),1,out);
         }
       }else{
         for(int32_t i=0;i<S32K;i++){
-          val = getSpBinValRaw(spID,i,1,1);
+          val = (float)getSpBinValRaw(spID,i,1,1);
           fwrite(&val,sizeof(float),1,out);
+        }
+      }
+      fclose(out);
+      printf("Wrote data to file: %s\n",outFileName);
+      break;
+  }
+
+  return 0;
+}
+
+//routine to export a .dmca file (S32K double values per spectrum)
+//exportMode: 0=write displayed spectrum, 1=write all imported spectra
+int exportDMCA(const char *filePrefix, const int exportMode, const int rebin){
+  
+  int spID;
+  double val;
+  FILE *out;
+  char outFileName[256];
+
+  snprintf(outFileName,256,"%s.dmca",filePrefix);
+  if((out = fopen(outFileName, "w")) == NULL){ //open the file
+    printf("ERROR: Cannot open the output file: %s\n", outFileName);
+    printf("The file may not be accesible.\n");
+    return 1;
+  }
+
+  switch(exportMode + (drawing.multiplotMode != MULTIPLOT_SUMMED)){
+    case 1:
+      //export all
+      for(int32_t i=0;i<rawdata.numSpOpened;i++){
+        //write histogram
+        if(rebin){
+          for(int32_t j=0;j<(S32K*drawing.contractFactor);j+=drawing.contractFactor){
+            val = getSpBinValRaw(i,j,drawing.scaleFactor[i],drawing.contractFactor);
+            fwrite(&val,sizeof(double),1,out);
+          }
+        }else{
+          for(int32_t j=0;j<S32K;j++){
+            val = getSpBinValRaw(i,j,1,1);
+            fwrite(&val,sizeof(double),1,out);
+          }
+        }
+      }
+      fclose(out);
+       printf("Wrote data to file: %s\n",outFileName);
+      break;
+    case 0:
+      //export current (summed) spectrum view
+
+      //write histogram
+      for(int32_t j=0;j<S32K;j+=drawing.contractFactor){
+        val = getSpBinValOrWeight(0,j,0);
+        fwrite(&val,sizeof(double),1,out);
+      }
+      fclose(out);
+      printf("Wrote data to file: %s\n",outFileName);
+
+      break;
+    default:
+      //export one histogram
+      
+      spID = exportMode-2;
+      if((spID < 0)||(spID >= rawdata.numSpOpened)){
+        printf("ERROR: invalid spectrum index for export.\n");
+        fclose(out);
+        return 2;
+      }
+
+      //write histogram
+      if(rebin){
+        for(int32_t i=0;i<(S32K*drawing.contractFactor);i+=drawing.contractFactor){
+          val = getSpBinValRaw(spID,i,drawing.scaleFactor[spID],drawing.contractFactor);
+          fwrite(&val,sizeof(double),1,out);
+        }
+      }else{
+        for(int32_t i=0;i<S32K;i++){
+          val = getSpBinValRaw(spID,i,1,1);
+          fwrite(&val,sizeof(double),1,out);
         }
       }
       fclose(out);
@@ -396,7 +474,7 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin){
   
   int spID;
   int maxArraySize;
-  float val;
+  double val;
   FILE *out;
   char outFileName[256];
 

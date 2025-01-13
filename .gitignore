@@ -4,6 +4,7 @@ specfitter-resources.c
 *.txt
 *.mca
 *.fmca
+*.dmca
 *.spe
 *.jf3
 *.png

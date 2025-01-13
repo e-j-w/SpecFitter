@@ -1,4 +1,4 @@
-/* © J. Williams, 2020-2023 */
+/* © J. Williams, 2020-2025 */
 
 //File contains routines and callbacks for dealing with GTK and
 //the various UI elements used in the program.  Initialization
@@ -526,10 +526,11 @@ void on_open_button_clicked(){
   }
   gtk_file_chooser_set_select_multiple(file_open_dialog, TRUE);
   file_filter = gtk_file_filter_new();
-  gtk_file_filter_set_name(file_filter,"Spectrum Data (.jf3, .txt, .mca, .fmca, .spe, .chn, .C)");
+  gtk_file_filter_set_name(file_filter,"Spectrum Data (.jf3, .txt, .mca, .fmca, .dmca, .spe, .chn, .C)");
   gtk_file_filter_add_pattern(file_filter,"*.txt");
   gtk_file_filter_add_pattern(file_filter,"*.mca");
   gtk_file_filter_add_pattern(file_filter,"*.fmca");
+  gtk_file_filter_add_pattern(file_filter,"*.dmca");
   gtk_file_filter_add_pattern(file_filter,"*.spe");
   gtk_file_filter_add_pattern(file_filter,"*.Spe");
   gtk_file_filter_add_pattern(file_filter,"*.chn");
@@ -653,10 +654,11 @@ void on_append_button_clicked(){
   }
   gtk_file_chooser_set_select_multiple(file_open_dialog, TRUE);
   file_filter = gtk_file_filter_new();
-  gtk_file_filter_set_name(file_filter,"Spectrum Data (.jf3, .txt, .mca, .fmca, .spe, .chn, .C)");
+  gtk_file_filter_set_name(file_filter,"Spectrum Data (.jf3, .txt, .mca, .fmca, .dmca, .spe, .chn, .C)");
   gtk_file_filter_add_pattern(file_filter,"*.txt");
   gtk_file_filter_add_pattern(file_filter,"*.mca");
   gtk_file_filter_add_pattern(file_filter,"*.fmca");
+  gtk_file_filter_add_pattern(file_filter,"*.dmca");
   gtk_file_filter_add_pattern(file_filter,"*.spe");
   gtk_file_filter_add_pattern(file_filter,"*.Spe");
   gtk_file_filter_add_pattern(file_filter,"*.chn");
@@ -863,6 +865,26 @@ void on_save_fmca_button_clicked(){
   gtk_window_present(export_options_window); //show the window
 }
 
+void on_save_dmca_button_clicked(){
+  int32_t i, cbEntry;
+  guiglobals.exportFileType = 3; //exporting to dmca format
+  gtk_label_set_text(export_description_label,"Export to .dmca format:");
+  gtk_combo_box_text_remove_all(export_mode_combobox);
+  cbEntry = 0;
+  if(drawing.multiplotMode == MULTIPLOT_SUMMED){
+    gtk_combo_box_text_insert(export_mode_combobox,cbEntry,NULL,"Current summed view");
+    cbEntry++;
+  }
+  gtk_combo_box_text_insert(export_mode_combobox,cbEntry,NULL,"All spectra (concatenated in one file)");
+  cbEntry++;
+  for(i=0;i<rawdata.numSpOpened;i++){
+    gtk_combo_box_text_insert(export_mode_combobox,cbEntry,NULL,rawdata.histComment[i]);
+    cbEntry++;
+  }
+  gtk_combo_box_set_active(GTK_COMBO_BOX(export_mode_combobox),0); //set the default entry
+  gtk_window_present(export_options_window); //show the window
+}
+
 void on_export_mode_combobox_changed(){
   int32_t exportMode = gtk_combo_box_get_active(GTK_COMBO_BOX(export_mode_combobox));
   switch(exportMode){
@@ -870,6 +892,14 @@ void on_export_mode_combobox_changed(){
       if(drawing.multiplotMode == MULTIPLOT_SUMMED){
         gtk_revealer_set_reveal_child(export_options_revealer, FALSE);
         switch(guiglobals.exportFileType){
+          case 3:
+            //dmca
+            if(rawdata.numChComments > 0)
+              gtk_label_set_text(export_note_label,"NOTE: Exported data will not contain weighted errors.\nComments will not be exported (incomatible with .dmca format).");
+            else
+              gtk_label_set_text(export_note_label,"NOTE: Exported data will not contain weighted errors.");
+            gtk_widget_show(GTK_WIDGET(export_note_label));
+            break;
           case 2:
             //fmca
             if(rawdata.numChComments > 0)
@@ -895,6 +925,16 @@ void on_export_mode_combobox_changed(){
         }
       }else{
         switch(guiglobals.exportFileType){
+          case 3:
+            //dmca
+            gtk_revealer_set_reveal_child(export_options_revealer, TRUE);
+            if(rawdata.numChComments > 0){
+              gtk_label_set_text(export_note_label,"NOTE: Comments will not be exported (incomatible with .dmca format).");
+              gtk_widget_show(GTK_WIDGET(export_note_label));
+            }else{
+              gtk_widget_hide(GTK_WIDGET(export_note_label));
+            }
+            break;
           case 2:
             //fmca
             gtk_revealer_set_reveal_child(export_options_revealer, TRUE);
@@ -926,6 +966,15 @@ void on_export_mode_combobox_changed(){
     default:
       gtk_revealer_set_reveal_child(export_options_revealer, TRUE);
       switch(guiglobals.exportFileType){
+        case 3:
+          //dmca
+          if(rawdata.numChComments > 0){
+            gtk_label_set_text(export_note_label,"NOTE: Comments will not be exported (incomatible with .dmca format).");
+            gtk_widget_show(GTK_WIDGET(export_note_label));
+          }else{
+            gtk_widget_hide(GTK_WIDGET(export_note_label));
+          }
+          break;
         case 2:
           //fmca
           if(rawdata.numChComments > 0){
@@ -968,6 +1017,12 @@ void on_export_save_button_clicked(){
   file_filter = gtk_file_filter_new();
 
   switch(guiglobals.exportFileType){
+    case 3:
+      //dmca
+      gtk_file_filter_set_name(file_filter,"DMCA files (.dmca)");
+      gtk_file_filter_add_pattern(file_filter,"*.dmca");
+      gtk_file_chooser_add_filter(file_save_dialog,file_filter);
+      break;
     case 2:
       //fmca
       gtk_file_filter_set_name(file_filter,"FMCA files (.fmca)");
@@ -1001,6 +1056,10 @@ void on_export_save_button_clicked(){
 
     //write file
     switch(guiglobals.exportFileType){
+      case 3:
+        //dmca
+        saveErr = exportDMCA(fileName, exportMode, rebin);
+        break;
       case 2:
         //fmca
         saveErr = exportFMCA(fileName, exportMode, rebin);
@@ -2422,6 +2481,7 @@ void iniitalizeUIElements(){
   save_button = GTK_BUTTON(gtk_builder_get_object(builder, "save_button"));
   save_button_radware = GTK_BUTTON(gtk_builder_get_object(builder, "save_button_radware"));
   save_button_fmca = GTK_BUTTON(gtk_builder_get_object(builder, "save_button_fmca"));
+  save_button_dmca = GTK_BUTTON(gtk_builder_get_object(builder, "save_button_dmca"));
   save_button_text = GTK_BUTTON(gtk_builder_get_object(builder, "save_button_text"));
   save_button_png = GTK_BUTTON(gtk_builder_get_object(builder, "save_button_png"));
   help_button = GTK_BUTTON(gtk_builder_get_object(builder, "help_button"));
@@ -2563,6 +2623,7 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(save_button), "clicked", G_CALLBACK(on_save_button_clicked), NULL);
   g_signal_connect(G_OBJECT(save_button_radware), "clicked", G_CALLBACK(on_save_radware_button_clicked), NULL);
   g_signal_connect(G_OBJECT(save_button_fmca), "clicked", G_CALLBACK(on_save_fmca_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(save_button_dmca), "clicked", G_CALLBACK(on_save_dmca_button_clicked), NULL);
   g_signal_connect(G_OBJECT(save_button_text), "clicked", G_CALLBACK(on_save_text_button_clicked), NULL);
   g_signal_connect(G_OBJECT(save_button_png), "clicked", G_CALLBACK(on_save_png_button_clicked), NULL);
   g_signal_connect(G_OBJECT(help_button), "clicked", G_CALLBACK(on_help_button_clicked), NULL);

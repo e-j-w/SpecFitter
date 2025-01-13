@@ -1,4 +1,4 @@
-/* © J. Williams, 2020-2023 */
+/* © J. Williams, 2020-2025 */
 
 //This file contains routines for fitting displayed spectra.
 //The main fit routine is startGausFit (at the bottom), which
@@ -792,11 +792,11 @@ long double widthGuess(const double centroidCh, const double widthInit){
   int32_t halfSearchLength = 100;
   int32_t scanPastLength = 10;
   int32_t ctr;
-  float lowWindowVal, highWindowVal, filterVal;
-  float minFilterVal = (float)BIG_NUMBER;
-  float maxFilterVal = -1.0f*(float)BIG_NUMBER;
-  float minChVal = -1; //negative value indicates bound not found yet
-  float maxChVal = -1; //negative value indicates bound not found yet
+  double lowWindowVal, highWindowVal, filterVal;
+  double minFilterVal = (double)BIG_NUMBER;
+  double maxFilterVal = -1.0*(double)BIG_NUMBER;
+  double minChVal = -1; //negative value indicates bound not found yet
+  double maxChVal = -1; //negative value indicates bound not found yet
 
   //scan forward, find minimum
   ctr = 0;
@@ -809,7 +809,7 @@ long double widthGuess(const double centroidCh, const double widthInit){
     }
     filterVal = highWindowVal - lowWindowVal;
     if(filterVal < minFilterVal){
-      minChVal = (float)(centroidCh+(drawing.contractFactor*i));
+      minChVal = (double)(centroidCh+(drawing.contractFactor*i));
       minFilterVal = filterVal;
       ctr=0;
     }else{
@@ -891,15 +891,15 @@ long double widthGuess(const double centroidCh, const double widthInit){
 }
 
 //use a trapezoidal filter to determine the best peak location in the window
-float centroidGuess(const float centroidInit){
+double centroidGuess(const double centroidInit){
   int32_t windowSize = 5;
   int32_t halfSearchLength = 10;
-  float lowWindowVal, highWindowVal, filterVal;
-  float minFilterVal = (float)BIG_NUMBER;
-  float maxFilterVal = -1.0f*(float)BIG_NUMBER;
-  float minCentroidVal = centroidInit;
-  float maxCentroidVal = centroidInit;
-  float centroidVal = centroidInit;
+  double lowWindowVal, highWindowVal, filterVal;
+  double minFilterVal = (double)BIG_NUMBER;
+  double maxFilterVal = -1.0*(double)BIG_NUMBER;
+  double minCentroidVal = centroidInit;
+  double maxCentroidVal = centroidInit;
+  double centroidVal = centroidInit;
 
   //first get maximum positive and negative slope
   for(int32_t i=0;i<((2*halfSearchLength)-windowSize);i++){
@@ -911,11 +911,11 @@ float centroidGuess(const float centroidInit){
     }
     filterVal = highWindowVal - lowWindowVal;
     if(filterVal < minFilterVal){
-      minCentroidVal = (float)i;
+      minCentroidVal = (double)i;
       minFilterVal = filterVal;
     }
     if(filterVal > maxFilterVal){
-      maxCentroidVal = (float)i;
+      maxCentroidVal = (double)i;
       maxFilterVal = filterVal;
     }
     //printf("centroidVal: %i, filterVal: %f\n",i,filterVal);
@@ -923,10 +923,10 @@ float centroidGuess(const float centroidInit){
   //printf("minCentroidVal: %f, maxCentroidVal: %f\n",minCentroidVal,maxCentroidVal);
 
   //then get slope closest to zero between the maximum positive and negative slopes
-  minFilterVal = (float)BIG_NUMBER;
+  minFilterVal = (double)BIG_NUMBER;
   if(minCentroidVal > maxCentroidVal){
     //swap values so that minCentroidVal is the smaller of the two
-    float swapVal = minCentroidVal;
+    double swapVal = minCentroidVal;
     minCentroidVal = maxCentroidVal;
     maxCentroidVal = swapVal;
   }
@@ -937,9 +937,9 @@ float centroidGuess(const float centroidInit){
       lowWindowVal += getSpBinVal(0,(int)centroidInit+(drawing.contractFactor*(i - halfSearchLength + j)));
       highWindowVal += getSpBinVal(0,(int)centroidInit+(drawing.contractFactor*(i - halfSearchLength + j + windowSize)));
     }
-    filterVal = fabsf(highWindowVal - lowWindowVal);
+    filterVal = fabs(highWindowVal - lowWindowVal);
     if(filterVal < minFilterVal){
-      centroidVal = centroidInit + (float)(i + windowSize - halfSearchLength);
+      centroidVal = centroidInit + (double)(i + windowSize - halfSearchLength);
       minFilterVal = filterVal;
     }
   }

@@ -1,4 +1,4 @@
-/* © J. Williams, 2020-2023 */
+/* © J. Williams, 2020-2025 */
 
 //This file contains routines for accessing spectrum data, 
 //mainly to help other parts of the program with drawing, 
@@ -197,30 +197,30 @@ double getCalWidth(const double val){
 }
 
 //lower level spectrum data access routine which takes rebinning into account
-float getSpBinValRaw(const int32_t spNumRaw, const int32_t bin, const double scaleFactor, const int32_t contractFactor){
+double getSpBinValRaw(const int32_t spNumRaw, const int32_t bin, const double scaleFactor, const int32_t contractFactor){
 
   if(spNumRaw >= NSPECT){
     return 0;
   }
 
-  float val = 0.;
+  double val = 0.;
   for(int32_t i=0;i<contractFactor;i++){
     if((bin+i) < S32K){
-      val += (float)(scaleFactor*rawdata.hist[spNumRaw][bin+i]);
+      val += (double)(scaleFactor*rawdata.hist[spNumRaw][bin+i]);
     }
   }
   return val;
 }
 
 //if getWeight is set, will return weight values for fitting
-float getSpBinValOrWeight(const int32_t dispSpNum, const int32_t bin, const int32_t getWeight){
+double getSpBinValOrWeight(const int32_t dispSpNum, const int32_t bin, const int32_t getWeight){
 
   /*if((dispSpNum >= drawing.numMultiplotSp)||(dispSpNum < 0)){
     //invalid displayed spectrum number
     return 0;
   }*/
 
-  float val = 0.;
+  double val = 0.;
 
   switch(drawing.multiplotMode){
     case MULTIPLOT_SUMMED:
@@ -228,11 +228,11 @@ float getSpBinValOrWeight(const int32_t dispSpNum, const int32_t bin, const int3
       for(int32_t j=0;j<drawing.contractFactor;j++){
         if(getWeight){
           for(int32_t k=0;k<drawing.numMultiplotSp;k++){
-            val += (float)(drawing.scaleFactor[drawing.multiPlots[k]]*drawing.scaleFactor[drawing.multiPlots[k]]*fabs(rawdata.hist[drawing.multiPlots[k]][bin+j]));
+            val += (double)(drawing.scaleFactor[drawing.multiPlots[k]]*drawing.scaleFactor[drawing.multiPlots[k]]*fabs(rawdata.hist[drawing.multiPlots[k]][bin+j]));
           }
         }else{
           for(int32_t k=0;k<drawing.numMultiplotSp;k++){
-            val += (float)(drawing.scaleFactor[drawing.multiPlots[k]]*rawdata.hist[drawing.multiPlots[k]][bin+j]);
+            val += (double)(drawing.scaleFactor[drawing.multiPlots[k]]*rawdata.hist[drawing.multiPlots[k]][bin+j]);
           }
         }
       }
@@ -258,13 +258,13 @@ float getSpBinValOrWeight(const int32_t dispSpNum, const int32_t bin, const int3
 //for contracted spectra, the original channel units are retained, but the sum
 //of j bins is returned, where j is the contraction factor
 //spNum is the displayed spectrum number (for multiplot), 0 is the first displayed spectrum
-float getDispSpBinVal(const int32_t dispSpNum, const int32_t bin){
+double getDispSpBinVal(const int32_t dispSpNum, const int32_t bin){
   return getSpBinValOrWeight(dispSpNum,drawing.lowerLimit+bin,0);
 }
-float getDispSpBinErr(const int32_t dispSpNum, const int32_t bin){
-  return sqrtf(fabsf(getSpBinValOrWeight(dispSpNum,drawing.lowerLimit+bin,1)));
+double getDispSpBinErr(const int32_t dispSpNum, const int32_t bin){
+  return sqrt(fabs(getSpBinValOrWeight(dispSpNum,drawing.lowerLimit+bin,1)));
 }
-float getDispSpBinValAdj(const int32_t dispSpNum, const int32_t bin){
+double getDispSpBinValAdj(const int32_t dispSpNum, const int32_t bin){
   switch(drawing.valueDrawMode){
     case VALUE_PLUSERR:
       return getDispSpBinVal(dispSpNum,bin) + getDispSpBinErr(dispSpNum,bin);
@@ -278,9 +278,9 @@ float getDispSpBinValAdj(const int32_t dispSpNum, const int32_t bin){
       break;
   }
 }
-float getSpBinVal(const int32_t dispSpNum, const int32_t bin){
+double getSpBinVal(const int32_t dispSpNum, const int32_t bin){
   return getSpBinValOrWeight(dispSpNum,bin,0);
 }
-float getSpBinFitWeight(const int32_t dispSpNum, const int32_t bin){
+double getSpBinFitWeight(const int32_t dispSpNum, const int32_t bin){
   return getSpBinValOrWeight(dispSpNum,bin,1);
 }

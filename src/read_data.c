@@ -1,4 +1,4 @@
-/* © J. Williams, 2020-2023 */
+/* © J. Williams, 2020-2025 */
 
 //File contains functions for reading spectra of various formats.
 //.jf3 - compressed multiple spectra, with titles and comments
@@ -6,6 +6,7 @@
 //.spe - RadWare, with title
 //.mca - integer array
 //.fmca - float array
+//.dmca - double array
 //.C - ROOT macro
 
 //function reads an .jf3 file into a double array and returns the array
@@ -284,6 +285,51 @@ int readFMCA(const char *filename, double outHist[NSPECT][S32K], const uint32_t 
       }else{
         for(uint32_t j = 0; j < S32K; j++)
           outHist[i][j] = (double)tmpHist[j];
+      }
+      snprintf(rawdata.histComment[i],256,"Spectrum %i of %s",i-outHistStartSp+1,basename((char*)filename));
+    }
+  }
+
+  fclose(inp);
+  return (int)numSpec;
+}
+
+//function reads a .dmca file into a double array and returns the number of spectra read in
+int readDMCA(const char *filename, double outHist[NSPECT][S32K], const uint32_t outHistStartSp){
+
+  double tmpHist[S32K];
+  FILE *inp;
+
+  if((inp = fopen(filename, "r")) == NULL){ //open the file
+    printf("ERROR: Cannot open the input file: %s\n", filename);
+    printf("Check that the file exists.\n");
+    exit(-1); //over-import error
+  }
+
+  //get the number of spectra in the .fmca file
+  uint32_t numSpec = S32K;
+  for(uint32_t i = 0; i < numSpec; i++){
+    if(fread(tmpHist, S32K * sizeof(double), 1, inp) != 1){
+      numSpec = i;
+      break;
+    }
+  }
+  fclose(inp);
+  //printf("number of spectra in file '%s': %i\n",filename,numSpec);
+  if((outHistStartSp+numSpec)>NSPECT){
+    printf("Cannot open file %s, number of spectra would exceed maximum (%i, %i spectra already open, %i in file)!\n", filename, NSPECT, outHistStartSp, numSpec);
+    return -1;
+  }
+
+  if((inp = fopen(filename, "r")) != NULL){ //reopen the file
+    for(uint32_t i = outHistStartSp; i < (outHistStartSp+numSpec); i++){
+      if(fread(tmpHist, S32K * sizeof(double), 1, inp) != 1){
+        printf("ERROR: Cannot read spectrum %i from the .fmca file: %s\n", i, filename);
+        printf("Verify that the format and number of spectra in the file are correct.\n");
+        exit(-1);
+      }else{
+        for(uint32_t j = 0; j < S32K; j++)
+          outHist[i][j] = tmpHist[j];
       }
       snprintf(rawdata.histComment[i],256,"Spectrum %i of %s",i-outHistStartSp+1,basename((char*)filename));
     }
@@ -779,6 +825,8 @@ int readSpectrumDataFile(const char *filename, double outHist[NSPECT][S32K], con
     numSpec = readMCA(filename, outHist, outHistStartSp);
   }else if(strcmp(dot + 1, "fmca") == 0){
     numSpec = readFMCA(filename, outHist, outHistStartSp);
+  }else if(strcmp(dot + 1, "dmca") == 0){
+    numSpec = readDMCA(filename, outHist, outHistStartSp);
   }else if((strcmp(dot + 1, "spe") == 0)||(strcmp(dot + 1, "Spe") == 0)){
     printf("Trying Maestro SPE format.\n");
     numSpec = readSPEM(filename, outHist, outHistStartSp);

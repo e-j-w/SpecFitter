@@ -6,6 +6,6 @@ Name[en_US]=SpecFitter
 Name=SpecFitter
 GenericName=Spectrum Fitter
 Exec=/usr/bin/specfitter
-MimeType=application/x-spectrum-jf3;application/x-spectrum-spe;application/x-spectrum-mca;application/x-spectrum-fmca;application/x-spectrum-chn;text/plain;
+MimeType=application/x-spectrum-jf3;application/x-spectrum-spe;application/x-spectrum-mca;application/x-spectrum-fmca;application/x-spectrum-dmca;application/x-spectrum-chn;text/plain;
 Icon=specfitter-application-icon
 Categories=Utility;
