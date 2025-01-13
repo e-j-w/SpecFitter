@@ -772,7 +772,7 @@ void on_save_button_clicked(){
     //save as a .jf3 file by default
     strncat(fileName,".jf3",255);
     //write file
-    saveErr = writeJF3(fileName, rawdata.hist);
+    saveErr = writeJF3(fileName, 3, rawdata.hist);
 
     if(saveErr>0){
       GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
