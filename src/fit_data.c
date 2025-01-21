@@ -890,64 +890,6 @@ long double widthGuess(const double centroidCh, const double widthInit){
 
 }
 
-//use a trapezoidal filter to determine the best peak location in the window
-double centroidGuess(const double centroidInit){
-  int32_t windowSize = 5;
-  int32_t halfSearchLength = 10;
-  double lowWindowVal, highWindowVal, filterVal;
-  double minFilterVal = (double)BIG_NUMBER;
-  double maxFilterVal = -1.0*(double)BIG_NUMBER;
-  double minCentroidVal = centroidInit;
-  double maxCentroidVal = centroidInit;
-  double centroidVal = centroidInit;
-
-  //first get maximum positive and negative slope
-  for(int32_t i=0;i<((2*halfSearchLength)-windowSize);i++){
-    lowWindowVal = 0.;
-    highWindowVal = 0.;
-    for(int32_t j=0;j<windowSize;j++){
-      lowWindowVal += getSpBinVal(0,(int)centroidInit+(drawing.contractFactor*(i - halfSearchLength + j)));
-      highWindowVal += getSpBinVal(0,(int)centroidInit+(drawing.contractFactor*(i - halfSearchLength + j + windowSize)));
-    }
-    filterVal = highWindowVal - lowWindowVal;
-    if(filterVal < minFilterVal){
-      minCentroidVal = (double)i;
-      minFilterVal = filterVal;
-    }
-    if(filterVal > maxFilterVal){
-      maxCentroidVal = (double)i;
-      maxFilterVal = filterVal;
-    }
-    //printf("centroidVal: %i, filterVal: %f\n",i,filterVal);
-  }
-  //printf("minCentroidVal: %f, maxCentroidVal: %f\n",minCentroidVal,maxCentroidVal);
-
-  //then get slope closest to zero between the maximum positive and negative slopes
-  minFilterVal = (double)BIG_NUMBER;
-  if(minCentroidVal > maxCentroidVal){
-    //swap values so that minCentroidVal is the smaller of the two
-    double swapVal = minCentroidVal;
-    minCentroidVal = maxCentroidVal;
-    maxCentroidVal = swapVal;
-  }
-  for(int32_t i=(int32_t)minCentroidVal; i<=(int32_t)maxCentroidVal; i++){
-    lowWindowVal = 0.;
-    highWindowVal = 0.;
-    for(int32_t j=0;j<windowSize;j++){
-      lowWindowVal += getSpBinVal(0,(int)centroidInit+(drawing.contractFactor*(i - halfSearchLength + j)));
-      highWindowVal += getSpBinVal(0,(int)centroidInit+(drawing.contractFactor*(i - halfSearchLength + j + windowSize)));
-    }
-    filterVal = fabs(highWindowVal - lowWindowVal);
-    if(filterVal < minFilterVal){
-      centroidVal = centroidInit + (double)(i + windowSize - halfSearchLength);
-      minFilterVal = filterVal;
-    }
-  }
-
-  //printf("Centroid guess: %f\n",centroidVal);
-  return centroidVal;
-}
-
 int startGausFit(){
 
   guiglobals.fittingSp = FITSTATE_FITTING;
