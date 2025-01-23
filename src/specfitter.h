@@ -120,6 +120,8 @@ GtkNotebook *preferences_notebook;
 GtkCheckButton *discard_empty_checkbutton, *bin_errors_checkbutton, *round_errors_checkbutton, *dark_theme_checkbutton;
 GtkCheckButton *spectrum_label_checkbutton, *spectrum_comment_checkbutton, *spectrum_gridline_checkbutton, *autozoom_checkbutton;
 GtkRevealer *skew_parameters_revealer, *peak_parameters_revealer, *background_parameters_revealer;
+GtkCheckButton *limit_centroid_checkbutton;
+GtkSpinButton *limit_centroid_spinbutton;
 GtkCheckButton *fix_skew_amplitude_checkbutton, *fix_beta_checkbutton;
 GtkSpinButton *skew_amplitude_spinbutton, *beta_spinbutton;
 GtkCheckButton *relative_widths_checkbutton, *step_function_checkbutton, *positive_peak_checkbutton;
@@ -244,11 +246,13 @@ struct {
   uint8_t bgType; //0=constant, 1=linear, 2=quadratic
   uint8_t fitType; //fit type (values from fit_type_enum)
   uint8_t numFitPeaks; //number of peaks to fit
+  uint8_t limitCentroid; //whether the centroid range is limited
   uint8_t fixSkewAmplitide; //whether the R parameter is fixed
   uint8_t fixBeta; //whether the skewness parameter is fixed
+  float limitCentroidVal; //number of channels to limit the centoid by
   float fixedRVal; //fixed value of the skewed component amplitude R, if fixSkewAmplitide==1
   float fixedBetaVal; //fixed value of the skewness beta, if fixBeta==1
-  uint8_t peakWidthMethod; //0=don't fix width, 1=fix widths, 2=fix to previous
+  uint8_t peakWidthMethod; //values from peak_width_mode_enum
   uint8_t stepFunction; //0=no step function, 1=step function
   uint8_t forcePositivePeaks; //0=peak amplitude is free, 1=peak amplitude must be +ve
   uint8_t weightMode; //uses values from fit_weight_mode_enum: 0=weight using data (properly weighting for background subtraction), 1=weight using fit, 2=no weights
@@ -259,6 +263,7 @@ struct {
 } fitpar;
 
 enum fit_type_enum{FITTYPE_SYMMETRIC, FITTYPE_SKEWED, FITTYPE_BGONLY, FITTYPE_SUMREGION, FITTYPE_ENUM_LENGTH};
+enum peak_width_mode_enum{PEAKWIDTHMODE_FREE, PEAKWIDTHMODE_RELATIVE, PEAKWIDTHMODE_PREVIOUS, PEAKWIDTHMODE_ENUM_LENGTH};
 enum fit_weight_mode_enum{FITWEIGHT_DATA, FITWEIGHT_FIT, FITWEIGHT_NONE, FITWEIGHT_ENUM_LENGTH};
 enum fit_par_enum{FITPAR_BGCONST,FITPAR_BGLIN,FITPAR_BGQUAD,FITPAR_R,FITPAR_BETA,FITPAR_STEP,FITPAR_POS1,FITPAR_WIDTH1,FITPAR_AMP1,FITPAR_ENUM_LENGTH};
 enum fit_state_enum{FITSTATE_NOTFITTING, FITSTATE_SETTINGLIMITS, FITSTATE_SETTINGPEAKS, FITSTATE_FITTING, FITSTATE_FITCOMPLETE, FITSTATE_ENUM_LENGTH};

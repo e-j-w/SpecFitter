@@ -91,6 +91,13 @@ uint8_t readConfigFile(FILE *file, uint8_t keepCalibration){
           guiglobals.drawGridLines = 0;
         }
       }
+      if(strcmp(par,"limit_centroid") == 0){
+        if(strcmp(val,"yes") == 0){
+          fitpar.limitCentroid = 1;
+        }else{
+          fitpar.limitCentroid = 0;
+        }
+      }
       if(strcmp(par,"fix_skew_amp") == 0){
         if(strcmp(val,"yes") == 0){
           fitpar.fixSkewAmplitide = 1;
@@ -105,6 +112,12 @@ uint8_t readConfigFile(FILE *file, uint8_t keepCalibration){
           fitpar.fixBeta = 0;
         }
       }
+      if(strcmp(par,"limit_centroid_val") == 0){
+        float ampVal = (float)atof(val);
+        if((ampVal >= 0.0f)&&(ampVal <= 100.0f)){
+          fitpar.limitCentroidVal = ampVal;
+        }
+      }
       if(strcmp(par,"fix_skew_amp_val") == 0){
         float ampVal = (float)atof(val);
         if((ampVal >= 0.0f)&&(ampVal <= 100.0f)){
@@ -117,8 +130,10 @@ uint8_t readConfigFile(FILE *file, uint8_t keepCalibration){
       }
       if(strcmp(par,"peak_width_method") == 0){
         uint8_t pwVal = (uint8_t)atoi(val);
-        if(pwVal <= 2){
+        if(pwVal != PEAKWIDTHMODE_PREVIOUS){
           fitpar.peakWidthMethod = pwVal;
+        }else{
+          fitpar.peakWidthMethod = PEAKWIDTHMODE_RELATIVE;
         }
       }
       if(strcmp(par,"step_function") == 0){
@@ -262,6 +277,12 @@ uint8_t writeConfigFile(FILE *file){
   }else{
     fprintf(file,"autozoom=no\n");
   }
+  if(fitpar.limitCentroid == 1){
+    fprintf(file,"limit_centroid=yes\n");
+    fprintf(file,"limit_centroid_val=%f\n",fitpar.limitCentroidVal);
+  }else{
+    fprintf(file,"limit_centroid=no\n");
+  }
   if(fitpar.fixSkewAmplitide == 1){
     fprintf(file,"fix_skew_amp=yes\n");
     fprintf(file,"fix_skew_amp_val=%f\n",fitpar.fixedRVal);
@@ -274,7 +295,7 @@ uint8_t writeConfigFile(FILE *file){
   }else{
     fprintf(file,"fix_beta=no\n");
   }
-  if(fitpar.peakWidthMethod < 3){
+  if(fitpar.peakWidthMethod < PEAKWIDTHMODE_ENUM_LENGTH){
     fprintf(file,"peak_width_method=%u\n",fitpar.peakWidthMethod);
   }
   if(fitpar.stepFunction == 1){

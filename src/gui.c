@@ -15,8 +15,10 @@ void showPreferences(int page){
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_label_checkbutton),guiglobals.drawSpLabels);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_comment_checkbutton),guiglobals.drawSpComments);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_gridline_checkbutton),guiglobals.drawGridLines);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(limit_centroid_checkbutton),fitpar.limitCentroid);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fix_skew_amplitude_checkbutton),fitpar.fixSkewAmplitide);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fix_beta_checkbutton),fitpar.fixBeta);
+  gtk_spin_button_set_value(limit_centroid_spinbutton,(gdouble)fitpar.limitCentroidVal);
   gtk_spin_button_set_value(skew_amplitude_spinbutton,(gdouble)fitpar.fixedRVal);
   gtk_spin_button_set_value(beta_spinbutton,(gdouble)fitpar.fixedBetaVal);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(step_function_checkbutton),fitpar.stepFunction);
@@ -2180,6 +2182,15 @@ void on_toggle_spectrum_gridlines(GtkToggleButton *togglebutton){
     guiglobals.drawGridLines=0;
 }
 
+void on_toggle_limit_centroid(GtkToggleButton *togglebutton){
+  if(gtk_toggle_button_get_active(togglebutton)){
+    fitpar.limitCentroid=1;
+  }else{
+    fitpar.limitCentroid=0;
+  }
+  gtk_widget_set_sensitive(GTK_WIDGET(limit_centroid_spinbutton),fitpar.limitCentroid);
+}
+
 void on_toggle_fix_skew_amplitude(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton)){
     fitpar.fixSkewAmplitide=1;
@@ -2233,6 +2244,10 @@ void on_peak_shape_changed(GtkComboBox *combo_box){
       gtk_revealer_set_reveal_child(background_parameters_revealer, TRUE);
     }
   }
+}
+
+void on_limit_centroid_changed(GtkSpinButton *spin_button){
+  fitpar.limitCentroidVal = (float)gtk_spin_button_get_value(spin_button);
 }
 
 void on_skew_amplitude_changed(GtkSpinButton *spin_button){
@@ -2595,6 +2610,8 @@ void iniitalizeUIElements(){
   skew_parameters_revealer = GTK_REVEALER(gtk_builder_get_object(builder, "skew_parameters_revealer"));
   peak_parameters_revealer = GTK_REVEALER(gtk_builder_get_object(builder, "peak_parameters_revealer"));
   background_parameters_revealer = GTK_REVEALER(gtk_builder_get_object(builder, "background_parameters_revealer"));
+  limit_centroid_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "limit_centroid_checkbutton"));
+  limit_centroid_spinbutton = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "limit_centroid_spinbutton"));
   fix_skew_amplitude_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "fix_skew_amplitude_checkbutton"));
   skew_amplitude_spinbutton = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "skew_amplitude_spinbutton"));
   fix_beta_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "fix_beta_checkbutton"));
@@ -2666,6 +2683,8 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(spectrum_comment_checkbutton), "toggled", G_CALLBACK(on_toggle_spectrum_comment), NULL);
   g_signal_connect(G_OBJECT(spectrum_gridline_checkbutton), "toggled", G_CALLBACK(on_toggle_spectrum_gridlines), NULL);
   g_signal_connect(G_OBJECT(peak_shape_combobox), "changed", G_CALLBACK(on_peak_shape_changed), NULL);
+  g_signal_connect(G_OBJECT(limit_centroid_checkbutton), "toggled", G_CALLBACK(on_toggle_limit_centroid), NULL);
+  g_signal_connect(G_OBJECT(limit_centroid_spinbutton), "value-changed", G_CALLBACK(on_limit_centroid_changed), NULL);
   g_signal_connect(G_OBJECT(fix_skew_amplitude_checkbutton), "toggled", G_CALLBACK(on_toggle_fix_skew_amplitude), NULL);
   g_signal_connect(G_OBJECT(skew_amplitude_spinbutton), "value-changed", G_CALLBACK(on_skew_amplitude_changed), NULL);
   g_signal_connect(G_OBJECT(fix_beta_checkbutton), "toggled", G_CALLBACK(on_toggle_fix_beta), NULL);
@@ -2793,11 +2812,13 @@ void iniitalizeUIElements(){
   guiglobals.usingDarkTheme = 0;
   guiglobals.useZoomAnimations = 1;
   guiglobals.exportFileType = 0;
+  fitpar.limitCentroid = 0;
   fitpar.fixSkewAmplitide = 0;
   fitpar.fixBeta = 0;
+  fitpar.limitCentroidVal = 1.0f;
   fitpar.fixedRVal = 10.0f;
   fitpar.fixedBetaVal = 5.0f;
-  fitpar.peakWidthMethod = 1;
+  fitpar.peakWidthMethod = PEAKWIDTHMODE_RELATIVE;
   fitpar.prevFitNumPeaks = 0;
   fitpar.stepFunction = 0;
   fitpar.forcePositivePeaks = 0;

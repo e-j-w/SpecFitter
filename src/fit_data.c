@@ -118,9 +118,9 @@ gboolean print_fit_results(){
     length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Area of region: %s\n",fitParStr[0]);
   }else{
 
-    if((fitpar.peakWidthMethod == 2)&&(fitpar.prevFitNumPeaks > 0)){
+    if((fitpar.peakWidthMethod == PEAKWIDTHMODE_PREVIOUS)&&(fitpar.prevFitNumPeaks > 0)){
       length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Peak widths were fixed to previous fit values.\n\n");
-    }else if(fitpar.peakWidthMethod == 1){
+    }else if(fitpar.peakWidthMethod == PEAKWIDTHMODE_RELATIVE){
       length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Relative peak widths were fixed.\n\n");
     }
     for(int32_t i=0;i<fitpar.numFitPeaks;i++){
@@ -523,7 +523,7 @@ void performGausFit(){
   }
   /* set up fixed relative widths */
   uint8_t relWidthFixed = 0;
-  if(fitpar.peakWidthMethod == 1){
+  if(fitpar.peakWidthMethod == PEAKWIDTHMODE_RELATIVE){
     uint8_t niw = 0;
     //loop over width parameters for all peaks
     for(j = FITPAR_WIDTH1; j < npars; j += 3){
@@ -654,6 +654,19 @@ void performGausFit(){
     if(relWidthFixed && (nip1>0)){
       for(j = FITPAR_WIDTH1; j <= miw - 3; j += 3){
         b[j] = fitpar.fitParVal[j] + fixed[j] * delta[nip1-1];
+      }
+    }
+    if(fitpar.limitCentroid){
+      /* limit centroid ranges */
+      uint8_t peakInd=0;
+      for(j = FITPAR_POS1; j <= npars; j += 3){
+        if(b[j] < (long double)(fitpar.fitPeakInitGuess[peakInd] - fitpar.limitCentroidVal)){
+          //printf("Correcting peak position (%f, initial guess %f).\n",b[j],fitpar.fitPeakInitGuess[peakInd])
+          b[j] = (long double)(fitpar.fitPeakInitGuess[peakInd] - fitpar.limitCentroidVal);
+        }else if(b[j] > (long double)(fitpar.fitPeakInitGuess[peakInd] + fitpar.limitCentroidVal)){
+          b[j] = (long double)(fitpar.fitPeakInitGuess[peakInd] + fitpar.limitCentroidVal);
+        }
+        peakInd++;
       }
     }
     if(fitpar.forcePositivePeaks){
@@ -973,7 +986,7 @@ int startGausFit(){
     }
 
     //fix relative widths if required
-    if((fitpar.peakWidthMethod == 2)&&(fitpar.prevFitNumPeaks > 0)){
+    if((fitpar.peakWidthMethod == PEAKWIDTHMODE_PREVIOUS)&&(fitpar.prevFitNumPeaks > 0)){
       printf("Fitting with peak widths fixed to previous fit values.\n");
       for(uint32_t i=0;i<fitpar.prevFitNumPeaks;i++){
         fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] = fitpar.prevFitWidths[i];
@@ -985,7 +998,7 @@ int startGausFit(){
         fitpar.fitParFree[FITPAR_WIDTH1+(3*i)] = 1; //free width
         fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
       }
-    }else if(fitpar.peakWidthMethod == 1){
+    }else if(fitpar.peakWidthMethod == PEAKWIDTHMODE_RELATIVE){
       printf("Fitting with relative peak widths fixed.\n");
       double firstWidthInitGuess = getFWHM(fitpar.fitPeakInitGuess[0],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482;
       fitpar.fitParVal[FITPAR_WIDTH1] = widthGuess(fitpar.fitPeakInitGuess[0],firstWidthInitGuess);
@@ -1033,6 +1046,10 @@ int startGausFit(){
       fitpar.fitParVal[FITPAR_STEP] = 0.1; //step function
       fitpar.fitParFree[FITPAR_STEP] = 1; //step function
       fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
+    }
+
+    if(fitpar.limitCentroid){
+      printf("Limiting centroid range to %0.2f channels from initial guess.\n",(double)fitpar.limitCentroidVal);
     }
 
     switch(fitpar.weightMode){

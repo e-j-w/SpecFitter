@@ -46,6 +46,12 @@ Author: Jonathan Williams
     <property name="step-increment">1</property>
     <property name="page-increment">100</property>
   </object>
+  <object class="GtkAdjustment" id="limit_centroid_adjustment">
+    <property name="upper">100</property>
+    <property name="value">1</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
   <object class="GtkAccelGroup" id="main_window_accelgroup"/>
   <object class="GtkListStore" id="manage_liststore">
     <columns>
@@ -1931,7 +1937,7 @@ binning factors will be preserved.</property>
                                     <property name="placeholder-text">1.00</property>
                                     <property name="adjustment">scale_adjustment</property>
                                     <property name="climb-rate">0.10</property>
-                                    <property name="digits">2</property>
+                                    <property name="digits">4</property>
                                   </object>
                                   <attributes>
                                     <attribute name="text">2</attribute>
@@ -2630,7 +2636,7 @@ Fix to previous fit values - use the width values from the previous fit.  If no 
                         </child>
                         <child>
                           <object class="GtkCheckButton" id="positive_peak_checkbutton">
-                            <property name="label" translatable="yes">Force positive amplitude peaks</property>
+                            <property name="label" translatable="yes"> Force positive amplitude peaks</property>
                             <property name="name">drop_empty_checkbox</property>
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
@@ -2643,6 +2649,63 @@ Fix to previous fit values - use the width values from the previous fit.  If no 
                             <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="tooltip-text" translatable="yes">Whether to limit the range of the centroid value of each peak (relative to the initial guess).</property>
+                            <child>
+                              <object class="GtkCheckButton" id="limit_centroid_checkbutton">
+                                <property name="label" translatable="yes"> Limit centroid ranges:  +/-</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">False</property>
+                                <property name="draw-indicator">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSpinButton" id="limit_centroid_spinbutton">
+                                <property name="visible">True</property>
+                                <property name="sensitive">False</property>
+                                <property name="can-focus">True</property>
+                                <property name="width-chars">4</property>
+                                <property name="input-purpose">number</property>
+                                <property name="adjustment">limit_centroid_adjustment</property>
+                                <property name="digits">1</property>
+                                <property name="numeric">True</property>
+                                <property name="value">1</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes"> channels</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">3</property>
                           </packing>
                         </child>
                       </object>
