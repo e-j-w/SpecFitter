@@ -122,7 +122,7 @@ GtkCheckButton *spectrum_label_checkbutton, *spectrum_comment_checkbutton, *spec
 GtkRevealer *skew_parameters_revealer, *peak_parameters_revealer, *background_parameters_revealer;
 GtkCheckButton *fix_skew_amplitude_checkbutton, *fix_beta_checkbutton;
 GtkSpinButton *skew_amplitude_spinbutton, *beta_spinbutton;
-GtkCheckButton *relative_widths_checkbutton, *step_function_checkbutton;
+GtkCheckButton *relative_widths_checkbutton, *step_function_checkbutton, *positive_peak_checkbutton;
 GtkButton *preferences_apply_button;
 GtkComboBoxText *background_type_combobox, *peak_shape_combobox, *peak_width_combobox, *weight_mode_combobox;
 GtkCheckButton *animation_checkbutton;
@@ -250,6 +250,7 @@ struct {
   float fixedBetaVal; //fixed value of the skewness beta, if fixBeta==1
   uint8_t peakWidthMethod; //0=don't fix width, 1=fix widths, 2=fix to previous
   uint8_t stepFunction; //0=no step function, 1=step function
+  uint8_t forcePositivePeaks; //0=peak amplitude is free, 1=peak amplitude must be +ve
   uint8_t weightMode; //uses values from fit_weight_mode_enum: 0=weight using data (properly weighting for background subtraction), 1=weight using fit, 2=no weights
   uint8_t prevFitNumPeaks; //number of peaks in the previous fit
   int32_t prevFitStartCh, prevFitEndCh;

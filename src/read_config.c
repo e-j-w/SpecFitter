@@ -128,6 +128,13 @@ uint8_t readConfigFile(FILE *file, uint8_t keepCalibration){
           fitpar.stepFunction = 0;
         }
       }
+      if(strcmp(par,"force_positive_amplitude") == 0){
+        if(strcmp(val,"yes") == 0){
+          fitpar.forcePositivePeaks = 1;
+        }else{
+          fitpar.forcePositivePeaks = 0;
+        }
+      }
       if(strcmp(par,"fit_weight_mode") == 0){
         uint8_t ucVal = (uint8_t)atoi(val);
         if(ucVal <= 2){
@@ -274,6 +281,11 @@ uint8_t writeConfigFile(FILE *file){
     fprintf(file,"step_function=yes\n");
   }else{
     fprintf(file,"step_function=no\n");
+  }
+  if(fitpar.forcePositivePeaks == 1){
+    fprintf(file,"force_positive_amplitude=yes\n");
+  }else{
+    fprintf(file,"force_positive_amplitude=no\n");
   }
   if(fitpar.bgType < 3){
     fprintf(file,"bg_type=%u\n",fitpar.bgType);

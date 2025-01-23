@@ -656,8 +656,15 @@ void performGausFit(){
         b[j] = fitpar.fitParVal[j] + fixed[j] * delta[nip1-1];
       }
     }
+    if(fitpar.forcePositivePeaks){
+      /* constrain peak heights to be positive */
+      for(j = FITPAR_AMP1; j <= npars; j += 3){
+        if(b[j] < 0.0) b[j] = fabsl(b[j]);
+      }
+    }
+    /* constrain widths to be positive */
     for(j = FITPAR_WIDTH1; j <= npars; j += 3){
-      if(b[j] < 0.0f) b[j] = fabsl(b[j]);
+      if(b[j] < 0.0) b[j] = fabsl(b[j]);
     }
     /* if chisq increased, increase flamda and try again */
     fitpar.chisq = 0.;
