@@ -186,6 +186,17 @@ int isSpSelected(const int32_t spNum){
   return 0;
 }
 
+/*//get an uncalibrated value from a calibrated one
+double getUnCalVal(const double val){
+  //use the quadratic equation!
+  double x = sqrt(calpar.calpar[1]*calpar.calpar[1] - 4.0*(calpar.calpar[0] - val)*calpar.calpar[2])/(2.0*calpar.calpar[0]);
+  if((-1.0*calpar.calpar[1] + x) >= 0.0){
+    return (-1.0*calpar.calpar[1] + x);
+  }else{
+    return (-1.0*calpar.calpar[1] - x);
+  }
+}*/
+
 //get a calibrated value from an uncalibrated one
 double getCalVal(const double val){
   return calpar.calpar[0] + calpar.calpar[1]*val + calpar.calpar[2]*val*val;

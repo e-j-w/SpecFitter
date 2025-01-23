@@ -112,10 +112,22 @@ uint8_t readConfigFile(FILE *file, uint8_t keepCalibration){
           fitpar.fixBeta = 0;
         }
       }
+      if(strcmp(par,"manual_width_val") == 0){
+        float wVal = (float)atof(val);
+        if((wVal >= 0.0f)&&(wVal <= 100.0f)){
+          fitpar.manualWidthVal = wVal;
+        }
+      }
+      if(strcmp(par,"manual_width_offset") == 0){
+        float wVal = (float)atof(val);
+        if((wVal >= 0.0f)&&(wVal <= 100.0f)){
+          fitpar.manualWidthOffset = wVal;
+        }
+      }
       if(strcmp(par,"limit_centroid_val") == 0){
-        float ampVal = (float)atof(val);
-        if((ampVal >= 0.0f)&&(ampVal <= 100.0f)){
-          fitpar.limitCentroidVal = ampVal;
+        float cVal = (float)atof(val);
+        if((cVal >= 0.0f)&&(cVal <= 100.0f)){
+          fitpar.limitCentroidVal = cVal;
         }
       }
       if(strcmp(par,"fix_skew_amp_val") == 0){
@@ -276,6 +288,10 @@ uint8_t writeConfigFile(FILE *file){
     fprintf(file,"autozoom=yes\n");
   }else{
     fprintf(file,"autozoom=no\n");
+  }
+  if(fitpar.peakWidthMethod == PEAKWIDTHMODE_MANUAL){
+    fprintf(file,"manual_width_val=%f\n",fitpar.manualWidthVal);
+    fprintf(file,"manual_width_offset=%f\n",fitpar.manualWidthOffset);
   }
   if(fitpar.limitCentroid == 1){
     fprintf(file,"limit_centroid=yes\n");

@@ -18,6 +18,8 @@ void showPreferences(int page){
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(limit_centroid_checkbutton),fitpar.limitCentroid);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fix_skew_amplitude_checkbutton),fitpar.fixSkewAmplitide);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fix_beta_checkbutton),fitpar.fixBeta);
+  gtk_spin_button_set_value(manual_width_spinbutton,(gdouble)fitpar.manualWidthVal);
+  gtk_spin_button_set_value(manual_width_offset_spinbutton,(gdouble)fitpar.manualWidthOffset);
   gtk_spin_button_set_value(limit_centroid_spinbutton,(gdouble)fitpar.limitCentroidVal);
   gtk_spin_button_set_value(skew_amplitude_spinbutton,(gdouble)fitpar.fixedRVal);
   gtk_spin_button_set_value(beta_spinbutton,(gdouble)fitpar.fixedBetaVal);
@@ -27,6 +29,11 @@ void showPreferences(int page){
   gtk_combo_box_set_active(GTK_COMBO_BOX(peak_shape_combobox),fitpar.fitType);
   gtk_combo_box_set_active(GTK_COMBO_BOX(peak_width_combobox),fitpar.peakWidthMethod);
   gtk_combo_box_set_active(GTK_COMBO_BOX(weight_mode_combobox),fitpar.weightMode);
+  if(fitpar.peakWidthMethod == PEAKWIDTHMODE_MANUAL){
+    gtk_revealer_set_reveal_child(manual_width_revealer, TRUE);
+  }else{
+    gtk_revealer_set_reveal_child(manual_width_revealer, FALSE);
+  }
   if(fitpar.fitType == FITTYPE_SKEWED){
     gtk_revealer_set_reveal_child(skew_parameters_revealer, TRUE);
   }else{
@@ -2246,6 +2253,27 @@ void on_peak_shape_changed(GtkComboBox *combo_box){
   }
 }
 
+void on_peak_width_changed(GtkComboBox *combo_box){
+  int entry = gtk_combo_box_get_active(combo_box);
+  if((entry >=0)&&(entry < PEAKWIDTHMODE_ENUM_LENGTH)){
+    if(entry == PEAKWIDTHMODE_MANUAL){
+      gtk_revealer_set_reveal_child(manual_width_revealer, TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(manual_width_spinbutton),TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(manual_width_offset_spinbutton),TRUE);
+    }else{
+      gtk_revealer_set_reveal_child(manual_width_revealer, FALSE);
+    }
+  }
+}
+
+void on_manual_width_changed(GtkSpinButton *spin_button){
+  fitpar.manualWidthVal = (float)gtk_spin_button_get_value(spin_button);
+}
+
+void on_manual_width_offset_changed(GtkSpinButton *spin_button){
+  fitpar.manualWidthOffset = (float)gtk_spin_button_get_value(spin_button);
+}
+
 void on_limit_centroid_changed(GtkSpinButton *spin_button){
   fitpar.limitCentroidVal = (float)gtk_spin_button_get_value(spin_button);
 }
@@ -2607,6 +2635,9 @@ void iniitalizeUIElements(){
   spectrum_label_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "spectrum_label_checkbutton"));
   spectrum_comment_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "spectrum_comment_checkbutton"));
   spectrum_gridline_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "spectrum_gridline_checkbutton"));
+  manual_width_revealer = GTK_REVEALER(gtk_builder_get_object(builder, "manual_width_revealer"));
+  manual_width_spinbutton = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "manual_width_spinbutton"));
+  manual_width_offset_spinbutton = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "manual_width_offset_spinbutton"));
   skew_parameters_revealer = GTK_REVEALER(gtk_builder_get_object(builder, "skew_parameters_revealer"));
   peak_parameters_revealer = GTK_REVEALER(gtk_builder_get_object(builder, "peak_parameters_revealer"));
   background_parameters_revealer = GTK_REVEALER(gtk_builder_get_object(builder, "background_parameters_revealer"));
@@ -2682,6 +2713,9 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(spectrum_label_checkbutton), "toggled", G_CALLBACK(on_toggle_spectrum_label), NULL);
   g_signal_connect(G_OBJECT(spectrum_comment_checkbutton), "toggled", G_CALLBACK(on_toggle_spectrum_comment), NULL);
   g_signal_connect(G_OBJECT(spectrum_gridline_checkbutton), "toggled", G_CALLBACK(on_toggle_spectrum_gridlines), NULL);
+  g_signal_connect(G_OBJECT(peak_width_combobox), "changed", G_CALLBACK(on_peak_width_changed), NULL);
+  g_signal_connect(G_OBJECT(manual_width_spinbutton), "value-changed", G_CALLBACK(on_manual_width_changed), NULL);
+  g_signal_connect(G_OBJECT(manual_width_offset_spinbutton), "value-changed", G_CALLBACK(on_manual_width_offset_changed), NULL);
   g_signal_connect(G_OBJECT(peak_shape_combobox), "changed", G_CALLBACK(on_peak_shape_changed), NULL);
   g_signal_connect(G_OBJECT(limit_centroid_checkbutton), "toggled", G_CALLBACK(on_toggle_limit_centroid), NULL);
   g_signal_connect(G_OBJECT(limit_centroid_spinbutton), "value-changed", G_CALLBACK(on_limit_centroid_changed), NULL);

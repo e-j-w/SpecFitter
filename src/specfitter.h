@@ -119,7 +119,8 @@ GtkWindow *preferences_window;
 GtkNotebook *preferences_notebook;
 GtkCheckButton *discard_empty_checkbutton, *bin_errors_checkbutton, *round_errors_checkbutton, *dark_theme_checkbutton;
 GtkCheckButton *spectrum_label_checkbutton, *spectrum_comment_checkbutton, *spectrum_gridline_checkbutton, *autozoom_checkbutton;
-GtkRevealer *skew_parameters_revealer, *peak_parameters_revealer, *background_parameters_revealer;
+GtkRevealer *manual_width_revealer, *skew_parameters_revealer, *peak_parameters_revealer, *background_parameters_revealer;
+GtkSpinButton *manual_width_spinbutton, *manual_width_offset_spinbutton;
 GtkCheckButton *limit_centroid_checkbutton;
 GtkSpinButton *limit_centroid_spinbutton;
 GtkCheckButton *fix_skew_amplitude_checkbutton, *fix_beta_checkbutton;
@@ -246,6 +247,7 @@ struct {
   uint8_t bgType; //0=constant, 1=linear, 2=quadratic
   uint8_t fitType; //fit type (values from fit_type_enum)
   uint8_t numFitPeaks; //number of peaks to fit
+  float manualWidthVal, manualWidthOffset; //manually fixed peak width value and offset/error
   uint8_t limitCentroid; //whether the centroid range is limited
   uint8_t fixSkewAmplitide; //whether the R parameter is fixed
   uint8_t fixBeta; //whether the skewness parameter is fixed
@@ -263,7 +265,7 @@ struct {
 } fitpar;
 
 enum fit_type_enum{FITTYPE_SYMMETRIC, FITTYPE_SKEWED, FITTYPE_BGONLY, FITTYPE_SUMREGION, FITTYPE_ENUM_LENGTH};
-enum peak_width_mode_enum{PEAKWIDTHMODE_FREE, PEAKWIDTHMODE_RELATIVE, PEAKWIDTHMODE_PREVIOUS, PEAKWIDTHMODE_ENUM_LENGTH};
+enum peak_width_mode_enum{PEAKWIDTHMODE_FREE, PEAKWIDTHMODE_RELATIVE, PEAKWIDTHMODE_PREVIOUS, PEAKWIDTHMODE_MANUAL, PEAKWIDTHMODE_ENUM_LENGTH};
 enum fit_weight_mode_enum{FITWEIGHT_DATA, FITWEIGHT_FIT, FITWEIGHT_NONE, FITWEIGHT_ENUM_LENGTH};
 enum fit_par_enum{FITPAR_BGCONST,FITPAR_BGLIN,FITPAR_BGQUAD,FITPAR_R,FITPAR_BETA,FITPAR_STEP,FITPAR_POS1,FITPAR_WIDTH1,FITPAR_AMP1,FITPAR_ENUM_LENGTH};
 enum fit_state_enum{FITSTATE_NOTFITTING, FITSTATE_SETTINGLIMITS, FITSTATE_SETTINGPEAKS, FITSTATE_FITTING, FITSTATE_FITCOMPLETE, FITSTATE_ENUM_LENGTH};

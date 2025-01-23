@@ -80,6 +80,16 @@ Author: Jonathan Williams
     <property name="step-increment">0.01</property>
     <property name="page-increment">10</property>
   </object>
+  <object class="GtkAdjustment" id="peak_width_adjustment">
+    <property name="upper">100</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="peak_width_offset_adjustment">
+    <property name="upper">100</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
   <object class="GtkAdjustment" id="scale_adjustment">
     <property name="lower">-100</property>
     <property name="upper">100</property>
@@ -2579,7 +2589,8 @@ Sum counts - Only show the total number of counts in the fit region.</property>
                             <property name="tooltip-text" translatable="yes">The method to use to determine peak widths.
 Fit freely - Widths allowed to vary freely.
 Fix relative widths - force peak widths to follow a quadratic relationship with the channel number when more than one peak is fit.  Recommended for gamma-ray spectroscopy.
-Fix to previous fit values - use the width values from the previous fit.  If no peaks have been fit yet, this is equivalent to 'fit freely'.</property>
+Fix to previous fit values - use the width values from the previous fit.
+Manually set value - Select a specific value (and range).</property>
                             <property name="spacing">10</property>
                             <child>
                               <object class="GtkLabel">
@@ -2602,6 +2613,7 @@ Fix to previous fit values - use the width values from the previous fit.  If no 
                                   <item id="&lt;Enter ID&gt;" translatable="yes">Fit freely</item>
                                   <item translatable="yes">Fix relative widths</item>
                                   <item translatable="yes">Fix to previous fit values</item>
+                                  <item translatable="yes">Manually set value</item>
                                 </items>
                               </object>
                               <packing>
@@ -2618,6 +2630,90 @@ Fix to previous fit values - use the width values from the previous fit.  If no 
                           </packing>
                         </child>
                         <child>
+                          <object class="GtkRevealer" id="manual_width_revealer">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="reveal-child">True</property>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="margin-top">10</property>
+                                <property name="spacing">8</property>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="halign">start</property>
+                                    <property name="label" translatable="yes">Width value:</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkSpinButton" id="manual_width_spinbutton">
+                                    <property name="visible">True</property>
+                                    <property name="sensitive">False</property>
+                                    <property name="can-focus">True</property>
+                                    <property name="width-chars">4</property>
+                                    <property name="text" translatable="yes">10.0</property>
+                                    <property name="input-purpose">number</property>
+                                    <property name="adjustment">peak_width_adjustment</property>
+                                    <property name="digits">1</property>
+                                    <property name="numeric">True</property>
+                                    <property name="value">10</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="halign">start</property>
+                                    <property name="label" translatable="yes">+ / -</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">2</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkSpinButton" id="manual_width_offset_spinbutton">
+                                    <property name="visible">True</property>
+                                    <property name="sensitive">False</property>
+                                    <property name="can-focus">True</property>
+                                    <property name="width-chars">4</property>
+                                    <property name="text" translatable="yes">10.0</property>
+                                    <property name="input-purpose">number</property>
+                                    <property name="adjustment">peak_width_offset_adjustment</property>
+                                    <property name="digits">1</property>
+                                    <property name="numeric">True</property>
+                                    <property name="value">10</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">3</property>
+                                  </packing>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkCheckButton" id="step_function_checkbutton">
                             <property name="label" translatable="yes"> Use step function</property>
                             <property name="name">drop_empty_checkbox</property>
@@ -2631,7 +2727,7 @@ Fix to previous fit values - use the width values from the previous fit.  If no 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                         <child>
@@ -2648,7 +2744,7 @@ Fix to previous fit values - use the width values from the previous fit.  If no 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">2</property>
+                            <property name="position">3</property>
                           </packing>
                         </child>
                         <child>
@@ -2705,7 +2801,7 @@ Fix to previous fit values - use the width values from the previous fit.  If no 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">3</property>
+                            <property name="position">4</property>
                           </packing>
                         </child>
                       </object>
@@ -3865,7 +3961,7 @@ Weight by fit function - Weights are proportional to the fit function values det
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
-                <property name="tooltip-text" translatable="yes">Open a file containing spectra (.jf3, .txt, .mca, .fmca, .spe format).</property>
+                <property name="tooltip-text" translatable="yes">Open a file containing spectra (.jf3, .txt, .mca, .fmca, .dmca, .spe format).</property>
               </object>
               <packing>
                 <property name="expand">True</property>

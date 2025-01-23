@@ -656,12 +656,23 @@ void performGausFit(){
         b[j] = fitpar.fitParVal[j] + fixed[j] * delta[nip1-1];
       }
     }
+    if(fitpar.peakWidthMethod == PEAKWIDTHMODE_MANUAL){
+      /* limit width ranges */
+      uint8_t peakInd=0;
+      for(j = FITPAR_WIDTH1; j <= npars; j += 3){
+        if(b[j] < (long double)(fitpar.manualWidthVal - fitpar.manualWidthOffset)){
+          b[j] = (long double)(fitpar.manualWidthVal - fitpar.manualWidthOffset);
+        }else if(b[j] > (long double)(fitpar.manualWidthVal + fitpar.manualWidthOffset)){
+          b[j] = (long double)(fitpar.manualWidthVal + fitpar.manualWidthOffset);
+        }
+        peakInd++;
+      }
+    }
     if(fitpar.limitCentroid){
       /* limit centroid ranges */
       uint8_t peakInd=0;
       for(j = FITPAR_POS1; j <= npars; j += 3){
         if(b[j] < (long double)(fitpar.fitPeakInitGuess[peakInd] - fitpar.limitCentroidVal)){
-          //printf("Correcting peak position (%f, initial guess %f).\n",b[j],fitpar.fitPeakInitGuess[peakInd])
           b[j] = (long double)(fitpar.fitPeakInitGuess[peakInd] - fitpar.limitCentroidVal);
         }else if(b[j] > (long double)(fitpar.fitPeakInitGuess[peakInd] + fitpar.limitCentroidVal)){
           b[j] = (long double)(fitpar.fitPeakInitGuess[peakInd] + fitpar.limitCentroidVal);
@@ -1007,6 +1018,13 @@ int startGausFit(){
       //printf("width guess: %f\n",fitpar.fitParVal[FITPAR_WIDTH1]);
       for(uint32_t i=1;i<fitpar.numFitPeaks;i++){
         fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] = fitpar.fitParVal[FITPAR_WIDTH1]*(getFWHM(fitpar.fitPeakInitGuess[i],fitpar.widthFGH[0],fitpar.widthFGH[1],fitpar.widthFGH[2])/2.35482)/firstWidthInitGuess;
+        fitpar.fitParFree[FITPAR_WIDTH1+(3*i)] = 1; //free width
+        fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
+      }
+    }else if(fitpar.peakWidthMethod == PEAKWIDTHMODE_MANUAL){
+      printf("Fitting with peak widths manually set.\n");
+      for(uint32_t i=0;i<fitpar.numFitPeaks;i++){
+        fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] = fitpar.manualWidthVal;
         fitpar.fitParFree[FITPAR_WIDTH1+(3*i)] = 1; //free width
         fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
       }
