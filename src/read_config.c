@@ -142,7 +142,7 @@ uint8_t readConfigFile(FILE *file, uint8_t keepCalibration){
       }
       if(strcmp(par,"peak_width_method") == 0){
         uint8_t pwVal = (uint8_t)atoi(val);
-        if(pwVal != PEAKWIDTHMODE_PREVIOUS){
+        if((pwVal != PEAKWIDTHMODE_PREVIOUS)&&(pwVal != PEAKWIDTHMODE_MANUAL)){
           fitpar.peakWidthMethod = pwVal;
         }else{
           fitpar.peakWidthMethod = PEAKWIDTHMODE_RELATIVE;
@@ -289,10 +289,8 @@ uint8_t writeConfigFile(FILE *file){
   }else{
     fprintf(file,"autozoom=no\n");
   }
-  if(fitpar.peakWidthMethod == PEAKWIDTHMODE_MANUAL){
-    fprintf(file,"manual_width_val=%f\n",fitpar.manualWidthVal);
-    fprintf(file,"manual_width_offset=%f\n",fitpar.manualWidthOffset);
-  }
+  fprintf(file,"manual_width_val=%f\n",fitpar.manualWidthVal);
+  fprintf(file,"manual_width_offset=%f\n",fitpar.manualWidthOffset);
   if(fitpar.limitCentroid == 1){
     fprintf(file,"limit_centroid=yes\n");
     fprintf(file,"limit_centroid_val=%f\n",fitpar.limitCentroidVal);

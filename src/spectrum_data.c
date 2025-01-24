@@ -186,25 +186,38 @@ int isSpSelected(const int32_t spNum){
   return 0;
 }
 
-/*//get an uncalibrated value from a calibrated one
-double getUnCalVal(const double val){
-  //use the quadratic equation!
-  double x = sqrt(calpar.calpar[1]*calpar.calpar[1] - 4.0*(calpar.calpar[0] - val)*calpar.calpar[2])/(2.0*calpar.calpar[0]);
-  if((-1.0*calpar.calpar[1] + x) >= 0.0){
-    return (-1.0*calpar.calpar[1] + x);
-  }else{
-    return (-1.0*calpar.calpar[1] - x);
-  }
-}*/
-
 //get a calibrated value from an uncalibrated one
 double getCalVal(const double val){
   return calpar.calpar[0] + calpar.calpar[1]*val + calpar.calpar[2]*val*val;
 }
+double getUnCalVal(const double calVal){
+  if((calpar.calpar[2] == 0.0)&&(calpar.calpar[1] != 0.0)){
+    //linear calibration
+    return calVal/calpar.calpar[1];
+  }else{
+    //use the quadratic equation!
+    double x = sqrt(calpar.calpar[1]*calpar.calpar[1] + 4.0*calpar.calpar[2]*(calpar.calpar[0] - calVal))/(2.0*(calpar.calpar[2]));
+    if(x != x){
+      //NaN
+      return 0.0;
+    }
+    //printf("%f %f %f\n",x,(-1.0*calpar.calpar[1] + x),(-1.0*calpar.calpar[1] - x));
+    if((-1.0*calpar.calpar[1] + x) >= 0.0){
+      return (-1.0*calpar.calpar[1] + x);
+    }else{
+      return (-1.0*calpar.calpar[1] - x);
+    }
+  }
+}
 //get a calibrated width from an uncalibrated one (is this always true?)
 //this is used for uncertainties as well (since these are "widths" around a central value)
-double getCalWidth(const double val){
-  return fabs(calpar.calpar[1]*val + calpar.calpar[2]*val*val);
+//'centroid' specifies the uncalibrated value that the error is taken relative to
+//(ie. for peak width errors, this is the peak centroid)
+double getCalWidth(const double val, const double centroid){
+  return val*getCalVal(centroid)/centroid;
+}
+double getUnCalWidth(const double calWidth, const double unCalCentroid){
+  return calWidth*unCalCentroid/getCalVal(unCalCentroid);
 }
 
 //lower level spectrum data access routine which takes rebinning into account

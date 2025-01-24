@@ -13,6 +13,7 @@ long double evalAreaAboveBGErr();
 gboolean update_gui_fit_state(){
   switch(guiglobals.fittingSp){
     case FITSTATE_FITCOMPLETE:
+    case FITSTATE_FITCOMPLETEDUBIOUS:
       gtk_widget_set_sensitive(GTK_WIDGET(open_button),TRUE);
       if(rawdata.openedSp)
         gtk_widget_set_sensitive(GTK_WIDGET(append_button),TRUE);
@@ -93,6 +94,12 @@ gboolean print_fit_error(){
 
 gboolean print_fit_dubious(){
 
+  if((fitpar.peakWidthMethod == PEAKWIDTHMODE_MANUAL)||(fitpar.limitCentroid)){
+    //don't warn about bad fit, the user has chosen to manually set
+    //peak widths and/or centroids
+    return FALSE; //stop running
+  }
+
   GtkDialogFlags flags; 
   GtkWidget *message_dialog;
 
@@ -113,6 +120,10 @@ gboolean print_fit_results(){
   char fitParStr[3][50];
 
   int32_t length = 0;
+
+  if(guiglobals.fittingSp == FITSTATE_FITCOMPLETEDUBIOUS){
+    length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Fit may not be optimal, try refitting or modifying the fit settings for a better result.\n\n");
+  }
   if(fitpar.fitType == FITTYPE_SUMREGION){
     getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BGCONST],(double)fitpar.fitParErr[FITPAR_BGCONST],fitParStr[0],50,1,guiglobals.roundErrors);
     length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Area of region: %s\n",fitParStr[0]);
@@ -122,12 +133,14 @@ gboolean print_fit_results(){
       length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Peak widths were fixed to previous fit values.\n\n");
     }else if(fitpar.peakWidthMethod == PEAKWIDTHMODE_RELATIVE){
       length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Relative peak widths were fixed.\n\n");
+    }else if(fitpar.peakWidthMethod == PEAKWIDTHMODE_MANUAL){
+      length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Peak widths constrained to %0.2f +/- %0.2f.\n\n",fitpar.manualWidthVal,fitpar.manualWidthOffset);
     }
     for(int32_t i=0;i<fitpar.numFitPeaks;i++){
       getFormattedValAndUncertainty((double)fitpar.areaVal[i],(double)fitpar.areaErr[i],fitParStr[0],50,1,guiglobals.roundErrors);
       if(calpar.calMode == 1){
-        getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_POS1+(3*i)]),getCalWidth((double)fitpar.fitParErr[FITPAR_POS1+(3*i)]),fitParStr[1],50,1,guiglobals.roundErrors);
-        getFormattedValAndUncertainty(2.35482*getCalWidth((double)fitpar.fitParVal[FITPAR_WIDTH1+(3*i)]),2.35482*getCalWidth((double)fitpar.fitParErr[FITPAR_WIDTH1+(3*i)]),fitParStr[2],50,1,guiglobals.roundErrors);
+        getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_POS1+(3*i)]),getCalWidth((double)fitpar.fitParErr[FITPAR_POS1+(3*i)],(double)fitpar.fitParVal[FITPAR_POS1+(3*i)]),fitParStr[1],50,1,guiglobals.roundErrors);
+        getFormattedValAndUncertainty(2.35482*getCalWidth((double)fitpar.fitParVal[FITPAR_WIDTH1+(3*i)],(double)fitpar.fitParVal[FITPAR_POS1+(3*i)]),2.35482*getCalWidth((double)fitpar.fitParErr[FITPAR_WIDTH1+(3*i)],(double)fitpar.fitParVal[FITPAR_POS1+(3*i)]),fitParStr[2],50,1,guiglobals.roundErrors);
       }else{
         getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_POS1+(3*i)],(double)fitpar.fitParErr[FITPAR_POS1+(3*i)],fitParStr[1],50,1,guiglobals.roundErrors);
         getFormattedValAndUncertainty(2.35482*(double)fitpar.fitParVal[FITPAR_WIDTH1+(3*i)],2.35482*(double)fitpar.fitParErr[FITPAR_WIDTH1+(3*i)],fitParStr[2],50,1,guiglobals.roundErrors);
@@ -139,9 +152,9 @@ gboolean print_fit_results(){
       length += len;
     }
     if(calpar.calMode == 1){
-      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BGCONST]),getCalWidth((double)fitpar.fitParErr[FITPAR_BGCONST]),fitParStr[0],50,1,guiglobals.roundErrors);
-      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BGLIN]),getCalWidth((double)fitpar.fitParErr[FITPAR_BGLIN]),fitParStr[1],50,1,guiglobals.roundErrors);
-      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BGQUAD]),getCalWidth((double)fitpar.fitParErr[FITPAR_BGQUAD]),fitParStr[2],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BGCONST]),getCalWidth((double)fitpar.fitParErr[FITPAR_BGCONST],(double)fitpar.fitParVal[FITPAR_BGCONST]),fitParStr[0],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BGLIN]),getCalWidth((double)fitpar.fitParErr[FITPAR_BGLIN],(double)fitpar.fitParVal[FITPAR_BGLIN]),fitParStr[1],50,1,guiglobals.roundErrors);
+      getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BGQUAD]),getCalWidth((double)fitpar.fitParErr[FITPAR_BGQUAD],(double)fitpar.fitParVal[FITPAR_BGQUAD]),fitParStr[2],50,1,guiglobals.roundErrors);
     }else{
       getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BGCONST],(double)fitpar.fitParErr[FITPAR_BGCONST],fitParStr[0],50,1,guiglobals.roundErrors);
       getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BGLIN],(double)fitpar.fitParErr[FITPAR_BGLIN],fitParStr[1],50,1,guiglobals.roundErrors);
@@ -157,7 +170,7 @@ gboolean print_fit_results(){
       //print peak skew parameters
       if(calpar.calMode == 1){
         getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_R],(double)fitpar.fitParErr[FITPAR_R],fitParStr[0],50,1,guiglobals.roundErrors);
-        getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BETA]),getCalWidth((double)fitpar.fitParErr[FITPAR_BETA]),fitParStr[1],50,1,guiglobals.roundErrors);
+        getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_BETA]),getCalWidth((double)fitpar.fitParErr[FITPAR_BETA],(double)fitpar.fitParVal[FITPAR_BETA]),fitParStr[1],50,1,guiglobals.roundErrors);
       }else{
         getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_R],(double)fitpar.fitParErr[FITPAR_R],fitParStr[0],50,1,guiglobals.roundErrors);
         getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_BETA],(double)fitpar.fitParErr[FITPAR_BETA],fitParStr[1],50,1,guiglobals.roundErrors);
@@ -167,7 +180,7 @@ gboolean print_fit_results(){
     if(fitpar.stepFunction == 1){
       //print step function parameter
       if(calpar.calMode == 1){
-        getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_STEP]),getCalWidth((double)fitpar.fitParErr[FITPAR_STEP]),fitParStr[0],50,1,guiglobals.roundErrors);
+        getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_STEP]),getCalWidth((double)fitpar.fitParErr[FITPAR_STEP],(double)fitpar.fitParVal[FITPAR_STEP]),fitParStr[0],50,1,guiglobals.roundErrors);
       }else{
         getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_STEP],(double)fitpar.fitParErr[FITPAR_STEP],fitParStr[0],50,1,guiglobals.roundErrors);
       }
@@ -502,7 +515,7 @@ void performGausFit(){
   lin_eq_type linEq;
   linEq.dim = 0;
 
-  int maxits = 500; //maximum number of fitter iterations
+  int maxits = 1000; //maximum number of fitter iterations
   long double alpha[MAX_DIM][MAX_DIM];
   long double diff, beta[MAX_DIM], b[MAX_DIM], delta[MAX_DIM], fixed[MAX_DIM], ers[MAX_DIM];
   long double chisq1, flamda, dat, fit, r1;
@@ -660,10 +673,12 @@ void performGausFit(){
       /* limit width ranges */
       uint8_t peakInd=0;
       for(j = FITPAR_WIDTH1; j <= npars; j += 3){
-        if(b[j] < (long double)(fitpar.manualWidthVal - fitpar.manualWidthOffset)){
-          b[j] = (long double)(fitpar.manualWidthVal - fitpar.manualWidthOffset);
-        }else if(b[j] > (long double)(fitpar.manualWidthVal + fitpar.manualWidthOffset)){
-          b[j] = (long double)(fitpar.manualWidthVal + fitpar.manualWidthOffset);
+        long double maxWidth = (long double)(getUnCalWidth((fitpar.manualWidthVal + fitpar.manualWidthOffset)/2.35482,(double)b[j - FITPAR_WIDTH1 + FITPAR_POS1]));
+        long double minWidth = (long double)(getUnCalWidth((fitpar.manualWidthVal - fitpar.manualWidthOffset)/2.35482,(double)b[j - FITPAR_WIDTH1 + FITPAR_POS1]));
+        if(b[j] < minWidth){
+          b[j] = minWidth;
+        }else if(b[j] > maxWidth){
+          b[j] = maxWidth;
         }
         peakInd++;
       }
@@ -792,7 +807,7 @@ void performGausFit(){
       fitpar.fitParFree[i] = (uint8_t)(fixed[i]);
     }
   }
-  guiglobals.fittingSp = FITSTATE_FITCOMPLETE;
+  guiglobals.fittingSp = FITSTATE_FITCOMPLETEDUBIOUS;
   g_idle_add(update_gui_fit_state,NULL);
   g_idle_add(print_fit_dubious,NULL);
   g_idle_add(print_fit_results,NULL);
@@ -1022,9 +1037,9 @@ int startGausFit(){
         fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
       }
     }else if(fitpar.peakWidthMethod == PEAKWIDTHMODE_MANUAL){
-      printf("Fitting with peak widths manually set.\n");
+      printf("Fitting with peak widths manually set to %0.2f +/- %0.2f.\n",fitpar.manualWidthVal,fitpar.manualWidthOffset);
       for(uint32_t i=0;i<fitpar.numFitPeaks;i++){
-        fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] = fitpar.manualWidthVal;
+        fitpar.fitParVal[FITPAR_WIDTH1+(3*i)] = getUnCalWidth(fitpar.manualWidthVal/2.35482,(double)fitpar.fitParVal[FITPAR_POS1+(3*i)]);
         fitpar.fitParFree[FITPAR_WIDTH1+(3*i)] = 1; //free width
         fitpar.numFreePar = (uint8_t)(fitpar.numFreePar+1);
       }

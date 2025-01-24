@@ -531,6 +531,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
     float cursorChan = getCursorChannel(event->x, event->y);
     switch(guiglobals.fittingSp){
       case FITSTATE_FITCOMPLETE:
+      case FITSTATE_FITCOMPLETEDUBIOUS:
         //fit being displayed, clear it on right click
         guiglobals.fittingSp = FITSTATE_NOTFITTING;
         update_gui_fit_state();
@@ -788,7 +789,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event){
     }
     
     signed char peakToHighlight = -1;
-    if(guiglobals.fittingSp == FITSTATE_FITCOMPLETE){
+    if(guiglobals.fittingSp >= FITSTATE_FITCOMPLETE){
       //check if the cursor is over a peak
       uint8_t i;
       for(i=0;i<fitpar.numFitPeaks;i++){
@@ -884,9 +885,9 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event){
           //print highlighted peak info
           if(calpar.calMode == 1){
             double calCentr = getCalVal((double)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)]));
-            double calWidth = getCalWidth((double)(fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]));
-            double calCentrErr = getCalWidth((double)(fitpar.fitParErr[FITPAR_POS1+(3*drawing.highlightedPeak)]));
-            double calWidthErr = getCalWidth((double)(fitpar.fitParErr[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]));
+            double calWidth = getCalWidth((double)(fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]),(double)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)]));
+            double calCentrErr = getCalWidth((double)(fitpar.fitParErr[FITPAR_POS1+(3*drawing.highlightedPeak)]),(double)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)]));
+            double calWidthErr = getCalWidth((double)(fitpar.fitParErr[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]),(double)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)]));
             char fitParStr[3][50];
             getFormattedValAndUncertainty((double)fitpar.areaVal[drawing.highlightedPeak],(double)fitpar.areaErr[drawing.highlightedPeak],fitParStr[0],50,1,guiglobals.roundErrors);
             getFormattedValAndUncertainty(calCentr,calCentrErr,fitParStr[1],50,1,guiglobals.roundErrors);
@@ -1781,7 +1782,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   }
 
   //draw fit
-  if((guiglobals.fittingSp == FITSTATE_FITCOMPLETE)&&(showFit>0)){
+  if((guiglobals.fittingSp >= FITSTATE_FITCOMPLETE)&&(showFit>0)){
     if(fitpar.fitType != FITTYPE_SUMREGION){
       
       if((drawing.lowerLimit < fitpar.fitEndCh)&&(drawing.upperLimit > fitpar.fitStartCh)){
@@ -1972,7 +1973,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         cairo_stroke_preserve(cr);
         cairo_fill(cr);
       }
-    }else if(guiglobals.fittingSp == FITSTATE_FITCOMPLETE){
+    }else if(guiglobals.fittingSp >= FITSTATE_FITCOMPLETE){
       //put markers at fitted positions
       cairo_set_source_rgb(cr, 0.0, 0.0, 0.8);
       cairo_set_line_width(cr, 2.0*scaleFactor);

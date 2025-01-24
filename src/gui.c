@@ -427,7 +427,7 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button)
     gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened+rawdata.numViews);
 
     //clear fit if necessary
-    if(guiglobals.fittingSp == FITSTATE_FITCOMPLETE){
+    if(guiglobals.fittingSp >= FITSTATE_FITCOMPLETE){
       guiglobals.fittingSp = FITSTATE_NOTFITTING;
       //update widgets
       update_gui_fit_state();
@@ -1218,7 +1218,7 @@ void on_contract_scale_changed(GtkRange *range){
   if(drawing.contractFactor == 0){
     drawing.contractFactor = 1; //guard against divide by 0 elsewhere
   }
-  if(guiglobals.fittingSp == FITSTATE_FITCOMPLETE){
+  if(guiglobals.fittingSp >= FITSTATE_FITCOMPLETE){
     int32_t i;
     //rescale fit (optimization - don't refit)
     for(i=0;i<fitpar.numFitPeaks;i++){
@@ -1803,7 +1803,7 @@ void on_multiplot_ok_button_clicked(){
   //handle fitting
   if(drawing.multiplotMode > MULTIPLOT_SUMMED){
     guiglobals.fittingSp = FITSTATE_NOTFITTING; //clear any fits being displayed
-  }else if(guiglobals.fittingSp == FITSTATE_FITCOMPLETE){
+  }else if(guiglobals.fittingSp >= FITSTATE_FITCOMPLETE){
     startGausFit(); //refit
   }
   
@@ -2012,7 +2012,7 @@ void on_sum_all_button_clicked(){
   gtk_label_set_text(display_spectrumname_label,viewStr);
 
   //clear fit if necessary
-  if(guiglobals.fittingSp == FITSTATE_FITCOMPLETE){
+  if(guiglobals.fittingSp >= FITSTATE_FITCOMPLETE){
     guiglobals.fittingSp = FITSTATE_NOTFITTING;
     //update widgets
     update_gui_fit_state();
@@ -2028,7 +2028,7 @@ void on_fit_button_clicked(){
   //spectrum must be open to fit
   if(rawdata.openedSp){
     //cannot be already fitting
-    if((guiglobals.fittingSp == FITSTATE_NOTFITTING)||(guiglobals.fittingSp == FITSTATE_FITCOMPLETE)){
+    if((guiglobals.fittingSp == FITSTATE_NOTFITTING)||(guiglobals.fittingSp >= FITSTATE_FITCOMPLETE)){
       //must be displaying only a single spectrum
       if(drawing.multiplotMode < MULTIPLOT_OVERLAY_COMMON){
         //safe to fit
@@ -2062,7 +2062,7 @@ void on_refit_button_clicked(){
   //spectrum must be open to fit
   if(rawdata.openedSp){
     //cannot be already fitting
-    if((guiglobals.fittingSp < FITSTATE_FITTING)||(guiglobals.fittingSp == FITSTATE_FITCOMPLETE)){
+    if((guiglobals.fittingSp < FITSTATE_FITTING)||(guiglobals.fittingSp >= FITSTATE_FITCOMPLETE)){
       //must be displaying only a single spectrum
       if(drawing.multiplotMode < MULTIPLOT_OVERLAY_COMMON){
         //re-fitting must be valid
@@ -2293,7 +2293,7 @@ void on_preferences_button_clicked(){
 
 void on_preferences_apply_button_clicked(){
   if(fitpar.fitType != (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox))){
-    if(guiglobals.fittingSp == FITSTATE_FITCOMPLETE){
+    if(guiglobals.fittingSp >= FITSTATE_FITCOMPLETE){
       //the fit type was changed, clear the fit
       guiglobals.fittingSp = FITSTATE_NOTFITTING;
     }
@@ -2302,7 +2302,7 @@ void on_preferences_apply_button_clicked(){
     fitpar.prevFitStartCh = -1; //used to invalidate re-fits
   }
   if(fitpar.bgType != (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(background_type_combobox))){
-    if(guiglobals.fittingSp == FITSTATE_FITCOMPLETE){
+    if(guiglobals.fittingSp >= FITSTATE_FITCOMPLETE){
       //the fit type was changed, clear the fit
       guiglobals.fittingSp = FITSTATE_NOTFITTING;
     }
@@ -2847,6 +2847,8 @@ void iniitalizeUIElements(){
   guiglobals.useZoomAnimations = 1;
   guiglobals.exportFileType = 0;
   fitpar.limitCentroid = 0;
+  fitpar.manualWidthVal = 3.0;
+  fitpar.manualWidthOffset = 1.0;
   fitpar.fixSkewAmplitide = 0;
   fitpar.fixBeta = 0;
   fitpar.limitCentroidVal = 1.0f;
