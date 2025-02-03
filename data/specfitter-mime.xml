@@ -25,6 +25,12 @@
         <glob-deleteall/>
         <glob pattern="*.fmca"/>
     </mime-type>
+    <mime-type type="application/x-spectrum-dmca">
+        <comment>DMCA spectrum data file</comment>
+        <icon name="application-x-spectrum-dmca"/>
+        <glob-deleteall/>
+        <glob pattern="*.dmca"/>
+    </mime-type>
     <mime-type type="application/x-spectrum-chn">
         <comment>CHN spectrum data file</comment>
         <icon name="application-x-spectrum-chn"/>
