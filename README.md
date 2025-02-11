@@ -13,7 +13,7 @@ A list of features is [here](FEATURES.md).
 
 ### Compatibility
 
-This program has been tested on Debian 12, CentOS 7, and Arch Linux (as of January 2025) under the GNOME and KDE desktop environments.  It should work on any Linux distro that satisfies the listed build dependencies.  It may be possible to build this on other platforms where GTK is [available](https://www.gtk.org/docs/installations/), but that hasn't been tested.
+This program has been tested on Debian 12, CentOS 7, and Arch Linux (as of February 2025) under the GNOME and KDE desktop environments.  It should work on any Linux distro that satisfies the listed build dependencies.  It may be possible to build this on other platforms where GTK is [available](https://www.gtk.org/docs/installations/), but that hasn't been tested.
 
 ### Build dependencies
 
