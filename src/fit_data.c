@@ -145,7 +145,12 @@ gboolean print_fit_results(){
         getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_POS1+(3*i)],(double)fitpar.fitParErr[FITPAR_POS1+(3*i)],fitParStr[1],50,1,guiglobals.roundErrors);
         getFormattedValAndUncertainty(2.35482*(double)fitpar.fitParVal[FITPAR_WIDTH1+(3*i)],2.35482*(double)fitpar.fitParErr[FITPAR_WIDTH1+(3*i)],fitParStr[2],50,1,guiglobals.roundErrors);
       }
-      int32_t len = snprintf(fitResStr+length,(uint64_t)(strSize-length),"Peak %i\nArea: %s\nCentroid: %s\nFWHM: %s\n\n",i+1,fitParStr[0],fitParStr[1],fitParStr[2]);
+      int32_t len = 0; 
+      if(fitpar.fitType == FITTYPE_SKEWED){
+        len = snprintf(fitResStr+length,(uint64_t)(strSize-length),"Peak %i\nArea: %s\nCentroid: %s\nFWHM (Gaussian component): %s\n\n",i+1,fitParStr[0],fitParStr[1],fitParStr[2]);
+      }else{
+        len = snprintf(fitResStr+length,(uint64_t)(strSize-length),"Peak %i\nArea: %s\nCentroid: %s\nFWHM: %s\n\n",i+1,fitParStr[0],fitParStr[1],fitParStr[2]);
+      }
       if((len < 0)||(len >= strSize-length)){
         break;
       }
@@ -704,6 +709,12 @@ void performGausFit(){
     /* constrain widths to be positive */
     for(j = FITPAR_WIDTH1; j <= npars; j += 3){
       if(b[j] < 0.0) b[j] = fabsl(b[j]);
+    }
+    /* constrain R (skewed component amplitude) to be between 0% and 100% */
+    if(b[FITPAR_R] > 100.0){
+      b[FITPAR_R] = 100.0;
+    }else if(b[FITPAR_R] < 0.0){
+      b[FITPAR_R] = fabsl(b[FITPAR_R]);
     }
     /* if chisq increased, increase flamda and try again */
     fitpar.chisq = 0.;
