@@ -241,6 +241,7 @@ struct {
   long double fitParVal[6+(3*MAX_FIT_PK)]; //parameter values found by the fitter
   long double fitParErr[6+(3*MAX_FIT_PK)]; //errors in parameter values
   long double areaVal[MAX_FIT_PK], areaErr[MAX_FIT_PK]; //areas of peaks and errors
+  long double centroidVal[MAX_FIT_PK]; //centroids of peaks (taking skewed shape into account)
   long double chisq; //fit chisq
   uint8_t fitParFree[6+(3*MAX_FIT_PK)]; //whether individual parameters are fixed or free
   uint8_t numFreePar; //number of fit parameters which have been freed

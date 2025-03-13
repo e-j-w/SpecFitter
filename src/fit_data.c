@@ -139,10 +139,10 @@ gboolean print_fit_results(){
     for(int32_t i=0;i<fitpar.numFitPeaks;i++){
       getFormattedValAndUncertainty((double)fitpar.areaVal[i],(double)fitpar.areaErr[i],fitParStr[0],50,1,guiglobals.roundErrors);
       if(calpar.calMode == 1){
-        getFormattedValAndUncertainty(getCalVal((double)fitpar.fitParVal[FITPAR_POS1+(3*i)]),getCalWidth((double)fitpar.fitParErr[FITPAR_POS1+(3*i)],(double)fitpar.fitParVal[FITPAR_POS1+(3*i)]),fitParStr[1],50,1,guiglobals.roundErrors);
+        getFormattedValAndUncertainty(getCalVal((double)fitpar.centroidVal[i]),getCalWidth((double)fitpar.fitParErr[FITPAR_POS1+(3*i)],(double)fitpar.fitParVal[FITPAR_POS1+(3*i)]),fitParStr[1],50,1,guiglobals.roundErrors);
         getFormattedValAndUncertainty(2.35482*getCalWidth((double)fitpar.fitParVal[FITPAR_WIDTH1+(3*i)],(double)fitpar.fitParVal[FITPAR_POS1+(3*i)]),2.35482*getCalWidth((double)fitpar.fitParErr[FITPAR_WIDTH1+(3*i)],(double)fitpar.fitParVal[FITPAR_POS1+(3*i)]),fitParStr[2],50,1,guiglobals.roundErrors);
       }else{
-        getFormattedValAndUncertainty((double)fitpar.fitParVal[FITPAR_POS1+(3*i)],(double)fitpar.fitParErr[FITPAR_POS1+(3*i)],fitParStr[1],50,1,guiglobals.roundErrors);
+        getFormattedValAndUncertainty((double)fitpar.centroidVal[i],(double)fitpar.fitParErr[FITPAR_POS1+(3*i)],fitParStr[1],50,1,guiglobals.roundErrors);
         getFormattedValAndUncertainty(2.35482*(double)fitpar.fitParVal[FITPAR_WIDTH1+(3*i)],2.35482*(double)fitpar.fitParErr[FITPAR_WIDTH1+(3*i)],fitParStr[2],50,1,guiglobals.roundErrors);
       }
       int32_t len = 0; 
@@ -366,7 +366,7 @@ long double evalFitOnePeak(const long double xChVal, const int32_t peak){
 
 //Evaluate proprties of fitted peaks
 //based on gffin from RadWare gf3_subs.c
-void evalPeakAreas(){
+void evalPeakAreasAndCentroids(){
   long double area, d, r, y, r1, eb, eh, er, ew, beta;
   int i, ic;
   long double pkwidth;
@@ -395,8 +395,10 @@ void evalPeakAreas(){
     ew = (r1 * 1.06446705f + r * .600561216f * d * (d / 1.77245385f - y)) * fitpar.fitParErr[ic];
     fitpar.areaErr[i] = sqrtl(eh * eh + fitpar.fitParVal[ic+1] * fitpar.fitParVal[ic+1] * (er * er + eb * eb + ew * ew));
     fitpar.areaErr[i] /= (1.0*drawing.contractFactor);
+    fitpar.centroidVal[i] = fitpar.fitParVal[ic - 1] - (r * beta * d * beta / area);
   }
-} 
+  
+}
 
 //evaluate the fit for the current parameter values
 //based on eval from RadWare gf3_subs.c
@@ -772,7 +774,7 @@ void performGausFit(){
     }
   }
 
-  evalPeakAreas(); //get areas/errors
+  evalPeakAreasAndCentroids(); //get areas/errors
 
   if(relWidthFixed) printf("Relative widths fixed.\n");
 

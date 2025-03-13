@@ -793,13 +793,13 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event){
       //check if the cursor is over a peak
       uint8_t i;
       for(i=0;i<fitpar.numFitPeaks;i++){
-        if(cursorChan > (fitpar.fitParVal[FITPAR_POS1+(3*i)] - 2.*fitpar.fitParVal[FITPAR_WIDTH1+(3*i)])){
-          if(cursorChan < (fitpar.fitParVal[FITPAR_POS1+(3*i)] + 2.*fitpar.fitParVal[FITPAR_WIDTH1+(3*i)])){
+        if(cursorChan > (fitpar.centroidVal[i] - 2.*fitpar.fitParVal[FITPAR_WIDTH1+(3*i)])){
+          if(cursorChan < (fitpar.centroidVal[i] + 2.*fitpar.fitParVal[FITPAR_WIDTH1+(3*i)])){
             if(peakToHighlight == -1){
               peakToHighlight = (signed char)i;
             }else{
               //highlight whichever peak is closer to the cursor
-              if(fabsl(cursorChan - fitpar.fitParVal[FITPAR_POS1+(3*i)]) < fabsl(cursorChan - fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)])){
+              if(fabsl(cursorChan - fitpar.centroidVal[i]) < fabsl(cursorChan - fitpar.centroidVal[drawing.highlightedPeak])){
                 peakToHighlight = (signed char)i;
               }
             }
@@ -884,7 +884,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event){
         default:
           //print highlighted peak info
           if(calpar.calMode == 1){
-            double calCentr = getCalVal((double)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)]));
+            double calCentr = getCalVal((double)(fitpar.centroidVal[drawing.highlightedPeak]));
             double calWidth = getCalWidth((double)(fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]),(double)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)]));
             double calCentrErr = getCalWidth((double)(fitpar.fitParErr[FITPAR_POS1+(3*drawing.highlightedPeak)]),(double)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)]));
             double calWidthErr = getCalWidth((double)(fitpar.fitParErr[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]),(double)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)]));
@@ -896,7 +896,7 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event){
           }else{
             char fitParStr[3][50];
             getFormattedValAndUncertainty((double)fitpar.areaVal[drawing.highlightedPeak],(double)fitpar.areaErr[drawing.highlightedPeak],fitParStr[0],50,1,guiglobals.roundErrors);
-            getFormattedValAndUncertainty((double)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)]),(double)(fitpar.fitParErr[FITPAR_POS1+(3*drawing.highlightedPeak)]),fitParStr[1],50,1,guiglobals.roundErrors);
+            getFormattedValAndUncertainty((double)(fitpar.centroidVal[drawing.highlightedPeak]),(double)(fitpar.fitParErr[FITPAR_POS1+(3*drawing.highlightedPeak)]),fitParStr[1],50,1,guiglobals.roundErrors);
             getFormattedValAndUncertainty(2.35482*(double)(fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]),2.35482*(double)(fitpar.fitParErr[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]),fitParStr[2],50,1,guiglobals.roundErrors);
             snprintf(statusBarLabel,256,"Area: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
           }
@@ -1794,24 +1794,6 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         if(fitSkipFactor <= 0.0f){
           fitSkipFactor = 0.5f;
         }
-        //draw each peak
-        /*for(int32_t i=0;i<fitpar.numFitPeaks;i++){
-          fitDrawX=(float)(fitpar.fitStartCh);
-          fitDrawX = floorf((float)(fitpar.fitParVal[FITPAR_POS1+(3*i)] - 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*i)]));
-          nextXpos = getXPosFromCh(fitDrawX,width);
-          if(nextXpos > 0){
-            cairo_move_to(cr, nextXpos, getYPos((float)(evalFitOnePeak(fitDrawX,i)),0,height));
-          }else{
-            cairo_move_to(cr, XORIGIN, getYPos((float)(evalFitOnePeak((float)drawing.lowerLimit,i)),0,height,YORIGIN));
-          }
-          for(; fitDrawX<=floorf((float)(fitpar.fitParVal[FITPAR_POS1+(3*i)] + 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*i)])); fitDrawX+= fitSkipFactor){
-            nextFitDrawX = fitDrawX + fitSkipFactor;
-            nextXpos = getXPosFromCh(nextFitDrawX,width);
-            if(nextXpos > 0){
-              cairo_line_to(cr, nextXpos, getYPos((float)(evalFitOnePeak(nextFitDrawX,i)),0,height));
-            }
-          }
-        }*/
         //draw background
         cairo_set_line_width(cr, 1.0*scaleFactor);
         fitDrawX=(float)(fitpar.fitStartCh);
@@ -1849,14 +1831,14 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         //draw highlighed peak
         if((drawing.highlightedPeak >= 0)&&(drawing.highlightedPeak <= fitpar.numFitPeaks)&&(showFit>1)){
           cairo_set_line_width(cr, 6.0*scaleFactor);
-          fitDrawX = floorf((float)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)] - 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]));
+          fitDrawX = floorf((float)(fitpar.centroidVal[drawing.highlightedPeak] - 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]));
           nextXpos = getXPosFromCh(fitDrawX,width);
           if(nextXpos > 0){
             cairo_move_to(cr, nextXpos, getYPos((float)(evalFitOnePeak(fitDrawX,drawing.highlightedPeak)),0,height));
           }else{
             cairo_move_to(cr, XORIGIN, getYPos((float)(evalFitOnePeak((float)drawing.lowerLimit,drawing.highlightedPeak)),0,height));
           }
-          for(; fitDrawX<=floorf((float)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)] + 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)])); fitDrawX+= fitSkipFactor){
+          for(; fitDrawX<=floorf((float)(fitpar.centroidVal[drawing.highlightedPeak] + 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)])); fitDrawX+= fitSkipFactor){
             nextFitDrawX = fitDrawX + fitSkipFactor;
             nextXpos = getXPosFromCh(nextFitDrawX,width);
             if(nextXpos > 0){

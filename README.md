@@ -13,7 +13,7 @@ A list of features is [here](FEATURES.md).
 
 ### Compatibility
 
-This program has been tested on Debian 12, CentOS 7, and Arch Linux (as of February 2025) under the GNOME and KDE desktop environments.  It should work on any Linux distro that satisfies the listed build dependencies.  It may be possible to build this on other platforms where GTK is [available](https://www.gtk.org/docs/installations/), but that hasn't been tested.
+This program has been tested on Debian 12 and Arch Linux (as of March 2025) under the GNOME and KDE desktop environments.  It should work on any Linux distro that satisfies the listed build dependencies.  It may be possible to build this on other platforms where GTK is [available](https://www.gtk.org/docs/installations/), but that hasn't been tested.
 
 ### Build dependencies
 
@@ -21,12 +21,6 @@ This program has been tested on Debian 12, CentOS 7, and Arch Linux (as of Febru
 * gcc
 * pkg-config
 * GTK3
-
-In CentOS 7:
-
-```
-yum install gcc gtk3-devel
-```
 
 In Ubuntu / Debian:
 
@@ -38,6 +32,12 @@ In Arch Linux:
 
 ```
 pacman -S gcc make pkgconf gtk3
+```
+
+In CentOS:
+
+```
+yum install gcc gtk3-devel
 ```
 
 ### Build instructions
