@@ -7,12 +7,7 @@
 //alternatively, the packet header may be a negative number -n, in which case n non-repeating elements follow as 32-bit floats
 //if the packet header is 0, that is the end of the spectrum
 //format: 2 - use floating point for spectra, 3 - use double precision for spectra
-int writeJF3(const char *filename, const uint8_t format, double inpHist[NSPECT][S32K]){
-  
-  if((format < 2)||(format > 3)){
-    printf("ERROR: cannot save .jf3 file with format: %u\n", format);
-    return 1;
-  }
+int writeJF3(const char *filename, double inpHist[NSPECT][S32K]){
 
   FILE *out;
   uint8_t ucharBuf;
@@ -26,7 +21,7 @@ int writeJF3(const char *filename, const uint8_t format, double inpHist[NSPECT][
 
   //printf("Number of spectra to write: %i\n",rawdata.numSpOpened);
 
-  ucharBuf = format; //file format version number
+  ucharBuf = 4; //file format version number
   fwrite(&ucharBuf,sizeof(uint8_t),1,out);
   ucharBuf = rawdata.numSpOpened; //number of spectra to write
   fwrite(&ucharBuf,sizeof(uint8_t),1,out);
@@ -50,7 +45,7 @@ int writeJF3(const char *filename, const uint8_t format, double inpHist[NSPECT][
   fwrite(&uintBuf,sizeof(uint32_t),1,out);
   for(int32_t i=0;i<(int32_t)rawdata.numViews;i++){
     fwrite(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,out);
-    fwrite(&rawdata.viewMultiplotMode[i],sizeof(uint8_t),1,out);
+    fwrite(&rawdata.viewMode[i],sizeof(uint8_t),1,out);
     fwrite(&rawdata.viewNumMultiplotSp[i],sizeof(uint8_t),1,out);
     for(int32_t j=0;j<rawdata.viewNumMultiplotSp[i];j++){
       fwrite(&rawdata.viewMultiPlots[i][j],sizeof(uint8_t),1,out);
@@ -59,228 +54,122 @@ int writeJF3(const char *filename, const uint8_t format, double inpHist[NSPECT][
       fwrite(&rawdata.viewScaleFactor[i][rawdata.viewMultiPlots[i][j]],sizeof(double),1,out);
     }
   }
-
-  if(format == 3){
-    //double precision spectra
-    double lastBin = 0.;
-    double currentBin;
-    double val;
-    signed char packetCounter;
-    for(int32_t i=0;i<rawdata.numSpOpened;i++){
-      if(i<NSPECT){
-
-        //printf("Writing spectrum %i\n",i);
-
-        //scan for end of spectrum
-        int lastCh = 0;
-        for(int32_t j=S32K-1;j>=0;j--){
-          if(inpHist[i][j]!=0){
-            lastCh=j;
-            break;
-          }
-        }
-
-        //encode spectrum
-        packetCounter = 1;
-        for(int32_t j=0;j<S32K;j++){
-          
-          //get bin values
-          currentBin = inpHist[i][j];
-          if(j>0){
-            lastBin = inpHist[i][j-1];
-          }else{
-            lastBin = inpHist[i][j];
-          }
-          
-          //printf("bin: %i cuurent val: %f last val: %f packetCounter: %i\n",j,currentBin,lastBin,packetCounter);
-
-          if(j>=lastCh){
-            //end of spectrum reached
-            if(packetCounter > 0){
-              //write last packet
-              fwrite(&packetCounter,sizeof(signed char),1,out);
-              //printf("wrote packet counter %i\n",packetCounter);
-              val = inpHist[i][j-1];
-              fwrite(&val,sizeof(double),1,out);
-            }else{
-              //write last packet
-              fwrite(&packetCounter,sizeof(signed char),1,out);
-              //printf("wrote packet counter %i\n",packetCounter);
-              for(int32_t k=0;k<(packetCounter*-1);k++){
-                val = inpHist[i][j+packetCounter+k];
-                fwrite(&val,sizeof(double),1,out);
-              }
-            }
-            //write final packet
-            packetCounter = 0;
-            fwrite(&packetCounter,sizeof(signed char),1,out);
-            //printf("wrote packet counter %i\n",packetCounter);
-            val = inpHist[i][j];
-            fwrite(&val,sizeof(double),1,out);
-            break;
-          }else if(packetCounter > 126){
-            //write last packet
-            fwrite(&packetCounter,sizeof(signed char),1,out);
-            val = inpHist[i][j-1];
-            fwrite(&val,sizeof(double),1,out);
-            //start new packet
-            packetCounter = 1;
-          }else if (packetCounter < -126){
-            //write last packet
-            fwrite(&packetCounter,sizeof(signed char),1,out);
-            //printf("wrote packet counter %i\n",packetCounter);
-            for(int32_t k=0;k<(packetCounter*-1);k++){
-              val = inpHist[i][j+packetCounter+k];
-              fwrite(&val,sizeof(double),1,out);
-            }
-            //start new packet
-            packetCounter = 1;
-          }else if((currentBin == lastBin)&&(packetCounter>0)){
-            //continue packet
-            if(j>0) //remember we start off with a value of 1
-              packetCounter++;
-          }else if((currentBin != lastBin)&&(packetCounter>1)){
-            //write last packet
-            fwrite(&packetCounter,sizeof(signed char),1,out);
-            //printf("wrote packet counter %i\n",packetCounter);
-            val = inpHist[i][j-1];
-            fwrite(&val,sizeof(double),1,out);
-            //start new packet
-            packetCounter = 1;
-          }else if((currentBin != lastBin)&&(packetCounter==1)){
-            //change packet type
-            packetCounter = -2;
-          }else if((currentBin == lastBin)&&(packetCounter<0)){
-            //write last packet
-            fwrite(&packetCounter,sizeof(signed char),1,out);
-            //printf("wrote packet counter %i\n",packetCounter);
-            for(int32_t k=0;k<(packetCounter*-1);k++){
-              val = inpHist[i][j+packetCounter+k];
-              fwrite(&val,sizeof(double),1,out);
-            }
-            //start new packet
-            packetCounter = 1;
-          }else if((currentBin != lastBin)&&(packetCounter<0)){
-            //continue packet
-            packetCounter--;
-          }
-        }
-
-      }
-
-    }
-  }else if(format == 2){
-    //single precision (float) spectra
-    float lastBin = 0.;
-    float currentBin;
-    float val;
-    signed char packetCounter;
-    for(int32_t i=0;i<rawdata.numSpOpened;i++){
-      if(i<NSPECT){
-
-        //printf("Writing spectrum %i\n",i);
-
-        //scan for end of spectrum
-        int lastCh = 0;
-        for(int32_t j=S32K-1;j>=0;j--){
-          if(inpHist[i][j]!=0){
-            lastCh=j;
-            break;
-          }
-        }
-
-        //encode spectrum
-        packetCounter = 1;
-        for(int32_t j=0;j<S32K;j++){
-          
-          //get bin values
-          currentBin = (float)inpHist[i][j];
-          if(j>0){
-            lastBin = (float)inpHist[i][j-1];
-          }else{
-            lastBin = (float)inpHist[i][j];
-          }
-          
-          //printf("bin: %i cuurent val: %f last val: %f packetCounter: %i\n",j,currentBin,lastBin,packetCounter);
-
-          if(j>=lastCh){
-            //end of spectrum reached
-            if(packetCounter > 0){
-              //write last packet
-              fwrite(&packetCounter,sizeof(signed char),1,out);
-              //printf("wrote packet counter %i\n",packetCounter);
-              val = (float)inpHist[i][j-1];
-              fwrite(&val,sizeof(float),1,out);
-            }else{
-              //write last packet
-              fwrite(&packetCounter,sizeof(signed char),1,out);
-              //printf("wrote packet counter %i\n",packetCounter);
-              for(int32_t k=0;k<(packetCounter*-1);k++){
-                val = (float)inpHist[i][j+packetCounter+k];
-                fwrite(&val,sizeof(float),1,out);
-              }
-            }
-            //write final packet
-            packetCounter = 0;
-            fwrite(&packetCounter,sizeof(signed char),1,out);
-            //printf("wrote packet counter %i\n",packetCounter);
-            val = (float)inpHist[i][j];
-            fwrite(&val,sizeof(float),1,out);
-            break;
-          }else if(packetCounter > 126){
-            //write last packet
-            fwrite(&packetCounter,sizeof(signed char),1,out);
-            val = (float)inpHist[i][j-1];
-            fwrite(&val,sizeof(float),1,out);
-            //start new packet
-            packetCounter = 1;
-          }else if (packetCounter < -126){
-            //write last packet
-            fwrite(&packetCounter,sizeof(signed char),1,out);
-            //printf("wrote packet counter %i\n",packetCounter);
-            for(int32_t k=0;k<(packetCounter*-1);k++){
-              val = (float)inpHist[i][j+packetCounter+k];
-              fwrite(&val,sizeof(float),1,out);
-            }
-            //start new packet
-            packetCounter = 1;
-          }else if((currentBin == lastBin)&&(packetCounter>0)){
-            //continue packet
-            if(j>0) //remember we start off with a value of 1
-              packetCounter++;
-          }else if((currentBin != lastBin)&&(packetCounter>1)){
-            //write last packet
-            fwrite(&packetCounter,sizeof(signed char),1,out);
-            //printf("wrote packet counter %i\n",packetCounter);
-            val = (float)inpHist[i][j-1];
-            fwrite(&val,sizeof(float),1,out);
-            //start new packet
-            packetCounter = 1;
-          }else if((currentBin != lastBin)&&(packetCounter==1)){
-            //change packet type
-            packetCounter = -2;
-          }else if((currentBin == lastBin)&&(packetCounter<0)){
-            //write last packet
-            fwrite(&packetCounter,sizeof(signed char),1,out);
-            //printf("wrote packet counter %i\n",packetCounter);
-            for(int32_t k=0;k<(packetCounter*-1);k++){
-              val = (float)inpHist[i][j+packetCounter+k];
-              fwrite(&val,sizeof(float),1,out);
-            }
-            //start new packet
-            packetCounter = 1;
-          }else if((currentBin != lastBin)&&(packetCounter<0)){
-            //continue packet
-            packetCounter--;
-          }
-        }
-
-      }
-
-    }
+  //write saved fits
+  uintBuf = rawdata.numSavedFits; //number of saved fits to write
+  fwrite(&uintBuf,sizeof(uint32_t),1,out);
+  //write saved fit data
+  for(int32_t i=0;i<(int32_t)rawdata.numSavedFits;i++){
+    fwrite(&rawdata.savedFitPar[i],sizeof(fitpar),1,out);
   }
 
-  
+  //double precision spectra
+  double lastBin = 0.;
+  double currentBin;
+  double val;
+  signed char packetCounter;
+  for(int32_t i=0;i<rawdata.numSpOpened;i++){
+    if(i<NSPECT){
+
+      //printf("Writing spectrum %i\n",i);
+
+      //scan for end of spectrum
+      int lastCh = 0;
+      for(int32_t j=S32K-1;j>=0;j--){
+        if(inpHist[i][j]!=0){
+          lastCh=j;
+          break;
+        }
+      }
+
+      //encode spectrum
+      packetCounter = 1;
+      for(int32_t j=0;j<S32K;j++){
+        
+        //get bin values
+        currentBin = inpHist[i][j];
+        if(j>0){
+          lastBin = inpHist[i][j-1];
+        }else{
+          lastBin = inpHist[i][j];
+        }
+        
+        //printf("bin: %i cuurent val: %f last val: %f packetCounter: %i\n",j,currentBin,lastBin,packetCounter);
+
+        if(j>=lastCh){
+          //end of spectrum reached
+          if(packetCounter > 0){
+            //write last packet
+            fwrite(&packetCounter,sizeof(signed char),1,out);
+            //printf("wrote packet counter %i\n",packetCounter);
+            val = inpHist[i][j-1];
+            fwrite(&val,sizeof(double),1,out);
+          }else{
+            //write last packet
+            fwrite(&packetCounter,sizeof(signed char),1,out);
+            //printf("wrote packet counter %i\n",packetCounter);
+            for(int32_t k=0;k<(packetCounter*-1);k++){
+              val = inpHist[i][j+packetCounter+k];
+              fwrite(&val,sizeof(double),1,out);
+            }
+          }
+          //write final packet
+          packetCounter = 0;
+          fwrite(&packetCounter,sizeof(signed char),1,out);
+          //printf("wrote packet counter %i\n",packetCounter);
+          val = inpHist[i][j];
+          fwrite(&val,sizeof(double),1,out);
+          break;
+        }else if(packetCounter > 126){
+          //write last packet
+          fwrite(&packetCounter,sizeof(signed char),1,out);
+          val = inpHist[i][j-1];
+          fwrite(&val,sizeof(double),1,out);
+          //start new packet
+          packetCounter = 1;
+        }else if (packetCounter < -126){
+          //write last packet
+          fwrite(&packetCounter,sizeof(signed char),1,out);
+          //printf("wrote packet counter %i\n",packetCounter);
+          for(int32_t k=0;k<(packetCounter*-1);k++){
+            val = inpHist[i][j+packetCounter+k];
+            fwrite(&val,sizeof(double),1,out);
+          }
+          //start new packet
+          packetCounter = 1;
+        }else if((currentBin == lastBin)&&(packetCounter>0)){
+          //continue packet
+          if(j>0) //remember we start off with a value of 1
+            packetCounter++;
+        }else if((currentBin != lastBin)&&(packetCounter>1)){
+          //write last packet
+          fwrite(&packetCounter,sizeof(signed char),1,out);
+          //printf("wrote packet counter %i\n",packetCounter);
+          val = inpHist[i][j-1];
+          fwrite(&val,sizeof(double),1,out);
+          //start new packet
+          packetCounter = 1;
+        }else if((currentBin != lastBin)&&(packetCounter==1)){
+          //change packet type
+          packetCounter = -2;
+        }else if((currentBin == lastBin)&&(packetCounter<0)){
+          //write last packet
+          fwrite(&packetCounter,sizeof(signed char),1,out);
+          //printf("wrote packet counter %i\n",packetCounter);
+          for(int32_t k=0;k<(packetCounter*-1);k++){
+            val = inpHist[i][j+packetCounter+k];
+            fwrite(&val,sizeof(double),1,out);
+          }
+          //start new packet
+          packetCounter = 1;
+        }else if((currentBin != lastBin)&&(packetCounter<0)){
+          //continue packet
+          packetCounter--;
+        }
+      }
+
+    }
+
+  }
 
   fclose(out);
   printf("Wrote data to file: %s\n",filename);
@@ -303,7 +192,7 @@ int exportSPE(const char *filePrefix, const int exportMode, const int rebin){
   int32_t junk = 1;
   int32_t byteSize = arraySize*4;
 
-  switch(exportMode + (drawing.multiplotMode != MULTIPLOT_SUMMED)){
+  switch(exportMode + (drawing.multiplotMode != VIEWTYPE_SUMMED)){
     case 1:
       //export all
       for(int32_t i=0;i<rawdata.numSpOpened;i++){
@@ -448,7 +337,7 @@ int exportFMCA(const char *filePrefix, const int exportMode, const int rebin){
     return 1;
   }
 
-  switch(exportMode + (drawing.multiplotMode != MULTIPLOT_SUMMED)){
+  switch(exportMode + (drawing.multiplotMode != VIEWTYPE_SUMMED)){
     case 1:
       //export all
       for(int32_t i=0;i<rawdata.numSpOpened;i++){
@@ -526,7 +415,7 @@ int exportDMCA(const char *filePrefix, const int exportMode, const int rebin){
     return 1;
   }
 
-  switch(exportMode + (drawing.multiplotMode != MULTIPLOT_SUMMED)){
+  switch(exportMode + (drawing.multiplotMode != VIEWTYPE_SUMMED)){
     case 1:
       //export all
       for(int32_t i=0;i<rawdata.numSpOpened;i++){
@@ -605,7 +494,7 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin){
     return 1;
   }
   
-  switch(exportMode + (drawing.multiplotMode != MULTIPLOT_SUMMED)){
+  switch(exportMode + (drawing.multiplotMode != VIEWTYPE_SUMMED)){
     case 1:
       //export all
 
@@ -645,7 +534,7 @@ int exportTXT(const char *filePrefix, const int exportMode, const int rebin){
 
       //write views
       for(int32_t i=0;i<rawdata.numViews;i++){
-        fprintf(out,"VIEW %s\nVIEWPAR %u %i\n",rawdata.viewComment[i],rawdata.viewMultiplotMode[i],rawdata.viewNumMultiplotSp[i]);
+        fprintf(out,"VIEW %s\nVIEWPAR %u %i\n",rawdata.viewComment[i],rawdata.viewMode[i],rawdata.viewNumMultiplotSp[i]);
         fprintf(out,"VIEWSP ");
         for(int32_t j=0;j<rawdata.viewNumMultiplotSp[i];j++){
           fprintf(out," %u", rawdata.viewMultiPlots[i][j]);

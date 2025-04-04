@@ -24,8 +24,10 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
   }
 
   if(fread(&ucharBuf, sizeof(uint8_t), 1, inp)!=1){fclose(inp); return 0;}
-  if(ucharBuf==3){
-    //version 3 of file format (like version 2 but with double precision values)
+  uint8_t format = ucharBuf;
+  //printf(".jf3 file format: %u\n",format);
+  if(format>=3){
+    //version 3+ of file format (double precision values in spectra)
     if(fread(&ucharBuf, sizeof(uint8_t), 1, inp)!=1){fclose(inp); return 0;}
     numSpec = ucharBuf;
     if(numSpec > 0){
@@ -97,7 +99,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
           if(i<MAXNVIEWS){
             memset(rawdata.viewScaleFactor[i],0,sizeof(rawdata.viewScaleFactor[i]));
             if(fread(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,inp)!=1){fclose(inp); return 0;}
-            if(fread(&rawdata.viewMultiplotMode[i],sizeof(uint8_t),1,inp)!=1){fclose(inp); return 0;}
+            if(fread(&rawdata.viewMode[i],sizeof(uint8_t),1,inp)!=1){fclose(inp); return 0;}
             if(fread(&rawdata.viewNumMultiplotSp[i],sizeof(uint8_t),1,inp)!=1){fclose(inp); return 0;}
             for(uint32_t j=0;j<rawdata.viewNumMultiplotSp[i];j++){
               if(fread(&rawdata.viewMultiPlots[i][j],sizeof(uint8_t),1,inp)!=1){fclose(inp); return 0;}
@@ -115,7 +117,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
           if(i<MAXNVIEWS){
             memset(rawdata.viewScaleFactor[i],0,sizeof(rawdata.viewScaleFactor[i]));
             if(fread(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,inp)!=1){fclose(inp); return 0;}
-            if(fread(&rawdata.viewMultiplotMode[i],sizeof(uint8_t),1,inp)!=1){fclose(inp); return 0;}
+            if(fread(&rawdata.viewMode[i],sizeof(uint8_t),1,inp)!=1){fclose(inp); return 0;}
             if(fread(&rawdata.viewNumMultiplotSp[i],sizeof(uint8_t),1,inp)!=1){fclose(inp); return 0;}
             for(uint32_t j=0;j<rawdata.viewNumMultiplotSp[i];j++){
               if(fread(&rawdata.viewMultiPlots[i][j],sizeof(uint8_t),1,inp)!=1){fclose(inp); return 0;}
@@ -140,6 +142,14 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
         if(rawdata.numViews > MAXNVIEWS){
           printf("WARNING: over-imported views.  Truncating.\n");
           rawdata.numViews = MAXNVIEWS;
+        }
+      }
+      if(format >= 4){
+        //read saved fits
+        if(fread(&uintBuf, sizeof(uint32_t), 1, inp)!=1){fclose(inp); return 0;}
+        rawdata.numSavedFits = (uint8_t)uintBuf;
+        for(uint32_t i=0;i<rawdata.numSavedFits;i++){
+          if(fread(&rawdata.savedFitPar[i],sizeof(fitpar),1,inp)!=1){fclose(inp); return 0;}
         }
       }
 
@@ -193,7 +203,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
       fclose(inp);
       return 0;
     }
-  }else if(ucharBuf==2){
+  }else if(format==2){
     //version 2 of file format (floating point values)
     if(fread(&ucharBuf, sizeof(uint8_t), 1, inp)!=1){fclose(inp); return 0;}
     numSpec = ucharBuf;
@@ -266,7 +276,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
           if(i<MAXNVIEWS){
             memset(rawdata.viewScaleFactor[i],0,sizeof(rawdata.viewScaleFactor[i]));
             if(fread(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,inp)!=1){fclose(inp); return 0;}
-            if(fread(&rawdata.viewMultiplotMode[i],sizeof(uint8_t),1,inp)!=1){fclose(inp); return 0;}
+            if(fread(&rawdata.viewMode[i],sizeof(uint8_t),1,inp)!=1){fclose(inp); return 0;}
             if(fread(&rawdata.viewNumMultiplotSp[i],sizeof(uint8_t),1,inp)!=1){fclose(inp); return 0;}
             for(uint32_t j=0;j<rawdata.viewNumMultiplotSp[i];j++){
               if(fread(&rawdata.viewMultiPlots[i][j],sizeof(uint8_t),1,inp)!=1){fclose(inp); return 0;}
@@ -284,7 +294,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
           if(i<MAXNVIEWS){
             memset(rawdata.viewScaleFactor[i],0,sizeof(rawdata.viewScaleFactor[i]));
             if(fread(&rawdata.viewComment[i],sizeof(rawdata.viewComment[i]),1,inp)!=1){fclose(inp); return 0;}
-            if(fread(&rawdata.viewMultiplotMode[i],sizeof(uint8_t),1,inp)!=1){fclose(inp); return 0;}
+            if(fread(&rawdata.viewMode[i],sizeof(uint8_t),1,inp)!=1){fclose(inp); return 0;}
             if(fread(&rawdata.viewNumMultiplotSp[i],sizeof(uint8_t),1,inp)!=1){fclose(inp); return 0;}
             for(uint32_t j=0;j<rawdata.viewNumMultiplotSp[i];j++){
               if(fread(&rawdata.viewMultiPlots[i][j],sizeof(uint8_t),1,inp)!=1){fclose(inp); return 0;}
@@ -363,7 +373,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
       return 0;
     }
   }else{
-    printf("ERROR: file %s has unknown .jf3 file format version (%i).\n",filename,ucharBuf);
+    printf("ERROR: file %s has unknown .jf3 file format version (%i).\n",filename,format);
     fclose(inp);
     return 0;
   }
@@ -796,7 +806,7 @@ int readTXT(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
                         if(strcmp(tok,"VIEWPAR")==0){
                           tok = strtok(NULL," ");
                           if(tok!=NULL){
-                            rawdata.viewMultiplotMode[rawdata.numViews] = (uint8_t)atoi(tok);
+                            rawdata.viewMode[rawdata.numViews] = (uint8_t)atoi(tok);
                             tok = strtok(NULL," ");
                             if(tok!=NULL){
                               rawdata.viewNumMultiplotSp[rawdata.numViews] = (uint8_t)atoi(tok);

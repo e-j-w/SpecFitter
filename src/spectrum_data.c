@@ -9,8 +9,28 @@ int getFirstViewDependingOnSp(const int32_t spInd){
     return -1;
   }
   for(int32_t i=0;i<rawdata.numViews;i++){
-    for(int32_t j=0;j<rawdata.viewNumMultiplotSp[i];j++){
-      if(rawdata.viewMultiPlots[i][j] == spInd){
+    if(rawdata.viewMode[i] == VIEWTYPE_SAVEDFIT_OFSP){
+      if(rawdata.viewNumMultiplotSp[i] == spInd){
+        return i;
+      }
+    }else{
+      for(int32_t j=0;j<rawdata.viewNumMultiplotSp[i];j++){
+        if(rawdata.viewMultiPlots[i][j] == spInd){
+          return i;
+        }
+      }
+    }
+  }
+  return -1;
+}
+
+int getFirstViewDependingOnView(const int32_t viewInd){
+  if((viewInd<0)||(viewInd>=rawdata.numViews)){
+    return -1;
+  }
+  for(int32_t i=0;i<rawdata.numViews;i++){
+    if(rawdata.viewMode[i] == VIEWTYPE_SAVEDFIT_OFVIEW){
+      if(rawdata.viewNumMultiplotSp[i] == viewInd){
         return i;
       }
     }
@@ -80,11 +100,21 @@ void deleteSpectrumOrView(const int32_t spInd){
         //delete view
         for(int32_t i=viewToDel;i<(rawdata.numViews-1);i++){
           memcpy(&rawdata.viewComment[i],&rawdata.viewComment[i+1],sizeof(rawdata.viewComment[i]));
-          memcpy(&rawdata.viewMultiplotMode[i],&rawdata.viewMultiplotMode[i+1],sizeof(rawdata.viewMultiplotMode[i]));
+          memcpy(&rawdata.viewMode[i],&rawdata.viewMode[i+1],sizeof(rawdata.viewMode[i]));
           memcpy(&rawdata.viewNumMultiplotSp[i],&rawdata.viewNumMultiplotSp[i+1],sizeof(rawdata.viewNumMultiplotSp[i]));
           memcpy(&rawdata.viewScaleFactor[i],&rawdata.viewScaleFactor[i+1],sizeof(rawdata.viewScaleFactor[i]));
           memcpy(&rawdata.viewMultiPlots[i],&rawdata.viewMultiPlots[i+1],sizeof(rawdata.viewMultiPlots[i]));
         }
+
+        //realign other view data so that it still points to the proper view
+        for(int32_t i=0;i<rawdata.numViews;i++){
+          if(rawdata.viewMode[i] == VIEWTYPE_SAVEDFIT_OFVIEW){
+            if(rawdata.viewNumMultiplotSp[i] > viewToDel){
+              rawdata.viewNumMultiplotSp[i] = (uint8_t)(rawdata.viewNumMultiplotSp[i] - 1);
+            }
+          }
+        }
+
         if(rawdata.numViews > 0){
           rawdata.numViews = (uint8_t)(rawdata.numViews-1);
         }
@@ -95,13 +125,19 @@ void deleteSpectrumOrView(const int32_t spInd){
 
     //realign view data so that it still points to the proper spectra
     for(int32_t i=0;i<rawdata.numViews;i++){
-      for(int32_t j=0;j<rawdata.viewNumMultiplotSp[i];j++){
-        if(rawdata.viewMultiPlots[i][j] > spInd){
-          rawdata.viewMultiPlots[i][j] = (uint8_t)(rawdata.viewMultiPlots[i][j]-1);
+      if(rawdata.viewMode[i] == VIEWTYPE_SAVEDFIT_OFSP){
+        if(rawdata.viewNumMultiplotSp[i] > spInd){
+          rawdata.viewNumMultiplotSp[i] = (uint8_t)(rawdata.viewNumMultiplotSp[i] - 1);
         }
-      }
-      for(int32_t j=spInd;j<(rawdata.numSpOpened-1);j++){
-        rawdata.viewScaleFactor[i][j]=rawdata.viewScaleFactor[i][j+1];
+      }else{
+        for(int32_t j=0;j<rawdata.viewNumMultiplotSp[i];j++){
+          if(rawdata.viewMultiPlots[i][j] > spInd){
+            rawdata.viewMultiPlots[i][j] = (uint8_t)(rawdata.viewMultiPlots[i][j] - 1);
+          }
+        }
+        for(int32_t j=spInd;j<(rawdata.numSpOpened-1);j++){
+          rawdata.viewScaleFactor[i][j]=rawdata.viewScaleFactor[i][j+1];
+        }
       }
     }
 
@@ -143,14 +179,68 @@ void deleteSpectrumOrView(const int32_t spInd){
       }
     }
 
+    //delete views that depend on the data
+    int32_t deletingViews = 1;
+    while(deletingViews){
+      int32_t viewToDel = getFirstViewDependingOnView(viewInd);
+      if(viewToDel >= 0){
+
+        //delete comments associated with the view
+        for(int32_t i=0;i<(int32_t)rawdata.numChComments;i++){
+          if(rawdata.chanCommentView[i] == 1){
+            if(rawdata.chanCommentSp[i] == viewToDel){
+              //delete the comment
+              for(int32_t j=i;j<(int32_t)(rawdata.numChComments-1);j++){
+                memcpy(&rawdata.chanComment[j],&rawdata.chanComment[j+1],sizeof(rawdata.chanComment[j]));
+                memcpy(&rawdata.chanCommentView[j],&rawdata.chanCommentView[j+1],sizeof(rawdata.chanCommentView[j]));
+                memcpy(&rawdata.chanCommentSp[j],&rawdata.chanCommentSp[j+1],sizeof(rawdata.chanCommentSp[j]));
+                memcpy(&rawdata.chanCommentCh[j],&rawdata.chanCommentCh[j+1],sizeof(rawdata.chanCommentCh[j]));
+                memcpy(&rawdata.chanCommentVal[j],&rawdata.chanCommentVal[j+1],sizeof(rawdata.chanCommentVal[j]));
+              }
+              rawdata.numChComments -= 1;
+              i -= 1; //indices have shifted, reheck the current index
+            }else if(rawdata.chanCommentSp[i] > viewToDel){
+              //change to the new index for the view
+              rawdata.chanCommentSp[i] = (uint8_t)(rawdata.chanCommentSp[i]-1);
+            }
+          }
+        }
+
+        //delete view
+        for(int32_t i=viewToDel;i<(rawdata.numViews-1);i++){
+          memcpy(&rawdata.viewComment[i],&rawdata.viewComment[i+1],sizeof(rawdata.viewComment[i]));
+          memcpy(&rawdata.viewMode[i],&rawdata.viewMode[i+1],sizeof(rawdata.viewMode[i]));
+          memcpy(&rawdata.viewNumMultiplotSp[i],&rawdata.viewNumMultiplotSp[i+1],sizeof(rawdata.viewNumMultiplotSp[i]));
+          memcpy(&rawdata.viewScaleFactor[i],&rawdata.viewScaleFactor[i+1],sizeof(rawdata.viewScaleFactor[i]));
+          memcpy(&rawdata.viewMultiPlots[i],&rawdata.viewMultiPlots[i+1],sizeof(rawdata.viewMultiPlots[i]));
+        }
+
+        //realign other view data so that it still points to the proper view
+        for(int32_t i=0;i<rawdata.numViews;i++){
+          if(rawdata.viewMode[i] == VIEWTYPE_SAVEDFIT_OFVIEW){
+            if(rawdata.viewNumMultiplotSp[i] > viewToDel){
+              rawdata.viewNumMultiplotSp[i] = (uint8_t)(rawdata.viewNumMultiplotSp[i] - 1);
+            }
+          }
+        }
+
+        if(rawdata.numViews > 0){
+          rawdata.numViews = (uint8_t)(rawdata.numViews-1);
+        }
+      }else{
+        deletingViews = 0;
+      }
+    }
+
     //delete view
     for(int32_t i=viewInd;i<(rawdata.numViews-1);i++){
       memcpy(&rawdata.viewComment[i],&rawdata.viewComment[i+1],sizeof(rawdata.viewComment[i]));
-      memcpy(&rawdata.viewMultiplotMode[i],&rawdata.viewMultiplotMode[i+1],sizeof(rawdata.viewMultiplotMode[i]));
+      memcpy(&rawdata.viewMode[i],&rawdata.viewMode[i+1],sizeof(rawdata.viewMode[i]));
       memcpy(&rawdata.viewNumMultiplotSp[i],&rawdata.viewNumMultiplotSp[i+1],sizeof(rawdata.viewNumMultiplotSp[i]));
       memcpy(&rawdata.viewScaleFactor[i],&rawdata.viewScaleFactor[i+1],sizeof(rawdata.viewScaleFactor[i]));
       memcpy(&rawdata.viewMultiPlots[i],&rawdata.viewMultiPlots[i+1],sizeof(rawdata.viewMultiPlots[i]));
     }
+
     if(rawdata.numViews > 0){
       rawdata.numViews = (uint8_t)(rawdata.numViews-1);
     }
@@ -247,7 +337,7 @@ double getSpBinValOrWeight(const int32_t dispSpNum, const int32_t bin, const int
   double val = 0.;
 
   switch(drawing.multiplotMode){
-    case MULTIPLOT_SUMMED:
+    case VIEWTYPE_SUMMED:
       //sum spectra
       for(int32_t j=0;j<drawing.contractFactor;j++){
         if(getWeight){
@@ -261,13 +351,13 @@ double getSpBinValOrWeight(const int32_t dispSpNum, const int32_t bin, const int
         }
       }
       break;
-    case MULTIPLOT_STACKED:
+    case VIEWTYPE_STACKED:
       //stacked
-    case MULTIPLOT_OVERLAY_INDEPENDENT:
+    case VIEWTYPE_OVERLAY_INDEPENDENT:
       //overlay (independent scaling)
-    case MULTIPLOT_OVERLAY_COMMON:
+    case VIEWTYPE_OVERLAY_COMMON:
       //overlay (common scaling)
-    case MULTIPLOT_NONE:
+    case VIEWTYPE_NONE:
       //no multiplot
       val = getSpBinValRaw(drawing.multiPlots[dispSpNum],bin,drawing.scaleFactor[drawing.multiPlots[dispSpNum]],drawing.contractFactor);
       break;

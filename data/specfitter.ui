@@ -3714,6 +3714,24 @@ Weight by fit function - Weights are proportional to the fit function values det
                         <property name="orientation">vertical</property>
                         <property name="spacing">10</property>
                         <child>
+                          <object class="GtkButton" id="fit_save_button">
+                            <property name="label">Save fit</property>
+                            <property name="width-request">100</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                            <property name="halign">center</property>
+                            <style>
+                              <class name="suggested-action"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkButton" id="fit_dismiss_button">
                             <property name="label">Dismiss</property>
                             <property name="width-request">100</property>

@@ -15,36 +15,36 @@ void showPreferences(int page){
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_label_checkbutton),guiglobals.drawSpLabels);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_comment_checkbutton),guiglobals.drawSpComments);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_gridline_checkbutton),guiglobals.drawGridLines);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(limit_centroid_checkbutton),fitpar.limitCentroid);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fix_skew_amplitude_checkbutton),fitpar.fixSkewAmplitide);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fix_beta_checkbutton),fitpar.fixBeta);
-  gtk_spin_button_set_value(manual_width_spinbutton,(gdouble)fitpar.manualWidthVal);
-  gtk_spin_button_set_value(manual_width_offset_spinbutton,(gdouble)fitpar.manualWidthOffset);
-  gtk_spin_button_set_value(limit_centroid_spinbutton,(gdouble)fitpar.limitCentroidVal);
-  gtk_spin_button_set_value(skew_amplitude_spinbutton,(gdouble)fitpar.fixedRVal);
-  gtk_spin_button_set_value(beta_spinbutton,(gdouble)fitpar.fixedBetaVal);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(step_function_checkbutton),fitpar.stepFunction);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(positive_peak_checkbutton),fitpar.forcePositivePeaks);
-  gtk_combo_box_set_active(GTK_COMBO_BOX(background_type_combobox),fitpar.bgType);
-  gtk_combo_box_set_active(GTK_COMBO_BOX(peak_shape_combobox),fitpar.fitType);
-  gtk_combo_box_set_active(GTK_COMBO_BOX(peak_width_combobox),fitpar.peakWidthMethod);
-  gtk_combo_box_set_active(GTK_COMBO_BOX(weight_mode_combobox),fitpar.weightMode);
-  if(fitpar.peakWidthMethod == PEAKWIDTHMODE_MANUAL){
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(limit_centroid_checkbutton),rawdata.dispFitPar.limitCentroid);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fix_skew_amplitude_checkbutton),rawdata.dispFitPar.fixSkewAmplitide);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fix_beta_checkbutton),rawdata.dispFitPar.fixBeta);
+  gtk_spin_button_set_value(manual_width_spinbutton,(gdouble)rawdata.dispFitPar.manualWidthVal);
+  gtk_spin_button_set_value(manual_width_offset_spinbutton,(gdouble)rawdata.dispFitPar.manualWidthOffset);
+  gtk_spin_button_set_value(limit_centroid_spinbutton,(gdouble)rawdata.dispFitPar.limitCentroidVal);
+  gtk_spin_button_set_value(skew_amplitude_spinbutton,(gdouble)rawdata.dispFitPar.fixedRVal);
+  gtk_spin_button_set_value(beta_spinbutton,(gdouble)rawdata.dispFitPar.fixedBetaVal);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(step_function_checkbutton),rawdata.dispFitPar.stepFunction);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(positive_peak_checkbutton),rawdata.dispFitPar.forcePositivePeaks);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(background_type_combobox),rawdata.dispFitPar.bgType);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(peak_shape_combobox),rawdata.dispFitPar.fitType);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(peak_width_combobox),rawdata.dispFitPar.peakWidthMethod);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(weight_mode_combobox),rawdata.dispFitPar.weightMode);
+  if(rawdata.dispFitPar.peakWidthMethod == PEAKWIDTHMODE_MANUAL){
     gtk_revealer_set_reveal_child(manual_width_revealer, TRUE);
   }else{
     gtk_revealer_set_reveal_child(manual_width_revealer, FALSE);
   }
-  if(fitpar.fitType == FITTYPE_SKEWED){
+  if(rawdata.dispFitPar.fitType == FITTYPE_SKEWED){
     gtk_revealer_set_reveal_child(skew_parameters_revealer, TRUE);
   }else{
     gtk_revealer_set_reveal_child(skew_parameters_revealer, FALSE);
   }
-  if((fitpar.fitType == FITTYPE_BGONLY)||(fitpar.fitType == FITTYPE_SUMREGION)){
+  if((rawdata.dispFitPar.fitType == FITTYPE_BGONLY)||(rawdata.dispFitPar.fitType == FITTYPE_SUMREGION)){
     gtk_revealer_set_reveal_child(peak_parameters_revealer, FALSE);
   }else{
     gtk_revealer_set_reveal_child(peak_parameters_revealer, TRUE);
   }
-  if(fitpar.fitType == FITTYPE_SUMREGION){
+  if(rawdata.dispFitPar.fitType == FITTYPE_SUMREGION){
     gtk_revealer_set_reveal_child(background_parameters_revealer, FALSE);
   }else{
     gtk_revealer_set_reveal_child(background_parameters_revealer, TRUE);
@@ -128,16 +128,16 @@ void getViewStr(char *viewStr, const uint32_t strSize, const int32_t viewNum){
   if(viewNum == -1){
     //generating string for temporary view
     switch(drawing.multiplotMode){
-      case MULTIPLOT_STACKED:
+      case VIEWTYPE_STACKED:
         //stack view
         snprintf(viewStr,strSize,"Stacked view of %i spectra",drawing.numMultiplotSp);
         break;
-      case MULTIPLOT_OVERLAY_INDEPENDENT:
-      case MULTIPLOT_OVERLAY_COMMON:
+      case VIEWTYPE_OVERLAY_INDEPENDENT:
+      case VIEWTYPE_OVERLAY_COMMON:
         //overlay
         snprintf(viewStr,strSize,"Overlay view of %i spectra",drawing.numMultiplotSp);
         break;
-      case MULTIPLOT_SUMMED:
+      case VIEWTYPE_SUMMED:
         //summed view
         snprintf(viewStr,strSize,"Summed view of %i spectra",drawing.numMultiplotSp);
         break;
@@ -148,17 +148,23 @@ void getViewStr(char *viewStr, const uint32_t strSize, const int32_t viewNum){
     }
   }else if((viewNum < rawdata.numViews+1)&&(viewNum<MAXNVIEWS)){ //+1 in this condition needed to allow generating new view names
     //generating string for saved custom view
-    switch(rawdata.viewMultiplotMode[viewNum]){
-      case MULTIPLOT_STACKED:
+    switch(rawdata.viewMode[viewNum]){
+      case VIEWTYPE_SAVEDFIT_OFSP:
+        snprintf(viewStr,strSize,"Fit of: %s",rawdata.histComment[rawdata.viewNumMultiplotSp[drawing.displayedView]]);
+        break;
+      case VIEWTYPE_SAVEDFIT_OFVIEW:
+        snprintf(viewStr,strSize,"Fit of: %s",rawdata.viewComment[rawdata.numSpOpened + rawdata.viewNumMultiplotSp[drawing.displayedView]]);
+        break;
+      case VIEWTYPE_STACKED:
         //stack view
         snprintf(viewStr,strSize,"Stacked view of %i spectra",rawdata.viewNumMultiplotSp[viewNum]);
         break;
-      case MULTIPLOT_OVERLAY_INDEPENDENT:
-      case MULTIPLOT_OVERLAY_COMMON:
+      case VIEWTYPE_OVERLAY_INDEPENDENT:
+      case VIEWTYPE_OVERLAY_COMMON:
         //overlay
         snprintf(viewStr,strSize,"Overlay view of %i spectra",rawdata.viewNumMultiplotSp[viewNum]);
         break;
-      case MULTIPLOT_SUMMED:
+      case VIEWTYPE_SUMMED:
         //summed view
         snprintf(viewStr,strSize,"Summed view of %i spectra",rawdata.viewNumMultiplotSp[viewNum]);
         break;
@@ -389,35 +395,78 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button)
       //handle drawing individual spectra
       if(spNum < rawdata.numSpOpened){
         drawing.multiPlots[0] = (uint8_t)spNum;
-        drawing.multiplotMode = MULTIPLOT_NONE;//unset multiplot, if it is being used
+        drawing.multiplotMode = VIEWTYPE_NONE;//unset multiplot, if it is being used
         drawing.numMultiplotSp = 1;//unset multiplot
         drawing.scaleFactor[spNum] = 1.0; //reset any scaling from custom views
         drawing.displayedView = -1;
+        drawing.displayedSavedFit = -1;
         
         gtk_label_set_text(display_spectrumname_label,rawdata.histComment[spNum]);
 
         gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE); //no multiplot, therefore can fit
+
+        //clear fit if necessary
+        if(rawdata.dispFitPar.fittingSp >= FITSTATE_FITCOMPLETE){
+          rawdata.dispFitPar.fittingSp = FITSTATE_NOTFITTING;
+          //update widgets
+          update_gui_fit_state();
+        }
+
       }else if(spNum < (rawdata.numSpOpened+rawdata.numViews)){
         //handle drawing views
         int32_t viewNum = spNum - rawdata.numSpOpened;
-        drawing.numMultiplotSp = rawdata.viewNumMultiplotSp[viewNum];
-        drawing.multiplotMode = rawdata.viewMultiplotMode[viewNum];
-        memcpy(&drawing.scaleFactor,&rawdata.viewScaleFactor[viewNum],sizeof(drawing.scaleFactor));
-        memcpy(&drawing.multiPlots,&rawdata.viewMultiPlots[viewNum],sizeof(drawing.multiPlots));
-        drawing.displayedView = viewNum;
-
         gtk_label_set_text(display_spectrumname_label,rawdata.viewComment[viewNum]);
+        if(rawdata.viewMode[viewNum] == VIEWTYPE_SAVEDFIT_OFSP){
+          uint8_t dispSpNum = rawdata.viewNumMultiplotSp[viewNum];
+          drawing.multiPlots[0] = (uint8_t)dispSpNum;
+          drawing.multiplotMode = VIEWTYPE_NONE;//unset multiplot, if it is being used
+          drawing.numMultiplotSp = 1;//unset multiplot
+          drawing.scaleFactor[dispSpNum] = 1.0; //reset any scaling from custom views
+          drawing.displayedView = -1;
+          drawing.displayedSavedFit = viewNum;
+          memcpy(&rawdata.dispFitPar,&rawdata.savedFitPar[rawdata.viewMultiPlots[viewNum][0]],sizeof(fitpar)); //copy fit data
+          g_idle_add(update_gui_fit_state,NULL);
+          g_idle_add(print_fit_results,NULL);
+          gtk_revealer_set_reveal_child(revealer_info_panel, TRUE);
+        }else if(rawdata.viewMode[viewNum] == VIEWTYPE_SAVEDFIT_OFVIEW){
+          uint8_t dispViewNum = rawdata.viewNumMultiplotSp[viewNum];
+          drawing.numMultiplotSp = rawdata.viewNumMultiplotSp[dispViewNum];
+          drawing.multiplotMode = rawdata.viewMode[dispViewNum];
+          memcpy(&drawing.scaleFactor,&rawdata.viewScaleFactor[dispViewNum],sizeof(drawing.scaleFactor));
+          memcpy(&drawing.multiPlots,&rawdata.viewMultiPlots[dispViewNum],sizeof(drawing.multiPlots));
+          drawing.displayedView = dispViewNum;
+          drawing.displayedSavedFit = viewNum;
+          memcpy(&rawdata.dispFitPar,&rawdata.savedFitPar[rawdata.viewMultiPlots[viewNum][0]],sizeof(fitpar)); //copy fit data
+          g_idle_add(update_gui_fit_state,NULL);
+          g_idle_add(print_fit_results,NULL);
+          gtk_revealer_set_reveal_child(revealer_info_panel, TRUE);
+        }else{
+          drawing.numMultiplotSp = rawdata.viewNumMultiplotSp[viewNum];
+          drawing.multiplotMode = rawdata.viewMode[viewNum];
+          memcpy(&drawing.scaleFactor,&rawdata.viewScaleFactor[viewNum],sizeof(drawing.scaleFactor));
+          memcpy(&drawing.multiPlots,&rawdata.viewMultiPlots[viewNum],sizeof(drawing.multiPlots));
+          drawing.displayedView = viewNum;
+          drawing.displayedSavedFit = -1;
+          //clear fit if necessary
+          if(rawdata.dispFitPar.fittingSp >= FITSTATE_FITCOMPLETE){
+            rawdata.dispFitPar.fittingSp = FITSTATE_NOTFITTING;
+            //update widgets
+            update_gui_fit_state();
+          }
+        }
 
         switch(drawing.multiplotMode){
-          case MULTIPLOT_STACKED:
-          case MULTIPLOT_OVERLAY_INDEPENDENT:
-          case MULTIPLOT_OVERLAY_COMMON:
+          case VIEWTYPE_STACKED:
+          case VIEWTYPE_OVERLAY_INDEPENDENT:
+          case VIEWTYPE_OVERLAY_COMMON:
             gtk_widget_set_sensitive(GTK_WIDGET(fit_button),FALSE);
             break;
-          case MULTIPLOT_SUMMED:
-          case MULTIPLOT_NONE:
+          case VIEWTYPE_SUMMED:
+          case VIEWTYPE_NONE:
             gtk_widget_set_sensitive(GTK_WIDGET(fit_button),TRUE);
+            break;
           default:
+            printf("Invalid multiplot mode for setting fit button sensitivity: %u\n",drawing.multiplotMode);
             break;
         }
       }
@@ -425,13 +474,6 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button)
 
     //enforce the proper number of views (clear any temporary views)
     gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened+rawdata.numViews);
-
-    //clear fit if necessary
-    if(guiglobals.fittingSp >= FITSTATE_FITCOMPLETE){
-      guiglobals.fittingSp = FITSTATE_NOTFITTING;
-      //update widgets
-      update_gui_fit_state();
-    }
 
     /*printf("Number of spectra selected for plotting: %i.  Selected spectra: ", drawing.numMultiplotSp);
     int32_t i;
@@ -471,7 +513,7 @@ void openSingleFile(char *filename, int32_t append){
     int32_t sel = getFirstNonemptySpectrum(rawdata.numSpOpened);
     if(sel >=0){
       drawing.multiPlots[0] = (uint8_t)sel;
-      drawing.multiplotMode = MULTIPLOT_NONE; //file just opened, disable multiplot
+      drawing.multiplotMode = VIEWTYPE_NONE; //file just opened, disable multiplot
       setSpOpenView(1);
       //set the range of selectable spectra values
       gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);
@@ -556,6 +598,7 @@ void on_open_button_clicked(){
     rawdata.numSpOpened = 0; //reset the open spectra
     rawdata.numChComments = 0; //reset the number of comments
     rawdata.numViews = 0; //reset the number of views
+    rawdata.numSavedFits = 0; //reset the number of saved fits
     char *filename = NULL;
     GSList *file_list = gtk_file_chooser_get_filenames(file_open_dialog);
     for(i=0;i<g_slist_length(file_list);i++){
@@ -573,8 +616,8 @@ void on_open_button_clicked(){
         int32_t sel = getFirstNonemptySpectrum(rawdata.numSpOpened);
         if(sel >=0){
           drawing.multiPlots[0] = (uint8_t)sel;
-          drawing.multiplotMode = MULTIPLOT_NONE; //files just opened, disable multiplot
-          guiglobals.fittingSp = FITSTATE_NOTFITTING; //files just opened, reset fit state
+          drawing.multiplotMode = VIEWTYPE_NONE; //files just opened, disable multiplot
+          rawdata.dispFitPar.fittingSp = FITSTATE_NOTFITTING; //files just opened, reset fit state
           setSpOpenView(1);
           //set the range of selectable spectra values
           gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);
@@ -783,7 +826,7 @@ void on_save_button_clicked(){
     //save as a .jf3 file by default
     strncat(fileName,".jf3",255);
     //write file
-    saveErr = writeJF3(fileName, 3, rawdata.hist);
+    saveErr = writeJF3(fileName, rawdata.hist);
 
     if(saveErr>0){
       GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
@@ -819,7 +862,7 @@ void on_save_text_button_clicked(){
   
   gtk_combo_box_text_remove_all(export_mode_combobox);
   cbEntry = 0;
-  if(drawing.multiplotMode == MULTIPLOT_SUMMED){
+  if(drawing.multiplotMode == VIEWTYPE_SUMMED){
     gtk_combo_box_text_insert(export_mode_combobox,cbEntry,NULL,"Current summed view (single file)");
     cbEntry++;
   }else{
@@ -842,7 +885,7 @@ void on_save_radware_button_clicked(){
   gtk_label_set_text(export_description_label,"Export to .spe format:");
   gtk_combo_box_text_remove_all(export_mode_combobox);
   cbEntry = 0;
-  if(drawing.multiplotMode == MULTIPLOT_SUMMED){
+  if(drawing.multiplotMode == VIEWTYPE_SUMMED){
     gtk_combo_box_text_insert(export_mode_combobox,cbEntry,NULL,"Current summed view");
     cbEntry++;
   }
@@ -862,7 +905,7 @@ void on_save_fmca_button_clicked(){
   gtk_label_set_text(export_description_label,"Export to .fmca format:");
   gtk_combo_box_text_remove_all(export_mode_combobox);
   cbEntry = 0;
-  if(drawing.multiplotMode == MULTIPLOT_SUMMED){
+  if(drawing.multiplotMode == VIEWTYPE_SUMMED){
     gtk_combo_box_text_insert(export_mode_combobox,cbEntry,NULL,"Current summed view");
     cbEntry++;
   }
@@ -882,7 +925,7 @@ void on_save_dmca_button_clicked(){
   gtk_label_set_text(export_description_label,"Export to .dmca format:");
   gtk_combo_box_text_remove_all(export_mode_combobox);
   cbEntry = 0;
-  if(drawing.multiplotMode == MULTIPLOT_SUMMED){
+  if(drawing.multiplotMode == VIEWTYPE_SUMMED){
     gtk_combo_box_text_insert(export_mode_combobox,cbEntry,NULL,"Current summed view");
     cbEntry++;
   }
@@ -900,7 +943,7 @@ void on_export_mode_combobox_changed(){
   int32_t exportMode = gtk_combo_box_get_active(GTK_COMBO_BOX(export_mode_combobox));
   switch(exportMode){
     case 0:
-      if(drawing.multiplotMode == MULTIPLOT_SUMMED){
+      if(drawing.multiplotMode == VIEWTYPE_SUMMED){
         gtk_revealer_set_reveal_child(export_options_revealer, FALSE);
         switch(guiglobals.exportFileType){
           case 3:
@@ -1218,14 +1261,14 @@ void on_contract_scale_changed(GtkRange *range){
   if(drawing.contractFactor == 0){
     drawing.contractFactor = 1; //guard against divide by 0 elsewhere
   }
-  if(guiglobals.fittingSp >= FITSTATE_FITCOMPLETE){
+  if(rawdata.dispFitPar.fittingSp >= FITSTATE_FITCOMPLETE){
     int32_t i;
     //rescale fit (optimization - don't refit)
-    for(i=0;i<fitpar.numFitPeaks;i++){
-      fitpar.fitParVal[FITPAR_AMP1+(3*i)] *= 1.0*drawing.contractFactor/oldContractFactor;
+    for(i=0;i<rawdata.dispFitPar.numFitPeaks;i++){
+      rawdata.dispFitPar.fitParVal[FITPAR_AMP1+(3*i)] *= 1.0*drawing.contractFactor/oldContractFactor;
     }
     for(i=0;i<3;i++){
-      fitpar.fitParVal[i] *= 1.0*drawing.contractFactor/oldContractFactor;
+      rawdata.dispFitPar.fitParVal[i] *= 1.0*drawing.contractFactor/oldContractFactor;
     }
   }
   manualSpectrumAreaDraw(); //redraw the spectrum
@@ -1403,7 +1446,7 @@ void on_comment_ok_button_clicked(){
 
             drawing.displayedView = rawdata.numViews;
 
-            rawdata.viewMultiplotMode[rawdata.numViews] = drawing.multiplotMode;
+            rawdata.viewMode[rawdata.numViews] = drawing.multiplotMode;
             rawdata.viewNumMultiplotSp[rawdata.numViews] = drawing.numMultiplotSp;
             memcpy(&rawdata.viewScaleFactor[rawdata.numViews],&drawing.scaleFactor,sizeof(drawing.scaleFactor));
             memcpy(&rawdata.viewMultiPlots[rawdata.numViews],&drawing.multiPlots,sizeof(drawing.multiPlots));
@@ -1431,7 +1474,7 @@ void on_comment_ok_button_clicked(){
 
           drawing.displayedView = rawdata.numViews;
 
-          rawdata.viewMultiplotMode[rawdata.numViews] = drawing.multiplotMode;
+          rawdata.viewMode[rawdata.numViews] = drawing.multiplotMode;
           rawdata.viewNumMultiplotSp[rawdata.numViews] = drawing.numMultiplotSp;
           memcpy(&rawdata.viewScaleFactor[rawdata.numViews],&drawing.scaleFactor,sizeof(drawing.scaleFactor));
           memcpy(&rawdata.viewMultiPlots[rawdata.numViews],&drawing.multiPlots,sizeof(drawing.multiPlots));
@@ -1643,7 +1686,7 @@ void on_multiplot_make_view_button_clicked(){
   }
 
   rawdata.viewNumMultiplotSp[rawdata.numViews] = selectedSpCount;
-  rawdata.viewMultiplotMode[rawdata.numViews] = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(multiplot_mode_combobox));
+  rawdata.viewMode[rawdata.numViews] = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(multiplot_mode_combobox));
 
 
   if(rawdata.viewNumMultiplotSp[rawdata.numViews] > MAX_DISP_SP){
@@ -1660,9 +1703,9 @@ void on_multiplot_make_view_button_clicked(){
   }else{
     //set drawing mode for view
     if(rawdata.viewNumMultiplotSp[rawdata.numViews] == 1){
-      rawdata.viewMultiplotMode[rawdata.numViews] = MULTIPLOT_NONE;
+      rawdata.viewMode[rawdata.numViews] = VIEWTYPE_NONE;
     }else{
-      rawdata.viewMultiplotMode[rawdata.numViews]++; //value of 0 means no multiplot
+      rawdata.viewMode[rawdata.numViews]++; //value of 0 means no multiplot
     }
 
     //setup scale factors
@@ -1676,7 +1719,7 @@ void on_multiplot_make_view_button_clicked(){
     rawdata.numViews++;
 
     //show the newly created view
-    drawing.multiplotMode = rawdata.viewMultiplotMode[rawdata.numViews-1];
+    drawing.multiplotMode = rawdata.viewMode[rawdata.numViews-1];
     drawing.numMultiplotSp = rawdata.viewNumMultiplotSp[rawdata.numViews-1];
     memcpy(&drawing.scaleFactor,&rawdata.viewScaleFactor[rawdata.numViews-1],sizeof(drawing.scaleFactor));
     memcpy(&drawing.multiPlots,&rawdata.viewMultiPlots[rawdata.numViews-1],sizeof(drawing.multiPlots));
@@ -1738,7 +1781,7 @@ void on_multiplot_ok_button_clicked(){
       gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"%s",errStr);
 
       //reset default values, in case the multiplot window is closed
-      drawing.multiplotMode = MULTIPLOT_NONE;
+      drawing.multiplotMode = VIEWTYPE_NONE;
       drawing.multiPlots[0] = 0; 
       drawing.numMultiplotSp = 1;
       gtk_spin_button_set_value(spectrum_selector, drawing.multiPlots[0]+1);
@@ -1749,7 +1792,7 @@ void on_multiplot_ok_button_clicked(){
 
       //set drawing mode
       if(drawing.numMultiplotSp == 1){
-        drawing.multiplotMode = MULTIPLOT_NONE;
+        drawing.multiplotMode = VIEWTYPE_NONE;
       }else{
         drawing.multiplotMode++; //value of 0 means no multiplot
       }
@@ -1770,7 +1813,7 @@ void on_multiplot_ok_button_clicked(){
         printf("%i ",drawing.multiPlots[i]);
       }
       printf(", multiplot mode: %i\n",drawing.multiplotMode);
-      if(drawing.multiplotMode > MULTIPLOT_SUMMED){
+      if(drawing.multiplotMode > VIEWTYPE_SUMMED){
         //multiple spectra displayed simultaneously, cannot fit
         gtk_widget_set_sensitive(GTK_WIDGET(fit_button),FALSE);
       }else{
@@ -1789,7 +1832,7 @@ void on_multiplot_ok_button_clicked(){
 
       if((viewInd>=0)&&(viewInd<rawdata.numViews)){
         //setup a multiplot view
-        drawing.multiplotMode = rawdata.viewMultiplotMode[viewInd];
+        drawing.multiplotMode = rawdata.viewMode[viewInd];
         drawing.numMultiplotSp = rawdata.viewNumMultiplotSp[viewInd];
         memcpy(&drawing.scaleFactor,&rawdata.viewScaleFactor[viewInd],sizeof(drawing.scaleFactor));
         memcpy(&drawing.multiPlots,&rawdata.viewMultiPlots[viewInd],sizeof(drawing.multiPlots));
@@ -1801,9 +1844,9 @@ void on_multiplot_ok_button_clicked(){
   }
 
   //handle fitting
-  if(drawing.multiplotMode > MULTIPLOT_SUMMED){
-    guiglobals.fittingSp = FITSTATE_NOTFITTING; //clear any fits being displayed
-  }else if(guiglobals.fittingSp >= FITSTATE_FITCOMPLETE){
+  if(drawing.multiplotMode > VIEWTYPE_SUMMED){
+    rawdata.dispFitPar.fittingSp = FITSTATE_NOTFITTING; //clear any fits being displayed
+  }else if(rawdata.dispFitPar.fittingSp >= FITSTATE_FITCOMPLETE){
     startGausFit(); //refit
   }
   
@@ -1951,11 +1994,11 @@ void on_manage_delete_button_clicked(){
 
   if(deletedSpCounter>0){
     //reset to default drawing view
-    drawing.multiplotMode = MULTIPLOT_NONE;
+    drawing.multiplotMode = VIEWTYPE_NONE;
     drawing.multiPlots[0] = 0;
     drawing.scaleFactor[0] = 1.0;
     gtk_spin_button_set_value(spectrum_selector, drawing.multiPlots[0]+1);
-    guiglobals.fittingSp = FITSTATE_NOTFITTING; //clear any fits being displayed
+    rawdata.dispFitPar.fittingSp = FITSTATE_NOTFITTING; //clear any fits being displayed
       
     if(rawdata.numSpOpened <= 0){
       setSpOpenView(0); //no spectra available
@@ -1992,7 +2035,7 @@ void on_sum_all_button_clicked(){
   }
 
   uint8_t i;
-  drawing.multiplotMode = MULTIPLOT_SUMMED;//sum spectra
+  drawing.multiplotMode = VIEWTYPE_SUMMED;//sum spectra
   drawing.numMultiplotSp = rawdata.numSpOpened;
   if(drawing.numMultiplotSp > NSPECT)
     drawing.numMultiplotSp = NSPECT;
@@ -2012,8 +2055,8 @@ void on_sum_all_button_clicked(){
   gtk_label_set_text(display_spectrumname_label,viewStr);
 
   //clear fit if necessary
-  if(guiglobals.fittingSp >= FITSTATE_FITCOMPLETE){
-    guiglobals.fittingSp = FITSTATE_NOTFITTING;
+  if(rawdata.dispFitPar.fittingSp >= FITSTATE_FITCOMPLETE){
+    rawdata.dispFitPar.fittingSp = FITSTATE_NOTFITTING;
     //update widgets
     update_gui_fit_state();
   }
@@ -2028,18 +2071,18 @@ void on_fit_button_clicked(){
   //spectrum must be open to fit
   if(rawdata.openedSp){
     //cannot be already fitting
-    if((guiglobals.fittingSp == FITSTATE_NOTFITTING)||(guiglobals.fittingSp >= FITSTATE_FITCOMPLETE)){
+    if((rawdata.dispFitPar.fittingSp == FITSTATE_NOTFITTING)||(rawdata.dispFitPar.fittingSp >= FITSTATE_FITCOMPLETE)){
       //must be displaying only a single spectrum
-      if(drawing.multiplotMode < MULTIPLOT_OVERLAY_COMMON){
+      if(drawing.multiplotMode < VIEWTYPE_OVERLAY_COMMON){
         //safe to fit
-        guiglobals.fittingSp = FITSTATE_SETTINGLIMITS;
-        memset(&fitpar.fitParVal,0,sizeof(fitpar.fitParVal));
-        memset(&fitpar.fitParFree,0,sizeof(fitpar.fitParFree));
+        rawdata.dispFitPar.fittingSp = FITSTATE_SETTINGLIMITS;
+        memset(&rawdata.dispFitPar.fitParVal,0,sizeof(rawdata.dispFitPar.fitParVal));
+        memset(&rawdata.dispFitPar.fitParFree,0,sizeof(rawdata.dispFitPar.fitParFree));
         //set default values
-        fitpar.fitStartCh = -1;
-        fitpar.fitEndCh = -1;
-        fitpar.numFitPeaks = 0;
-        fitpar.numFreePar = 0;
+        rawdata.dispFitPar.fitStartCh = -1;
+        rawdata.dispFitPar.fitEndCh = -1;
+        rawdata.dispFitPar.numFitPeaks = 0;
+        rawdata.dispFitPar.numFreePar = 0;
         //update widgets
         update_gui_fit_state();
         gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw to hide any fit
@@ -2062,17 +2105,17 @@ void on_refit_button_clicked(){
   //spectrum must be open to fit
   if(rawdata.openedSp){
     //cannot be already fitting
-    if((guiglobals.fittingSp < FITSTATE_FITTING)||(guiglobals.fittingSp >= FITSTATE_FITCOMPLETE)){
+    if((rawdata.dispFitPar.fittingSp < FITSTATE_FITTING)||(rawdata.dispFitPar.fittingSp >= FITSTATE_FITCOMPLETE)){
       //must be displaying only a single spectrum
-      if(drawing.multiplotMode < MULTIPLOT_OVERLAY_COMMON){
+      if(drawing.multiplotMode < VIEWTYPE_OVERLAY_COMMON){
         //re-fitting must be valid
-        if(fitpar.prevFitStartCh >= 0){
+        if(rawdata.dispFitPar.prevFitStartCh >= 0){
           //safe to re-fit
-          fitpar.numFreePar = 0;
-          fitpar.fitStartCh = fitpar.prevFitStartCh;
-          fitpar.fitEndCh = fitpar.prevFitEndCh;
-          fitpar.numFitPeaks = fitpar.prevFitNumPeaks;
-          memcpy(fitpar.fitPeakInitGuess,fitpar.prevFitPeakInitGuess,sizeof(fitpar.prevFitPeakInitGuess));
+          rawdata.dispFitPar.numFreePar = 0;
+          rawdata.dispFitPar.fitStartCh = rawdata.dispFitPar.prevFitStartCh;
+          rawdata.dispFitPar.fitEndCh = rawdata.dispFitPar.prevFitEndCh;
+          rawdata.dispFitPar.numFitPeaks = rawdata.dispFitPar.prevFitNumPeaks;
+          memcpy(rawdata.dispFitPar.fitPeakInitGuess,rawdata.dispFitPar.prevFitPeakInitGuess,sizeof(rawdata.dispFitPar.prevFitPeakInitGuess));
           on_fit_fit_button_clicked();
         }else{
           GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
@@ -2105,16 +2148,16 @@ void on_fit_fit_button_clicked(){
 }
 
 void on_fit_refit_button_clicked(){
-  fitpar.fitStartCh = fitpar.prevFitStartCh;
-  fitpar.fitEndCh = fitpar.prevFitEndCh;
-  fitpar.numFitPeaks = fitpar.prevFitNumPeaks;
-  memcpy(fitpar.fitPeakInitGuess,fitpar.prevFitPeakInitGuess,sizeof(fitpar.prevFitPeakInitGuess));
+  rawdata.dispFitPar.fitStartCh = rawdata.dispFitPar.prevFitStartCh;
+  rawdata.dispFitPar.fitEndCh = rawdata.dispFitPar.prevFitEndCh;
+  rawdata.dispFitPar.numFitPeaks = rawdata.dispFitPar.prevFitNumPeaks;
+  memcpy(rawdata.dispFitPar.fitPeakInitGuess,rawdata.dispFitPar.prevFitPeakInitGuess,sizeof(rawdata.dispFitPar.prevFitPeakInitGuess));
 
   on_fit_fit_button_clicked();
 }
 
 void on_fit_cancel_button_clicked(){
-  guiglobals.fittingSp = FITSTATE_NOTFITTING;
+  rawdata.dispFitPar.fittingSp = FITSTATE_NOTFITTING;
   //update widgets
   update_gui_fit_state();
 }
@@ -2123,8 +2166,66 @@ void on_fit_preferences_button_clicked(){
   showPreferences(1);
 }
 
+void on_fit_save_button_clicked(){
+  if(rawdata.numViews >= MAXNVIEWS){
+    //show an error dialog
+    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+    GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_manage_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot create saved fit!");
+    gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Too many views and/or saved fits have been created.  Remove one first before creating a new one.");
+    gtk_dialog_run(GTK_DIALOG(message_dialog));
+    gtk_widget_destroy(message_dialog);
+    return;
+  }
+  if(rawdata.numSavedFits >= MAXNSAVEDFITS){
+    //show an error dialog
+    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+    GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_manage_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot create saved fit!");
+    gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"Too many views saved fits have been created.  Remove one first before creating a new one.");
+    gtk_dialog_run(GTK_DIALOG(message_dialog));
+    gtk_widget_destroy(message_dialog);
+    return;
+  }
+
+  if(drawing.multiplotMode == VIEWTYPE_NONE){
+    rawdata.viewNumMultiplotSp[rawdata.numViews] = drawing.multiPlots[0];
+    rawdata.viewMode[rawdata.numViews] = VIEWTYPE_SAVEDFIT_OFSP;
+  }else if(drawing.displayedView >= 0){
+    rawdata.viewNumMultiplotSp[rawdata.numViews] = (uint8_t)(drawing.displayedView);
+    rawdata.viewMode[rawdata.numViews] = VIEWTYPE_SAVEDFIT_OFVIEW;
+  }else{
+    //show an error dialog
+    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+    GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_manage_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot create saved fit!");
+    gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"The currently displayed view could not be identified.");
+    gtk_dialog_run(GTK_DIALOG(message_dialog));
+    gtk_widget_destroy(message_dialog);
+    return;
+  }
+
+  //copy fit data
+  memcpy(&rawdata.savedFitPar[rawdata.numSavedFits],&rawdata.dispFitPar,sizeof(fitpar));
+  rawdata.viewMultiPlots[rawdata.numViews][0] = rawdata.numSavedFits; //save fit data index here
+  
+  //setup default view name
+  char viewStr[256];
+  getViewStr(viewStr,256,rawdata.numViews);
+  memcpy(rawdata.viewComment[rawdata.numViews],viewStr,sizeof(viewStr));
+
+  rawdata.numSavedFits++;
+  rawdata.numViews++;
+  
+  //show the newly created view
+  drawing.multiplotMode = rawdata.viewMode[rawdata.numViews-1];
+  drawing.displayedView = rawdata.numViews-1;
+  gtk_adjustment_set_upper(spectrum_selector_adjustment, rawdata.numSpOpened+rawdata.numViews);
+  gtk_spin_button_set_value(spectrum_selector,rawdata.numSpOpened+rawdata.numViews);
+
+  update_gui_fit_state();
+}
+
+
 void on_fit_dismiss_button_clicked(){
-  guiglobals.fittingSp = FITSTATE_NOTFITTING;
+  rawdata.dispFitPar.fittingSp = FITSTATE_NOTFITTING;
   //update widgets
   update_gui_fit_state();
 }
@@ -2191,43 +2292,43 @@ void on_toggle_spectrum_gridlines(GtkToggleButton *togglebutton){
 
 void on_toggle_limit_centroid(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton)){
-    fitpar.limitCentroid=1;
+    rawdata.dispFitPar.limitCentroid=1;
   }else{
-    fitpar.limitCentroid=0;
+    rawdata.dispFitPar.limitCentroid=0;
   }
-  gtk_widget_set_sensitive(GTK_WIDGET(limit_centroid_spinbutton),fitpar.limitCentroid);
+  gtk_widget_set_sensitive(GTK_WIDGET(limit_centroid_spinbutton),rawdata.dispFitPar.limitCentroid);
 }
 
 void on_toggle_fix_skew_amplitude(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton)){
-    fitpar.fixSkewAmplitide=1;
+    rawdata.dispFitPar.fixSkewAmplitide=1;
   }else{
-    fitpar.fixSkewAmplitide=0;
+    rawdata.dispFitPar.fixSkewAmplitide=0;
   }
-  gtk_widget_set_sensitive(GTK_WIDGET(skew_amplitude_spinbutton),fitpar.fixSkewAmplitide);
+  gtk_widget_set_sensitive(GTK_WIDGET(skew_amplitude_spinbutton),rawdata.dispFitPar.fixSkewAmplitide);
 }
 
 void on_toggle_fix_beta(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton)){
-    fitpar.fixBeta=1;
+    rawdata.dispFitPar.fixBeta=1;
   }else{
-    fitpar.fixBeta=0;
+    rawdata.dispFitPar.fixBeta=0;
   }
-  gtk_widget_set_sensitive(GTK_WIDGET(beta_spinbutton),fitpar.fixBeta);
+  gtk_widget_set_sensitive(GTK_WIDGET(beta_spinbutton),rawdata.dispFitPar.fixBeta);
 }
 
 void on_toggle_step_function(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton))
-    fitpar.stepFunction=1;
+    rawdata.dispFitPar.stepFunction=1;
   else
-    fitpar.stepFunction=0;
+    rawdata.dispFitPar.stepFunction=0;
 }
 
 void on_toggle_positive_peaks(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton))
-    fitpar.forcePositivePeaks=1;
+    rawdata.dispFitPar.forcePositivePeaks=1;
   else
-    fitpar.forcePositivePeaks=0;
+    rawdata.dispFitPar.forcePositivePeaks=0;
 }
 
 void on_peak_shape_changed(GtkComboBox *combo_box){
@@ -2235,8 +2336,8 @@ void on_peak_shape_changed(GtkComboBox *combo_box){
   if((entry >=0)&&(entry < FITTYPE_ENUM_LENGTH)){
     if(entry == FITTYPE_SKEWED){
       gtk_revealer_set_reveal_child(skew_parameters_revealer, TRUE);
-      gtk_widget_set_sensitive(GTK_WIDGET(skew_amplitude_spinbutton),fitpar.fixSkewAmplitide);
-      gtk_widget_set_sensitive(GTK_WIDGET(beta_spinbutton),fitpar.fixBeta);
+      gtk_widget_set_sensitive(GTK_WIDGET(skew_amplitude_spinbutton),rawdata.dispFitPar.fixSkewAmplitide);
+      gtk_widget_set_sensitive(GTK_WIDGET(beta_spinbutton),rawdata.dispFitPar.fixBeta);
     }else{
       gtk_revealer_set_reveal_child(skew_parameters_revealer, FALSE);
     }
@@ -2267,23 +2368,23 @@ void on_peak_width_changed(GtkComboBox *combo_box){
 }
 
 void on_manual_width_changed(GtkSpinButton *spin_button){
-  fitpar.manualWidthVal = (float)gtk_spin_button_get_value(spin_button);
+  rawdata.dispFitPar.manualWidthVal = (float)gtk_spin_button_get_value(spin_button);
 }
 
 void on_manual_width_offset_changed(GtkSpinButton *spin_button){
-  fitpar.manualWidthOffset = (float)gtk_spin_button_get_value(spin_button);
+  rawdata.dispFitPar.manualWidthOffset = (float)gtk_spin_button_get_value(spin_button);
 }
 
 void on_limit_centroid_changed(GtkSpinButton *spin_button){
-  fitpar.limitCentroidVal = (float)gtk_spin_button_get_value(spin_button);
+  rawdata.dispFitPar.limitCentroidVal = (float)gtk_spin_button_get_value(spin_button);
 }
 
 void on_skew_amplitude_changed(GtkSpinButton *spin_button){
-  fitpar.fixedRVal = (float)gtk_spin_button_get_value(spin_button);
+  rawdata.dispFitPar.fixedRVal = (float)gtk_spin_button_get_value(spin_button);
 }
 
 void on_beta_changed(GtkSpinButton *spin_button){
-  fitpar.fixedBetaVal = (float)gtk_spin_button_get_value(spin_button);
+  rawdata.dispFitPar.fixedBetaVal = (float)gtk_spin_button_get_value(spin_button);
 }
 
 
@@ -2292,30 +2393,30 @@ void on_preferences_button_clicked(){
 }
 
 void on_preferences_apply_button_clicked(){
-  if(fitpar.fitType != (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox))){
-    if(guiglobals.fittingSp >= FITSTATE_FITCOMPLETE){
+  if(rawdata.dispFitPar.fitType != (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox))){
+    if(rawdata.dispFitPar.fittingSp >= FITSTATE_FITCOMPLETE){
       //the fit type was changed, clear the fit
-      guiglobals.fittingSp = FITSTATE_NOTFITTING;
+      rawdata.dispFitPar.fittingSp = FITSTATE_NOTFITTING;
     }
     //prevent re-fitting with a different fit mode
     gtk_widget_set_sensitive(GTK_WIDGET(fit_refit_button),FALSE);
-    fitpar.prevFitStartCh = -1; //used to invalidate re-fits
+    rawdata.dispFitPar.prevFitStartCh = -1; //used to invalidate re-fits
   }
-  if(fitpar.bgType != (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(background_type_combobox))){
-    if(guiglobals.fittingSp >= FITSTATE_FITCOMPLETE){
+  if(rawdata.dispFitPar.bgType != (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(background_type_combobox))){
+    if(rawdata.dispFitPar.fittingSp >= FITSTATE_FITCOMPLETE){
       //the fit type was changed, clear the fit
-      guiglobals.fittingSp = FITSTATE_NOTFITTING;
+      rawdata.dispFitPar.fittingSp = FITSTATE_NOTFITTING;
     }
   }
-  fitpar.bgType = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(background_type_combobox));
-  fitpar.fitType = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox));
-  fitpar.peakWidthMethod = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_width_combobox));
-  fitpar.weightMode = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(weight_mode_combobox));
-  if(fitpar.fitType == FITTYPE_BGONLY){
+  rawdata.dispFitPar.bgType = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(background_type_combobox));
+  rawdata.dispFitPar.fitType = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox));
+  rawdata.dispFitPar.peakWidthMethod = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_width_combobox));
+  rawdata.dispFitPar.weightMode = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(weight_mode_combobox));
+  if(rawdata.dispFitPar.fitType == FITTYPE_BGONLY){
     //background fit only
-    if(guiglobals.fittingSp > FITSTATE_SETTINGLIMITS){
+    if(rawdata.dispFitPar.fittingSp > FITSTATE_SETTINGLIMITS){
       //already past the point of fitting, clear the fit
-      guiglobals.fittingSp = FITSTATE_NOTFITTING;
+      rawdata.dispFitPar.fittingSp = FITSTATE_NOTFITTING;
     }
   }
   updateConfigFile();
@@ -2417,21 +2518,21 @@ void toggle_cursor(){
 //cycle between plotting modes for multiple spectra, argument determines cycle direction
 void cycle_multiplot_mode(int up){
   if(rawdata.openedSp){
-    if((drawing.numMultiplotSp > 1)&&(drawing.multiplotMode>=MULTIPLOT_SUMMED)){
+    if((drawing.numMultiplotSp > 1)&&(drawing.multiplotMode>=VIEWTYPE_SUMMED)){
       if(up){
-        if(drawing.multiplotMode < MULTIPLOT_STACKED){
+        if(drawing.multiplotMode < VIEWTYPE_STACKED){
           drawing.multiplotMode++;
         }else{
-          drawing.multiplotMode = MULTIPLOT_SUMMED;
+          drawing.multiplotMode = VIEWTYPE_SUMMED;
         }
       }else{
-        if(drawing.multiplotMode > MULTIPLOT_SUMMED){
+        if(drawing.multiplotMode > VIEWTYPE_SUMMED){
           drawing.multiplotMode--;
         }else{
-          drawing.multiplotMode = MULTIPLOT_STACKED;
+          drawing.multiplotMode = VIEWTYPE_STACKED;
         }
       }
-      guiglobals.fittingSp = FITSTATE_NOTFITTING; //reset fit state
+      rawdata.dispFitPar.fittingSp = FITSTATE_NOTFITTING; //reset fit state
       manualSpectrumAreaDraw();
     }
   }
@@ -2556,6 +2657,7 @@ void iniitalizeUIElements(){
   fit_fit_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_fit_button"));
   fit_refit_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_refit_button"));
   fit_preferences_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_preferences_button"));
+  fit_save_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_save_button"));
   fit_dismiss_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_dismiss_button"));
   fit_spinner = GTK_SPINNER(gtk_builder_get_object(builder, "fit_spinner"));
 
@@ -2692,6 +2794,7 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(fit_refit_button), "clicked", G_CALLBACK(on_fit_refit_button_clicked), NULL);
   g_signal_connect(G_OBJECT(fit_cancel_button), "clicked", G_CALLBACK(on_fit_cancel_button_clicked), NULL);
   g_signal_connect(G_OBJECT(fit_preferences_button), "clicked", G_CALLBACK(on_fit_preferences_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(fit_save_button), "clicked", G_CALLBACK(on_fit_save_button_clicked), NULL);
   g_signal_connect(G_OBJECT(fit_dismiss_button), "clicked", G_CALLBACK(on_fit_dismiss_button_clicked), NULL);
   g_signal_connect(G_OBJECT(display_button), "clicked", G_CALLBACK(on_display_button_clicked), NULL);
   g_signal_connect(G_OBJECT(calibrate_ok_button), "clicked", G_CALLBACK(on_calibrate_ok_button_clicked), NULL);
@@ -2815,7 +2918,7 @@ void iniitalizeUIElements(){
   rawdata.numSpOpened = 0;
   rawdata.numChComments = 0;
   drawing.displayedView = -1;
-  drawing.multiplotMode = MULTIPLOT_NONE;
+  drawing.multiplotMode = VIEWTYPE_NONE;
   drawing.numMultiplotSp = 1;
   drawing.highlightedPeak = -1;
   drawing.highlightedComment = -1;
@@ -2831,7 +2934,7 @@ void iniitalizeUIElements(){
   drawing.spColors[27] = 181/255.f; drawing.spColors[28] = 137/255.f; drawing.spColors[29] = 0.0f;      //RGB values for color 10 (solarized yellow)
   drawing.spColors[30] = 0.5f; drawing.spColors[31] = 0.5f; drawing.spColors[32] = 0.5f;                //RGB values for color 11
   drawing.spColors[33] = 0.7f; drawing.spColors[34] = 0.0f; drawing.spColors[35] = 0.3f;                //RGB values for color 12
-  guiglobals.fittingSp = FITSTATE_NOTFITTING;
+  rawdata.dispFitPar.fittingSp = FITSTATE_NOTFITTING;
   guiglobals.deferSpSelChange = 0;
   guiglobals.deferToggleRow = 0;
   guiglobals.draggingSp = 0;
@@ -2846,25 +2949,25 @@ void iniitalizeUIElements(){
   guiglobals.usingDarkTheme = 0;
   guiglobals.useZoomAnimations = 1;
   guiglobals.exportFileType = 0;
-  fitpar.limitCentroid = 0;
-  fitpar.manualWidthVal = 3.0;
-  fitpar.manualWidthOffset = 1.0;
-  fitpar.fixSkewAmplitide = 0;
-  fitpar.fixBeta = 0;
-  fitpar.limitCentroidVal = 1.0f;
-  fitpar.fixedRVal = 10.0f;
-  fitpar.fixedBetaVal = 5.0f;
-  fitpar.peakWidthMethod = PEAKWIDTHMODE_RELATIVE;
-  fitpar.prevFitNumPeaks = 0;
-  fitpar.stepFunction = 0;
-  fitpar.forcePositivePeaks = 0;
-  fitpar.fitStartCh = -1;
-  fitpar.fitEndCh = -1;
-  fitpar.prevFitStartCh = -1;
-  fitpar.prevFitEndCh = -1;
-  fitpar.numFitPeaks = 0;
-  fitpar.fitType = FITTYPE_SYMMETRIC;
-  fitpar.bgType = 2; //default to quadratic BG
+  rawdata.dispFitPar.limitCentroid = 0;
+  rawdata.dispFitPar.manualWidthVal = 3.0;
+  rawdata.dispFitPar.manualWidthOffset = 1.0;
+  rawdata.dispFitPar.fixSkewAmplitide = 0;
+  rawdata.dispFitPar.fixBeta = 0;
+  rawdata.dispFitPar.limitCentroidVal = 1.0f;
+  rawdata.dispFitPar.fixedRVal = 10.0f;
+  rawdata.dispFitPar.fixedBetaVal = 5.0f;
+  rawdata.dispFitPar.peakWidthMethod = PEAKWIDTHMODE_RELATIVE;
+  rawdata.dispFitPar.prevFitNumPeaks = 0;
+  rawdata.dispFitPar.stepFunction = 0;
+  rawdata.dispFitPar.forcePositivePeaks = 0;
+  rawdata.dispFitPar.fitStartCh = -1;
+  rawdata.dispFitPar.fitEndCh = -1;
+  rawdata.dispFitPar.prevFitStartCh = -1;
+  rawdata.dispFitPar.prevFitEndCh = -1;
+  rawdata.dispFitPar.numFitPeaks = 0;
+  rawdata.dispFitPar.fitType = FITTYPE_SYMMETRIC;
+  rawdata.dispFitPar.bgType = 2; //default to quadratic BG
 
   gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);
   gtk_adjustment_set_upper(spectrum_selector_adjustment, 1);

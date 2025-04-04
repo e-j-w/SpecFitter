@@ -54,8 +54,8 @@ double getCursorYVal(const double cursorx, const double cursory){
   if((cursorx > XORIGIN)&&(cursory < (dasize.height - YORIGIN))){
     double cursorVal;
     switch(drawing.multiplotMode){
-      case MULTIPLOT_SUMMED:
-      case MULTIPLOT_NONE:
+      case VIEWTYPE_SUMMED:
+      case VIEWTYPE_NONE:
         //single plot mode
         if(drawing.logScale){
           if(drawing.scaleLevelMin[0] > 0){
@@ -93,7 +93,7 @@ int getCommentAtCursor(const double cursorx, const double cursory){
     double cursorYVal = getCursorYVal(cursorx, cursory);
     //printf("cursorCh: %f, cursorYVal: %f\n",cursorCh,cursorYVal);
     switch(drawing.multiplotMode){
-      case MULTIPLOT_SUMMED:
+      case VIEWTYPE_SUMMED:
         //sum plot mode
         for(int32_t i=0;i<(int32_t)rawdata.numChComments;i++){
           if(rawdata.chanCommentView[i] == 1){
@@ -115,7 +115,7 @@ int getCommentAtCursor(const double cursorx, const double cursory){
           }
         }
         break;
-      case MULTIPLOT_NONE:
+      case VIEWTYPE_NONE:
         //single plot mode
         if(drawing.displayedView == -1){
           for(int32_t i=0;i<(int32_t)rawdata.numChComments;i++){
@@ -209,7 +209,7 @@ void setPlotLimits(){
 
 //zoom to the non-zero region of the spectrum
 void autoZoom(){
-  if(drawing.multiplotMode == MULTIPLOT_NONE){
+  if(drawing.multiplotMode == VIEWTYPE_NONE){
     for(int32_t i=0;i<S32K;i++){
       if(rawdata.hist[drawing.multiPlots[0]][i] != 0.){
         drawing.lowerLimit = i;
@@ -529,52 +529,52 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
   if((event->type == GDK_BUTTON_PRESS) && (event->button == 3)){
     //right mouse button being pressed
     float cursorChan = getCursorChannel(event->x, event->y);
-    switch(guiglobals.fittingSp){
+    switch(rawdata.dispFitPar.fittingSp){
       case FITSTATE_FITCOMPLETE:
       case FITSTATE_FITCOMPLETEDUBIOUS:
         //fit being displayed, clear it on right click
-        guiglobals.fittingSp = FITSTATE_NOTFITTING;
+        rawdata.dispFitPar.fittingSp = FITSTATE_NOTFITTING;
         update_gui_fit_state();
         break;
       case FITSTATE_SETTINGPEAKS:
         //setup peak positions
-        if(fitpar.numFitPeaks < MAX_FIT_PK){
-          if((cursorChan >= fitpar.fitStartCh)&&(cursorChan <= fitpar.fitEndCh)){
-            fitpar.fitPeakInitGuess[fitpar.numFitPeaks] = cursorChan - 0.5f;
-            printf("Fitting peak at channel %f\n",fitpar.fitPeakInitGuess[fitpar.numFitPeaks]);
+        if(rawdata.dispFitPar.numFitPeaks < MAX_FIT_PK){
+          if((cursorChan >= rawdata.dispFitPar.fitStartCh)&&(cursorChan <= rawdata.dispFitPar.fitEndCh)){
+            rawdata.dispFitPar.fitPeakInitGuess[rawdata.dispFitPar.numFitPeaks] = cursorChan - 0.5f;
+            printf("Fitting peak at channel %f\n",rawdata.dispFitPar.fitPeakInitGuess[rawdata.dispFitPar.numFitPeaks]);
             gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),TRUE);
-            fitpar.numFitPeaks++;
+            rawdata.dispFitPar.numFitPeaks++;
           }
         }
-        if(fitpar.numFitPeaks >= MAX_FIT_PK){
+        if(rawdata.dispFitPar.numFitPeaks >= MAX_FIT_PK){
           printf("Maximum number of fit peaks specified.\n");
-          fitpar.numFitPeaks = MAX_FIT_PK;
+          rawdata.dispFitPar.numFitPeaks = MAX_FIT_PK;
           startGausFit(); //force fit to proceed
         }
         gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
         break;
       case FITSTATE_SETTINGLIMITS:
         //setup fitting limit
-        if(fitpar.fitEndCh < 0){
-          if(fitpar.fitStartCh < 0){
-            fitpar.fitStartCh = (int)cursorChan;
+        if(rawdata.dispFitPar.fitEndCh < 0){
+          if(rawdata.dispFitPar.fitStartCh < 0){
+            rawdata.dispFitPar.fitStartCh = (int)cursorChan;
           }else{
-            if(cursorChan > fitpar.fitStartCh){
-              fitpar.fitEndCh = (int)cursorChan;
-            }else if(cursorChan < fitpar.fitStartCh){
-              fitpar.fitEndCh = fitpar.fitStartCh; //swap
-              fitpar.fitStartCh = (int)cursorChan;
+            if(cursorChan > rawdata.dispFitPar.fitStartCh){
+              rawdata.dispFitPar.fitEndCh = (int)cursorChan;
+            }else if(cursorChan < rawdata.dispFitPar.fitStartCh){
+              rawdata.dispFitPar.fitEndCh = rawdata.dispFitPar.fitStartCh; //swap
+              rawdata.dispFitPar.fitStartCh = (int)cursorChan;
             }
           }
         }
         //check if both limits have been set
-        if((fitpar.fitStartCh >= 0)&&(fitpar.fitEndCh >=0)){
-          printf("Fit limits: channel %i through %i\n",fitpar.fitStartCh,fitpar.fitEndCh);
-          if((fitpar.fitType == FITTYPE_BGONLY)||(fitpar.fitType == FITTYPE_SUMREGION)){
+        if((rawdata.dispFitPar.fitStartCh >= 0)&&(rawdata.dispFitPar.fitEndCh >=0)){
+          printf("Fit limits: channel %i through %i\n",rawdata.dispFitPar.fitStartCh,rawdata.dispFitPar.fitEndCh);
+          if((rawdata.dispFitPar.fitType == FITTYPE_BGONLY)||(rawdata.dispFitPar.fitType == FITTYPE_SUMREGION)){
             //background only or sum region fit, start the fit right away
             on_fit_fit_button_clicked(); //gui.c
           }else{
-            guiglobals.fittingSp = FITSTATE_SETTINGPEAKS;
+            rawdata.dispFitPar.fittingSp = FITSTATE_SETTINGPEAKS;
           }
           update_gui_fit_state();
         }
@@ -593,7 +593,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
       if(cursorChan >= 0){
         //user has double clicked on the displayed spectrum
         switch(drawing.multiplotMode){
-          case MULTIPLOT_SUMMED:
+          case VIEWTYPE_SUMMED:
             //summed single plot
             //offer option to create a new summed spectrum and comment on that
             guiglobals.commentEditInd = getCommentAtCursor(event->x, event->y);
@@ -650,7 +650,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
             //show the window to edit the comment
             gtk_window_present(comment_window);
             break;
-          case MULTIPLOT_NONE:
+          case VIEWTYPE_NONE:
             //single plot being displayed
             //open a dialog for the user to write a comment
             //printf("Double click on channel %f, value %f\n",cursorChan,cursorYVal);
@@ -789,17 +789,17 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event){
     }
     
     signed char peakToHighlight = -1;
-    if(guiglobals.fittingSp >= FITSTATE_FITCOMPLETE){
+    if(rawdata.dispFitPar.fittingSp >= FITSTATE_FITCOMPLETE){
       //check if the cursor is over a peak
       uint8_t i;
-      for(i=0;i<fitpar.numFitPeaks;i++){
-        if(cursorChan > (fitpar.centroidVal[i] - 2.*fitpar.fitParVal[FITPAR_WIDTH1+(3*i)])){
-          if(cursorChan < (fitpar.centroidVal[i] + 2.*fitpar.fitParVal[FITPAR_WIDTH1+(3*i)])){
+      for(i=0;i<rawdata.dispFitPar.numFitPeaks;i++){
+        if(cursorChan > (rawdata.dispFitPar.centroidVal[i] - 2.*rawdata.dispFitPar.fitParVal[FITPAR_WIDTH1+(3*i)])){
+          if(cursorChan < (rawdata.dispFitPar.centroidVal[i] + 2.*rawdata.dispFitPar.fitParVal[FITPAR_WIDTH1+(3*i)])){
             if(peakToHighlight == -1){
               peakToHighlight = (signed char)i;
             }else{
               //highlight whichever peak is closer to the cursor
-              if(fabsl(cursorChan - fitpar.centroidVal[i]) < fabsl(cursorChan - fitpar.centroidVal[drawing.highlightedPeak])){
+              if(fabsl(cursorChan - rawdata.dispFitPar.centroidVal[i]) < fabsl(cursorChan - rawdata.dispFitPar.centroidVal[drawing.highlightedPeak])){
                 peakToHighlight = (signed char)i;
               }
             }
@@ -831,9 +831,9 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event){
         case -1:
           //print cursor position on status bar
           switch(drawing.multiplotMode){
-            case MULTIPLOT_STACKED:
-            case MULTIPLOT_OVERLAY_INDEPENDENT:
-            case MULTIPLOT_OVERLAY_COMMON:
+            case VIEWTYPE_STACKED:
+            case VIEWTYPE_OVERLAY_INDEPENDENT:
+            case VIEWTYPE_OVERLAY_COMMON:
               //multiple visible plots
               if(calpar.calMode == 1){
                 int32_t cursorChanEnd = cursorChanRounded + drawing.contractFactor;
@@ -859,8 +859,8 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event){
               binValStr[15] = '\0'; //truncate string (staying safe with sprintf, working around compiler warning when using snprintf instead)
               statusBarLabelp += sprintf(statusBarLabelp," %s", binValStr);
               break;
-            case MULTIPLOT_SUMMED:
-            case MULTIPLOT_NONE:
+            case VIEWTYPE_SUMMED:
+            case VIEWTYPE_NONE:
             default:
               //single plot
               binVal = getDispSpBinVal(0,cursorChanRounded-drawing.lowerLimit);
@@ -884,20 +884,20 @@ void on_spectrum_cursor_motion(GtkWidget *widget, GdkEventMotion *event){
         default:
           //print highlighted peak info
           if(calpar.calMode == 1){
-            double calCentr = getCalVal((double)(fitpar.centroidVal[drawing.highlightedPeak]));
-            double calWidth = getCalWidth((double)(fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]),(double)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)]));
-            double calCentrErr = getCalWidth((double)(fitpar.fitParErr[FITPAR_POS1+(3*drawing.highlightedPeak)]),(double)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)]));
-            double calWidthErr = getCalWidth((double)(fitpar.fitParErr[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]),(double)(fitpar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)]));
+            double calCentr = getCalVal((double)(rawdata.dispFitPar.centroidVal[drawing.highlightedPeak]));
+            double calWidth = getCalWidth((double)(rawdata.dispFitPar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]),(double)(rawdata.dispFitPar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)]));
+            double calCentrErr = getCalWidth((double)(rawdata.dispFitPar.fitParErr[FITPAR_POS1+(3*drawing.highlightedPeak)]),(double)(rawdata.dispFitPar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)]));
+            double calWidthErr = getCalWidth((double)(rawdata.dispFitPar.fitParErr[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]),(double)(rawdata.dispFitPar.fitParVal[FITPAR_POS1+(3*drawing.highlightedPeak)]));
             char fitParStr[3][50];
-            getFormattedValAndUncertainty((double)fitpar.areaVal[drawing.highlightedPeak],(double)fitpar.areaErr[drawing.highlightedPeak],fitParStr[0],50,1,guiglobals.roundErrors);
+            getFormattedValAndUncertainty((double)rawdata.dispFitPar.areaVal[drawing.highlightedPeak],(double)rawdata.dispFitPar.areaErr[drawing.highlightedPeak],fitParStr[0],50,1,guiglobals.roundErrors);
             getFormattedValAndUncertainty(calCentr,calCentrErr,fitParStr[1],50,1,guiglobals.roundErrors);
             getFormattedValAndUncertainty(2.35482*calWidth,2.35482*calWidthErr,fitParStr[2],50,1,guiglobals.roundErrors);
             snprintf(statusBarLabel,256,"Area: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
           }else{
             char fitParStr[3][50];
-            getFormattedValAndUncertainty((double)fitpar.areaVal[drawing.highlightedPeak],(double)fitpar.areaErr[drawing.highlightedPeak],fitParStr[0],50,1,guiglobals.roundErrors);
-            getFormattedValAndUncertainty((double)(fitpar.centroidVal[drawing.highlightedPeak]),(double)(fitpar.fitParErr[FITPAR_POS1+(3*drawing.highlightedPeak)]),fitParStr[1],50,1,guiglobals.roundErrors);
-            getFormattedValAndUncertainty(2.35482*(double)(fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]),2.35482*(double)(fitpar.fitParErr[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]),fitParStr[2],50,1,guiglobals.roundErrors);
+            getFormattedValAndUncertainty((double)rawdata.dispFitPar.areaVal[drawing.highlightedPeak],(double)rawdata.dispFitPar.areaErr[drawing.highlightedPeak],fitParStr[0],50,1,guiglobals.roundErrors);
+            getFormattedValAndUncertainty((double)(rawdata.dispFitPar.centroidVal[drawing.highlightedPeak]),(double)(rawdata.dispFitPar.fitParErr[FITPAR_POS1+(3*drawing.highlightedPeak)]),fitParStr[1],50,1,guiglobals.roundErrors);
+            getFormattedValAndUncertainty(2.35482*(double)(rawdata.dispFitPar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]),2.35482*(double)(rawdata.dispFitPar.fitParErr[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]),fitParStr[2],50,1,guiglobals.roundErrors);
             snprintf(statusBarLabel,256,"Area: %s, Centroid: %s, FWHM: %s",fitParStr[0],fitParStr[1],fitParStr[2]);
           }
 
@@ -953,7 +953,7 @@ float getXPosFromCh(const float chVal, const float width){
 float getYPos(const double val, const int32_t multiplotSpNum, const float height){
   double pos, minVal;
   switch(drawing.multiplotMode){
-    case MULTIPLOT_STACKED:
+    case VIEWTYPE_STACKED:
       //stacked
       minVal = YORIGIN + (height-YORIGIN)*(double)(multiplotSpNum/(drawing.numMultiplotSp*1.0));
       if(drawing.logScale){
@@ -973,10 +973,10 @@ float getYPos(const double val, const int32_t multiplotSpNum, const float height
       if((pos < minVal)||(pos!=pos))
         pos = minVal;
       break;
-    case MULTIPLOT_OVERLAY_INDEPENDENT:
-    case MULTIPLOT_OVERLAY_COMMON:
-    case MULTIPLOT_SUMMED:
-    case MULTIPLOT_NONE:
+    case VIEWTYPE_OVERLAY_INDEPENDENT:
+    case VIEWTYPE_OVERLAY_COMMON:
+    case VIEWTYPE_SUMMED:
+    case VIEWTYPE_NONE:
     default:
       //single plot
       if(drawing.logScale){
@@ -1051,7 +1051,7 @@ void drawXAxisTick(const double axisVal, cairo_t *cr, const float width, const f
 float getAxisYPos(const float axisVal, const int32_t multiplotSpNum, const float height){
   double posVal;
   switch(drawing.multiplotMode){
-    case MULTIPLOT_STACKED:
+    case VIEWTYPE_STACKED:
       //stacked
       if(drawing.logScale){
         if((axisVal > 0)&&(drawing.scaleLevelMax[multiplotSpNum] > 0)){
@@ -1067,10 +1067,10 @@ float getAxisYPos(const float axisVal, const int32_t multiplotSpNum, const float
         posVal = (float)(1.0/drawing.numMultiplotSp)*(YORIGIN-height)*(axisVal - drawing.scaleLevelMin[multiplotSpNum])/(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum]) + (YORIGIN-height)*(float)(multiplotSpNum/(drawing.numMultiplotSp*1.0)) - YORIGIN;
       }
       break;
-    case MULTIPLOT_OVERLAY_INDEPENDENT:
-    case MULTIPLOT_OVERLAY_COMMON:
-    case MULTIPLOT_SUMMED:
-    case MULTIPLOT_NONE:
+    case VIEWTYPE_OVERLAY_INDEPENDENT:
+    case VIEWTYPE_OVERLAY_COMMON:
+    case VIEWTYPE_SUMMED:
+    case VIEWTYPE_NONE:
     default:
       if(drawing.logScale){
         if((axisVal > 0)&&(drawing.scaleLevelMax[multiplotSpNum] > 0)){
@@ -1101,7 +1101,7 @@ void drawYAxisTick(const double axisVal, const int32_t multiplotSpNum, cairo_t *
       //tick is too close to zero, don't draw
       return;
     }
-    if((drawing.multiplotMode == MULTIPLOT_STACKED)&&(fabs(drawing.scaleLevelMax[multiplotSpNum] - axisVal) < ((drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])/8.0)) ){
+    if((drawing.multiplotMode == VIEWTYPE_STACKED)&&(fabs(drawing.scaleLevelMax[multiplotSpNum] - axisVal) < ((drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])/8.0)) ){
       //tick is too close to the top of the spectrum in a stacked view, don't draw
       return;
     }
@@ -1114,7 +1114,7 @@ void drawYAxisTick(const double axisVal, const int32_t multiplotSpNum, cairo_t *
         //tick is too close to zero, don't draw
         return;
       }
-      if((drawing.multiplotMode == MULTIPLOT_STACKED)&&(log10(drawing.scaleLevelMax[multiplotSpNum] - axisVal) < (log10(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])/8.0)) ){
+      if((drawing.multiplotMode == VIEWTYPE_STACKED)&&(log10(drawing.scaleLevelMax[multiplotSpNum] - axisVal) < (log10(drawing.scaleLevelMax[multiplotSpNum] - drawing.scaleLevelMin[multiplotSpNum])/8.0)) ){
         //tick is too close to the top of the spectrum in a stacked view, don't draw
         return;
       }
@@ -1123,7 +1123,7 @@ void drawYAxisTick(const double axisVal, const int32_t multiplotSpNum, cairo_t *
         //tick is too close to zero, don't draw
         return;
       }
-      if((drawing.multiplotMode == MULTIPLOT_STACKED)&&(log10(drawing.scaleLevelMax[multiplotSpNum] - axisVal) < (log10(drawing.scaleLevelMax[multiplotSpNum])/8.0)) ){
+      if((drawing.multiplotMode == VIEWTYPE_STACKED)&&(log10(drawing.scaleLevelMax[multiplotSpNum] - axisVal) < (log10(drawing.scaleLevelMax[multiplotSpNum])/8.0)) ){
         //tick is too close to the top of the spectrum in a stacked view, don't draw
         return;
       }
@@ -1134,7 +1134,7 @@ void drawYAxisTick(const double axisVal, const int32_t multiplotSpNum, cairo_t *
   float axisPos = getAxisYPos((float)axisVal,multiplotSpNum,height);
   if((axisPos <= 0) && (axisPos > (height)*-0.98)) {
     //axis position is valid (ie. on the plot, and not too close to the top of the plot so that it won't be cut off)
-    if(drawing.multiplotMode!=MULTIPLOT_OVERLAY_INDEPENDENT){
+    if(drawing.multiplotMode!=VIEWTYPE_OVERLAY_INDEPENDENT){
       //default colours used, unless in independent scaling mode
       setTextColor(cr);
     }
@@ -1144,7 +1144,7 @@ void drawYAxisTick(const double axisVal, const int32_t multiplotSpNum, cairo_t *
       //don't draw a gridline which overlaps with the x-axis
       if(axisVal > drawing.scaleLevelMin[multiplotSpNum]){
         cairo_stroke(cr);
-        if(drawing.multiplotMode!=MULTIPLOT_OVERLAY_INDEPENDENT){
+        if(drawing.multiplotMode!=VIEWTYPE_OVERLAY_INDEPENDENT){
           //default colours used, unless in independent scaling mode
           setGridLineColor(cr);
         }
@@ -1156,7 +1156,7 @@ void drawYAxisTick(const double axisVal, const int32_t multiplotSpNum, cairo_t *
           xPos = xPos + 5.0f;
         }
         cairo_stroke(cr);
-        if(drawing.multiplotMode!=MULTIPLOT_OVERLAY_INDEPENDENT){
+        if(drawing.multiplotMode!=VIEWTYPE_OVERLAY_INDEPENDENT){
           //default colours used, unless in independent scaling mode
           setTextColor(cr);
         }
@@ -1178,73 +1178,84 @@ void drawPlotLabel(cairo_t *cr, const float width, const float height, const dou
   cairo_text_extents_t extents; //get dimensions needed to justify text labels
   float labelYOffset;
   cairo_set_font_size(cr, baseFontSize);
-  switch(drawing.multiplotMode){
-    case MULTIPLOT_STACKED:
-      //stacked spectra
-      labelYOffset = height/(float)(3.*drawing.numMultiplotSp);
-      if(labelYOffset > YORIGIN){
-        labelYOffset = YORIGIN;
-      }
-      for(int32_t i=0;i<drawing.numMultiplotSp;i++){
-        cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
-        if(drawing.scaleFactor[drawing.multiPlots[i]] == 1.0){
-          strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[i]]);
-        }else{
-          snprintf(plotLabel,256,"%s (scaled by %.2f)",rawdata.histComment[drawing.multiPlots[i]],drawing.scaleFactor[drawing.multiPlots[i]]);
-        }
-        cairo_text_extents(cr, plotLabel, &extents);
-        cairo_move_to(cr, (width)*0.95 - extents.width, (height-YORIGIN)*((drawing.numMultiplotSp-i-1)/(drawing.numMultiplotSp*1.0)) + labelYOffset);
-        cairo_show_text(cr, plotLabel);
-      }
-      break;
-    case MULTIPLOT_OVERLAY_INDEPENDENT:
-    case MULTIPLOT_OVERLAY_COMMON:
-      //overlaid spectra
-      for(int32_t i=0;i<drawing.numMultiplotSp;i++){
-        cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
-        if(drawing.scaleFactor[drawing.multiPlots[i]] == 1.0){
-          strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[i]]);
-        }else{
-          snprintf(plotLabel,256,"%s (scaled by %.2f)",rawdata.histComment[drawing.multiPlots[i]],drawing.scaleFactor[drawing.multiPlots[i]]);
-        }
-        cairo_text_extents(cr, plotLabel, &extents);
-        cairo_move_to(cr, (width)*0.95 - extents.width, YORIGIN*(1.0 + 0.45*i));
-        cairo_show_text(cr, plotLabel);
-      }
-      break;
-    case MULTIPLOT_SUMMED:
-      //summed spectra
+  if(drawing.displayedSavedFit >= 0){
+    if((rawdata.viewMode[drawing.displayedSavedFit] == VIEWTYPE_SAVEDFIT_OFSP)||(rawdata.viewMode[drawing.displayedSavedFit] == VIEWTYPE_SAVEDFIT_OFVIEW)){
       setTextColor(cr);
-      strcpy(plotLabel, "Sum of:");
+      strcpy(plotLabel, rawdata.viewComment[drawing.displayedSavedFit]);
       cairo_text_extents(cr, plotLabel, &extents);
       cairo_move_to(cr, (width)*0.95 - extents.width, YORIGIN);
       cairo_show_text(cr, plotLabel);
-      for(int32_t i=0;i<drawing.numMultiplotSp;i++){
-        if(drawing.scaleFactor[drawing.multiPlots[i]] == 1.0){
-          strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[i]]);
+    }
+  }else{
+    switch(drawing.multiplotMode){
+      case VIEWTYPE_STACKED:
+        //stacked spectra
+        labelYOffset = height/(float)(3.*drawing.numMultiplotSp);
+        if(labelYOffset > YORIGIN){
+          labelYOffset = YORIGIN;
+        }
+        for(int32_t i=0;i<drawing.numMultiplotSp;i++){
+          cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
+          if(drawing.scaleFactor[drawing.multiPlots[i]] == 1.0){
+            strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[i]]);
+          }else{
+            snprintf(plotLabel,256,"%s (scaled by %.2f)",rawdata.histComment[drawing.multiPlots[i]],drawing.scaleFactor[drawing.multiPlots[i]]);
+          }
+          cairo_text_extents(cr, plotLabel, &extents);
+          cairo_move_to(cr, (width)*0.95 - extents.width, (height-YORIGIN)*((drawing.numMultiplotSp-i-1)/(drawing.numMultiplotSp*1.0)) + labelYOffset);
+          cairo_show_text(cr, plotLabel);
+        }
+        break;
+      case VIEWTYPE_OVERLAY_INDEPENDENT:
+      case VIEWTYPE_OVERLAY_COMMON:
+        //overlaid spectra
+        for(int32_t i=0;i<drawing.numMultiplotSp;i++){
+          cairo_set_source_rgb (cr, drawing.spColors[3*i], drawing.spColors[3*i + 1], drawing.spColors[3*i + 2]);
+          if(drawing.scaleFactor[drawing.multiPlots[i]] == 1.0){
+            strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[i]]);
+          }else{
+            snprintf(plotLabel,256,"%s (scaled by %.2f)",rawdata.histComment[drawing.multiPlots[i]],drawing.scaleFactor[drawing.multiPlots[i]]);
+          }
+          cairo_text_extents(cr, plotLabel, &extents);
+          cairo_move_to(cr, (width)*0.95 - extents.width, YORIGIN*(1.0 + 0.45*i));
+          cairo_show_text(cr, plotLabel);
+        }
+        break;
+      case VIEWTYPE_SUMMED:
+        //summed spectra
+        setTextColor(cr);
+        strcpy(plotLabel, "Sum of:");
+        cairo_text_extents(cr, plotLabel, &extents);
+        cairo_move_to(cr, (width)*0.95 - extents.width, YORIGIN);
+        cairo_show_text(cr, plotLabel);
+        for(int32_t i=0;i<drawing.numMultiplotSp;i++){
+          if(drawing.scaleFactor[drawing.multiPlots[i]] == 1.0){
+            strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[i]]);
+          }else{
+            snprintf(plotLabel,256,"%s (scaled by %.2f)",rawdata.histComment[drawing.multiPlots[i]],drawing.scaleFactor[drawing.multiPlots[i]]);
+          }
+          cairo_text_extents(cr, plotLabel, &extents);
+          cairo_move_to(cr, (width)*0.95 - extents.width,  YORIGIN*(1.0 + 0.45*(i+1)));
+          cairo_show_text(cr, plotLabel);
+        }
+        break;
+      case VIEWTYPE_NONE:
+        //single plot mode
+        setTextColor(cr);
+        if(drawing.scaleFactor[drawing.multiPlots[0]] == 1.0){
+          strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[0]]);
         }else{
-          snprintf(plotLabel,256,"%s (scaled by %.2f)",rawdata.histComment[drawing.multiPlots[i]],drawing.scaleFactor[drawing.multiPlots[i]]);
+          snprintf(plotLabel,256,"%s (scaled by %.2f)",rawdata.histComment[drawing.multiPlots[0]],drawing.scaleFactor[drawing.multiPlots[0]]);
         }
         cairo_text_extents(cr, plotLabel, &extents);
-        cairo_move_to(cr, (width)*0.95 - extents.width,  YORIGIN*(1.0 + 0.45*(i+1)));
+        cairo_move_to(cr, (width)*0.95 - extents.width, YORIGIN);
         cairo_show_text(cr, plotLabel);
-      }
-      break;
-    case MULTIPLOT_NONE:
-      //single plot mode
-      setTextColor(cr);
-      if(drawing.scaleFactor[drawing.multiPlots[0]] == 1.0){
-        strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[0]]);
-      }else{
-        snprintf(plotLabel,256,"%s (scaled by %.2f)",rawdata.histComment[drawing.multiPlots[0]],drawing.scaleFactor[drawing.multiPlots[0]]);
-      }
-      cairo_text_extents(cr, plotLabel, &extents);
-      cairo_move_to(cr, (width)*0.95 - extents.width, YORIGIN);
-      cairo_show_text(cr, plotLabel);
-      break;
-    default:
-      break;
+        break;
+      default:
+        break;
+    }
   }
+  
 }
 
 float getDistBetweenYAxisTicks(const float axisRange, const int32_t numTicks){
@@ -1378,9 +1389,9 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   }
   for(int32_t i=0;i<(drawing.upperLimit-drawing.lowerLimit-1);i+=drawing.contractFactor){
     switch(drawing.multiplotMode){
-      case MULTIPLOT_STACKED:
+      case VIEWTYPE_STACKED:
         //stacked
-      case MULTIPLOT_OVERLAY_INDEPENDENT:
+      case VIEWTYPE_OVERLAY_INDEPENDENT:
         //overlay (independent scaling)
         for(int32_t j=0;j<drawing.numMultiplotSp;j++){
           currentVal[j] = getDispSpBinValAdj(j, i);
@@ -1392,7 +1403,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           }
         }
         break;
-      case MULTIPLOT_OVERLAY_COMMON:
+      case VIEWTYPE_OVERLAY_COMMON:
         //overlay (common scaling)
         for(int32_t j=0;j<drawing.numMultiplotSp;j++){
           currentVal[0] = getDispSpBinValAdj(j, i);
@@ -1404,9 +1415,9 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           }
         }
         break;
-      case MULTIPLOT_SUMMED:
+      case VIEWTYPE_SUMMED:
         //summed
-      case MULTIPLOT_NONE:
+      case VIEWTYPE_NONE:
         currentVal[0] = getDispSpBinValAdj(0, i);
         if(currentVal[0] > maxVal[0]){
           maxVal[0] = currentVal[0];
@@ -1422,8 +1433,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   //setup autoscaling
   if((drawing.autoScale)||(drawing.scaleLevelMax[0] <= drawing.scaleLevelMin[0])){
     switch(drawing.multiplotMode){
-      case MULTIPLOT_STACKED:
-      case MULTIPLOT_OVERLAY_INDEPENDENT:
+      case VIEWTYPE_STACKED:
+      case VIEWTYPE_OVERLAY_INDEPENDENT:
         for(int32_t i=0;i<drawing.numMultiplotSp;i++){
           if(drawing.logScale){
             drawing.scaleToLevelMax[i] = maxVal[i]*2.0f;
@@ -1433,7 +1444,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           drawing.scaleToLevelMin[i] = minVal[i];
         }
         break;
-      case MULTIPLOT_OVERLAY_COMMON:
+      case VIEWTYPE_OVERLAY_COMMON:
         for(int32_t i=0;i<drawing.numMultiplotSp;i++){
           if(drawing.logScale){
             drawing.scaleToLevelMax[i] = maxVal[0]*2.0f;
@@ -1443,8 +1454,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           drawing.scaleToLevelMin[i] = minVal[0];
         }
         break;
-      case MULTIPLOT_SUMMED:
-      case MULTIPLOT_NONE:
+      case VIEWTYPE_SUMMED:
+      case VIEWTYPE_NONE:
         if(drawing.logScale){
           drawing.scaleToLevelMax[0] = maxVal[0]*2.0f;
         }else{
@@ -1513,7 +1524,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   int32_t numTickPerSp;
   float yTickDist, yTick;
   switch(drawing.multiplotMode){
-    case MULTIPLOT_STACKED:
+    case VIEWTYPE_STACKED:
       //stacked
       if(drawing.logScale){
         for(int32_t i=0;i<drawing.numMultiplotSp;i++){
@@ -1568,7 +1579,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         }
       }
       break;
-    case MULTIPLOT_OVERLAY_INDEPENDENT:
+    case VIEWTYPE_OVERLAY_INDEPENDENT:
       //overlay (independent scaling)
       for(int32_t i=0;i<drawing.numMultiplotSp;i++){
         double labelOffset = 0.4*((double)i+1.0)/((double)(drawing.numMultiplotSp)*1.0);
@@ -1577,9 +1588,9 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         drawYAxisTick(0.0, i, cr, width, height, plotFontSize, drawGridLines); //always draw the zero label on the y axis
       }
       break;
-    case MULTIPLOT_OVERLAY_COMMON:
-    case MULTIPLOT_SUMMED:
-    case MULTIPLOT_NONE:
+    case VIEWTYPE_OVERLAY_COMMON:
+    case VIEWTYPE_SUMMED:
+    case VIEWTYPE_NONE:
       //modes with a single scale
       setTextColor(cr);
       if(drawing.logScale){
@@ -1665,7 +1676,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     if((guiglobals.draggingSp)||(drawing.zoomingSpX)||(zoomYTime>0 && zoomYTime<400000)){
       //optimize when dragging/zooming
       binSkipFactorF *= 1.5f;
-      if(drawing.multiplotMode>MULTIPLOT_SUMMED){
+      if(drawing.multiplotMode>VIEWTYPE_SUMMED){
         binSkipFactorF *= (float)(drawing.numMultiplotSp);
       }
     }
@@ -1689,9 +1700,9 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   int32_t range = drawing.upperLimit-drawing.lowerLimit;
   double nextVal;
   switch(drawing.multiplotMode){
-    case MULTIPLOT_STACKED:
+    case VIEWTYPE_STACKED:
       //stacked
-    case MULTIPLOT_OVERLAY_INDEPENDENT:
+    case VIEWTYPE_OVERLAY_INDEPENDENT:
       //overlay (independent scaling)
       for(int32_t i=0;i<drawing.numMultiplotSp;i++){
         cairo_move_to(cr, getXPos(startBin,width), getYPos(getDispSpBinValAdj(i,startBin),i,height));
@@ -1720,7 +1731,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         cairo_stroke(cr);
       }
       break;
-    case MULTIPLOT_OVERLAY_COMMON:
+    case VIEWTYPE_OVERLAY_COMMON:
       //overlay (common scaling)
       for(int32_t i=0;i<drawing.numMultiplotSp;i++){
         cairo_move_to(cr, getXPos(startBin,width), getYPos(getDispSpBinValAdj(i,startBin),0,height));
@@ -1749,9 +1760,9 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         cairo_stroke(cr);
       }
       break;
-    case MULTIPLOT_SUMMED:
+    case VIEWTYPE_SUMMED:
       //summed
-    case MULTIPLOT_NONE:
+    case VIEWTYPE_NONE:
       cairo_move_to(cr, getXPos(startBin,width), getYPos(getDispSpBinValAdj(0,startBin),0,height));
       for(int32_t i=startBin;i<range;i+=binSkipFactor){
 
@@ -1782,10 +1793,10 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   }
 
   //draw fit
-  if((guiglobals.fittingSp >= FITSTATE_FITCOMPLETE)&&(showFit>0)){
-    if(fitpar.fitType != FITTYPE_SUMREGION){
+  if((rawdata.dispFitPar.fittingSp >= FITSTATE_FITCOMPLETE)&&(showFit>0)){
+    if(rawdata.dispFitPar.fitType != FITTYPE_SUMREGION){
       
-      if((drawing.lowerLimit < fitpar.fitEndCh)&&(drawing.upperLimit > fitpar.fitStartCh)){
+      if((drawing.lowerLimit < rawdata.dispFitPar.fitEndCh)&&(drawing.upperLimit > rawdata.dispFitPar.fitStartCh)){
         cairo_set_line_width(cr, 3.0*scaleFactor);
         //cairo_set_source_rgb(cr, 0.5, 0.5, 0.5);
         cairo_set_source_rgb(cr, 0.0, 0.0, 0.8);
@@ -1796,14 +1807,14 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         }
         //draw background
         cairo_set_line_width(cr, 1.0*scaleFactor);
-        fitDrawX=(float)(fitpar.fitStartCh);
+        fitDrawX=(float)(rawdata.dispFitPar.fitStartCh);
         nextXpos = getXPosFromCh(fitDrawX,width);
         if(nextXpos > 0){
           cairo_move_to(cr, nextXpos, getYPos((float)(evalFitBG(fitDrawX)),0,height));
         }else{
           cairo_move_to(cr, XORIGIN, getYPos((float)(evalFitBG((float)drawing.lowerLimit)),0,height));
         }
-        for(; fitDrawX<=(float)(fitpar.fitEndCh); fitDrawX+= fitSkipFactor){
+        for(; fitDrawX<=(float)(rawdata.dispFitPar.fitEndCh); fitDrawX+= fitSkipFactor){
           nextFitDrawX = fitDrawX + fitSkipFactor;
           nextXpos = getXPosFromCh(nextFitDrawX,width);
           if(nextXpos > 0){
@@ -1813,14 +1824,14 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         cairo_stroke(cr);
         //draw sum of peaks
         cairo_set_line_width(cr, 3.0*scaleFactor);
-        fitDrawX=(float)(fitpar.fitStartCh);
+        fitDrawX=(float)(rawdata.dispFitPar.fitStartCh);
         nextXpos = getXPosFromCh(fitDrawX,width);
         if(nextXpos > 0){
           cairo_move_to(cr, nextXpos, getYPos((float)(evalFit(fitDrawX)),0,height));
         }else{
           cairo_move_to(cr, XORIGIN, getYPos((float)(evalFit((float)drawing.lowerLimit)),0,height));
         }
-        for(; fitDrawX<=(float)(fitpar.fitEndCh); fitDrawX+= fitSkipFactor){
+        for(; fitDrawX<=(float)(rawdata.dispFitPar.fitEndCh); fitDrawX+= fitSkipFactor){
           nextFitDrawX = fitDrawX + fitSkipFactor;
           nextXpos = getXPosFromCh(nextFitDrawX,width);
           if(nextXpos > 0){
@@ -1829,16 +1840,16 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         }
         cairo_stroke(cr);
         //draw highlighed peak
-        if((drawing.highlightedPeak >= 0)&&(drawing.highlightedPeak <= fitpar.numFitPeaks)&&(showFit>1)){
+        if((drawing.highlightedPeak >= 0)&&(drawing.highlightedPeak <= rawdata.dispFitPar.numFitPeaks)&&(showFit>1)){
           cairo_set_line_width(cr, 6.0*scaleFactor);
-          fitDrawX = floorf((float)(fitpar.centroidVal[drawing.highlightedPeak] - 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]));
+          fitDrawX = floorf((float)(rawdata.dispFitPar.centroidVal[drawing.highlightedPeak] - 5.*rawdata.dispFitPar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)]));
           nextXpos = getXPosFromCh(fitDrawX,width);
           if(nextXpos > 0){
             cairo_move_to(cr, nextXpos, getYPos((float)(evalFitOnePeak(fitDrawX,drawing.highlightedPeak)),0,height));
           }else{
             cairo_move_to(cr, XORIGIN, getYPos((float)(evalFitOnePeak((float)drawing.lowerLimit,drawing.highlightedPeak)),0,height));
           }
-          for(; fitDrawX<=floorf((float)(fitpar.centroidVal[drawing.highlightedPeak] + 5.*fitpar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)])); fitDrawX+= fitSkipFactor){
+          for(; fitDrawX<=floorf((float)(rawdata.dispFitPar.centroidVal[drawing.highlightedPeak] + 5.*rawdata.dispFitPar.fitParVal[FITPAR_WIDTH1+(3*drawing.highlightedPeak)])); fitDrawX+= fitSkipFactor){
             nextFitDrawX = fitDrawX + fitSkipFactor;
             nextXpos = getXPosFromCh(nextFitDrawX,width);
             if(nextXpos > 0){
@@ -1858,17 +1869,17 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   cairo_move_to(cr, XORIGIN, YORIGIN);
   cairo_line_to(cr, XORIGIN, height);
   switch(drawing.multiplotMode){
-    case MULTIPLOT_STACKED:
+    case VIEWTYPE_STACKED:
       //stacked
       for(int32_t i=0;i<drawing.numMultiplotSp;i++){
         cairo_move_to(cr, XORIGIN, YORIGIN + (height-YORIGIN)*(float)(i/(drawing.numMultiplotSp*1.0)));
         cairo_line_to(cr, width, YORIGIN + (height-YORIGIN)*(float)(i/(drawing.numMultiplotSp*1.0)));
       }
       break;
-    case MULTIPLOT_OVERLAY_INDEPENDENT:
-    case MULTIPLOT_OVERLAY_COMMON:
-    case MULTIPLOT_SUMMED:
-    case MULTIPLOT_NONE:
+    case VIEWTYPE_OVERLAY_INDEPENDENT:
+    case VIEWTYPE_OVERLAY_COMMON:
+    case VIEWTYPE_SUMMED:
+    case VIEWTYPE_NONE:
     default:
       //single plot
       cairo_move_to(cr, XORIGIN, YORIGIN);
@@ -1920,11 +1931,11 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   cairo_restore(cr); //recall the unrotated context
 
   //draw fit cursors and indicators
-  if((guiglobals.fittingSp != FITSTATE_NOTFITTING)&&(showFit>0)){
+  if((rawdata.dispFitPar.fittingSp != FITSTATE_NOTFITTING)&&(showFit>0)){
 
     //draw cursors at fit limits if needed
-    if(fitpar.fitStartCh >= 0){
-      float cursorPos = getXPosFromCh((float)(fitpar.fitStartCh),width);
+    if(rawdata.dispFitPar.fitStartCh >= 0){
+      float cursorPos = getXPosFromCh((float)(rawdata.dispFitPar.fitStartCh),width);
       if(cursorPos>=0){
         cairo_set_line_width(cr, 2.0*scaleFactor);
         cairo_set_source_rgb(cr, 0.5, 0.5, 0.5);
@@ -1933,8 +1944,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         cairo_stroke(cr);
       }
     }
-    if(fitpar.fitEndCh >= 0){
-      float cursorPos = getXPosFromCh((float)(fitpar.fitEndCh),width);
+    if(rawdata.dispFitPar.fitEndCh >= 0){
+      float cursorPos = getXPosFromCh((float)(rawdata.dispFitPar.fitEndCh),width);
       if(cursorPos>=0){
         cairo_set_line_width(cr, 2.0*scaleFactor);
         cairo_set_source_rgb(cr, 0.5, 0.5, 0.5);
@@ -1944,24 +1955,24 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       }
     }
     //draw peak position indicators
-    if((guiglobals.fittingSp >= FITSTATE_SETTINGPEAKS)&&(guiglobals.fittingSp < FITSTATE_FITCOMPLETE)){
+    if((rawdata.dispFitPar.fittingSp >= FITSTATE_SETTINGPEAKS)&&(rawdata.dispFitPar.fittingSp < FITSTATE_FITCOMPLETE)){
       //put markers at guessed positions
       cairo_set_source_rgb(cr, 0.0, 0.0, 0.8);
       cairo_set_line_width(cr, 2.0*scaleFactor);
-      for(int32_t i=0;i<fitpar.numFitPeaks;i++){
-        if((fitpar.fitPeakInitGuess[i] > drawing.lowerLimit)&&(fitpar.fitPeakInitGuess[i] < drawing.upperLimit)){
-          cairo_arc(cr,getXPosFromCh(fitpar.fitPeakInitGuess[i],width),(-0.002*(height)*30.0)-getYPos(getDispSpBinValAdj(0,(int)(fitpar.fitPeakInitGuess[i])-drawing.lowerLimit),0,height),5.,0.,2*G_PI);
+      for(int32_t i=0;i<rawdata.dispFitPar.numFitPeaks;i++){
+        if((rawdata.dispFitPar.fitPeakInitGuess[i] > drawing.lowerLimit)&&(rawdata.dispFitPar.fitPeakInitGuess[i] < drawing.upperLimit)){
+          cairo_arc(cr,getXPosFromCh(rawdata.dispFitPar.fitPeakInitGuess[i],width),(-0.002*(height)*30.0)-getYPos(getDispSpBinValAdj(0,(int)(rawdata.dispFitPar.fitPeakInitGuess[i])-drawing.lowerLimit),0,height),5.,0.,2*G_PI);
         }
         cairo_stroke_preserve(cr);
         cairo_fill(cr);
       }
-    }else if(guiglobals.fittingSp >= FITSTATE_FITCOMPLETE){
+    }else if(rawdata.dispFitPar.fittingSp >= FITSTATE_FITCOMPLETE){
       //put markers at fitted positions
       cairo_set_source_rgb(cr, 0.0, 0.0, 0.8);
       cairo_set_line_width(cr, 2.0*scaleFactor);
-      for(int32_t i=0;i<fitpar.numFitPeaks;i++){
-        if((fitpar.fitParVal[FITPAR_POS1+(3*i)] > drawing.lowerLimit)&&(fitpar.fitParVal[FITPAR_POS1+(3*i)] < drawing.upperLimit)){
-          cairo_arc(cr,getXPosFromCh((float)(fitpar.fitParVal[FITPAR_POS1+(3*i)]),width),(-0.002*(height)*30.0)-getYPos((float)(evalFit(fitpar.fitParVal[FITPAR_POS1+(3*i)])),0,height),5.,0.,2*G_PI);
+      for(int32_t i=0;i<rawdata.dispFitPar.numFitPeaks;i++){
+        if((rawdata.dispFitPar.fitParVal[FITPAR_POS1+(3*i)] > drawing.lowerLimit)&&(rawdata.dispFitPar.fitParVal[FITPAR_POS1+(3*i)] < drawing.upperLimit)){
+          cairo_arc(cr,getXPosFromCh((float)(rawdata.dispFitPar.fitParVal[FITPAR_POS1+(3*i)]),width),(-0.002*(height)*30.0)-getYPos((float)(evalFit(rawdata.dispFitPar.fitParVal[FITPAR_POS1+(3*i)])),0,height),5.,0.,2*G_PI);
         }
         cairo_stroke_preserve(cr);
         cairo_fill(cr);
@@ -1972,8 +1983,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
   //draw comment indicators
   if(drawComments){
     cairo_set_source_rgb(cr, 0.5, 0.5, 0.5);
-    switch (drawing.multiplotMode){
-      case MULTIPLOT_SUMMED:
+    switch(drawing.multiplotMode){
+      case VIEWTYPE_SUMMED:
         //sum view
         for(int32_t i=0;i<(int32_t)rawdata.numChComments;i++){
           if(rawdata.chanCommentView[i]==1){
@@ -2009,7 +2020,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           }
         }
         break;
-      case MULTIPLOT_NONE:
+      case VIEWTYPE_NONE:
         //single non-summed spectrum
         if(drawing.displayedView == -1){
           for(int32_t i=0;i<(int32_t)rawdata.numChComments;i++){

@@ -93,91 +93,91 @@ uint8_t readConfigFile(FILE *file, uint8_t keepCalibration){
       }
       if(strcmp(par,"limit_centroid") == 0){
         if(strcmp(val,"yes") == 0){
-          fitpar.limitCentroid = 1;
+          rawdata.dispFitPar.limitCentroid = 1;
         }else{
-          fitpar.limitCentroid = 0;
+          rawdata.dispFitPar.limitCentroid = 0;
         }
       }
       if(strcmp(par,"fix_skew_amp") == 0){
         if(strcmp(val,"yes") == 0){
-          fitpar.fixSkewAmplitide = 1;
+          rawdata.dispFitPar.fixSkewAmplitide = 1;
         }else{
-          fitpar.fixSkewAmplitide = 0;
+          rawdata.dispFitPar.fixSkewAmplitide = 0;
         }
       }
       if(strcmp(par,"fix_beta") == 0){
         if(strcmp(val,"yes") == 0){
-          fitpar.fixBeta = 1;
+          rawdata.dispFitPar.fixBeta = 1;
         }else{
-          fitpar.fixBeta = 0;
+          rawdata.dispFitPar.fixBeta = 0;
         }
       }
       if(strcmp(par,"manual_width_val") == 0){
         float wVal = (float)atof(val);
         if((wVal >= 0.0f)&&(wVal <= 100.0f)){
-          fitpar.manualWidthVal = wVal;
+          rawdata.dispFitPar.manualWidthVal = wVal;
         }
       }
       if(strcmp(par,"manual_width_offset") == 0){
         float wVal = (float)atof(val);
         if((wVal >= 0.0f)&&(wVal <= 100.0f)){
-          fitpar.manualWidthOffset = wVal;
+          rawdata.dispFitPar.manualWidthOffset = wVal;
         }
       }
       if(strcmp(par,"limit_centroid_val") == 0){
         float cVal = (float)atof(val);
         if((cVal >= 0.0f)&&(cVal <= 100.0f)){
-          fitpar.limitCentroidVal = cVal;
+          rawdata.dispFitPar.limitCentroidVal = cVal;
         }
       }
       if(strcmp(par,"fix_skew_amp_val") == 0){
         float ampVal = (float)atof(val);
         if((ampVal >= 0.0f)&&(ampVal <= 100.0f)){
-          fitpar.fixedRVal = ampVal;
+          rawdata.dispFitPar.fixedRVal = ampVal;
         }
       }
       if(strcmp(par,"fix_beta_val") == 0){
         float bVal = (float)atof(val);
-        fitpar.fixedBetaVal = bVal;
+        rawdata.dispFitPar.fixedBetaVal = bVal;
       }
       if(strcmp(par,"peak_width_method") == 0){
         uint8_t pwVal = (uint8_t)atoi(val);
         if((pwVal != PEAKWIDTHMODE_PREVIOUS)&&(pwVal != PEAKWIDTHMODE_MANUAL)){
-          fitpar.peakWidthMethod = pwVal;
+          rawdata.dispFitPar.peakWidthMethod = pwVal;
         }else{
-          fitpar.peakWidthMethod = PEAKWIDTHMODE_RELATIVE;
+          rawdata.dispFitPar.peakWidthMethod = PEAKWIDTHMODE_RELATIVE;
         }
       }
       if(strcmp(par,"step_function") == 0){
         if(strcmp(val,"yes") == 0){
-          fitpar.stepFunction = 1;
+          rawdata.dispFitPar.stepFunction = 1;
         }else{
-          fitpar.stepFunction = 0;
+          rawdata.dispFitPar.stepFunction = 0;
         }
       }
       if(strcmp(par,"force_positive_amplitude") == 0){
         if(strcmp(val,"yes") == 0){
-          fitpar.forcePositivePeaks = 1;
+          rawdata.dispFitPar.forcePositivePeaks = 1;
         }else{
-          fitpar.forcePositivePeaks = 0;
+          rawdata.dispFitPar.forcePositivePeaks = 0;
         }
       }
       if(strcmp(par,"fit_weight_mode") == 0){
         uint8_t ucVal = (uint8_t)atoi(val);
         if(ucVal <= 2){
-          fitpar.weightMode = ucVal;
+          rawdata.dispFitPar.weightMode = ucVal;
         }
       }
       if(strcmp(par,"fit_type") == 0){
         uint8_t ucVal = (uint8_t)atoi(val);
         if(ucVal < FITTYPE_ENUM_LENGTH){
-          fitpar.fitType = ucVal;
+          rawdata.dispFitPar.fitType = ucVal;
         }
       }
       if(strcmp(par,"bg_type") == 0){
         uint8_t ucVal = (uint8_t)atoi(val);
         if(ucVal <= 2){
-          fitpar.bgType = ucVal;
+          rawdata.dispFitPar.bgType = ucVal;
         }
       }
       if(strcmp(par,"autozoom") == 0){
@@ -289,47 +289,47 @@ uint8_t writeConfigFile(FILE *file){
   }else{
     fprintf(file,"autozoom=no\n");
   }
-  fprintf(file,"manual_width_val=%f\n",fitpar.manualWidthVal);
-  fprintf(file,"manual_width_offset=%f\n",fitpar.manualWidthOffset);
-  if(fitpar.limitCentroid == 1){
+  fprintf(file,"manual_width_val=%f\n",rawdata.dispFitPar.manualWidthVal);
+  fprintf(file,"manual_width_offset=%f\n",rawdata.dispFitPar.manualWidthOffset);
+  if(rawdata.dispFitPar.limitCentroid == 1){
     fprintf(file,"limit_centroid=yes\n");
-    fprintf(file,"limit_centroid_val=%f\n",fitpar.limitCentroidVal);
+    fprintf(file,"limit_centroid_val=%f\n",rawdata.dispFitPar.limitCentroidVal);
   }else{
     fprintf(file,"limit_centroid=no\n");
   }
-  if(fitpar.fixSkewAmplitide == 1){
+  if(rawdata.dispFitPar.fixSkewAmplitide == 1){
     fprintf(file,"fix_skew_amp=yes\n");
-    fprintf(file,"fix_skew_amp_val=%f\n",fitpar.fixedRVal);
+    fprintf(file,"fix_skew_amp_val=%f\n",rawdata.dispFitPar.fixedRVal);
   }else{
     fprintf(file,"fix_skew_amp=no\n");
   }
-  if(fitpar.fixBeta == 1){
+  if(rawdata.dispFitPar.fixBeta == 1){
     fprintf(file,"fix_beta=yes\n");
-    fprintf(file,"fix_beta_val=%f\n",fitpar.fixedBetaVal);
+    fprintf(file,"fix_beta_val=%f\n",rawdata.dispFitPar.fixedBetaVal);
   }else{
     fprintf(file,"fix_beta=no\n");
   }
-  if(fitpar.peakWidthMethod < PEAKWIDTHMODE_ENUM_LENGTH){
-    fprintf(file,"peak_width_method=%u\n",fitpar.peakWidthMethod);
+  if(rawdata.dispFitPar.peakWidthMethod < PEAKWIDTHMODE_ENUM_LENGTH){
+    fprintf(file,"peak_width_method=%u\n",rawdata.dispFitPar.peakWidthMethod);
   }
-  if(fitpar.stepFunction == 1){
+  if(rawdata.dispFitPar.stepFunction == 1){
     fprintf(file,"step_function=yes\n");
   }else{
     fprintf(file,"step_function=no\n");
   }
-  if(fitpar.forcePositivePeaks == 1){
+  if(rawdata.dispFitPar.forcePositivePeaks == 1){
     fprintf(file,"force_positive_amplitude=yes\n");
   }else{
     fprintf(file,"force_positive_amplitude=no\n");
   }
-  if(fitpar.bgType < 3){
-    fprintf(file,"bg_type=%u\n",fitpar.bgType);
+  if(rawdata.dispFitPar.bgType < 3){
+    fprintf(file,"bg_type=%u\n",rawdata.dispFitPar.bgType);
   }
-  if(fitpar.fitType < FITTYPE_ENUM_LENGTH){
-    fprintf(file,"fit_type=%u\n",fitpar.fitType);
+  if(rawdata.dispFitPar.fitType < FITTYPE_ENUM_LENGTH){
+    fprintf(file,"fit_type=%u\n",rawdata.dispFitPar.fitType);
   }
-  if(fitpar.weightMode < FITWEIGHT_ENUM_LENGTH){
-    fprintf(file,"fit_weight_mode=%u\n",fitpar.weightMode);
+  if(rawdata.dispFitPar.weightMode < FITWEIGHT_ENUM_LENGTH){
+    fprintf(file,"fit_weight_mode=%u\n",rawdata.dispFitPar.weightMode);
   }
 
   return 1;
