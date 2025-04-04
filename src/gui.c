@@ -4,6 +4,9 @@
 //the various UI elements used in the program.  Initialization
 //routines at the bottom of the file.
 
+//forward declarations
+void on_refit_button_clicked();
+
 void showPreferences(int page){
   gtk_notebook_set_current_page(preferences_notebook,page);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(discard_empty_checkbutton),rawdata.dropEmptySpectra);
@@ -150,10 +153,10 @@ void getViewStr(char *viewStr, const uint32_t strSize, const int32_t viewNum){
     //generating string for saved custom view
     switch(rawdata.viewMode[viewNum]){
       case VIEWTYPE_SAVEDFIT_OFSP:
-        snprintf(viewStr,strSize,"Fit of: %s",rawdata.histComment[rawdata.viewNumMultiplotSp[viewNum]]);
+        snprintf(viewStr,strSize,"Fit of: %s",rawdata.histComment[rawdata.viewMultiPlots[rawdata.numViews][0]]);
         break;
       case VIEWTYPE_SAVEDFIT_OFVIEW:
-        snprintf(viewStr,strSize,"Fit of: %s",rawdata.viewComment[rawdata.viewNumMultiplotSp[viewNum]]);
+        snprintf(viewStr,strSize,"Fit of: %s",rawdata.viewComment[rawdata.viewMultiPlots[rawdata.numViews][0]]);
         break;
       case VIEWTYPE_STACKED:
         //stack view
@@ -417,26 +420,28 @@ void on_spectrum_selector_changed(GtkSpinButton *spin_button)
         int32_t viewNum = spNum - rawdata.numSpOpened;
         gtk_label_set_text(display_spectrumname_label,rawdata.viewComment[viewNum]);
         if(rawdata.viewMode[viewNum] == VIEWTYPE_SAVEDFIT_OFSP){
-          uint8_t dispSpNum = rawdata.viewNumMultiplotSp[viewNum];
+          uint8_t dispSpNum = rawdata.viewMultiPlots[viewNum][0];
           drawing.multiPlots[0] = (uint8_t)dispSpNum;
           drawing.multiplotMode = VIEWTYPE_NONE;//unset multiplot, if it is being used
           drawing.numMultiplotSp = 1;//unset multiplot
           drawing.scaleFactor[dispSpNum] = 1.0; //reset any scaling from custom views
           drawing.displayedView = -1;
           drawing.displayedSavedFit = viewNum;
-          memcpy(&rawdata.dispFitPar,&rawdata.savedFitPar[rawdata.viewMultiPlots[viewNum][0]],sizeof(fitpar)); //copy fit data
+          memcpy(&rawdata.dispFitPar,&rawdata.savedFitPar[rawdata.viewMultiPlots[viewNum][1]],sizeof(fitpar)); //copy fit data
+          on_refit_button_clicked(); //redo the fit
           g_idle_add(update_gui_fit_state,NULL);
           g_idle_add(print_fit_results,NULL);
           gtk_revealer_set_reveal_child(revealer_info_panel, TRUE);
         }else if(rawdata.viewMode[viewNum] == VIEWTYPE_SAVEDFIT_OFVIEW){
-          uint8_t dispViewNum = rawdata.viewNumMultiplotSp[viewNum];
+          uint8_t dispViewNum = rawdata.viewMultiPlots[viewNum][0];
           drawing.numMultiplotSp = rawdata.viewNumMultiplotSp[dispViewNum];
           drawing.multiplotMode = rawdata.viewMode[dispViewNum];
           memcpy(&drawing.scaleFactor,&rawdata.viewScaleFactor[dispViewNum],sizeof(drawing.scaleFactor));
           memcpy(&drawing.multiPlots,&rawdata.viewMultiPlots[dispViewNum],sizeof(drawing.multiPlots));
           drawing.displayedView = dispViewNum;
           drawing.displayedSavedFit = viewNum;
-          memcpy(&rawdata.dispFitPar,&rawdata.savedFitPar[rawdata.viewMultiPlots[viewNum][0]],sizeof(fitpar)); //copy fit data
+          memcpy(&rawdata.dispFitPar,&rawdata.savedFitPar[rawdata.viewMultiPlots[viewNum][1]],sizeof(fitpar)); //copy fit data
+          on_refit_button_clicked(); //redo the fit
           g_idle_add(update_gui_fit_state,NULL);
           g_idle_add(print_fit_results,NULL);
           gtk_revealer_set_reveal_child(revealer_info_panel, TRUE);
@@ -2191,16 +2196,18 @@ void on_fit_save_button_clicked(){
   }
 
   if(drawing.displayedView < 0){
-    rawdata.viewNumMultiplotSp[rawdata.numViews] = drawing.multiPlots[0];
+    rawdata.viewNumMultiplotSp[rawdata.numViews] = 2; //needed to save other view data when writing to disk
+    rawdata.viewMultiPlots[rawdata.numViews][0] = drawing.multiPlots[0]; //HACK: save underlying spectrum here
     rawdata.viewMode[rawdata.numViews] = VIEWTYPE_SAVEDFIT_OFSP;
   }else{
-    rawdata.viewNumMultiplotSp[rawdata.numViews] = (uint8_t)(drawing.displayedView);
+    rawdata.viewNumMultiplotSp[rawdata.numViews] = 2; //needed to save other view data when writing to disk
+    rawdata.viewMultiPlots[rawdata.numViews][0] = (uint8_t)(drawing.displayedView); //HACK: save underlying view here
     rawdata.viewMode[rawdata.numViews] = VIEWTYPE_SAVEDFIT_OFVIEW;
   }
 
   //copy fit data
   memcpy(&rawdata.savedFitPar[rawdata.numSavedFits],&rawdata.dispFitPar,sizeof(fitpar));
-  rawdata.viewMultiPlots[rawdata.numViews][0] = rawdata.numSavedFits; //save fit data index here
+  rawdata.viewMultiPlots[rawdata.numViews][1] = rawdata.numSavedFits; //HACK: save fit data index here
   
   //setup default view name
   char viewStr[256];

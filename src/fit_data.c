@@ -200,10 +200,8 @@ gboolean print_fit_results(){
 
   }
   
-
-  //print to the console
   length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"\n");
-  printf("%s",fitResStr);
+  //printf("%s",fitResStr); //print to the console
 
   gtk_label_set_text(fit_info_label,fitResStr);
 
@@ -803,7 +801,7 @@ void performGausFit(){
   }
 
   if(conv){
-    printf("Converged after %d fit iterations.\n", nits);
+    printf("Fit converged after %d fit iterations.\n", nits);
     if(rawdata.dispFitPar.fitType == FITTYPE_SKEWED){
       //convenience: set fixed values of skewed component parameters
       //to the values that were just used in the just successful fit,
@@ -820,7 +818,7 @@ void performGausFit(){
     g_idle_add(print_fit_results,NULL);
     return;
   }
-  printf("Failed to converge after %d iterations.\nWARNING: do not believe quoted parameter values!\n", nits);
+  printf("Fit failed to converge after %d iterations.\nWARNING: do not believe quoted parameter values!\n", nits);
   if(relWidthFixed){
     for(i = 6; i < npars; ++i){
       rawdata.dispFitPar.fitParFree[i] = (uint8_t)(fixed[i]);
@@ -1100,11 +1098,11 @@ int startGausFit(){
       rawdata.dispFitPar.numFreePar = (uint8_t)(rawdata.dispFitPar.numFreePar+1);
     }
 
-    if(rawdata.dispFitPar.limitCentroid){
+    /*if(rawdata.dispFitPar.limitCentroid){
       printf("Limiting centroid range to %0.2f channels from initial guess.\n",(double)rawdata.dispFitPar.limitCentroidVal);
-    }
+    }*/
 
-    switch(rawdata.dispFitPar.weightMode){
+    /*switch(rawdata.dispFitPar.weightMode){
       case FITWEIGHT_DATA:
         printf("Weighting using data.\n");
         break;
@@ -1115,7 +1113,8 @@ int startGausFit(){
       default:
         printf("No weighting for fit.\n");
         break;
-    }
+    }*/
+
   }
   
   //printf("Initial guesses: %f %f %f %f %f %f %f %f\n",rawdata.dispFitPar.fitParVal[FITPAR_BGCONST],rawdata.dispFitPar.fitParVal[FITPAR_BGLIN],rawdata.dispFitPar.fitParVal[FITPAR_BGQUAD],rawdata.dispFitPar.fitParVal[FITPAR_R],rawdata.dispFitPar.fitParVal[FITPAR_BETA],rawdata.dispFitPar.fitParVal[FITPAR_AMP1],rawdata.dispFitPar.fitParVal[FITPAR_POS1],rawdata.dispFitPar.fitParVal[FITPAR_WIDTH1]);
