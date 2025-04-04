@@ -13,6 +13,7 @@ int getFirstViewDependingOnSp(const int32_t spInd){
       if(rawdata.viewNumMultiplotSp[i] == spInd){
         return i;
       }
+      //printf("%u %i\n",rawdata.viewNumMultiplotSp[i],spInd);
     }else{
       for(int32_t j=0;j<rawdata.viewNumMultiplotSp[i];j++){
         if(rawdata.viewMultiPlots[i][j] == spInd){
@@ -75,6 +76,7 @@ void deleteSpectrumOrView(const int32_t spInd){
     while(deletingViews){
       int32_t viewToDel = getFirstViewDependingOnSp(spInd);
       if(viewToDel >= 0){
+        //printf("Deleting view: %i\n",viewToDel);
 
         //delete comments associated with the view
         for(int32_t i=0;i<(int32_t)rawdata.numChComments;i++){

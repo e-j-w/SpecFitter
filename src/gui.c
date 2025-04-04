@@ -150,10 +150,10 @@ void getViewStr(char *viewStr, const uint32_t strSize, const int32_t viewNum){
     //generating string for saved custom view
     switch(rawdata.viewMode[viewNum]){
       case VIEWTYPE_SAVEDFIT_OFSP:
-        snprintf(viewStr,strSize,"Fit of: %s",rawdata.histComment[rawdata.viewNumMultiplotSp[drawing.displayedView]]);
+        snprintf(viewStr,strSize,"Fit of: %s",rawdata.histComment[rawdata.viewNumMultiplotSp[viewNum]]);
         break;
       case VIEWTYPE_SAVEDFIT_OFVIEW:
-        snprintf(viewStr,strSize,"Fit of: %s",rawdata.viewComment[rawdata.numSpOpened + rawdata.viewNumMultiplotSp[drawing.displayedView]]);
+        snprintf(viewStr,strSize,"Fit of: %s",rawdata.viewComment[rawdata.viewNumMultiplotSp[viewNum]]);
         break;
       case VIEWTYPE_STACKED:
         //stack view
@@ -801,7 +801,7 @@ void on_save_button_clicked(){
     return;
   }
 
-  printf("Save button clicked\n");
+  //printf("Save button clicked\n");
   GtkFileChooserNative *native = gtk_file_chooser_native_new("Save Spectrum Data", window, GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
   file_save_dialog = GTK_FILE_CHOOSER(native);
   if(currentFolderSelection != NULL){
@@ -1972,7 +1972,8 @@ void on_manage_delete_button_clicked(){
     gtk_tree_model_get(model,&iter,1,&val,2,&spInd,-1); //get whether the spectrum is selected and the spectrum index
     if(spInd < NSPECT){
       if(val==TRUE){
-        if(getFirstViewDependingOnSp(spInd-deletedSpCounter)>=0){
+        //printf("%i %i %i %i %i\n",spInd,deletedSpCounter,rawdata.numSpOpened,getFirstViewDependingOnSp(spInd-deletedSpCounter),getFirstViewDependingOnView(spInd-deletedSpCounter));
+        if(((spInd < rawdata.numSpOpened)&&(getFirstViewDependingOnSp(spInd-deletedSpCounter)>=0)) || ((spInd >= rawdata.numSpOpened)&&(getFirstViewDependingOnView(spInd-rawdata.numSpOpened-deletedSpCounter)>=0))){
           char messageStr[512];
           snprintf(messageStr,512,"One or more saved views depends on the data: %s\nRemoving the data will remove the view(s) as well.",rawdata.histComment[spInd-deletedSpCounter]);
           GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
@@ -2075,6 +2076,9 @@ void on_fit_button_clicked(){
       //must be displaying only a single spectrum
       if(drawing.multiplotMode < VIEWTYPE_OVERLAY_COMMON){
         //safe to fit
+        //if displaying a saved fit, pass-through to underlying spectrum/view
+        drawing.displayedSavedFit = -1;
+        //iniitialize fit
         rawdata.dispFitPar.fittingSp = FITSTATE_SETTINGLIMITS;
         memset(&rawdata.dispFitPar.fitParVal,0,sizeof(rawdata.dispFitPar.fitParVal));
         memset(&rawdata.dispFitPar.fitParFree,0,sizeof(rawdata.dispFitPar.fitParFree));
@@ -2186,20 +2190,12 @@ void on_fit_save_button_clicked(){
     return;
   }
 
-  if(drawing.multiplotMode == VIEWTYPE_NONE){
+  if(drawing.displayedView < 0){
     rawdata.viewNumMultiplotSp[rawdata.numViews] = drawing.multiPlots[0];
     rawdata.viewMode[rawdata.numViews] = VIEWTYPE_SAVEDFIT_OFSP;
-  }else if(drawing.displayedView >= 0){
+  }else{
     rawdata.viewNumMultiplotSp[rawdata.numViews] = (uint8_t)(drawing.displayedView);
     rawdata.viewMode[rawdata.numViews] = VIEWTYPE_SAVEDFIT_OFVIEW;
-  }else{
-    //show an error dialog
-    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
-    GtkWidget *message_dialog = gtk_message_dialog_new(multiplot_manage_window, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cannot create saved fit!");
-    gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(message_dialog),"The currently displayed view could not be identified.");
-    gtk_dialog_run(GTK_DIALOG(message_dialog));
-    gtk_widget_destroy(message_dialog);
-    return;
   }
 
   //copy fit data
