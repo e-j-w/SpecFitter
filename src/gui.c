@@ -28,6 +28,7 @@ void showPreferences(int page){
   gtk_spin_button_set_value(beta_spinbutton,(gdouble)rawdata.dispFitPar.fixedBetaVal);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(step_function_checkbutton),rawdata.dispFitPar.stepFunction);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(positive_peak_checkbutton),rawdata.dispFitPar.forcePositivePeaks);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(inflate_errors_checkbutton),rawdata.dispFitPar.inflateErrors);
   gtk_combo_box_set_active(GTK_COMBO_BOX(background_type_combobox),rawdata.dispFitPar.bgType);
   gtk_combo_box_set_active(GTK_COMBO_BOX(peak_shape_combobox),rawdata.dispFitPar.fitType);
   gtk_combo_box_set_active(GTK_COMBO_BOX(peak_width_combobox),rawdata.dispFitPar.peakWidthMethod);
@@ -2334,6 +2335,13 @@ void on_toggle_positive_peaks(GtkToggleButton *togglebutton){
     rawdata.dispFitPar.forcePositivePeaks=0;
 }
 
+void on_toggle_inflate_errors(GtkToggleButton *togglebutton){
+  if(gtk_toggle_button_get_active(togglebutton))
+    rawdata.dispFitPar.inflateErrors=1;
+  else
+    rawdata.dispFitPar.inflateErrors=0;
+}
+
 void on_peak_shape_changed(GtkComboBox *combo_box){
   int entry = gtk_combo_box_get_active(combo_box);
   if((entry >=0)&&(entry < FITTYPE_ENUM_LENGTH)){
@@ -2754,6 +2762,7 @@ void iniitalizeUIElements(){
   beta_spinbutton = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "beta_spinbutton"));
   step_function_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "step_function_checkbutton"));
   positive_peak_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "positive_peak_checkbutton"));
+  inflate_errors_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "inflate_errors_checkbutton"));
   background_type_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "background_type_combobox"));
   peak_shape_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "peak_shape_combobox"));
   peak_width_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "peak_width_combobox"));
@@ -2831,6 +2840,7 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(beta_spinbutton), "value-changed", G_CALLBACK(on_beta_changed), NULL);
   g_signal_connect(G_OBJECT(step_function_checkbutton), "toggled", G_CALLBACK(on_toggle_step_function), NULL);
   g_signal_connect(G_OBJECT(positive_peak_checkbutton), "toggled", G_CALLBACK(on_toggle_positive_peaks), NULL);
+  g_signal_connect(G_OBJECT(inflate_errors_checkbutton), "toggled", G_CALLBACK(on_toggle_inflate_errors), NULL);
   g_signal_connect(G_OBJECT(animation_checkbutton), "toggled", G_CALLBACK(on_toggle_animation), NULL);
   g_signal_connect(G_OBJECT(autozoom_checkbutton), "toggled", G_CALLBACK(on_toggle_autozoom), NULL);
   g_signal_connect(G_OBJECT(preferences_apply_button), "clicked", G_CALLBACK(on_preferences_apply_button_clicked), NULL);
@@ -2964,6 +2974,7 @@ void iniitalizeUIElements(){
   rawdata.dispFitPar.prevFitNumPeaks = 0;
   rawdata.dispFitPar.stepFunction = 0;
   rawdata.dispFitPar.forcePositivePeaks = 0;
+  rawdata.dispFitPar.inflateErrors = 1;
   rawdata.dispFitPar.fitStartCh = -1;
   rawdata.dispFitPar.fitEndCh = -1;
   rawdata.dispFitPar.prevFitStartCh = -1;

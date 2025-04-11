@@ -1,5 +1,58 @@
 /* © J. Williams, 2020-2025 */
 
+//save fit data element by element,
+//in order to preserve compatibility for future revisions to the fit data format
+int writeSavedFits(FILE *out){
+
+  if(out == NULL){
+    //file not opened for some reason
+    return 1;
+  }
+
+  uint32_t uintBuf = rawdata.numSavedFits; //number of saved fits to write
+  fwrite(&uintBuf,sizeof(uint32_t),1,out);
+  //write saved fit data
+  for(int32_t i=0;i<(int32_t)rawdata.numSavedFits;i++){
+    fwrite(&rawdata.savedFitPar[i].fitStartCh,sizeof(rawdata.savedFitPar[i].fitStartCh),1,out);
+    fwrite(&rawdata.savedFitPar[i].fitEndCh,sizeof(rawdata.savedFitPar[i].fitEndCh),1,out);
+    fwrite(&rawdata.savedFitPar[i].fitMidCh,sizeof(rawdata.savedFitPar[i].fitMidCh),1,out);
+    fwrite(&rawdata.savedFitPar[i].ndf,sizeof(rawdata.savedFitPar[i].ndf),1,out);
+    fwrite(&rawdata.savedFitPar[i].fitPeakInitGuess,sizeof(rawdata.savedFitPar[i].fitPeakInitGuess),1,out);
+    fwrite(&rawdata.savedFitPar[i].widthFGH,sizeof(rawdata.savedFitPar[i].widthFGH),1,out);
+    fwrite(&rawdata.savedFitPar[i].fitParVal,sizeof(rawdata.savedFitPar[i].fitParVal),1,out);
+    fwrite(&rawdata.savedFitPar[i].fitParErr,sizeof(rawdata.savedFitPar[i].fitParErr),1,out);
+    fwrite(&rawdata.savedFitPar[i].areaVal,sizeof(rawdata.savedFitPar[i].areaVal),1,out);
+    fwrite(&rawdata.savedFitPar[i].areaErr,sizeof(rawdata.savedFitPar[i].areaErr),1,out);
+    fwrite(&rawdata.savedFitPar[i].centroidVal,sizeof(rawdata.savedFitPar[i].centroidVal),1,out);
+    fwrite(&rawdata.savedFitPar[i].chisq,sizeof(rawdata.savedFitPar[i].chisq),1,out);
+    fwrite(&rawdata.savedFitPar[i].fitParFree,sizeof(rawdata.savedFitPar[i].fitParFree),1,out);
+    fwrite(&rawdata.savedFitPar[i].numFreePar,sizeof(rawdata.savedFitPar[i].numFreePar),1,out);
+    fwrite(&rawdata.savedFitPar[i].bgType,sizeof(rawdata.savedFitPar[i].bgType),1,out);
+    fwrite(&rawdata.savedFitPar[i].fitType,sizeof(rawdata.savedFitPar[i].fitType),1,out);
+    fwrite(&rawdata.savedFitPar[i].numFitPeaks,sizeof(rawdata.savedFitPar[i].numFitPeaks),1,out);
+    fwrite(&rawdata.savedFitPar[i].manualWidthVal,sizeof(rawdata.savedFitPar[i].manualWidthVal),1,out);
+    fwrite(&rawdata.savedFitPar[i].manualWidthOffset,sizeof(rawdata.savedFitPar[i].manualWidthOffset),1,out);
+    fwrite(&rawdata.savedFitPar[i].limitCentroid,sizeof(rawdata.savedFitPar[i].limitCentroid),1,out);
+    fwrite(&rawdata.savedFitPar[i].fixSkewAmplitide,sizeof(rawdata.savedFitPar[i].fixSkewAmplitide),1,out);
+    fwrite(&rawdata.savedFitPar[i].fixBeta,sizeof(rawdata.savedFitPar[i].fixBeta),1,out);
+    fwrite(&rawdata.savedFitPar[i].limitCentroidVal,sizeof(rawdata.savedFitPar[i].limitCentroidVal),1,out);
+    fwrite(&rawdata.savedFitPar[i].fixedRVal,sizeof(rawdata.savedFitPar[i].fixedRVal),1,out);
+    fwrite(&rawdata.savedFitPar[i].fixedBetaVal,sizeof(rawdata.savedFitPar[i].fixedBetaVal),1,out);
+    fwrite(&rawdata.savedFitPar[i].peakWidthMethod,sizeof(rawdata.savedFitPar[i].peakWidthMethod),1,out);
+    fwrite(&rawdata.savedFitPar[i].stepFunction,sizeof(rawdata.savedFitPar[i].stepFunction),1,out);
+    fwrite(&rawdata.savedFitPar[i].forcePositivePeaks,sizeof(rawdata.savedFitPar[i].forcePositivePeaks),1,out);
+    fwrite(&rawdata.savedFitPar[i].inflateErrors,sizeof(rawdata.savedFitPar[i].inflateErrors),1,out);
+    fwrite(&rawdata.savedFitPar[i].weightMode,sizeof(rawdata.savedFitPar[i].weightMode),1,out);
+    fwrite(&rawdata.savedFitPar[i].prevFitNumPeaks,sizeof(rawdata.savedFitPar[i].prevFitNumPeaks),1,out);
+    fwrite(&rawdata.savedFitPar[i].prevFitStartCh,sizeof(rawdata.savedFitPar[i].prevFitStartCh),1,out);
+    fwrite(&rawdata.savedFitPar[i].prevFitEndCh,sizeof(rawdata.savedFitPar[i].prevFitEndCh),1,out);
+    fwrite(&rawdata.savedFitPar[i].prevFitPeakInitGuess,sizeof(rawdata.savedFitPar[i].prevFitPeakInitGuess),1,out);
+    fwrite(&rawdata.savedFitPar[i].prevFitWidths,sizeof(rawdata.savedFitPar[i].prevFitWidths),1,out);
+    fwrite(&rawdata.savedFitPar[i].fittingSp,sizeof(rawdata.savedFitPar[i].fittingSp),1,out);
+  }
+  return 0;
+}
+
 //routine to write a .jf3 file
 //header containing: file format version number (uint8_t), number of spectra (uint8_t), label for each spactrum (each 256 element char array),
 //number of comments (uint8_t), individual comments (comment sp (char), ch (int32), y-val (float32), followed by a 256 element char array for the comment itself)
@@ -21,7 +74,7 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K]){
 
   //printf("Number of spectra to write: %i\n",rawdata.numSpOpened);
 
-  ucharBuf = 4; //file format version number
+  ucharBuf = 5; //file format version number
   fwrite(&ucharBuf,sizeof(uint8_t),1,out);
   ucharBuf = rawdata.numSpOpened; //number of spectra to write
   fwrite(&ucharBuf,sizeof(uint8_t),1,out);
@@ -55,11 +108,10 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K]){
     }
   }
   //write saved fits
-  uintBuf = rawdata.numSavedFits; //number of saved fits to write
-  fwrite(&uintBuf,sizeof(uint32_t),1,out);
-  //write saved fit data
-  for(int32_t i=0;i<(int32_t)rawdata.numSavedFits;i++){
-    fwrite(&rawdata.savedFitPar[i],sizeof(fitpar),1,out);
+  if(writeSavedFits(out) != 0){
+    //failed to save fits for some reason
+    printf("ERROR: failed to save fits to output file: %s\n", filename);
+    return 1;
   }
 
   //double precision spectra

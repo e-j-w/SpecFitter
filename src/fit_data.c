@@ -769,7 +769,11 @@ void performGausFit(){
   
   /* list data and exit */
   for(l = 0; l < linEq.dim; ++l){
-    rawdata.dispFitPar.fitParErr[nextp[l]] = ers[l];
+    if(rawdata.dispFitPar.inflateErrors){
+      rawdata.dispFitPar.fitParErr[nextp[l]] = ers[l]*sqrtl(rawdata.dispFitPar.chisq);
+    }else{
+      rawdata.dispFitPar.fitParErr[nextp[l]] = ers[l];
+    }
   }
   if(relWidthFixed && (nip1>0)){
     for(j = FITPAR_WIDTH1; j <= miw; j += 3){

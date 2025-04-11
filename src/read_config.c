@@ -162,6 +162,13 @@ uint8_t readConfigFile(FILE *file, uint8_t keepCalibration){
           rawdata.dispFitPar.forcePositivePeaks = 0;
         }
       }
+      if(strcmp(par,"inflate_errors") == 0){
+        if(strcmp(val,"yes") == 0){
+          rawdata.dispFitPar.inflateErrors = 1;
+        }else{
+          rawdata.dispFitPar.inflateErrors = 0;
+        }
+      }
       if(strcmp(par,"fit_weight_mode") == 0){
         uint8_t ucVal = (uint8_t)atoi(val);
         if(ucVal <= 2){
@@ -321,6 +328,11 @@ uint8_t writeConfigFile(FILE *file){
     fprintf(file,"force_positive_amplitude=yes\n");
   }else{
     fprintf(file,"force_positive_amplitude=no\n");
+  }
+  if(rawdata.dispFitPar.inflateErrors == 1){
+    fprintf(file,"inflate_errors=yes\n");
+  }else{
+    fprintf(file,"inflate_errors=no\n");
   }
   if(rawdata.dispFitPar.bgType < 3){
     fprintf(file,"bg_type=%u\n",rawdata.dispFitPar.bgType);

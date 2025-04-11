@@ -1,13 +1,81 @@
 /* © J. Williams, 2020-2025 */
 
 //File contains functions for reading spectra of various formats.
-//.jf3 - compressed multiple spectra, with titles and comments
+//.jf3 - compressed multiple spectra, with titles, comments, and saved fits
 //.txt - column plaintext data (compatible with spreadsheet software), with titles and comments
 //.spe - RadWare, with title
 //.mca - integer array
 //.fmca - float array
 //.dmca - double array
 //.C - ROOT macro
+
+//sread fit data element by element,
+//in order to preserve compatibility for future revisions to the fit data format
+int readSavedFits(FILE *inp, const uint8_t format){
+
+  if(format < 4){
+    //no saved fits in these early file format versions
+    return 1;
+  }
+  if(inp == NULL){
+    //file not opened for some reason
+    return 0;
+  }
+
+  uint32_t uintBuf;
+  if(fread(&uintBuf, sizeof(uint32_t), 1, inp)!=1){fclose(inp); return 0;}
+  rawdata.numSavedFits = (uint8_t)uintBuf;
+  for(uint8_t i=0;i<rawdata.numSavedFits;i++){
+    if(fread(&rawdata.savedFitPar[i].fitStartCh,sizeof(rawdata.savedFitPar[i].fitStartCh),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].fitEndCh,sizeof(rawdata.savedFitPar[i].fitEndCh),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].fitMidCh,sizeof(rawdata.savedFitPar[i].fitMidCh),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].ndf,sizeof(rawdata.savedFitPar[i].ndf),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].fitPeakInitGuess,sizeof(rawdata.savedFitPar[i].fitPeakInitGuess),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].widthFGH,sizeof(rawdata.savedFitPar[i].widthFGH),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].fitParVal,sizeof(rawdata.savedFitPar[i].fitParVal),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].fitParErr,sizeof(rawdata.savedFitPar[i].fitParErr),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].areaVal,sizeof(rawdata.savedFitPar[i].areaVal),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].areaErr,sizeof(rawdata.savedFitPar[i].areaErr),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].centroidVal,sizeof(rawdata.savedFitPar[i].centroidVal),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].chisq,sizeof(rawdata.savedFitPar[i].chisq),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].fitParFree,sizeof(rawdata.savedFitPar[i].fitParFree),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].numFreePar,sizeof(rawdata.savedFitPar[i].numFreePar),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].bgType,sizeof(rawdata.savedFitPar[i].bgType),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].fitType,sizeof(rawdata.savedFitPar[i].fitType),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].numFitPeaks,sizeof(rawdata.savedFitPar[i].numFitPeaks),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].manualWidthVal,sizeof(rawdata.savedFitPar[i].manualWidthVal),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].manualWidthOffset,sizeof(rawdata.savedFitPar[i].manualWidthOffset),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].limitCentroid,sizeof(rawdata.savedFitPar[i].limitCentroid),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].fixSkewAmplitide,sizeof(rawdata.savedFitPar[i].fixSkewAmplitide),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].fixBeta,sizeof(rawdata.savedFitPar[i].fixBeta),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].limitCentroidVal,sizeof(rawdata.savedFitPar[i].limitCentroidVal),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].fixedRVal,sizeof(rawdata.savedFitPar[i].fixedRVal),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].fixedBetaVal,sizeof(rawdata.savedFitPar[i].fixedBetaVal),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].peakWidthMethod,sizeof(rawdata.savedFitPar[i].peakWidthMethod),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].stepFunction,sizeof(rawdata.savedFitPar[i].stepFunction),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].forcePositivePeaks,sizeof(rawdata.savedFitPar[i].forcePositivePeaks),1,inp)!=1){fclose(inp); return 0;}
+    if(format >= 5){
+      if(fread(&rawdata.savedFitPar[i].inflateErrors,sizeof(rawdata.savedFitPar[i].inflateErrors),1,inp)!=1){fclose(inp); return 0;}
+    }else{
+      rawdata.savedFitPar[i].inflateErrors = 0;
+    }
+    if(fread(&rawdata.savedFitPar[i].weightMode,sizeof(rawdata.savedFitPar[i].weightMode),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].prevFitNumPeaks,sizeof(rawdata.savedFitPar[i].prevFitNumPeaks),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].prevFitStartCh,sizeof(rawdata.savedFitPar[i].prevFitStartCh),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].prevFitEndCh,sizeof(rawdata.savedFitPar[i].prevFitEndCh),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].prevFitPeakInitGuess,sizeof(rawdata.savedFitPar[i].prevFitPeakInitGuess),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].prevFitWidths,sizeof(rawdata.savedFitPar[i].prevFitWidths),1,inp)!=1){fclose(inp); return 0;}
+    if(fread(&rawdata.savedFitPar[i].fittingSp,sizeof(rawdata.savedFitPar[i].fittingSp),1,inp)!=1){fclose(inp); return 0;}
+    /*printf("channel range of fit %u: [%i %i]\n",i,rawdata.savedFitPar[i].fitStartCh,rawdata.savedFitPar[i].fitEndCh);
+    printf("fit %u chisq: %Lf\n",i,rawdata.savedFitPar[i].chisq);
+    printf("fit %u num fit peaks: %u\n",i,rawdata.savedFitPar[i].numFitPeaks);
+    printf("fit %u force positive peaks: %u\n",i,rawdata.savedFitPar[i].forcePositivePeaks);
+    printf("fit %u weight mode: %u\n",i,rawdata.savedFitPar[i].weightMode);
+    printf("fit %u status: %u\n",i,rawdata.savedFitPar[i].weightMode);*/
+  }
+
+  return 1;
+}
 
 //function reads an .jf3 file into a double array and returns the array
 int readJF3(const char *filename, double outHist[NSPECT][S32K], const uint32_t outHistStartSp){
@@ -144,14 +212,13 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
           rawdata.numViews = MAXNVIEWS;
         }
       }
-      if(format >= 4){
-        //read saved fits
-        if(fread(&uintBuf, sizeof(uint32_t), 1, inp)!=1){fclose(inp); return 0;}
-        rawdata.numSavedFits = (uint8_t)uintBuf;
-        for(uint32_t i=0;i<rawdata.numSavedFits;i++){
-          if(fread(&rawdata.savedFitPar[i],sizeof(fitpar),1,inp)!=1){fclose(inp); return 0;}
-        }
+      //read saved fits
+      if(readSavedFits(inp,format) == 0){
+        //failed to read fits for some reason
+        printf("ERROR: failed to read fits from input file: %s\n", filename);
+        return 0;
       }
+      printf("num saved fits: %i\n",rawdata.numSavedFits);
 
       //printf("num comments: %i\n",rawdata.numChComments);
       

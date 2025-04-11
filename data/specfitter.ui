@@ -3049,6 +3049,23 @@ Weight by fit function - Weights are proportional to the fit function values det
                             <property name="position">1</property>
                           </packing>
                         </child>
+                        <child>
+                          <object class="GtkCheckButton" id="inflate_errors_checkbutton">
+                            <property name="label" translatable="yes">Inflate errors based on reduced chi-square</property>
+                            <property name="name">inflate_errors_checkbox</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="tooltip-text" translatable="yes">If checked, will Inflate the errors of the fit based on the square root of the reduced chi-square.</property>
+                            <property name="halign">start</property>
+                            <property name="draw-indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
                       </object>
                     </child>
                   </object>
