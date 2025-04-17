@@ -273,7 +273,7 @@ void setup_multiplot_window(){
   char scaleFacStr[16];
   gtk_list_store_clear(multiplot_liststore);
   for(i=0;i<rawdata.numSpOpened;i++){
-    snprintf(scaleFacStr,16,"%.2f",drawing.scaleFactor[i]);
+    snprintf(scaleFacStr,16,"%.5f",drawing.scaleFactor[i]);
     gtk_list_store_append(multiplot_liststore,&iter);
     gtk_list_store_set(multiplot_liststore, &iter, 0, rawdata.histComment[i], -1);
     gtk_list_store_set(multiplot_liststore, &iter, 1, isSpSelected(i), -1);
@@ -1619,14 +1619,14 @@ void on_multiplot_scaling_edited(GtkCellRendererText *c, gchar *path_string, gch
   gtk_tree_model_get(model,&iter,3,&spInd,-1); //get the spectrum index
   if((spInd >= 0)&&(spInd < NSPECT)){
     drawing.scaleFactor[spInd] = scaleVal;
-    printf("Set scaling for spectrum %i to %.2f\n",spInd,drawing.scaleFactor[spInd]);
+    printf("Set scaling for spectrum %i to %.5f\n",spInd,drawing.scaleFactor[spInd]);
   }else{
     printf("WARNING: scale factor belongs to invalid spectrum number (%i).\n",spInd);
     return;
   }
 
   char scaleFacStr[16];
-  snprintf(scaleFacStr,16,"%.2f",drawing.scaleFactor[spInd]);
+  snprintf(scaleFacStr,16,"%.5f",drawing.scaleFactor[spInd]);
   gtk_list_store_set(multiplot_liststore,&iter,2,scaleFacStr,-1); //set the string
 
   //now see whether the view can be saved

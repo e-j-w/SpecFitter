@@ -1232,7 +1232,7 @@ void drawPlotLabel(cairo_t *cr, const float width, const float height, const dou
           if(drawing.scaleFactor[drawing.multiPlots[i]] == 1.0){
             strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[i]]);
           }else{
-            snprintf(plotLabel,256,"%s (scaled by %.2f)",rawdata.histComment[drawing.multiPlots[i]],drawing.scaleFactor[drawing.multiPlots[i]]);
+            snprintf(plotLabel,256,"%s (scaled by %.5f)",rawdata.histComment[drawing.multiPlots[i]],drawing.scaleFactor[drawing.multiPlots[i]]);
           }
           cairo_text_extents(cr, plotLabel, &extents);
           cairo_move_to(cr, (width)*0.95 - extents.width,  YORIGIN*(1.0 + 0.45*(i+1)));
@@ -1245,7 +1245,7 @@ void drawPlotLabel(cairo_t *cr, const float width, const float height, const dou
         if(drawing.scaleFactor[drawing.multiPlots[0]] == 1.0){
           strcpy(plotLabel, rawdata.histComment[drawing.multiPlots[0]]);
         }else{
-          snprintf(plotLabel,256,"%s (scaled by %.2f)",rawdata.histComment[drawing.multiPlots[0]],drawing.scaleFactor[drawing.multiPlots[0]]);
+          snprintf(plotLabel,256,"%s (scaled by %.5f)",rawdata.histComment[drawing.multiPlots[0]],drawing.scaleFactor[drawing.multiPlots[0]]);
         }
         cairo_text_extents(cr, plotLabel, &extents);
         cairo_move_to(cr, (width)*0.95 - extents.width, YORIGIN);
@@ -1437,31 +1437,58 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       case VIEWTYPE_OVERLAY_INDEPENDENT:
         for(int32_t i=0;i<drawing.numMultiplotSp;i++){
           if(drawing.logScale){
-            drawing.scaleToLevelMax[i] = maxVal[i]*2.0f;
+            if(maxVal[i] > 0.0f){
+              drawing.scaleToLevelMax[i] = maxVal[i]*2.0f;
+            }else{
+              drawing.scaleToLevelMax[i] = 10.0f;
+            }
+            if(minVal[i] > 0.0f){
+              drawing.scaleToLevelMin[i] = minVal[i];
+            }else{
+              drawing.scaleToLevelMin[i] = 0.1f;
+            }
           }else{
             drawing.scaleToLevelMax[i] = maxVal[i]*1.2f;
+            drawing.scaleToLevelMin[i] = minVal[i];
           }
-          drawing.scaleToLevelMin[i] = minVal[i];
         }
         break;
       case VIEWTYPE_OVERLAY_COMMON:
         for(int32_t i=0;i<drawing.numMultiplotSp;i++){
           if(drawing.logScale){
-            drawing.scaleToLevelMax[i] = maxVal[0]*2.0f;
+            if(maxVal[0] > 0.0f){
+              drawing.scaleToLevelMax[i] = maxVal[0]*2.0f;
+            }else{
+              drawing.scaleToLevelMax[i] = 10.0f;
+            }
+            if(minVal[0] > 0.0f){
+              drawing.scaleToLevelMin[i] = minVal[0];
+            }else{
+              drawing.scaleToLevelMin[i] = 0.1f;
+            }
           }else{
             drawing.scaleToLevelMax[i] = maxVal[0]*1.2f;
+            drawing.scaleToLevelMin[i] = minVal[0];
           }
-          drawing.scaleToLevelMin[i] = minVal[0];
         }
         break;
       case VIEWTYPE_SUMMED:
       case VIEWTYPE_NONE:
         if(drawing.logScale){
-          drawing.scaleToLevelMax[0] = maxVal[0]*2.0f;
+          if(maxVal[0] > 0.0f){
+            drawing.scaleToLevelMax[0] = maxVal[0]*2.0f;
+          }else{
+            drawing.scaleToLevelMax[0] = 10.0f;
+          }
+          if(minVal[0] > 0.0f){
+            drawing.scaleToLevelMin[0] = minVal[0];
+          }else{
+            drawing.scaleToLevelMin[0] = 0.1f;
+          }
         }else{
           drawing.scaleToLevelMax[0] = maxVal[0]*1.2f;
+          drawing.scaleToLevelMin[0] = minVal[0];
         }
-        drawing.scaleToLevelMin[0] = minVal[0];
         break;
       default:
         break;

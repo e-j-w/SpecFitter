@@ -27,7 +27,7 @@ gboolean update_gui_fit_state(){
       gtk_widget_hide(GTK_WIDGET(fit_spinner));
       gtk_widget_hide(GTK_WIDGET(fit_button_box));
       gtk_widget_show(GTK_WIDGET(fit_display_button_box));
-      //gtk_revealer_set_reveal_child(revealer_info_panel, FALSE);
+      gtk_revealer_set_reveal_child(revealer_info_panel, TRUE);
       if(drawing.displayedSavedFit >= 0){
         gtk_widget_hide(GTK_WIDGET(fit_save_button));
       }else{
@@ -960,7 +960,6 @@ long double widthGuess(const double centroidCh, const double widthInit){
 int startGausFit(){
 
   rawdata.dispFitPar.fittingSp = FITSTATE_FITTING;
-  g_idle_add(update_gui_fit_state,NULL);
 
   memset(rawdata.dispFitPar.fitParErr,0,sizeof(rawdata.dispFitPar.fitParErr));
   rawdata.dispFitPar.prevFitStartCh = rawdata.dispFitPar.fitStartCh;
@@ -981,6 +980,8 @@ int startGausFit(){
     g_idle_add(update_gui_fit_state,NULL);
     g_idle_add(print_fit_results,NULL);
     return 1;
+  }else{
+    g_idle_add(update_gui_fit_state,NULL);
   }
 
   //width parameters
