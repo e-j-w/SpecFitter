@@ -1828,7 +1828,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
         //cairo_set_source_rgb(cr, 0.5, 0.5, 0.5);
         cairo_set_source_rgb(cr, 0.0, 0.0, 0.8);
         float fitDrawX, nextFitDrawX, nextXpos;
-        float fitSkipFactor = 0.5f*(float)(binSkipFactor);
+        float fitSkipFactor = 0.25f*(float)(binSkipFactor);
         if(fitSkipFactor <= 0.0f){
           fitSkipFactor = 0.5f;
         }
@@ -1998,8 +1998,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       cairo_set_source_rgb(cr, 0.0, 0.0, 0.8);
       cairo_set_line_width(cr, 2.0*scaleFactor);
       for(int32_t i=0;i<rawdata.dispFitPar.numFitPeaks;i++){
-        if((rawdata.dispFitPar.fitParVal[FITPAR_POS1+(3*i)] > drawing.lowerLimit)&&(rawdata.dispFitPar.fitParVal[FITPAR_POS1+(3*i)] < drawing.upperLimit)){
-          cairo_arc(cr,getXPosFromCh((float)(rawdata.dispFitPar.fitParVal[FITPAR_POS1+(3*i)]),width),(-0.002*(height)*30.0)-getYPos((float)(evalFit(rawdata.dispFitPar.fitParVal[FITPAR_POS1+(3*i)])),0,height),5.,0.,2*G_PI);
+        if((rawdata.dispFitPar.centroidVal[i] > drawing.lowerLimit)&&(rawdata.dispFitPar.centroidVal[i] < drawing.upperLimit)){
+          cairo_arc(cr,getXPosFromCh((float)(rawdata.dispFitPar.centroidVal[i]),width),(-0.002*(height)*30.0)-getYPos((float)(evalFit(rawdata.dispFitPar.centroidVal[i])),0,height),5.,0.,2*G_PI);
         }
         cairo_stroke_preserve(cr);
         cairo_fill(cr);

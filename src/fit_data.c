@@ -289,15 +289,15 @@ long double evalFitOnePeakNoBG(const long double xChVal, const int32_t peak){
   long double h, r, r1, r2, u, u1, u2, u3, u5, u7,  w, x, x1, y = 0.0, y1 = 0.0, z, beta;
   uint8_t notail = 0;
   
-  if(rawdata.dispFitPar.fitParFree[3] == 0 && rawdata.dispFitPar.fitParVal[3] == 0.0){
+  if(rawdata.dispFitPar.fitParFree[FITPAR_R] == 0 && rawdata.dispFitPar.fitParVal[FITPAR_R] == 0.0){
     notail = 1;
   }else{
     notail = 0;
-    beta = rawdata.dispFitPar.fitParVal[4];
+    beta = rawdata.dispFitPar.fitParVal[FITPAR_BETA];
     if(beta == 0.){
       beta = 0.001; //handle symmetric peak case
     }
-    y = rawdata.dispFitPar.fitParVal[peak*3 + 7] / (rawdata.dispFitPar.fitParVal[4] * 3.33021838);
+    y = rawdata.dispFitPar.fitParVal[peak*3 + FITPAR_WIDTH1] / (rawdata.dispFitPar.fitParVal[FITPAR_BETA] * 3.33021838);
     if(y > 4.0){
       y1 = 0.0;
       notail = 1;
@@ -307,12 +307,12 @@ long double evalFitOnePeakNoBG(const long double xChVal, const int32_t peak){
   }
 
   x1 = xChVal;
-  x = x1 - rawdata.dispFitPar.fitParVal[peak*3 + 6];
-  long double width = rawdata.dispFitPar.fitParVal[peak*3 + 7]; // normalization factor of 2.35482 omitted due to differences in how RadWare and this program report FWHM
+  x = x1 - rawdata.dispFitPar.fitParVal[peak*3 + FITPAR_POS1];
+  long double width = rawdata.dispFitPar.fitParVal[peak*3 + FITPAR_WIDTH1]; // normalization factor of 2.35482 omitted due to differences in how RadWare and this program report FWHM
   if(width == 0.0){
     return 0.0;
   }
-  h = rawdata.dispFitPar.fitParVal[peak*3 + 8];
+  h = rawdata.dispFitPar.fitParVal[peak*3 + FITPAR_AMP1];
   w = x / (width*1.41421356);
   if(fabsl(w) > 4.0){
     u1 = 0.0;
@@ -324,12 +324,12 @@ long double evalFitOnePeakNoBG(const long double xChVal, const int32_t peak){
   }
   if(notail){
     /* notail = true; pure gaussians only */
-    u = u1 + rawdata.dispFitPar.fitParVal[5] * u3 / 200.;
+    u = u1 + rawdata.dispFitPar.fitParVal[FITPAR_STEP] * u3 / 200.;
     pkVal += h * u;
   }else{
-    r = rawdata.dispFitPar.fitParVal[3] / 100.0;
+    r = rawdata.dispFitPar.fitParVal[FITPAR_R] / 100.0;
     r1 = 1.0 - r;
-    beta = rawdata.dispFitPar.fitParVal[4];
+    beta = rawdata.dispFitPar.fitParVal[FITPAR_BETA];
     z = w + y;
     if((r2 = x / beta, fabsl(r2)) > 12.){
       u5 = 0.0;
@@ -344,7 +344,7 @@ long double evalFitOnePeakNoBG(const long double xChVal, const int32_t peak){
       }
     }
     u2 = u7 * u5;
-    u = r1 * u1 + r * u2 + rawdata.dispFitPar.fitParVal[5] * u3 / 200.0;
+    u = r1 * u1 + r * u2 + rawdata.dispFitPar.fitParVal[FITPAR_STEP] * u3 / 200.0;
     pkVal += h * u;
   }
   

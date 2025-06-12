@@ -552,7 +552,7 @@ int readDMCA(const char *filename, double outHist[NSPECT][S32K], const uint32_t 
     exit(-1); //over-import error
   }
 
-  //get the number of spectra in the .fmca file
+  //get the number of spectra in the .dmca file
   uint32_t numSpec = S32K;
   for(uint32_t i = 0; i < numSpec; i++){
     if(fread(tmpHist, S32K * sizeof(double), 1, inp) != 1){
@@ -570,7 +570,7 @@ int readDMCA(const char *filename, double outHist[NSPECT][S32K], const uint32_t 
   if((inp = fopen(filename, "r")) != NULL){ //reopen the file
     for(uint32_t i = outHistStartSp; i < (outHistStartSp+numSpec); i++){
       if(fread(tmpHist, S32K * sizeof(double), 1, inp) != 1){
-        printf("ERROR: Cannot read spectrum %i from the .fmca file: %s\n", i, filename);
+        printf("ERROR: Cannot read spectrum %i from the .dmca file: %s\n", i, filename);
         printf("Verify that the format and number of spectra in the file are correct.\n");
         exit(-1);
       }else{
