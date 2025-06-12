@@ -289,15 +289,15 @@ long double evalFitOnePeakNoBG(const long double xChVal, const int32_t peak){
   long double h, r, r1, r2, u, u1, u2, u3, u5, u7,  w, x, x1, y = 0.0, y1 = 0.0, z, beta;
   uint8_t notail = 0;
   
-  if(rawdata.dispFitPar.fitParFree[FITPAR_R] == 0 && rawdata.dispFitPar.fitParVal[FITPAR_R] == 0.0){
+  if(rawdata.dispFitPar.fitParFree[3] == 0 && rawdata.dispFitPar.fitParVal[3] == 0.0){
     notail = 1;
   }else{
     notail = 0;
-    beta = rawdata.dispFitPar.fitParVal[FITPAR_BETA];
+    beta = rawdata.dispFitPar.fitParVal[4];
     if(beta == 0.){
       beta = 0.001; //handle symmetric peak case
     }
-    y = rawdata.dispFitPar.fitParVal[peak*3 + FITPAR_WIDTH1] / (rawdata.dispFitPar.fitParVal[FITPAR_BETA] * 3.33021838);
+    y = rawdata.dispFitPar.fitParVal[peak*3 + 7] / (rawdata.dispFitPar.fitParVal[4] * 3.33021838);
     if(y > 4.0){
       y1 = 0.0;
       notail = 1;
@@ -307,12 +307,12 @@ long double evalFitOnePeakNoBG(const long double xChVal, const int32_t peak){
   }
 
   x1 = xChVal;
-  x = x1 - rawdata.dispFitPar.fitParVal[peak*3 + FITPAR_POS1];
-  long double width = rawdata.dispFitPar.fitParVal[peak*3 + FITPAR_WIDTH1]; // normalization factor of 2.35482 omitted due to differences in how RadWare and this program report FWHM
+  x = x1 - rawdata.dispFitPar.fitParVal[peak*3 + 6];
+  long double width = rawdata.dispFitPar.fitParVal[peak*3 + 7]; // normalization factor of 2.35482 omitted due to differences in how RadWare and this program report FWHM
   if(width == 0.0){
     return 0.0;
   }
-  h = rawdata.dispFitPar.fitParVal[peak*3 + FITPAR_AMP1];
+  h = rawdata.dispFitPar.fitParVal[peak*3 + 8];
   w = x / (width*1.41421356);
   if(fabsl(w) > 4.0){
     u1 = 0.0;
@@ -324,12 +324,12 @@ long double evalFitOnePeakNoBG(const long double xChVal, const int32_t peak){
   }
   if(notail){
     /* notail = true; pure gaussians only */
-    u = u1 + rawdata.dispFitPar.fitParVal[FITPAR_STEP] * u3 / 200.;
+    u = u1 + rawdata.dispFitPar.fitParVal[5] * u3 / 200.;
     pkVal += h * u;
   }else{
-    r = rawdata.dispFitPar.fitParVal[FITPAR_R] / 100.0;
+    r = rawdata.dispFitPar.fitParVal[3] / 100.0;
     r1 = 1.0 - r;
-    beta = rawdata.dispFitPar.fitParVal[FITPAR_BETA];
+    beta = rawdata.dispFitPar.fitParVal[4];
     z = w + y;
     if((r2 = x / beta, fabsl(r2)) > 12.){
       u5 = 0.0;
@@ -344,7 +344,7 @@ long double evalFitOnePeakNoBG(const long double xChVal, const int32_t peak){
       }
     }
     u2 = u7 * u5;
-    u = r1 * u1 + r * u2 + rawdata.dispFitPar.fitParVal[FITPAR_STEP] * u3 / 200.0;
+    u = r1 * u1 + r * u2 + rawdata.dispFitPar.fitParVal[5] * u3 / 200.0;
     pkVal += h * u;
   }
   
@@ -372,7 +372,6 @@ long double evalFitOnePeak(const long double xChVal, const int32_t peak){
 //based on gffin from RadWare gf3_subs.c
 void evalPeakAreasAndCentroids(){
   long double area, d, r, y, r1, eb, eh, er, ew, beta;
-  int i, ic;
   long double pkwidth;
 
   /* calc. areas, centroids and errors */
@@ -382,9 +381,8 @@ void evalPeakAreasAndCentroids(){
   if(beta == 0.){
     beta = 0.001; //handle symmetric peak case
   }
-  for(i = 0; i < rawdata.dispFitPar.numFitPeaks; ++i){
-    ic = i*3 + FITPAR_WIDTH1;
-    pkwidth = rawdata.dispFitPar.fitParVal[ic] * 2.35482;
+  for(int i = 0; i < rawdata.dispFitPar.numFitPeaks; ++i){
+    pkwidth = rawdata.dispFitPar.fitParVal[i*3 + FITPAR_WIDTH1] * 2.35482;
     y = pkwidth / (beta * 3.33021838f);
     if (y > 4.0f) {
       d = 0.0f;
@@ -392,14 +390,15 @@ void evalPeakAreasAndCentroids(){
       d = expl(-y * y) / erfcl(y);
     }
     area = r * beta * d + pkwidth * 1.06446705f * r1;
-    rawdata.dispFitPar.areaVal[i] = area * rawdata.dispFitPar.fitParVal[ic + 1] / (1.0*drawing.contractFactor);
-    eh = area * rawdata.dispFitPar.fitParErr[ic + 1];
-    er = (beta * 2.0 * d - pkwidth * 1.06446705f) * rawdata.dispFitPar.fitParErr[3] / 100.0;
-    eb = r * d * (y * 2.0 * y + 1.0 - d * 1.12837917f * y) * rawdata.dispFitPar.fitParErr[4];
-    ew = (r1 * 1.06446705f + r * .600561216f * d * (d / 1.77245385f - y)) * rawdata.dispFitPar.fitParErr[ic];
-    rawdata.dispFitPar.areaErr[i] = sqrtl(eh * eh + rawdata.dispFitPar.fitParVal[ic+1] * rawdata.dispFitPar.fitParVal[ic+1] * (er * er + eb * eb + ew * ew));
+    rawdata.dispFitPar.areaVal[i] = area * rawdata.dispFitPar.fitParVal[i*3 + FITPAR_AMP1] / (1.0*drawing.contractFactor);
+    eh = area * rawdata.dispFitPar.fitParErr[i*3 + FITPAR_AMP1];
+    er = (beta * 2.0 * d - pkwidth * 1.06446705f) * rawdata.dispFitPar.fitParErr[FITPAR_R] / 100.0;
+    eb = r * d * (y * 2.0 * y + 1.0 - d * 1.12837917f * y) * rawdata.dispFitPar.fitParErr[FITPAR_BETA];
+    ew = (r1 * 1.06446705f + r * .600561216f * d * (d / 1.77245385f - y)) * rawdata.dispFitPar.fitParErr[i*3 + FITPAR_WIDTH1];
+    rawdata.dispFitPar.areaErr[i] = sqrtl(eh * eh + rawdata.dispFitPar.fitParVal[i*3 + FITPAR_AMP1] * rawdata.dispFitPar.fitParVal[i*3 + FITPAR_AMP1] * (er * er + eb * eb + ew * ew));
     rawdata.dispFitPar.areaErr[i] /= (1.0*drawing.contractFactor);
-    rawdata.dispFitPar.centroidVal[i] = rawdata.dispFitPar.fitParVal[ic - 1] - (r * beta * d * beta / area);
+    rawdata.dispFitPar.centroidVal[i] = rawdata.dispFitPar.fitParVal[i*3 + FITPAR_POS1] - (r * beta * d * beta / area);
+    rawdata.dispFitPar.centroidVal[i] += drawing.contractFactor/2.0; //inconsistent with radware, but seems visually correct, and makes centroids consistent with different contract factors (at least for Gaussians)
   }
   
 }
