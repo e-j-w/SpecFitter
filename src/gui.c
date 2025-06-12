@@ -1067,10 +1067,10 @@ void on_export_save_button_clicked(){
   int32_t exportMode = gtk_combo_box_get_active(GTK_COMBO_BOX(export_mode_combobox));
   int32_t rebin = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(export_rebin_checkbutton));
 
-  GtkFileChooserNative *native = gtk_file_chooser_native_new ("Export Spectrum Data", window, GTK_FILE_CHOOSER_ACTION_SAVE, "_Export", "_Cancel");
+  GtkFileChooserNative *native = gtk_file_chooser_native_new("Export Spectrum Data", window, GTK_FILE_CHOOSER_ACTION_SAVE, "_Export", "_Cancel");
   file_save_dialog = GTK_FILE_CHOOSER(native);
   if(currentFolderSelection != NULL){
-    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection);
+    gtk_file_chooser_set_current_folder(file_save_dialog,currentFolderSelection);
   }
   gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
   gtk_file_chooser_set_do_overwrite_confirmation(file_save_dialog, TRUE);
@@ -1107,7 +1107,7 @@ void on_export_save_button_clicked(){
   int32_t saveErr = 0; //to track if there are any errors when opening spectra
   if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
     
-    currentFolderSelection = gtk_file_chooser_get_current_folder(file_open_dialog);
+    currentFolderSelection = gtk_file_chooser_get_current_folder(file_save_dialog);
     char *fn = NULL;
     char *tok, fileName[256];
     fn = gtk_file_chooser_get_filename(file_save_dialog);
@@ -1183,7 +1183,7 @@ void on_export_image_button_clicked(){
   GtkFileChooserNative *native = gtk_file_chooser_native_new ("Save Image File", window, GTK_FILE_CHOOSER_ACTION_SAVE, "_Save", "_Cancel");
   file_save_dialog = GTK_FILE_CHOOSER(native);
   if(currentFolderSelection != NULL){
-    gtk_file_chooser_set_current_folder(file_open_dialog,currentFolderSelection);
+    gtk_file_chooser_set_current_folder(file_save_dialog,currentFolderSelection);
   }
   gtk_file_chooser_set_select_multiple(file_save_dialog, FALSE);
   gtk_file_chooser_set_do_overwrite_confirmation(file_save_dialog, TRUE);
@@ -1194,10 +1194,10 @@ void on_export_image_button_clicked(){
 
   float scaleFactor = (float)((1.0 + inpAxisScale*0.5)*sqrt((hres*vres)/1000000.0));
 
-  int32_t saveErr = 0; //to track if there are any errors when opening spectra
+  int32_t saveErr = 0; //to track if there are any errors when saving spectra
   if(gtk_native_dialog_run(GTK_NATIVE_DIALOG(native)) == GTK_RESPONSE_ACCEPT){
     
-    currentFolderSelection = gtk_file_chooser_get_current_folder(file_open_dialog);
+    currentFolderSelection = gtk_file_chooser_get_current_folder(file_save_dialog);
     char *fn = NULL;
     char *tok, fileName[256];
     fn = gtk_file_chooser_get_filename(file_save_dialog);
