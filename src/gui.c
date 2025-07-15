@@ -825,12 +825,14 @@ void on_save_button_clicked(){
 
     currentFolderSelection = gtk_file_chooser_get_current_folder(file_save_dialog);
     char *fn = NULL;
-    char *tok, fileName[256];
+    char fileName[256];
     fn = gtk_file_chooser_get_filename(file_save_dialog);
-    tok = strtok (fn,".");
-    strncpy(fileName,tok,255);
-    //save as a .jf3 file by default
-    strncat(fileName,".jf3",255);
+    strncpy(fileName,fn,255);
+    size_t len = strlen(fileName);
+    //append extension if needed
+    if((len >= 4)&&(strncmp(&fileName[len-4],".jf3",5)!=0)){
+      strncat(fileName,".jf3",255);
+    }
     //write file
     saveErr = writeJF3(fileName, rawdata.hist);
 
@@ -1109,28 +1111,40 @@ void on_export_save_button_clicked(){
     
     currentFolderSelection = gtk_file_chooser_get_current_folder(file_save_dialog);
     char *fn = NULL;
-    char *tok, fileName[256];
+    char fileName[256];
     fn = gtk_file_chooser_get_filename(file_save_dialog);
-    tok = strtok (fn,".");
-    strncpy(fileName,tok,255);
+    strncpy(fileName,fn,255);
+    size_t len = strlen(fileName);
 
     //write file
     switch(guiglobals.exportFileType){
       case 3:
         //dmca
+        if((len >= 5)&&(strncmp(&fileName[len-5],".dmca",5)!=0)){
+          strncat(fileName,".dmca",255);
+        }
         saveErr = exportDMCA(fileName, exportMode, rebin);
         break;
       case 2:
         //fmca
+        if((len >= 5)&&(strncmp(&fileName[len-5],".fmca",5)!=0)){
+          strncat(fileName,".fmca",255);
+        }
         saveErr = exportFMCA(fileName, exportMode, rebin);
         break;
       case 1:
         //radware
+        if((len >= 4)&&(strncmp(&fileName[len-4],".spe",5)!=0)){
+          strncat(fileName,".spe",255);
+        }
         saveErr = exportSPE(fileName, exportMode, rebin);
         break;
       case 0:
       default:
         //text
+        if((len >= 4)&&(strncmp(&fileName[len-4],".txt",5)!=0)){
+          strncat(fileName,".txt",255);
+        }
         saveErr = exportTXT(fileName, exportMode, rebin);
         break;
     }
