@@ -228,6 +228,13 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
       uint32_t spInd;
       double val;
       for(uint32_t i=0;i<numSpec;i++){
+
+        if(format >= 6){
+          //version 6+ allows custom error values to be written,
+          //check for those
+          if(fread(&ucharBuf, sizeof(uint8_t), 1, inp)!=1){fclose(inp); return 0;}
+          rawdata.hasCustomErr[i+outHistStartSp] = ucharBuf;
+        }
         
         doneSp = 0;
         spInd = 0;
@@ -258,6 +265,41 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
             spInd += numEntr;
           }
 
+        }
+        if(format >= 6){
+          if(rawdata.hasCustomErr[i+outHistStartSp]){
+            //read custom error values
+            doneSp = 0;
+            spInd = 0;
+            while(doneSp==0){
+              //read packet header
+              if(fread(&scharBuf,sizeof(int8_t), 1, inp)!=1){fclose(inp); return 0;}
+              //printf("read packet counter: %i\n",scharBuf);
+              if(scharBuf == 0){
+                if(fread(&val,sizeof(double), 1, inp)!=1){fclose(inp); return 0;} //read in final value
+                rawdata.histErr[i+outHistStartSp][spInd] = val;
+                spInd++;
+                doneSp = 1; //move on to the next spectrum
+              }else if(scharBuf > 0){
+                //duplicated entries
+                if(fread(&val,sizeof(double), 1, inp)!=1){fclose(inp); return 0;} //read in value
+                for(uint32_t j=0;j<(uint32_t)scharBuf;j++){
+                  rawdata.histErr[i+outHistStartSp][spInd+j] = val;
+                }
+                spInd += (uint32_t)abs(scharBuf);
+              }else{
+                //non-duplicated entries
+                uint32_t numEntr = (uint32_t)abs(scharBuf);
+                for(uint32_t j=0;j<numEntr;j++){
+                  if(fread(&val,sizeof(double), 1, inp)!=1){fclose(inp); return 0;} //read in value
+                  rawdata.histErr[i+outHistStartSp][spInd+j] = val;
+                  //printf("val %f\n",val);
+                }
+                spInd += numEntr;
+              }
+
+            }
+          }
         }
 
         //fill the rest of the histogram

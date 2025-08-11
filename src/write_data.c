@@ -74,7 +74,7 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K]){
 
   //printf("Number of spectra to write: %i\n",rawdata.numSpOpened);
 
-  ucharBuf = 5; //file format version number
+  ucharBuf = 6; //file format version number
   fwrite(&ucharBuf,sizeof(uint8_t),1,out);
   ucharBuf = rawdata.numSpOpened; //number of spectra to write
   fwrite(&ucharBuf,sizeof(uint8_t),1,out);
@@ -123,6 +123,10 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K]){
     if(i<NSPECT){
 
       //printf("Writing spectrum %i\n",i);
+
+      //write whether spectrum has custom errors
+      ucharBuf = rawdata.hasCustomErr[i];
+      fwrite(&ucharBuf,sizeof(uint8_t),1,out);
 
       //scan for end of spectrum
       int lastCh = 0;
@@ -216,6 +220,94 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K]){
         }else if((currentBin != lastBin)&&(packetCounter<0)){
           //continue packet
           packetCounter--;
+        }
+      }
+
+      if(rawdata.hasCustomErr[i]){
+        //encode spectrum errors
+        packetCounter = 1;
+        for(int32_t j=0;j<S32K;j++){
+          
+          //get bin values
+          currentBin = rawdata.histErr[i][j];
+          if(j>0){
+            lastBin = rawdata.histErr[i][j-1];
+          }else{
+            lastBin = rawdata.histErr[i][j];
+          }
+          
+          //printf("bin: %i cuurent val: %f last val: %f packetCounter: %i\n",j,currentBin,lastBin,packetCounter);
+
+          if(j>=lastCh){
+            //end of spectrum reached
+            if(packetCounter > 0){
+              //write last packet
+              fwrite(&packetCounter,sizeof(signed char),1,out);
+              //printf("wrote packet counter %i\n",packetCounter);
+              val = rawdata.histErr[i][j-1];
+              fwrite(&val,sizeof(double),1,out);
+            }else{
+              //write last packet
+              fwrite(&packetCounter,sizeof(signed char),1,out);
+              //printf("wrote packet counter %i\n",packetCounter);
+              for(int32_t k=0;k<(packetCounter*-1);k++){
+                val = rawdata.histErr[i][j+packetCounter+k];
+                fwrite(&val,sizeof(double),1,out);
+              }
+            }
+            //write final packet
+            packetCounter = 0;
+            fwrite(&packetCounter,sizeof(signed char),1,out);
+            //printf("wrote packet counter %i\n",packetCounter);
+            val = rawdata.histErr[i][j];
+            fwrite(&val,sizeof(double),1,out);
+            break;
+          }else if(packetCounter > 126){
+            //write last packet
+            fwrite(&packetCounter,sizeof(signed char),1,out);
+            val = rawdata.histErr[i][j-1];
+            fwrite(&val,sizeof(double),1,out);
+            //start new packet
+            packetCounter = 1;
+          }else if (packetCounter < -126){
+            //write last packet
+            fwrite(&packetCounter,sizeof(signed char),1,out);
+            //printf("wrote packet counter %i\n",packetCounter);
+            for(int32_t k=0;k<(packetCounter*-1);k++){
+              val = rawdata.histErr[i][j+packetCounter+k];
+              fwrite(&val,sizeof(double),1,out);
+            }
+            //start new packet
+            packetCounter = 1;
+          }else if((currentBin == lastBin)&&(packetCounter>0)){
+            //continue packet
+            if(j>0) //remember we start off with a value of 1
+              packetCounter++;
+          }else if((currentBin != lastBin)&&(packetCounter>1)){
+            //write last packet
+            fwrite(&packetCounter,sizeof(signed char),1,out);
+            //printf("wrote packet counter %i\n",packetCounter);
+            val = rawdata.histErr[i][j-1];
+            fwrite(&val,sizeof(double),1,out);
+            //start new packet
+            packetCounter = 1;
+          }else if((currentBin != lastBin)&&(packetCounter==1)){
+            //change packet type
+            packetCounter = -2;
+          }else if((currentBin == lastBin)&&(packetCounter<0)){
+            //write last packet
+            fwrite(&packetCounter,sizeof(signed char),1,out);
+            //printf("wrote packet counter %i\n",packetCounter);
+            for(int32_t k=0;k<(packetCounter*-1);k++){
+              val = rawdata.histErr[i][j+packetCounter+k];
+              fwrite(&val,sizeof(double),1,out);
+            }
+            //start new packet
+            packetCounter = 1;
+          }else if((currentBin != lastBin)&&(packetCounter<0)){
+            //continue packet
+            packetCounter--;
+          }
         }
       }
 
