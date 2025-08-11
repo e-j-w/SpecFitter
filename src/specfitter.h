@@ -215,7 +215,9 @@ struct {
 //raw histogram data globals
 struct {
   double hist[NSPECT][S32K]; //spectrum histogram data
+  double histErr[NSPECT][S32K]; //errors per bin of the histogram
   char histComment[NSPECT][256]; //spectrum description/comment
+  uint8_t hasCustomErr[NSPECT];
   uint8_t openedSp; //0=not opened, 1=opened
   uint8_t numSpOpened; //number of spectra in the opened file(s)
   uint8_t numFilesOpened; //number of files containing spectra opened

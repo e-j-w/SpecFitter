@@ -268,7 +268,23 @@ double getSpBinValRaw(const int32_t spNumRaw, const int32_t bin, const double sc
   return val;
 }
 
-//if getWeight is set, will return weight values for fitting
+double getSpBinCustomErr2Raw(const int32_t spNumRaw, const int32_t bin, const double scaleFactor, const int32_t contractFactor){
+
+  if(spNumRaw >= NSPECT){
+    return 0;
+  }
+
+  double val = 0.;
+  for(int32_t i=0;i<contractFactor;i++){
+    if((bin+i) < S32K){
+      val += (double)(rawdata.histErr[spNumRaw][bin+i]*rawdata.histErr[spNumRaw][bin+i]);
+    }
+  }
+  return val*scaleFactor*scaleFactor;
+}
+
+
+//if getWeight is 1, will return weight values for fitting
 double getSpBinValOrWeight(const int32_t dispSpNum, const int32_t bin, const int32_t getWeight){
 
   /*if((dispSpNum >= drawing.numMultiplotSp)||(dispSpNum < 0)){
@@ -284,7 +300,11 @@ double getSpBinValOrWeight(const int32_t dispSpNum, const int32_t bin, const int
       for(int32_t j=0;j<drawing.contractFactor;j++){
         if(getWeight){
           for(int32_t k=0;k<drawing.numMultiplotSp;k++){
-            val += (double)(drawing.scaleFactor[drawing.multiPlots[k]]*drawing.scaleFactor[drawing.multiPlots[k]]*fabs(rawdata.hist[drawing.multiPlots[k]][bin+j]));
+            if(rawdata.hasCustomErr[drawing.multiPlots[k]]){
+              val += (double)(drawing.scaleFactor[drawing.multiPlots[k]]*drawing.scaleFactor[drawing.multiPlots[k]]*rawdata.histErr[drawing.multiPlots[k]][bin+j]*rawdata.histErr[drawing.multiPlots[k]][bin+j]);
+            }else{
+              val += (double)(drawing.scaleFactor[drawing.multiPlots[k]]*drawing.scaleFactor[drawing.multiPlots[k]]*fabs(rawdata.hist[drawing.multiPlots[k]][bin+j]));
+            }
           }
         }else{
           for(int32_t k=0;k<drawing.numMultiplotSp;k++){
@@ -301,7 +321,11 @@ double getSpBinValOrWeight(const int32_t dispSpNum, const int32_t bin, const int
       //overlay (common scaling)
     case VIEWTYPE_NONE:
       //no multiplot
-      val = getSpBinValRaw(drawing.multiPlots[dispSpNum],bin,drawing.scaleFactor[drawing.multiPlots[dispSpNum]],drawing.contractFactor);
+      if(getWeight && rawdata.hasCustomErr[drawing.multiPlots[dispSpNum]]){
+        val = getSpBinCustomErr2Raw(drawing.multiPlots[dispSpNum],bin,drawing.scaleFactor[drawing.multiPlots[dispSpNum]],drawing.contractFactor);
+      }else{
+        val = getSpBinValRaw(drawing.multiPlots[dispSpNum],bin,drawing.scaleFactor[drawing.multiPlots[dispSpNum]],drawing.contractFactor);
+      }
       break;
     default:
       break;

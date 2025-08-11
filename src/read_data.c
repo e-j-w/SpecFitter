@@ -585,6 +585,68 @@ int readDMCA(const char *filename, double outHist[NSPECT][S32K], const uint32_t 
   return (int)numSpec;
 }
 
+//function reads a .wmca file into a double array and returns the number of spectra read in
+//this is the same as a .dmca file, except there are weight spectra which specify custom error values per-bin
+//the weight spectra are directly after each regular spectrum
+int readWMCA(const char *filename, double outHist[NSPECT][S32K], const uint32_t outHistStartSp){
+
+  double tmpHist[S32K];
+  FILE *inp;
+
+  if((inp = fopen(filename, "r")) == NULL){ //open the file
+    printf("ERROR: Cannot open the input file: %s\n", filename);
+    printf("Check that the file exists.\n");
+    exit(-1); //over-import error
+  }
+
+  //get the number of spectra in the .dmca file
+  uint32_t numSpec = S32K;
+  for(uint32_t i = 0; i < numSpec; i++){
+    if(fread(tmpHist, S32K * sizeof(double), 1, inp) != 1){
+      numSpec = i;
+      break;
+    }
+  }
+  fclose(inp);
+  if((numSpec % 2)!=0){
+    printf("ERROS: uneven number of spectra (%u) in .wmca file!\n",numSpec);
+    return -1;
+  }else{
+    numSpec = numSpec/2;
+  }
+  //printf("number of spectra in file '%s': %i\n",filename,numSpec);
+  if((outHistStartSp+numSpec)>NSPECT){
+    printf("Cannot open file %s, number of spectra would exceed maximum (%i, %i spectra already open, %i in file)!\n", filename, NSPECT, outHistStartSp, numSpec);
+    return -1;
+  }
+
+  if((inp = fopen(filename, "r")) != NULL){ //reopen the file
+    for(uint32_t i = outHistStartSp; i < (outHistStartSp+numSpec); i++){
+      if(fread(tmpHist, S32K * sizeof(double), 1, inp) != 1){
+        printf("ERROR: Cannot read value spectrum %i from the .wmca file: %s\n", i, filename);
+        printf("Verify that the format and number of spectra in the file are correct.\n");
+        exit(-1);
+      }else{
+        for(uint32_t j = 0; j < S32K; j++)
+          outHist[i][j] = tmpHist[j];
+      }
+      if(fread(tmpHist, S32K * sizeof(double), 1, inp) != 1){
+        printf("ERROR: Cannot read error spectrum %i from the .wmca file: %s\n", i, filename);
+        printf("Verify that the format and number of spectra in the file are correct.\n");
+        exit(-1);
+      }else{
+        for(uint32_t j = 0; j < S32K; j++)
+          rawdata.histErr[i][j] = tmpHist[j];
+        rawdata.hasCustomErr[i] = 1;
+      }
+      snprintf(rawdata.histComment[i],256,"Spectrum %i of %s",i-outHistStartSp+1,basename((char*)filename));
+    }
+  }
+
+  fclose(inp);
+  return (int)numSpec;
+}
+
 //function reads an .chn (Maestro) file into the output hist and returns the number of spectra read in
 int readCHN(const char *filename, double outHist[NSPECT][S32K], const uint32_t outHistStartSp){
 
@@ -1073,6 +1135,8 @@ int readSpectrumDataFile(const char *filename, double outHist[NSPECT][S32K], con
     numSpec = readFMCA(filename, outHist, outHistStartSp);
   }else if(strcmp(dot + 1, "dmca") == 0){
     numSpec = readDMCA(filename, outHist, outHistStartSp);
+  }else if(strcmp(dot + 1, "wmca") == 0){
+    numSpec = readWMCA(filename, outHist, outHistStartSp);
   }else if((strcmp(dot + 1, "spe") == 0)||(strcmp(dot + 1, "Spe") == 0)){
     printf("Trying Maestro SPE format.\n");
     numSpec = readSPEM(filename, outHist, outHistStartSp);

@@ -584,11 +584,12 @@ void on_open_button_clicked(){
   }
   gtk_file_chooser_set_select_multiple(file_open_dialog, TRUE);
   file_filter = gtk_file_filter_new();
-  gtk_file_filter_set_name(file_filter,"Spectrum Data (.jf3, .txt, .mca, .fmca, .dmca, .spe, .chn, .C)");
+  gtk_file_filter_set_name(file_filter,"Spectrum Data (.jf3, .txt, .mca, .fmca, .dmca, .wmca, .spe, .chn, .C)");
   gtk_file_filter_add_pattern(file_filter,"*.txt");
   gtk_file_filter_add_pattern(file_filter,"*.mca");
   gtk_file_filter_add_pattern(file_filter,"*.fmca");
   gtk_file_filter_add_pattern(file_filter,"*.dmca");
+  gtk_file_filter_add_pattern(file_filter,"*.wmca");
   gtk_file_filter_add_pattern(file_filter,"*.spe");
   gtk_file_filter_add_pattern(file_filter,"*.Spe");
   gtk_file_filter_add_pattern(file_filter,"*.chn");
