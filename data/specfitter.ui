@@ -138,7 +138,7 @@ Author: Jonathan Williams
     <property name="website-label" translatable="yes">Source Repository</property>
     <property name="authors">Jonathan Williams</property>
     <property name="artists">Jonathan Williams</property>
-    <property name="logo">specfitter-application-icon.svg</property>
+    <property name="logo">io.github.e_j_w.SpecFitter.svg</property>
     <property name="license-type">gpl-3-0</property>
     <child internal-child="vbox">
       <object class="GtkBox">

@@ -25,8 +25,8 @@ install:
 		echo "This must be run with administrator privileges (eg. with 'sudo')."; \
 	else \
 		cp specfitter /usr/bin ; \
-		cp data/specfitter-application-icon.svg /usr/share/icons/hicolor/scalable/apps ; \
-		cp data/specfitter.desktop /usr/share/applications ; \
+		cp data/io.github.e_j_w.SpecFitter.svg /usr/share/icons/hicolor/scalable/apps ; \
+		cp data/io.github.e_j_w.SpecFitter.desktop /usr/share/applications ; \
 		cp data/specfitter-mime.xml /usr/share/mime/packages ; \
 		update-mime-database /usr/share/mime ; \
 		update-desktop-database /usr/share/applications ; \
@@ -40,8 +40,8 @@ uninstall:
 		echo "This must be run with administrator privileges (eg. with 'sudo')."; \
 	else \
 		rm /usr/bin/specfitter ; \
-		rm /usr/share/icons/hicolor/scalable/apps/specfitter-application-icon.svg ; \
-		rm /usr/share/applications/specfitter.desktop ; \
+		rm /usr/share/icons/hicolor/scalable/apps/io.github.e_j_w.SpecFitter.svg ; \
+		rm /usr/share/applications/io.github.e_j_w.SpecFitter.desktop ; \
 		rm /usr/share/mime/packages/specfitter-mime.xml ; \
 		update-mime-database /usr/share/mime ; \
 		update-desktop-database /usr/share/applications ; \

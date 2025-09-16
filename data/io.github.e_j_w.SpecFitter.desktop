@@ -7,5 +7,5 @@ Name=SpecFitter
 GenericName=Spectrum Fitter
 Exec=/usr/bin/specfitter
 MimeType=application/x-spectrum-jf3;application/x-spectrum-spe;application/x-spectrum-mca;application/x-spectrum-fmca;application/x-spectrum-dmca;application/x-spectrum-wmca;application/x-spectrum-chn;text/plain;
-Icon=specfitter-application-icon
+Icon=io.github.e_j_w.SpecFitter
 Categories=Utility;
