@@ -3545,7 +3545,7 @@ Weight by fit function - Weights are proportional to the fit function values det
     <property name="window-position">center</property>
     <property name="default-width">600</property>
     <property name="default-height">400</property>
-    <property name="icon">specfitter-application-icon.svg</property>
+    <property name="icon">io.github.e_j_w.SpecFitter.svg</property>
     <property name="gravity">center</property>
     <child>
       <object class="GtkBox" id="box1">

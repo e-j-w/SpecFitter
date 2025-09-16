@@ -2603,7 +2603,7 @@ void iniitalizeUIElements(){
   //import UI layout and graphics data
   builder = gtk_builder_new_from_resource("/resources/specfitter.ui"); //get UI layout from XML file
   gtk_builder_add_from_resource(builder, "/resources/shortcuts_window.ui", NULL);
-  appIcon = gdk_pixbuf_new_from_resource("/resources/specfitter-application-icon.svg", NULL);
+  appIcon = gdk_pixbuf_new_from_resource("/resources/io.github.e_j_w.SpecFitter.svg", NULL);
   spIconPixbuf = gdk_pixbuf_new_from_resource("/resources/icon-spectrum-symbolic", NULL);
   spIconPixbufDark = gdk_pixbuf_new_from_resource("/resources/icon-spectrum-symbolic-dark", NULL);
 
