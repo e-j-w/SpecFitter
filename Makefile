@@ -27,7 +27,7 @@ install:
 		cp specfitter /usr/bin ; \
 		cp data/io.github.e_j_w.SpecFitter.svg /usr/share/icons/hicolor/scalable/apps ; \
 		cp data/io.github.e_j_w.SpecFitter.desktop /usr/share/applications ; \
-		cp data/specfitter-mime.xml /usr/share/mime/packages ; \
+		cp data/io.github.e_j_w.SpecFitter-mime.xml /usr/share/mime/packages ; \
 		update-mime-database /usr/share/mime ; \
 		update-desktop-database /usr/share/applications ; \
 		echo "Done!" ; \
@@ -42,7 +42,7 @@ uninstall:
 		rm /usr/bin/specfitter ; \
 		rm /usr/share/icons/hicolor/scalable/apps/io.github.e_j_w.SpecFitter.svg ; \
 		rm /usr/share/applications/io.github.e_j_w.SpecFitter.desktop ; \
-		rm /usr/share/mime/packages/specfitter-mime.xml ; \
+		rm /usr/share/mime/packages/io.github.e_j_w.SpecFitter-mime.xml ; \
 		update-mime-database /usr/share/mime ; \
 		update-desktop-database /usr/share/applications ; \
 		echo "Done!" ; \
