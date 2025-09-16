@@ -408,7 +408,7 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
         guiglobals.scrollDir = GDK_SCROLL_DOWN;
         return; //skip a frame to account for spurious touchpad inputs
       }else{
-        guiglobals.accSmoothScrollDelta = guiglobals.accSmoothScrollDelta + 0.25*e->delta_y;
+        guiglobals.accSmoothScrollDelta = e->delta_y;
       }
     }else if(e->delta_y<0.0){
       //touchpad scroll up
@@ -416,9 +416,9 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
         guiglobals.scrollDir = GDK_SCROLL_UP;
         return; //skip a frame to account for spurious touchpad inputs
       }else{
-        guiglobals.accSmoothScrollDelta = guiglobals.accSmoothScrollDelta - 0.25*e->delta_y;
+        guiglobals.accSmoothScrollDelta = -1.0*e->delta_y;
       }
-    }else if((e->delta_x==0.0)&&(e->delta_y==0.0)){
+    }else if((e->delta_x==0.0)&&(e->delta_y==0.0)&&(e->direction != GDK_SCROLL_SMOOTH)){
       //GTK bug lol (https://bugzilla.gnome.org/show_bug.cgi?id=675959)
       if(drawing.zoomLevel > 1.0){
         guiglobals.scrollDir = GDK_SCROLL_UP;
@@ -434,7 +434,7 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
 
   if((guiglobals.scrollDir == GDK_SCROLL_DOWN)&&(drawing.zoomLevel > 1.0)){
     //printf("Scrolling down at %f %f!\n",e->x,e->y);
-    on_zoom_out_x();
+    //on_zoom_out_x();
     //handle zooming that follows cursor
     GdkRectangle dasize;  // GtkDrawingArea size
     GdkWindow *wwindow = gtk_widget_get_window(widget);
@@ -445,11 +445,11 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
         return;
       }
       if(e->direction == GDK_SCROLL_SMOOTH){
-        if(guiglobals.accSmoothScrollDelta < 0.25){
+        if(guiglobals.accSmoothScrollDelta < 0.01){
           return;
         }
         //printf("zoom out: %f\n",guiglobals.accSmoothScrollDelta);
-        drawing.zoomToLevel = drawing.zoomLevel * (float)(1.0/guiglobals.accSmoothScrollDelta);
+        drawing.zoomToLevel = drawing.zoomLevel - (float)(drawing.zoomLevel*guiglobals.accSmoothScrollDelta);
         guiglobals.accSmoothScrollDelta = 0.0; //reset
       }else{
         drawing.zoomToLevel = drawing.zoomLevel * 0.5f;
@@ -486,7 +486,7 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
         return;
       }
       if(e->direction == GDK_SCROLL_SMOOTH){
-        if(guiglobals.accSmoothScrollDelta < 0.25){
+        if(guiglobals.accSmoothScrollDelta < 0.01){
           return;
         }
         //printf("zoom in: %f\n",guiglobals.accSmoothScrollDelta);
