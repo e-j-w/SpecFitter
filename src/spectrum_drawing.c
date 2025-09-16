@@ -417,7 +417,6 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
 
   if((guiglobals.scrollDir == GDK_SCROLL_DOWN)&&(drawing.zoomLevel > 1.0)){
     //printf("Scrolling down at %f %f!\n",e->x,e->y);
-    //on_zoom_out_x();
     //handle zooming that follows cursor
     GdkRectangle dasize;  // GtkDrawingArea size
     GdkWindow *wwindow = gtk_widget_get_window(widget);
