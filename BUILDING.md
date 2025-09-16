@@ -96,7 +96,7 @@ Clean up the build to save disk space (optional):
 rm -rf flatpak_build .flatpak-builder repo
 ```
 
-The "Chart of Nuclides" application should now be available in your application menu and/or via the application search interface (depending on your desktop environment). Or you can run the application directly from the terminal:
+The "SpecFitter" application should now be available in your application menu and/or via the application search interface (depending on your desktop environment). Or you can run the application directly from the terminal:
 
 ```
 flatpak run io.github.e_j_w.SpecFitter
