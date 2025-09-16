@@ -538,7 +538,7 @@ void performGausFit(){
      nfp = no. of fixed pars
      npars = total no. of pars = 3 * no.of peaks + 6
      rawdata.dispFitPar.ndf   = no. of degrees of freedom */
-  npars = (uint8_t)(6 + (3*rawdata.dispFitPar.numFitPeaks));
+  npars = (uint8_t)(FITPAR_POS1 + (3*rawdata.dispFitPar.numFitPeaks));
   nfp = (uint8_t)(npars - rawdata.dispFitPar.numFreePar);
   linEq.dim = (uint8_t)(npars - nfp);
   for(i = 6; i < npars; ++i){

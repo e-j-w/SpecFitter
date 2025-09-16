@@ -63,13 +63,6 @@ uint8_t readConfigFile(FILE *file, uint8_t keepCalibration){
           guiglobals.preferDarkTheme = 0;
         }
       }
-      if(strcmp(par,"use_drawing_animation") == 0){
-        if(strcmp(val,"yes") == 0){
-          guiglobals.useZoomAnimations = 1;
-        }else{
-          guiglobals.useZoomAnimations = 0;
-        }
-      }
       if(strcmp(par,"draw_sp_labels") == 0){
         if(strcmp(val,"yes") == 0){
           guiglobals.drawSpLabels = 1;
@@ -270,11 +263,6 @@ uint8_t writeConfigFile(FILE *file){
     fprintf(file,"prefer_dark_theme=yes\n");
   }else{
     fprintf(file,"prefer_dark_theme=no\n");
-  }
-  if(guiglobals.useZoomAnimations == 1){
-    fprintf(file,"use_drawing_animation=yes\n");
-  }else{
-    fprintf(file,"use_drawing_animation=no\n");
   }
   if(guiglobals.drawSpLabels == 1){
     fprintf(file,"draw_sp_labels=yes\n");

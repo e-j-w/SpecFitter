@@ -333,23 +333,15 @@ void on_zoom_in_x(){
   if(rawdata.openedSp == 0){
     return;
   }
-  if(guiglobals.useZoomAnimations){
-    drawing.zoomToLevel = drawing.zoomLevel * 2.0f;
-    if(drawing.zoomToLevel > 1024.0)
-      drawing.zoomToLevel = 1024.0;
-    drawing.zoomFocusFrac = 0.5;
-    drawing.zoomingSpX = 1;
-    drawing.zoomXStartFrameTime = gdk_frame_clock_get_frame_time(frameClock);
-    drawing.zoomXLastFrameTime = drawing.zoomXStartFrameTime;
-    gtk_widget_add_tick_callback(GTK_WIDGET(spectrum_drawing_area), zoom_in_tick_callback, NULL, NULL);
-  }else{
-    drawing.zoomLevel *= 2.0f;
-    if(drawing.zoomLevel > 1024.0)
-      drawing.zoomLevel = 1024.0;
-    drawing.zoomFocusFrac = 0.5;
-    gtk_range_set_value(GTK_RANGE(zoom_scale),log(drawing.zoomLevel)/log(2.));//base 2 log of zoom
-    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+  drawing.zoomToLevel = drawing.zoomLevel * 2.0f;
+  if(drawing.zoomToLevel > 1024.0){
+    drawing.zoomToLevel = 1024.0;
   }
+  drawing.zoomFocusFrac = 0.5;
+  drawing.zoomingSpX = 1;
+  drawing.zoomXStartFrameTime = gdk_frame_clock_get_frame_time(frameClock);
+  drawing.zoomXLastFrameTime = drawing.zoomXStartFrameTime;
+  gtk_widget_add_tick_callback(GTK_WIDGET(spectrum_drawing_area), zoom_in_tick_callback, NULL, NULL);
 }
 
 void on_zoom_out_x(){
@@ -357,25 +349,16 @@ void on_zoom_out_x(){
   if(rawdata.openedSp == 0){
     return;
   }
-  if(guiglobals.useZoomAnimations){
-    drawing.zoomToLevel = drawing.zoomLevel * 0.5f;
-    if(drawing.zoomToLevel < 1.0)
-      drawing.zoomToLevel = 1.0;
-    drawing.xChanFocus = (drawing.upperLimit + drawing.lowerLimit)/2;
-    drawing.zoomFocusFrac = 0.5;
-    drawing.zoomingSpX = 1;
-    drawing.zoomXStartFrameTime = gdk_frame_clock_get_frame_time(frameClock);
-    drawing.zoomXLastFrameTime = drawing.zoomXStartFrameTime;
-    gtk_widget_add_tick_callback(GTK_WIDGET(spectrum_drawing_area), zoom_out_tick_callback, NULL, NULL);
-  }else{
-    drawing.zoomLevel *= 0.5f;
-    if(drawing.zoomLevel < 1.0)
-      drawing.zoomLevel = 1.0;
-    drawing.xChanFocus = (drawing.upperLimit + drawing.lowerLimit)/2;
-    drawing.zoomFocusFrac = 0.5;
-    gtk_range_set_value(GTK_RANGE(zoom_scale),log(drawing.zoomLevel)/log(2.));//base 2 log of zoom
-    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+  drawing.zoomToLevel = drawing.zoomLevel * 0.5f;
+  if(drawing.zoomToLevel < 1.0){
+    drawing.zoomToLevel = 1.0;
   }
+  drawing.xChanFocus = (drawing.upperLimit + drawing.lowerLimit)/2;
+  drawing.zoomFocusFrac = 0.5;
+  drawing.zoomingSpX = 1;
+  drawing.zoomXStartFrameTime = gdk_frame_clock_get_frame_time(frameClock);
+  drawing.zoomXLastFrameTime = drawing.zoomXStartFrameTime;
+  gtk_widget_add_tick_callback(GTK_WIDGET(spectrum_drawing_area), zoom_out_tick_callback, NULL, NULL);
 }
 
 //function handling mouse wheel scrolling to zoom the displayed spectrum
@@ -440,40 +423,32 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
     GdkWindow *wwindow = gtk_widget_get_window(widget);
     // Determine GtkDrawingArea dimensions
     gdk_window_get_geometry(wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
-    if(guiglobals.useZoomAnimations){
-      if(drawing.zoomingSpX){
+    if(drawing.zoomingSpX){
+      return;
+    }
+    if(e->direction == GDK_SCROLL_SMOOTH){
+      //most mouse wheels will end up here, with accSmoothScrollDelta = 1.0
+      if(guiglobals.accSmoothScrollDelta < 0.01){
         return;
       }
-      if(e->direction == GDK_SCROLL_SMOOTH){
-        if(guiglobals.accSmoothScrollDelta < 0.01){
-          return;
-        }
-        //printf("zoom out: %f\n",guiglobals.accSmoothScrollDelta);
-        drawing.zoomToLevel = drawing.zoomLevel - (float)(drawing.zoomLevel*guiglobals.accSmoothScrollDelta);
-        guiglobals.accSmoothScrollDelta = 0.0; //reset
-      }else{
-        drawing.zoomToLevel = drawing.zoomLevel * 0.5f;
-      }
-      if((drawing.upperLimit - drawing.lowerLimit)>0){
-        drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-XORIGIN)/(dasize.width-XORIGIN)*(drawing.upperLimit - drawing.lowerLimit));
-        drawing.zoomFocusFrac = (float)((drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit));
-      }else{
-        drawing.zoomFocusFrac = 0.5f;
-      }
-      drawing.zoomingSpX = 1;
-      drawing.zoomXLastFrameTime = gdk_frame_clock_get_frame_time(frameClock);
-      gtk_widget_add_tick_callback(widget, zoom_out_tick_callback, NULL, NULL);
+      //printf("zoom out: %f\n",guiglobals.accSmoothScrollDelta);
+      drawing.zoomToLevel = drawing.zoomLevel - (float)(0.5*drawing.zoomLevel*guiglobals.accSmoothScrollDelta);
+      guiglobals.accSmoothScrollDelta = 0.0; //reset
     }else{
-      if((drawing.upperLimit - drawing.lowerLimit)>0){
-        drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-XORIGIN)/(dasize.width-XORIGIN)*(drawing.upperLimit - drawing.lowerLimit));
-        drawing.zoomFocusFrac = (float)((drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit));
-      }else{
-        drawing.zoomFocusFrac = 0.5f;
-      }
-      drawing.zoomLevel *= 0.5f;
-      gtk_range_set_value(GTK_RANGE(zoom_scale),log(drawing.zoomLevel)/log(2.));//base 2 log of zoom
-      gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+      drawing.zoomToLevel = drawing.zoomLevel * 0.5f;
     }
+    if(drawing.zoomToLevel < 1.0){
+      drawing.zoomToLevel = 1.0;
+    }
+    if((drawing.upperLimit - drawing.lowerLimit)>0){
+      drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-XORIGIN)/(dasize.width-XORIGIN)*(drawing.upperLimit - drawing.lowerLimit));
+      drawing.zoomFocusFrac = (float)((drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit));
+    }else{
+      drawing.zoomFocusFrac = 0.5f;
+    }
+    drawing.zoomingSpX = 1;
+    drawing.zoomXLastFrameTime = gdk_frame_clock_get_frame_time(frameClock);
+    gtk_widget_add_tick_callback(widget, zoom_out_tick_callback, NULL, NULL);
   }else if((guiglobals.scrollDir != GDK_SCROLL_DOWN)&&(drawing.zoomLevel < 1024.0)){
     //handle zooming that follows cursor
     //printf("Scrolling up at %f %f!\n",e->x,e->y);
@@ -481,40 +456,31 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
     GdkWindow *wwindow = gtk_widget_get_window(widget);
     // Determine GtkDrawingArea dimensions
     gdk_window_get_geometry(wwindow, &dasize.x, &dasize.y, &dasize.width, &dasize.height);
-    if(guiglobals.useZoomAnimations){
-      if(drawing.zoomingSpX){
+    if(drawing.zoomingSpX){
+      return;
+    }
+    if(e->direction == GDK_SCROLL_SMOOTH){
+      if(guiglobals.accSmoothScrollDelta < 0.01){
         return;
       }
-      if(e->direction == GDK_SCROLL_SMOOTH){
-        if(guiglobals.accSmoothScrollDelta < 0.01){
-          return;
-        }
-        //printf("zoom in: %f\n",guiglobals.accSmoothScrollDelta);
-        drawing.zoomToLevel = drawing.zoomLevel * (float)(1.0 + guiglobals.accSmoothScrollDelta);
-        guiglobals.accSmoothScrollDelta = 0.0; //reset
-      }else{
-        drawing.zoomToLevel = drawing.zoomLevel * 2.0f;
-      }
-      if((drawing.upperLimit - drawing.lowerLimit)>0){
-        drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-XORIGIN)/(dasize.width-XORIGIN)*(drawing.upperLimit - drawing.lowerLimit));
-        drawing.zoomFocusFrac = (float)((drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit));
-      }else{
-        drawing.zoomFocusFrac = 0.5f;
-      }
-      drawing.zoomingSpX = 1;
-      drawing.zoomXLastFrameTime = gdk_frame_clock_get_frame_time(frameClock);
-      gtk_widget_add_tick_callback(widget, zoom_in_tick_callback, NULL, NULL);
+      //printf("zoom in: %f\n",guiglobals.accSmoothScrollDelta);
+      drawing.zoomToLevel = drawing.zoomLevel * (float)(1.0 + guiglobals.accSmoothScrollDelta);
+      guiglobals.accSmoothScrollDelta = 0.0; //reset
     }else{
-      if((drawing.upperLimit - drawing.lowerLimit)>0){
-        drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-XORIGIN)/(dasize.width-XORIGIN)*(drawing.upperLimit - drawing.lowerLimit));
-        drawing.zoomFocusFrac = (float)((drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit));
-      }else{
-        drawing.zoomFocusFrac = 0.5f;
-      }
-      drawing.zoomLevel *= 2.0f;
-      gtk_range_set_value(GTK_RANGE(zoom_scale),log(drawing.zoomLevel)/log(2.));//base 2 log of zoom
-      gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+      drawing.zoomToLevel = drawing.zoomLevel * 2.0f;
     }
+    if(drawing.zoomToLevel > 1024.0){
+      drawing.zoomToLevel = 1024.0;
+    }
+    if((drawing.upperLimit - drawing.lowerLimit)>0){
+      drawing.xChanFocus = drawing.lowerLimit + (int)(((e->x)-XORIGIN)/(dasize.width-XORIGIN)*(drawing.upperLimit - drawing.lowerLimit));
+      drawing.zoomFocusFrac = (float)((drawing.xChanFocus - drawing.lowerLimit)/(1.0*drawing.upperLimit - drawing.lowerLimit));
+    }else{
+      drawing.zoomFocusFrac = 0.5f;
+    }
+    drawing.zoomingSpX = 1;
+    drawing.zoomXLastFrameTime = gdk_frame_clock_get_frame_time(frameClock);
+    gtk_widget_add_tick_callback(widget, zoom_in_tick_callback, NULL, NULL);
   }
   
 }
@@ -1493,39 +1459,32 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       default:
         break;
     }
-    if(guiglobals.useZoomAnimations){
-      if((drawing.zoomYLastFrameTime-drawing.zoomYStartFrameTime) > 3000000){
-        //reset zoom
-        for(int32_t i=0;i<drawing.numMultiplotSp;i++){
-          drawing.scaleLevelMax[i] = drawing.scaleToLevelMax[i];
-          drawing.scaleLevelMin[i] = drawing.scaleToLevelMin[i];
-        }
-      }
-      for(int32_t i=0;i<drawing.numMultiplotSp;i++){
-        if(drawing.scaleLevelMax[i]==drawing.scaleLevelMin[i]){
-          drawing.scaleLevelMax[i] = drawing.scaleToLevelMax[i];
-          drawing.scaleLevelMin[i] = drawing.scaleToLevelMin[i];
-        }
-      }
-      for(int32_t i=0;i<drawing.numMultiplotSp;i++){
-        if((drawing.scaleLevelMax[i] != drawing.scaleToLevelMax[i])||(drawing.scaleLevelMin[i] != drawing.scaleToLevelMin[i])){
-          if(drawing.zoomingSpY == 0){
-            //printf("Starting y zoom.\n");
-            drawing.zoomingSpY = 1;
-            drawing.zoomYStartFrameTime = gdk_frame_clock_get_frame_time(frameClock);
-            drawing.zoomYLastFrameTime = drawing.zoomYStartFrameTime;
-            gtk_widget_add_tick_callback(GTK_WIDGET(spectrum_drawing_area), zoom_y_callback, NULL, NULL);
-            break;
-          }
-        }
-      }
-
-    }else{
+    if((drawing.zoomYLastFrameTime-drawing.zoomYStartFrameTime) > 3000000){
+      //reset zoom
       for(int32_t i=0;i<drawing.numMultiplotSp;i++){
         drawing.scaleLevelMax[i] = drawing.scaleToLevelMax[i];
         drawing.scaleLevelMin[i] = drawing.scaleToLevelMin[i];
       }
     }
+    for(int32_t i=0;i<drawing.numMultiplotSp;i++){
+      if(drawing.scaleLevelMax[i]==drawing.scaleLevelMin[i]){
+        drawing.scaleLevelMax[i] = drawing.scaleToLevelMax[i];
+        drawing.scaleLevelMin[i] = drawing.scaleToLevelMin[i];
+      }
+    }
+    for(int32_t i=0;i<drawing.numMultiplotSp;i++){
+      if((drawing.scaleLevelMax[i] != drawing.scaleToLevelMax[i])||(drawing.scaleLevelMin[i] != drawing.scaleToLevelMin[i])){
+        if(drawing.zoomingSpY == 0){
+          //printf("Starting y zoom.\n");
+          drawing.zoomingSpY = 1;
+          drawing.zoomYStartFrameTime = gdk_frame_clock_get_frame_time(frameClock);
+          drawing.zoomYLastFrameTime = drawing.zoomYStartFrameTime;
+          gtk_widget_add_tick_callback(GTK_WIDGET(spectrum_drawing_area), zoom_y_callback, NULL, NULL);
+          break;
+        }
+      }
+    }
+
   }
   /*printf("mode: %i   ",drawing.multiplotMode);
   for(i=0;i<drawing.numMultiplotSp;i++){

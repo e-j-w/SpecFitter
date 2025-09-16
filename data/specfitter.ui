@@ -3151,22 +3151,6 @@ Weight by fit function - Weights are proportional to the fit function values det
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkCheckButton" id="animation_checkbutton">
-                    <property name="label" translatable="yes"> Enable animations</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="tooltip-text" translatable="yes">If checked, animations will be enabled for drawing spectra.  Disable if low latency is preferred.</property>
-                    <property name="halign">start</property>
-                    <property name="draw-indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">4</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkCheckButton" id="dark_theme_checkbutton">
                     <property name="label" translatable="yes"> Prefer dark theme</property>
                     <property name="visible">True</property>

@@ -13,7 +13,6 @@ void showPreferences(int page){
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bin_errors_checkbutton),guiglobals.showBinErrors);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(round_errors_checkbutton),guiglobals.roundErrors);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dark_theme_checkbutton),guiglobals.preferDarkTheme);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(animation_checkbutton),guiglobals.useZoomAnimations);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(autozoom_checkbutton),guiglobals.autoZoom);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_label_checkbutton),guiglobals.drawSpLabels);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spectrum_comment_checkbutton),guiglobals.drawSpComments);
@@ -2275,12 +2274,6 @@ void on_toggle_dark_theme(GtkToggleButton *togglebutton){
   
   setupUITheme();
 }
-void on_toggle_animation(GtkToggleButton *togglebutton){
-  if(gtk_toggle_button_get_active(togglebutton))
-    guiglobals.useZoomAnimations=1;
-  else
-    guiglobals.useZoomAnimations=0;
-}
 void on_toggle_autozoom(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton))
     guiglobals.autoZoom=1;
@@ -2856,7 +2849,6 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(step_function_checkbutton), "toggled", G_CALLBACK(on_toggle_step_function), NULL);
   g_signal_connect(G_OBJECT(positive_peak_checkbutton), "toggled", G_CALLBACK(on_toggle_positive_peaks), NULL);
   g_signal_connect(G_OBJECT(inflate_errors_checkbutton), "toggled", G_CALLBACK(on_toggle_inflate_errors), NULL);
-  g_signal_connect(G_OBJECT(animation_checkbutton), "toggled", G_CALLBACK(on_toggle_animation), NULL);
   g_signal_connect(G_OBJECT(autozoom_checkbutton), "toggled", G_CALLBACK(on_toggle_autozoom), NULL);
   g_signal_connect(G_OBJECT(preferences_apply_button), "clicked", G_CALLBACK(on_preferences_apply_button_clicked), NULL);
   g_signal_connect(G_OBJECT(preferences_button), "clicked", G_CALLBACK(on_preferences_button_clicked), NULL);
@@ -2975,7 +2967,6 @@ void iniitalizeUIElements(){
   guiglobals.autoZoom = 1;
   guiglobals.preferDarkTheme = 0;
   guiglobals.usingDarkTheme = 0;
-  guiglobals.useZoomAnimations = 1;
   guiglobals.exportFileType = 0;
   rawdata.dispFitPar.limitCentroid = 0;
   rawdata.dispFitPar.manualWidthVal = 3.0;
