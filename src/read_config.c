@@ -339,8 +339,8 @@ uint8_t writeConfigFile(FILE *file){
 void updateConfigFile(){
   char dirPath[256];
   strcpy(dirPath,"");
-  strcat(dirPath,getenv("HOME"));
-  strcat(dirPath,"/.config/specfitter/specfitter.conf");
+  strcat(dirPath,g_get_user_config_dir());
+  strcat(dirPath,"/specfitter/specfitter.conf");
   FILE *configFile = fopen(dirPath, "w");
   if(configFile != NULL){
     writeConfigFile(configFile); //write the default configuration values
@@ -353,8 +353,8 @@ void updateConfigFile(){
 void updatePrefsFromConfigFile(){
   char dirPath[256];
   strcpy(dirPath,"");
-  strcat(dirPath,getenv("HOME"));
-  strcat(dirPath,"/.config/specfitter/specfitter.conf");
+  strcat(dirPath,g_get_user_config_dir());
+  strcat(dirPath,"/specfitter/specfitter.conf");
   FILE *configFile = fopen(dirPath, "r");
   if(configFile != NULL){
     readConfigFile(configFile,0); //read the configuration values
