@@ -1,4 +1,4 @@
-/* © J. Williams, 2020-2025 */
+/* © J. Williams, 2020-2026 */
 
 //read data from a config file
 //keepCalibration: 0=update the calibration, 1=don't change the calibration

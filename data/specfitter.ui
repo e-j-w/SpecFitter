@@ -132,8 +132,8 @@ Author: Jonathan Williams
     <property name="type-hint">dialog</property>
     <property name="attached-to">window</property>
     <property name="program-name">SpecFitter</property>
-    <property name="version">1.0.0</property>
-    <property name="copyright" translatable="yes">© Jonathan Williams, 2020-2025</property>
+    <property name="version">1.0.1</property>
+    <property name="copyright" translatable="yes">© Jonathan Williams, 2020-2026</property>
     <property name="comments" translatable="yes">A GTK-based spectroscopy tool.</property>
     <property name="website">https://github.com/e-j-w/specfitter</property>
     <property name="website-label" translatable="yes">Source Repository</property>

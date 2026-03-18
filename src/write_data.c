@@ -1,4 +1,4 @@
-/* © J. Williams, 2020-2025 */
+/* © J. Williams, 2020-2026 */
 
 //save fit data element by element,
 //in order to preserve compatibility for future revisions to the fit data format

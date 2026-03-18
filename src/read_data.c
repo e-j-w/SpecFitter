@@ -1,4 +1,4 @@
-/* © J. Williams, 2020-2025 */
+/* © J. Williams, 2020-2026 */
 
 //File contains functions for reading spectra of various formats.
 //.jf3 - compressed multiple spectra, with titles, comments, and saved fits

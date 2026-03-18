@@ -1,4 +1,4 @@
-/* © J. Williams, 2020-2025 */
+/* © J. Williams, 2020-2026 */
 
 //This file contains routines for drawing spectra using Cairo.
 //The main routine is drawSpectrum (near the bottom), helper 
@@ -1413,8 +1413,11 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
               drawing.scaleToLevelMin[i] = 0.1f;
             }
           }else{
-            drawing.scaleToLevelMax[i] = maxVal[i]*1.2f;
-            drawing.scaleToLevelMin[i] = minVal[i];
+            drawing.scaleToLevelMin[i] = minVal[i] - fabs(maxVal[i]-minVal[i])*0.05f;
+            if((drawing.scaleToLevelMin[i] < 0.0f)&&(minVal[i] >= 0.0f)){
+              drawing.scaleToLevelMin[i] = 0.0f;
+            }
+            drawing.scaleToLevelMax[i] = minVal[i] + fabs(maxVal[i]-minVal[i])*1.1f;
           }
         }
         break;
@@ -1427,13 +1430,16 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
               drawing.scaleToLevelMax[i] = 10.0f;
             }
             if(minVal[0] > 0.0f){
-              drawing.scaleToLevelMin[i] = minVal[0];
+              drawing.scaleToLevelMin[i] = minVal[0]*0.9f;
             }else{
               drawing.scaleToLevelMin[i] = 0.1f;
             }
           }else{
-            drawing.scaleToLevelMax[i] = maxVal[0]*1.2f;
-            drawing.scaleToLevelMin[i] = minVal[0];
+            drawing.scaleToLevelMin[i] = minVal[0] - fabs(maxVal[0]-minVal[0])*0.05f;
+            if((drawing.scaleToLevelMin[i] < 0.0f)&&(minVal[0] >= 0.0f)){
+              drawing.scaleToLevelMin[i] = 0.0f;
+            }
+            drawing.scaleToLevelMax[i] = minVal[0] + fabs(maxVal[0]-minVal[0])*1.1f;
           }
         }
         break;
@@ -1451,8 +1457,11 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
             drawing.scaleToLevelMin[0] = 0.1f;
           }
         }else{
-          drawing.scaleToLevelMax[0] = maxVal[0]*1.2f;
-          drawing.scaleToLevelMin[0] = minVal[0];
+          drawing.scaleToLevelMin[0] = minVal[0] - fabs(maxVal[0]-minVal[0])*0.05f;
+          if((drawing.scaleToLevelMin[0] < 0.0f)&&(minVal[0] >= 0.0f)){
+            drawing.scaleToLevelMin[0] = 0.0f;
+          }
+          drawing.scaleToLevelMax[0] = minVal[0] + fabs(maxVal[0]-minVal[0])*1.1f;
         }
         break;
       default:
