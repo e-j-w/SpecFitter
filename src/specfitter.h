@@ -22,6 +22,8 @@
 #define MAX_DISP_SP   12 //maximum number of spectra which may be displayed at once
 #define MAX_FIT_PK    10 //maximum number of peaks which may be fit at once (when changing, also change MAX_DIM in lin_eq_solver.h)
 
+#define Y_ZOOM_TIME_USEC 150000.0
+
 /* Data file specs (be careful if changing these, can break compatibility) */
 #define S32K          32768 //maximum number of channels per spectrum in .mca, .fmca, and .dmca (changing breaks file compatibility)
 #define NSPECT        128   //maximum number of spectra which may be opened at once (for compatibility should be 255 or less)
@@ -250,6 +252,7 @@ struct {
   char zoomingSpX, zoomingSpY; //0 if no zoom motion, 1 if zooming
   gint64 zoomXStartFrameTime, zoomYStartFrameTime; //the frames at which the x and y-scale zooms were started
   gint64 zoomXLastFrameTime, zoomYLastFrameTime; //the most recent frames during the x and y-scale zooms
+  double scaleZoomStartLevelMax[MAX_DISP_SP], scaleZoomStartLevelMin[MAX_DISP_SP]; //the y scale values at the start of a zoom
   double scaleToLevelMax[MAX_DISP_SP], scaleToLevelMin[MAX_DISP_SP]; //the y scale values to zoom to
   double scaleLevelMax[MAX_DISP_SP], scaleLevelMin[MAX_DISP_SP]; //the y scale values, ie. the maximum and minimum values to show on the y axis
   uint8_t contractFactor; //the number of channels per bin (default=1)

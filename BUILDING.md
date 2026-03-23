@@ -1,5 +1,5 @@
 
-The current code has been tested under Arch Linux and Debian 12 as of September 2025, though most recent Linux distros should work as well. Non-Linux platforms are not supported.
+The current code has been tested under Arch Linux and Debian 12 as of March 2026, though most recent Linux distros should work as well. Non-Linux platforms are not supported.
 
 ## Manual build
 
@@ -23,7 +23,7 @@ In Arch Linux:
 pacman -S gcc make pkgconf gtk3
 ```
 
-In CentOS:
+In CentOS 7:
 
 ```
 yum install gcc gtk3-devel

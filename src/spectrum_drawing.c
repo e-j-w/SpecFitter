@@ -246,43 +246,24 @@ gboolean zoom_y_callback(){
     return G_SOURCE_REMOVE;
   }
 
-  gint64 frameTime = gdk_frame_clock_get_frame_time(frameClock);
-  double linFac = 0.00001*(double)(frameTime-drawing.zoomYLastFrameTime);
-  double diffFac = 0.00002*(double)(frameTime-drawing.zoomYLastFrameTime);
-  int32_t i;
-  for(i=0;i<drawing.numMultiplotSp;i++){
+  drawing.zoomYLastFrameTime = gdk_frame_clock_get_frame_time(frameClock); //in microseconds
+
+  double zoomFrac = ((double)(drawing.zoomYLastFrameTime - drawing.zoomYStartFrameTime))/Y_ZOOM_TIME_USEC;
+  if(zoomFrac > 1.0){
+    zoomFrac = 1.0;
+  }
+  //printf("zoomFrac: %f\n",zoomFrac);
+  for(int32_t i=0;i<drawing.numMultiplotSp;i++){
     if(drawing.scaleToLevelMax[i] == drawing.scaleLevelMin[i]){
       drawing.scaleLevelMax[i] = drawing.scaleLevelMin[i];
-    }else if(drawing.scaleLevelMax[i] > drawing.scaleToLevelMax[i]){
-      drawing.scaleLevelMax[i] -= diffFac*(drawing.scaleLevelMax[i]-drawing.scaleToLevelMax[i]) + linFac*fabs(drawing.scaleLevelMax[i]);
-      if(drawing.scaleLevelMax[i] <= drawing.scaleToLevelMax[i]){
-        drawing.scaleLevelMax[i] = drawing.scaleToLevelMax[i];
-      }
-    }else if(drawing.scaleLevelMax[i] < drawing.scaleToLevelMax[i]){
-      drawing.scaleLevelMax[i] += diffFac*(drawing.scaleToLevelMax[i]-drawing.scaleLevelMax[i]) + linFac*fabs(drawing.scaleLevelMax[i]);
-      if(drawing.scaleLevelMax[i] >= drawing.scaleToLevelMax[i]){
-        drawing.scaleLevelMax[i] = drawing.scaleToLevelMax[i];
-      }
-    }
-    if(drawing.scaleLevelMin[i] < drawing.scaleToLevelMin[i]){
-      drawing.scaleLevelMin[i] += diffFac*(drawing.scaleToLevelMin[i]-drawing.scaleLevelMin[i]) + linFac*fabs(drawing.scaleLevelMin[i]);
-      if(drawing.scaleLevelMin[i] >= drawing.scaleToLevelMin[i]){
-        drawing.scaleLevelMin[i] = drawing.scaleToLevelMin[i];
-      }
-    }else if(drawing.scaleLevelMin[i] > drawing.scaleToLevelMin[i]){
-      drawing.scaleLevelMin[i] -= diffFac*(drawing.scaleLevelMin[i]-drawing.scaleToLevelMin[i]) + linFac*fabs(drawing.scaleLevelMin[i]);
-      if(drawing.scaleLevelMin[i] <= drawing.scaleToLevelMin[i]){
-        drawing.scaleLevelMin[i] = drawing.scaleToLevelMin[i];
-      }
+    }else{
+      drawing.scaleLevelMax[i] = drawing.scaleZoomStartLevelMax[i] + (drawing.scaleToLevelMax[i] - drawing.scaleZoomStartLevelMax[i])*zoomFrac;
+      drawing.scaleLevelMin[i] = drawing.scaleZoomStartLevelMin[i] + (drawing.scaleToLevelMin[i] - drawing.scaleZoomStartLevelMin[i])*zoomFrac;
     }
   }
-  for(i=0;i<drawing.numMultiplotSp;i++){
-    //printf("scaleMin: %f, scaleToMin: %f,   scaleMax: %f, scaleToMax: %f\n",drawing.scaleLevelMin[i],drawing.scaleToLevelMin[i],drawing.scaleLevelMax[i],drawing.scaleToLevelMax[i]);
-    if((drawing.scaleLevelMax[i] != drawing.scaleToLevelMax[i])||(drawing.scaleLevelMin[i] != drawing.scaleToLevelMin[i])){
-      drawing.zoomYLastFrameTime=frameTime;
-      gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
-      return G_SOURCE_CONTINUE;
-    }
+  if(zoomFrac < 1.0){
+    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+    return G_SOURCE_CONTINUE;
   }
   //printf("Finished y zoom.\n");
   drawing.zoomingSpY = 0; //finished zooming
@@ -373,15 +354,17 @@ void on_spectrum_scroll(GtkWidget *widget, GdkEventScroll *e){
   }
 
   //get scroll direction
+  //I find on KWin the mouse wheel delta_x and delta_y values are +/- 1.5,
+  //whereas in earlier testing with GNOME they were +/- 1.0
   //printf("direction: %i, delta_x: %f, delta_y: %f\n",e->direction,e->delta_x,e->delta_y);
   if((e->direction == GDK_SCROLL_UP)||(e->direction == GDK_SCROLL_DOWN)){
     guiglobals.scrollDir = e->direction;
   }else if(e->direction == GDK_SCROLL_SMOOTH){
-    if(e->delta_y==1.000){
+    if(e->delta_y>=1.000){
       //mouse wheel down
       guiglobals.scrollDir = GDK_SCROLL_DOWN;
       guiglobals.accSmoothScrollDelta = 1.0;
-    }else if(e->delta_y==-1.000){
+    }else if(e->delta_y<=-1.000){
       //mouse wheel up
       guiglobals.scrollDir = GDK_SCROLL_UP;
       guiglobals.accSmoothScrollDelta = 1.0;
@@ -1417,7 +1400,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
             if((drawing.scaleToLevelMin[i] < 0.0f)&&(minVal[i] >= 0.0f)){
               drawing.scaleToLevelMin[i] = 0.0f;
             }
-            drawing.scaleToLevelMax[i] = minVal[i] + fabs(maxVal[i]-minVal[i])*1.1f;
+            drawing.scaleToLevelMax[i] = minVal[i] + fabs(maxVal[i]-minVal[i])*1.15f;
           }
         }
         break;
@@ -1439,7 +1422,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
             if((drawing.scaleToLevelMin[i] < 0.0f)&&(minVal[0] >= 0.0f)){
               drawing.scaleToLevelMin[i] = 0.0f;
             }
-            drawing.scaleToLevelMax[i] = minVal[0] + fabs(maxVal[0]-minVal[0])*1.1f;
+            drawing.scaleToLevelMax[i] = minVal[0] + fabs(maxVal[0]-minVal[0])*1.15f;
           }
         }
         break;
@@ -1461,7 +1444,7 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           if((drawing.scaleToLevelMin[0] < 0.0f)&&(minVal[0] >= 0.0f)){
             drawing.scaleToLevelMin[0] = 0.0f;
           }
-          drawing.scaleToLevelMax[0] = minVal[0] + fabs(maxVal[0]-minVal[0])*1.1f;
+          drawing.scaleToLevelMax[0] = minVal[0] + fabs(maxVal[0]-minVal[0])*1.15f;
         }
         break;
       default:
@@ -1483,6 +1466,8 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
     for(int32_t i=0;i<drawing.numMultiplotSp;i++){
       if((drawing.scaleLevelMax[i] != drawing.scaleToLevelMax[i])||(drawing.scaleLevelMin[i] != drawing.scaleToLevelMin[i])){
         if(drawing.zoomingSpY == 0){
+          drawing.scaleZoomStartLevelMin[i] = drawing.scaleLevelMin[i];
+          drawing.scaleZoomStartLevelMax[i] = drawing.scaleLevelMax[i];
           //printf("Starting y zoom.\n");
           drawing.zoomingSpY = 1;
           drawing.zoomYStartFrameTime = gdk_frame_clock_get_frame_time(frameClock);
