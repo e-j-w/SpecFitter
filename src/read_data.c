@@ -48,6 +48,11 @@ int readSavedFits(FILE *inp, const uint8_t format){
     if(fread(&rawdata.savedFitPar[i].limitCentroid,sizeof(rawdata.savedFitPar[i].limitCentroid),1,inp)!=1){fclose(inp); return 0;}
     if(fread(&rawdata.savedFitPar[i].fixSkewAmplitide,sizeof(rawdata.savedFitPar[i].fixSkewAmplitide),1,inp)!=1){fclose(inp); return 0;}
     if(fread(&rawdata.savedFitPar[i].fixBeta,sizeof(rawdata.savedFitPar[i].fixBeta),1,inp)!=1){fclose(inp); return 0;}
+    if(format >= 7){
+      if(fread(&rawdata.savedFitPar[i].useSkewedCentroid,sizeof(rawdata.savedFitPar[i].useSkewedCentroid),1,inp)!=1){fclose(inp); return 0;}
+    }else{
+      rawdata.savedFitPar[i].useSkewedCentroid = 1;
+    }
     if(fread(&rawdata.savedFitPar[i].limitCentroidVal,sizeof(rawdata.savedFitPar[i].limitCentroidVal),1,inp)!=1){fclose(inp); return 0;}
     if(fread(&rawdata.savedFitPar[i].fixedRVal,sizeof(rawdata.savedFitPar[i].fixedRVal),1,inp)!=1){fclose(inp); return 0;}
     if(fread(&rawdata.savedFitPar[i].fixedBetaVal,sizeof(rawdata.savedFitPar[i].fixedBetaVal),1,inp)!=1){fclose(inp); return 0;}
