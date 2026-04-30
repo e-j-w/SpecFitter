@@ -133,6 +133,13 @@ uint8_t readConfigFile(FILE *file, uint8_t keepCalibration){
         float bVal = (float)atof(val);
         rawdata.dispFitPar.fixedBetaVal = bVal;
       }
+      if(strcmp(par,"use_skewed_centroid") == 0){
+        if(strcmp(val,"yes") == 0){
+          rawdata.dispFitPar.useSkewedCentroid = 1;
+        }else{
+          rawdata.dispFitPar.useSkewedCentroid = 0;
+        }
+      }
       if(strcmp(par,"peak_width_method") == 0){
         uint8_t pwVal = (uint8_t)atoi(val);
         if((pwVal != PEAKWIDTHMODE_PREVIOUS)&&(pwVal != PEAKWIDTHMODE_MANUAL)){
@@ -303,6 +310,11 @@ uint8_t writeConfigFile(FILE *file){
     fprintf(file,"fix_beta_val=%f\n",rawdata.dispFitPar.fixedBetaVal);
   }else{
     fprintf(file,"fix_beta=no\n");
+  }
+  if(rawdata.dispFitPar.useSkewedCentroid == 1){
+    fprintf(file,"use_skewed_centroid=yes\n");
+  }else{
+    fprintf(file,"use_skewed_centroid=no\n");
   }
   if(rawdata.dispFitPar.peakWidthMethod < PEAKWIDTHMODE_ENUM_LENGTH){
     fprintf(file,"peak_width_method=%u\n",rawdata.dispFitPar.peakWidthMethod);

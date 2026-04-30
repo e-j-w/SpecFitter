@@ -26,6 +26,7 @@ void showPreferences(int page){
   gtk_spin_button_set_value(skew_amplitude_spinbutton,(gdouble)rawdata.dispFitPar.fixedRVal);
   gtk_spin_button_set_value(beta_spinbutton,(gdouble)rawdata.dispFitPar.fixedBetaVal);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(step_function_checkbutton),rawdata.dispFitPar.stepFunction);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(skew_centroid_checkbutton),rawdata.dispFitPar.useSkewedCentroid);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(positive_peak_checkbutton),rawdata.dispFitPar.forcePositivePeaks);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(inflate_errors_checkbutton),rawdata.dispFitPar.inflateErrors);
   gtk_combo_box_set_active(GTK_COMBO_BOX(background_type_combobox),rawdata.dispFitPar.bgType);
@@ -2329,6 +2330,13 @@ void on_toggle_fix_beta(GtkToggleButton *togglebutton){
   gtk_widget_set_sensitive(GTK_WIDGET(beta_spinbutton),rawdata.dispFitPar.fixBeta);
 }
 
+void on_toggle_skew_centroid(GtkToggleButton *togglebutton){
+  if(gtk_toggle_button_get_active(togglebutton))
+    rawdata.dispFitPar.useSkewedCentroid=1;
+  else
+    rawdata.dispFitPar.useSkewedCentroid=0;
+}
+
 void on_toggle_step_function(GtkToggleButton *togglebutton){
   if(gtk_toggle_button_get_active(togglebutton))
     rawdata.dispFitPar.stepFunction=1;
@@ -2768,6 +2776,7 @@ void iniitalizeUIElements(){
   skew_amplitude_spinbutton = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "skew_amplitude_spinbutton"));
   fix_beta_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "fix_beta_checkbutton"));
   beta_spinbutton = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "beta_spinbutton"));
+  skew_centroid_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "skew_centroid_checkbutton"));
   step_function_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "step_function_checkbutton"));
   positive_peak_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "positive_peak_checkbutton"));
   inflate_errors_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "inflate_errors_checkbutton"));
@@ -2846,6 +2855,7 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(skew_amplitude_spinbutton), "value-changed", G_CALLBACK(on_skew_amplitude_changed), NULL);
   g_signal_connect(G_OBJECT(fix_beta_checkbutton), "toggled", G_CALLBACK(on_toggle_fix_beta), NULL);
   g_signal_connect(G_OBJECT(beta_spinbutton), "value-changed", G_CALLBACK(on_beta_changed), NULL);
+  g_signal_connect(G_OBJECT(skew_centroid_checkbutton), "toggled", G_CALLBACK(on_toggle_skew_centroid), NULL);
   g_signal_connect(G_OBJECT(step_function_checkbutton), "toggled", G_CALLBACK(on_toggle_step_function), NULL);
   g_signal_connect(G_OBJECT(positive_peak_checkbutton), "toggled", G_CALLBACK(on_toggle_positive_peaks), NULL);
   g_signal_connect(G_OBJECT(inflate_errors_checkbutton), "toggled", G_CALLBACK(on_toggle_inflate_errors), NULL);
@@ -2988,6 +2998,7 @@ void iniitalizeUIElements(){
   rawdata.dispFitPar.numFitPeaks = 0;
   rawdata.dispFitPar.fitType = FITTYPE_SYMMETRIC;
   rawdata.dispFitPar.bgType = 2; //default to quadratic BG
+  rawdata.dispFitPar.useSkewedCentroid = 1;
 
   gtk_adjustment_set_lower(spectrum_selector_adjustment, 1);
   gtk_adjustment_set_upper(spectrum_selector_adjustment, 1);

@@ -18,5 +18,6 @@ specfitter-resources.c
 */*.o
 *workspace
 .vscode
+.flatpak*
 gmon.out
 gprof*

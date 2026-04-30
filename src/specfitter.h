@@ -128,6 +128,7 @@ GtkCheckButton *limit_centroid_checkbutton;
 GtkSpinButton *limit_centroid_spinbutton;
 GtkCheckButton *fix_skew_amplitude_checkbutton, *fix_beta_checkbutton;
 GtkSpinButton *skew_amplitude_spinbutton, *beta_spinbutton;
+GtkCheckButton *skew_centroid_checkbutton;
 GtkCheckButton *relative_widths_checkbutton, *step_function_checkbutton, *positive_peak_checkbutton, *inflate_errors_checkbutton;
 GtkButton *preferences_apply_button;
 GtkComboBoxText *background_type_combobox, *peak_shape_combobox, *peak_width_combobox, *weight_mode_combobox;
@@ -174,6 +175,7 @@ typedef struct {
   uint8_t limitCentroid; //whether the centroid range is limited
   uint8_t fixSkewAmplitide; //whether the R parameter is fixed
   uint8_t fixBeta; //whether the skewness parameter is fixed
+  uint8_t useSkewedCentroid; //whether to accout for skew component when reporting peak centroids
   float limitCentroidVal; //number of channels to limit the centroid by
   float fixedRVal; //fixed value of the skewed component amplitude R, if fixSkewAmplitide==1
   float fixedBetaVal; //fixed value of the skewness beta, if fixBeta==1

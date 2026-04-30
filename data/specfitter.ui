@@ -584,6 +584,17 @@ Author: Jonathan Williams
             <property name="orientation">vertical</property>
             <property name="spacing">10</property>
             <child>
+              <object class="GtkTextView">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">-1</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkEntry" id="comment_entry">
                 <property name="width-request">400</property>
                 <property name="visible">True</property>
@@ -598,7 +609,7 @@ Author: Jonathan Williams
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">0</property>
+                <property name="position">1</property>
               </packing>
             </child>
             <child>
@@ -2942,6 +2953,33 @@ Manually set value - Select a specific value (and range).</property>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="tooltip-text" translatable="yes">If checked, the reported peak centroids will take the skewness into account. Otherwise, only the Gaussian component will be considered. </property>
+                            <property name="spacing">10</property>
+                            <child>
+                              <object class="GtkCheckButton" id="skew_centroid_checkbutton">
+                                <property name="label" translatable="yes"> Allow skewness to modify peak centroids</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">False</property>
+                                <property name="draw-indicator">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                       </object>

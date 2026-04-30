@@ -383,21 +383,25 @@ void evalPeakAreasAndCentroids(){
   }
   for(int i = 0; i < rawdata.dispFitPar.numFitPeaks; ++i){
     pkwidth = rawdata.dispFitPar.fitParVal[i*3 + FITPAR_WIDTH1] * 2.35482;
-    y = pkwidth / (beta * 3.33021838f);
-    if (y > 4.0f) {
+    y = pkwidth / (beta * 3.33021838);
+    if (y > 4.0) {
       d = 0.0f;
     } else {
       d = expl(-y * y) / erfcl(y);
     }
-    area = r * beta * d + pkwidth * 1.06446705f * r1;
+    area = (r * beta * d) + (pkwidth * 1.06446705 * r1);
     rawdata.dispFitPar.areaVal[i] = area * rawdata.dispFitPar.fitParVal[i*3 + FITPAR_AMP1] / (1.0*drawing.contractFactor);
     eh = area * rawdata.dispFitPar.fitParErr[i*3 + FITPAR_AMP1];
-    er = (beta * 2.0 * d - pkwidth * 1.06446705f) * rawdata.dispFitPar.fitParErr[FITPAR_R] / 100.0;
-    eb = r * d * (y * 2.0 * y + 1.0 - d * 1.12837917f * y) * rawdata.dispFitPar.fitParErr[FITPAR_BETA];
-    ew = (r1 * 1.06446705f + r * .600561216f * d * (d / 1.77245385f - y)) * rawdata.dispFitPar.fitParErr[i*3 + FITPAR_WIDTH1];
+    er = (beta * 2.0 * d - pkwidth * 1.06446705) * rawdata.dispFitPar.fitParErr[FITPAR_R] / 100.0;
+    eb = r * d * (y * 2.0 * y + 1.0 - d * 1.12837917 * y) * rawdata.dispFitPar.fitParErr[FITPAR_BETA];
+    ew = (r1 * 1.06446705 + r * .600561216 * d * (d / 1.77245385 - y)) * rawdata.dispFitPar.fitParErr[i*3 + FITPAR_WIDTH1];
     rawdata.dispFitPar.areaErr[i] = sqrtl(eh * eh + rawdata.dispFitPar.fitParVal[i*3 + FITPAR_AMP1] * rawdata.dispFitPar.fitParVal[i*3 + FITPAR_AMP1] * (er * er + eb * eb + ew * ew));
     rawdata.dispFitPar.areaErr[i] /= (1.0*drawing.contractFactor);
-    rawdata.dispFitPar.centroidVal[i] = rawdata.dispFitPar.fitParVal[i*3 + FITPAR_POS1] - (r * beta * d * beta / area);
+    if(rawdata.dispFitPar.useSkewedCentroid){
+      rawdata.dispFitPar.centroidVal[i] = rawdata.dispFitPar.fitParVal[i*3 + FITPAR_POS1] - (r * 2.0 * beta * d / area);
+    }else{
+      rawdata.dispFitPar.centroidVal[i] = rawdata.dispFitPar.fitParVal[i*3 + FITPAR_POS1];
+    }
     rawdata.dispFitPar.centroidVal[i] += drawing.contractFactor/2.0; //inconsistent with radware, but seems visually correct, and makes centroids consistent with different contract factors (at least for Gaussians)
   }
   
