@@ -63,8 +63,13 @@ GtkGesture *spectrum_drag_gesture;
 GtkRevealer *revealer_info_panel;
 GtkBox *fit_button_box, *fit_display_button_box;
 GtkLabel *fit_panel_label, *fit_info_label;
-GtkButton *fit_cancel_button, *fit_fit_button, *fit_refit_button, *fit_preferences_button, *fit_save_button, *fit_dismiss_button;
+GtkButton *fit_cancel_button, *fit_fit_button, *fit_refit_button, *fit_manualpeak_button;
+GtkButton *fit_preferences_button, *fit_save_button, *fit_dismiss_button;
 GtkSpinner *fit_spinner;
+//Manual peak entry dialog
+GtkWindow *set_peak_position_window;
+GtkSpinButton *peak_position_spinbutton;
+GtkButton *peak_position_set_button, *peak_position_fix_button;
 //Calibration dialog
 GtkWidget *calibrate_ok_button, *remove_calibration_button;
 GtkWindow *calibrate_window;
@@ -152,6 +157,7 @@ typedef struct {
   int32_t fitStartCh, fitEndCh, fitMidCh; //upper and lower channel bounds for fitting, and middle channel
   int32_t ndf; //DOF for fit
   float fitPeakInitGuess[MAX_FIT_PK]; //initial guess of peak positions, in channels
+  uint8_t fitPeakFreePos[MAX_FIT_PK]; //whether to fix or free peak positions
   double widthFGH[3]; //F,G,H parameters used to evaluate widths
   //fit parameters (indices defined in fit_par_enum): 
   //0, 1, 2       : quadratic background

@@ -489,6 +489,7 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
         if(rawdata.dispFitPar.numFitPeaks < MAX_FIT_PK){
           if((cursorChan >= rawdata.dispFitPar.fitStartCh)&&(cursorChan <= rawdata.dispFitPar.fitEndCh)){
             rawdata.dispFitPar.fitPeakInitGuess[rawdata.dispFitPar.numFitPeaks] = cursorChan - 0.5f;
+            rawdata.dispFitPar.fitPeakFreePos[rawdata.dispFitPar.numFitPeaks] = 1;
             printf("Fitting peak at channel %f\n",rawdata.dispFitPar.fitPeakInitGuess[rawdata.dispFitPar.numFitPeaks]);
             gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),TRUE);
             rawdata.dispFitPar.numFitPeaks++;

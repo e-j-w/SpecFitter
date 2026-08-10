@@ -80,15 +80,198 @@ Author: Jonathan Williams
     <property name="step-increment">0.01</property>
     <property name="page-increment">10</property>
   </object>
-  <object class="GtkAdjustment" id="peak_width_adjustment">
-    <property name="upper">100</property>
+  <object class="GtkAdjustment" id="peak_position_adjustment">
+    <property name="upper">32000</property>
+    <property name="value">1000</property>
     <property name="step-increment">1</property>
     <property name="page-increment">10</property>
   </object>
+  <object class="GtkWindow" id="set_peak_position_window">
+    <property name="can-focus">False</property>
+    <property name="title" translatable="yes">Manual Peak Entry</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="window-position">center-always</property>
+    <property name="type-hint">dialog</property>
+    <property name="gravity">center</property>
+    <property name="attached-to">window</property>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="margin-left">10</property>
+        <property name="margin-right">10</property>
+        <property name="margin-start">10</property>
+        <property name="margin-end">10</property>
+        <property name="margin-top">10</property>
+        <property name="margin-bottom">10</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">10</property>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkLabel" id="peak_position_description_label">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Enter the position of the peak (in x-axis units).
+Select 'Fix position' to prevent the 
+peak position from being varied in the fit.</property>
+                <property name="justify">center</property>
+                <property name="wrap">True</property>
+                <attributes>
+                  <attribute name="style" value="italic"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSeparator">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="spacing">10</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">Peak position:</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkSpinButton" id="peak_position_spinbutton">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="tooltip-text" translatable="yes">The horizontal resolution of the exported image.</property>
+                    <property name="hexpand">True</property>
+                    <property name="width-chars">5</property>
+                    <property name="text" translatable="yes">1200</property>
+                    <property name="input-purpose">alpha</property>
+                    <property name="adjustment">peak_position_adjustment</property>
+                    <property name="climb-rate">1</property>
+                    <property name="digits">2</property>
+                    <property name="numeric">True</property>
+                    <property name="value">1200</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSeparator">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">7</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="hexpand">True</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkButton" id="peak_position_fix_button">
+                <property name="label">Fix position</property>
+                <property name="width-request">100</property>
+                <property name="height-request">30</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="tooltip-text" translatable="yes">Use the entered peak position as a fixed parameter in the fit.</property>
+                <property name="halign">end</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack-type">end</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="peak_position_set_button">
+                <property name="label">Set starting position</property>
+                <property name="width-request">100</property>
+                <property name="height-request">30</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="tooltip-text" translatable="yes">Use the entered peak position as an initial but free parameter in the fit.</property>
+                <property name="halign">end</property>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack-type">end</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkAdjustment" id="peak_width_adjustment">
+    <property name="upper">100</property>
+    <property name="value">3</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">1</property>
+  </object>
   <object class="GtkAdjustment" id="peak_width_offset_adjustment">
     <property name="upper">100</property>
+    <property name="value">1</property>
     <property name="step-increment">1</property>
-    <property name="page-increment">10</property>
+    <property name="page-increment">1</property>
   </object>
   <object class="GtkAdjustment" id="scale_adjustment">
     <property name="lower">-100</property>
@@ -132,7 +315,7 @@ Author: Jonathan Williams
     <property name="type-hint">dialog</property>
     <property name="attached-to">window</property>
     <property name="program-name">SpecFitter</property>
-    <property name="version">1.0.1</property>
+    <property name="version">1.0.2</property>
     <property name="copyright" translatable="yes">© Jonathan Williams, 2020-2026</property>
     <property name="comments" translatable="yes">A GTK-based spectroscopy tool.</property>
     <property name="website">https://github.com/e-j-w/specfitter</property>
@@ -2677,7 +2860,7 @@ Manually set value - Select a specific value (and range).</property>
                                     <property name="adjustment">peak_width_adjustment</property>
                                     <property name="digits">1</property>
                                     <property name="numeric">True</property>
-                                    <property name="value">10</property>
+                                    <property name="value">3</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -2709,7 +2892,7 @@ Manually set value - Select a specific value (and range).</property>
                                     <property name="adjustment">peak_width_offset_adjustment</property>
                                     <property name="digits">1</property>
                                     <property name="numeric">True</property>
-                                    <property name="value">10</property>
+                                    <property name="value">1</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -2740,7 +2923,7 @@ Manually set value - Select a specific value (and range).</property>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">2</property>
+                            <property name="position">4</property>
                           </packing>
                         </child>
                         <child>
@@ -2757,7 +2940,7 @@ Manually set value - Select a specific value (and range).</property>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">3</property>
+                            <property name="position">5</property>
                           </packing>
                         </child>
                         <child>
@@ -2814,7 +2997,7 @@ Manually set value - Select a specific value (and range).</property>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">4</property>
+                            <property name="position">6</property>
                           </packing>
                         </child>
                       </object>
@@ -3442,6 +3625,8 @@ Weight by fit function - Weights are proportional to the fit function values det
       <object class="GtkBox" id="saveas_menu_box">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
+        <property name="margin-left">10</property>
+        <property name="margin-right">10</property>
         <property name="margin-start">10</property>
         <property name="margin-end">10</property>
         <property name="margin-top">10</property>
@@ -3571,7 +3756,7 @@ Weight by fit function - Weights are proportional to the fit function values det
         </child>
       </object>
       <packing>
-        <property name="submenu">submenu1</property>
+        <property name="submenu">saveas</property>
         <property name="position">1</property>
       </packing>
     </child>
@@ -3666,6 +3851,8 @@ Weight by fit function - Weights are proportional to the fit function values det
                   <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
+                    <property name="margin-left">6</property>
+                    <property name="margin-right">6</property>
                     <property name="margin-start">10</property>
                     <property name="margin-end">10</property>
                     <property name="margin-top">6</property>
@@ -3761,7 +3948,6 @@ Weight by fit function - Weights are proportional to the fit function values det
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
-                            <property name="halign">center</property>
                             <style>
                               <class name="suggested-action"/>
                             </style>
@@ -3779,7 +3965,6 @@ Weight by fit function - Weights are proportional to the fit function values det
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
-                            <property name="halign">center</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -3808,7 +3993,6 @@ Weight by fit function - Weights are proportional to the fit function values det
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
-                            <property name="halign">center</property>
                             <style>
                               <class name="suggested-action"/>
                             </style>
@@ -3826,7 +4010,6 @@ Weight by fit function - Weights are proportional to the fit function values det
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
-                            <property name="halign">center</property>
                             <style>
                               <class name="suggested-action"/>
                             </style>
@@ -3838,18 +4021,31 @@ Weight by fit function - Weights are proportional to the fit function values det
                           </packing>
                         </child>
                         <child>
+                          <object class="GtkButton" id="fit_manualpeak_button">
+                            <property name="label" translatable="yes">Add peak manually...</property>
+                            <property name="width-request">100</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkButton" id="fit_preferences_button">
                             <property name="label" translatable="yes">Settings...</property>
                             <property name="width-request">100</property>
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
-                            <property name="halign">center</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">2</property>
+                            <property name="position">3</property>
                           </packing>
                         </child>
                         <child>
@@ -3859,12 +4055,11 @@ Weight by fit function - Weights are proportional to the fit function values det
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
-                            <property name="halign">center</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">3</property>
+                            <property name="position">4</property>
                           </packing>
                         </child>
                       </object>

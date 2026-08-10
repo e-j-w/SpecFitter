@@ -218,6 +218,31 @@ int isSpSelected(const int32_t spNum){
   return 0;
 }
 
+//get an uncalibrated (ie. channel number) value from an calibrated one
+double getUncalVal(const double val){
+  if(calpar.calpar[2] != 0.){
+    //use quadratic equation
+    double b24ac = calpar.calpar[1]*calpar.calpar[1] - (4*calpar.calpar[2]*(calpar.calpar[0] - val));
+    if(b24ac < 0.0){
+      printf("getUncalVal - invalid quadratic calibration!\n");
+      return 0.0;
+    }
+    double x = (-1.0*calpar.calpar[1] + sqrt(b24ac))/(2*calpar.calpar[2]);
+    if(x >= 0.0){
+      return x;
+    }else{
+      return (-1.0*calpar.calpar[1] - sqrt(b24ac))/(2*calpar.calpar[2]);
+    }
+  }else if(calpar.calpar[1] != 0.){
+    //linear equation
+    return (val + calpar.calpar[0])/calpar.calpar[1];
+  }else{
+    printf("getUncalVal - no calibration!\n");
+    return 0.0;
+  }
+  
+}
+
 //get a calibrated value from an uncalibrated one
 double getCalVal(const double val){
   return calpar.calpar[0] + calpar.calpar[1]*val + calpar.calpar[2]*val*val;

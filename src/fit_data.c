@@ -40,11 +40,13 @@ gboolean update_gui_fit_state(){
       gtk_widget_show(GTK_WIDGET(fit_spinner));
       gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
       gtk_widget_set_sensitive(GTK_WIDGET(fit_refit_button),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_manualpeak_button),FALSE);
       gtk_widget_set_sensitive(GTK_WIDGET(contract_scale),FALSE);
       gtk_revealer_set_reveal_child(revealer_info_panel, TRUE);
       break;
     case FITSTATE_SETTINGPEAKS:
       gtk_label_set_text(fit_info_label,"Right-click on spectrum at approximate peak position(s).");
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_manualpeak_button),TRUE);
       break;
     case FITSTATE_SETTINGLIMITS:
       gtk_widget_set_sensitive(GTK_WIDGET(open_button),FALSE);
@@ -53,6 +55,7 @@ gboolean update_gui_fit_state(){
       gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),FALSE);
       gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
       gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_manualpeak_button),FALSE);
       if(rawdata.dispFitPar.prevFitStartCh == -1){
         gtk_label_set_text(fit_info_label,"Right-click on spectrum to set fit region lower and upper bounds.");
         gtk_widget_set_sensitive(GTK_WIDGET(fit_refit_button),FALSE);
@@ -75,6 +78,7 @@ gboolean update_gui_fit_state(){
       gtk_widget_set_sensitive(GTK_WIDGET(contract_scale),TRUE);
       gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
       gtk_widget_set_sensitive(GTK_WIDGET(fit_refit_button),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_manualpeak_button),FALSE);
       gtk_widget_hide(GTK_WIDGET(fit_spinner));
       gtk_revealer_set_reveal_child(revealer_info_panel, FALSE);
       gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area)); //redraw to hide any fit
@@ -1032,8 +1036,8 @@ int startGausFit(){
       rawdata.dispFitPar.fitParVal[FITPAR_AMP1+(3*i)] = getSpBinVal(0,(int)rawdata.dispFitPar.fitPeakInitGuess[i]) - rawdata.dispFitPar.fitParVal[FITPAR_BGCONST] - rawdata.dispFitPar.fitParVal[FITPAR_BGLIN]*rawdata.dispFitPar.fitPeakInitGuess[i];
       rawdata.dispFitPar.fitParVal[FITPAR_POS1+(3*i)] = rawdata.dispFitPar.fitPeakInitGuess[i];
       rawdata.dispFitPar.fitParFree[FITPAR_AMP1+(3*i)] = 1; //free amplitude
-      rawdata.dispFitPar.fitParFree[FITPAR_POS1+(3*i)] = 1; //free position
-      rawdata.dispFitPar.numFreePar = (uint8_t)(rawdata.dispFitPar.numFreePar+2);
+      rawdata.dispFitPar.fitParFree[FITPAR_POS1+(3*i)] = rawdata.dispFitPar.fitPeakFreePos[i]; //determine whether position is free
+      rawdata.dispFitPar.numFreePar = (uint8_t)(rawdata.dispFitPar.numFreePar+rawdata.dispFitPar.fitParFree[FITPAR_AMP1+(3*i)]+rawdata.dispFitPar.fitParFree[FITPAR_POS1+(3*i)]);
     }
 
     //fix relative widths if required

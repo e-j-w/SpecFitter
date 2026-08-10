@@ -2181,6 +2181,11 @@ void on_fit_refit_button_clicked(){
   on_fit_fit_button_clicked();
 }
 
+void on_fit_manualpeak_button_clicked(){
+  gtk_widget_set_sensitive(GTK_WIDGET(peak_position_spinbutton),TRUE);
+  gtk_window_present(set_peak_position_window); //show the window
+}
+
 void on_fit_cancel_button_clicked(){
   rawdata.dispFitPar.fittingSp = FITSTATE_NOTFITTING;
   //update widgets
@@ -2247,6 +2252,42 @@ void on_fit_dismiss_button_clicked(){
   rawdata.dispFitPar.fittingSp = FITSTATE_NOTFITTING;
   //update widgets
   update_gui_fit_state();
+}
+
+void on_peak_position_set_button_clicked(){
+  if(rawdata.dispFitPar.fittingSp == FITSTATE_SETTINGPEAKS){
+    //printf("val: %f\n",gtk_spin_button_get_value(peak_position_spinbutton));
+    float pkPos = (float)getUncalVal(gtk_spin_button_get_value(peak_position_spinbutton));
+    //printf("Manual peak position: %f\n",(double)pkPos);
+    if(rawdata.dispFitPar.numFitPeaks < MAX_FIT_PK){
+      if((pkPos >= rawdata.dispFitPar.fitStartCh)&&(pkPos <= rawdata.dispFitPar.fitEndCh)){
+        rawdata.dispFitPar.fitPeakInitGuess[rawdata.dispFitPar.numFitPeaks] = pkPos;
+        rawdata.dispFitPar.fitPeakFreePos[rawdata.dispFitPar.numFitPeaks] = 1;
+        printf("Fitting peak at channel %f\n",rawdata.dispFitPar.fitPeakInitGuess[rawdata.dispFitPar.numFitPeaks]);
+        gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),TRUE);
+        rawdata.dispFitPar.numFitPeaks++;
+      }
+    }
+    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+    gtk_widget_hide(GTK_WIDGET(set_peak_position_window)); //close the manual peak position window
+  }
+}
+
+void on_peak_position_fix_button_clicked(){
+  if(rawdata.dispFitPar.fittingSp == FITSTATE_SETTINGPEAKS){
+    float pkPos = (float)getUncalVal(gtk_spin_button_get_value(peak_position_spinbutton));
+    if(rawdata.dispFitPar.numFitPeaks < MAX_FIT_PK){
+      if((pkPos >= rawdata.dispFitPar.fitStartCh)&&(pkPos <= rawdata.dispFitPar.fitEndCh)){
+        rawdata.dispFitPar.fitPeakInitGuess[rawdata.dispFitPar.numFitPeaks] = pkPos;
+        rawdata.dispFitPar.fitPeakFreePos[rawdata.dispFitPar.numFitPeaks] = 0; //fix peak position
+        printf("Fixing peak at channel %f\n",rawdata.dispFitPar.fitPeakInitGuess[rawdata.dispFitPar.numFitPeaks]);
+        gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),TRUE);
+        rawdata.dispFitPar.numFitPeaks++;
+      }
+    }
+    gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+    gtk_widget_hide(GTK_WIDGET(set_peak_position_window)); //close the manual peak position window
+  }
 }
 
 void on_toggle_discard_empty(GtkToggleButton *togglebutton){
@@ -2638,6 +2679,8 @@ void iniitalizeUIElements(){
   gtk_window_set_transient_for(GTK_WINDOW(help_window), window); //center help window on main window
   about_dialog = GTK_ABOUT_DIALOG(gtk_builder_get_object(builder, "about_dialog"));
   gtk_window_set_transient_for(GTK_WINDOW(about_dialog), window); //center about dialog on main window
+  set_peak_position_window = GTK_WINDOW(gtk_builder_get_object(builder, "set_peak_position_window"));
+  gtk_window_set_transient_for(set_peak_position_window, window); //center peak position window on main window
   main_window_accelgroup = GTK_ACCEL_GROUP(gtk_builder_get_object(builder, "main_window_accelgroup"));
   gtk_window_add_accel_group (window, main_window_accelgroup);
   comment_window_accelgroup = GTK_ACCEL_GROUP(gtk_builder_get_object(builder, "comment_window_accelgroup"));
@@ -2683,10 +2726,16 @@ void iniitalizeUIElements(){
   fit_cancel_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_cancel_button"));
   fit_fit_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_fit_button"));
   fit_refit_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_refit_button"));
+  fit_manualpeak_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_manualpeak_button"));
   fit_preferences_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_preferences_button"));
   fit_save_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_save_button"));
   fit_dismiss_button = GTK_BUTTON(gtk_builder_get_object(builder, "fit_dismiss_button"));
   fit_spinner = GTK_SPINNER(gtk_builder_get_object(builder, "fit_spinner"));
+
+  //manual peak position UI elements
+  peak_position_spinbutton = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "peak_position_spinbutton"));
+  peak_position_set_button = GTK_BUTTON(gtk_builder_get_object(builder, "peak_position_set_button"));
+  peak_position_fix_button = GTK_BUTTON(gtk_builder_get_object(builder, "peak_position_fix_button"));
 
   //calibration window UI elements
   calibrate_ok_button = GTK_WIDGET(gtk_builder_get_object(builder, "options_ok_button"));
@@ -2821,10 +2870,13 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(fit_button), "clicked", G_CALLBACK(on_fit_button_clicked), NULL);
   g_signal_connect(G_OBJECT(fit_fit_button), "clicked", G_CALLBACK(on_fit_fit_button_clicked), NULL);
   g_signal_connect(G_OBJECT(fit_refit_button), "clicked", G_CALLBACK(on_fit_refit_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(fit_manualpeak_button), "clicked", G_CALLBACK(on_fit_manualpeak_button_clicked), NULL);
   g_signal_connect(G_OBJECT(fit_cancel_button), "clicked", G_CALLBACK(on_fit_cancel_button_clicked), NULL);
   g_signal_connect(G_OBJECT(fit_preferences_button), "clicked", G_CALLBACK(on_fit_preferences_button_clicked), NULL);
   g_signal_connect(G_OBJECT(fit_save_button), "clicked", G_CALLBACK(on_fit_save_button_clicked), NULL);
   g_signal_connect(G_OBJECT(fit_dismiss_button), "clicked", G_CALLBACK(on_fit_dismiss_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(peak_position_set_button), "clicked", G_CALLBACK(on_peak_position_set_button_clicked), NULL);
+  g_signal_connect(G_OBJECT(peak_position_fix_button), "clicked", G_CALLBACK(on_peak_position_fix_button_clicked), NULL);
   g_signal_connect(G_OBJECT(display_button), "clicked", G_CALLBACK(on_display_button_clicked), NULL);
   g_signal_connect(G_OBJECT(calibrate_ok_button), "clicked", G_CALLBACK(on_calibrate_ok_button_clicked), NULL);
   g_signal_connect(G_OBJECT(comment_ok_button), "clicked", G_CALLBACK(on_comment_ok_button_clicked), NULL);
@@ -2888,6 +2940,7 @@ void iniitalizeUIElements(){
   g_signal_connect(G_OBJECT(shortcuts_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect(G_OBJECT(help_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
   g_signal_connect(G_OBJECT(about_dialog), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
+  g_signal_connect(G_OBJECT(set_peak_position_window), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), NULL); //so that the window is hidden, not destroyed, when hitting the x button
 
   //setup keyboard shortcuts
   gtk_accel_group_connect(main_window_accelgroup, GDK_KEY_f, (GdkModifierType)0, GTK_ACCEL_VISIBLE, g_cclosure_new(G_CALLBACK(on_fit_button_clicked), NULL, 0));
