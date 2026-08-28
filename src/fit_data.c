@@ -689,7 +689,6 @@ void performGausFit(){
     }
     if(rawdata.dispFitPar.peakWidthMethod == PEAKWIDTHMODE_MANUAL){
       /* limit width ranges */
-      uint8_t peakInd=0;
       for(j = FITPAR_WIDTH1; j <= npars; j += 3){
         long double maxWidth = (long double)(getUnCalWidth((rawdata.dispFitPar.manualWidthVal + rawdata.dispFitPar.manualWidthOffset)/2.35482,(double)b[j - FITPAR_WIDTH1 + FITPAR_POS1]));
         long double minWidth = (long double)(getUnCalWidth((rawdata.dispFitPar.manualWidthVal - rawdata.dispFitPar.manualWidthOffset)/2.35482,(double)b[j - FITPAR_WIDTH1 + FITPAR_POS1]));
@@ -698,7 +697,6 @@ void performGausFit(){
         }else if(b[j] > maxWidth){
           b[j] = maxWidth;
         }
-        peakInd++;
       }
     }
     if(rawdata.dispFitPar.limitCentroid){
