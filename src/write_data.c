@@ -18,6 +18,7 @@ int writeSavedFits(FILE *out){
     fwrite(&rawdata.savedFitPar[i].fitMidCh,sizeof(rawdata.savedFitPar[i].fitMidCh),1,out);
     fwrite(&rawdata.savedFitPar[i].ndf,sizeof(rawdata.savedFitPar[i].ndf),1,out);
     fwrite(&rawdata.savedFitPar[i].fitPeakInitGuess,sizeof(rawdata.savedFitPar[i].fitPeakInitGuess),1,out);
+    fwrite(&rawdata.savedFitPar[i].fitPeakFreePos,sizeof(rawdata.savedFitPar[i].fitPeakFreePos),1,out);
     fwrite(&rawdata.savedFitPar[i].widthFGH,sizeof(rawdata.savedFitPar[i].widthFGH),1,out);
     fwrite(&rawdata.savedFitPar[i].fitParVal,sizeof(rawdata.savedFitPar[i].fitParVal),1,out);
     fwrite(&rawdata.savedFitPar[i].fitParErr,sizeof(rawdata.savedFitPar[i].fitParErr),1,out);
@@ -75,7 +76,7 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K]){
 
   //printf("Number of spectra to write: %i\n",rawdata.numSpOpened);
 
-  ucharBuf = 7; //file format version number
+  ucharBuf = 8; //file format version number
   fwrite(&ucharBuf,sizeof(uint8_t),1,out);
   ucharBuf = rawdata.numSpOpened; //number of spectra to write
   fwrite(&ucharBuf,sizeof(uint8_t),1,out);

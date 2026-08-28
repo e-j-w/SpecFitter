@@ -31,6 +31,9 @@ int readSavedFits(FILE *inp, const uint8_t format){
     if(fread(&rawdata.savedFitPar[i].fitMidCh,sizeof(rawdata.savedFitPar[i].fitMidCh),1,inp)!=1){fclose(inp); return 0;}
     if(fread(&rawdata.savedFitPar[i].ndf,sizeof(rawdata.savedFitPar[i].ndf),1,inp)!=1){fclose(inp); return 0;}
     if(fread(&rawdata.savedFitPar[i].fitPeakInitGuess,sizeof(rawdata.savedFitPar[i].fitPeakInitGuess),1,inp)!=1){fclose(inp); return 0;}
+    if(format >= 8){
+      if(fread(&rawdata.savedFitPar[i].fitPeakFreePos,sizeof(rawdata.savedFitPar[i].fitPeakFreePos),1,inp)!=1){fclose(inp); return 0;}
+    }
     if(fread(&rawdata.savedFitPar[i].widthFGH,sizeof(rawdata.savedFitPar[i].widthFGH),1,inp)!=1){fclose(inp); return 0;}
     if(fread(&rawdata.savedFitPar[i].fitParVal,sizeof(rawdata.savedFitPar[i].fitParVal),1,inp)!=1){fclose(inp); return 0;}
     if(fread(&rawdata.savedFitPar[i].fitParErr,sizeof(rawdata.savedFitPar[i].fitParErr),1,inp)!=1){fclose(inp); return 0;}
