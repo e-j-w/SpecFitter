@@ -16,6 +16,8 @@
 #include "lin_eq_solver.h"
 #include "utils.h"
 
+#define JF3_MAX_VERSION 8 //current maximum .jf3 version understood by the app
+
 #define BIG_NUMBER    1E30
 #define SMALL_NUMBER -1E30
 

@@ -76,7 +76,7 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K]){
 
   //printf("Number of spectra to write: %i\n",rawdata.numSpOpened);
 
-  ucharBuf = 8; //file format version number
+  ucharBuf = JF3_MAX_VERSION; //file format version number
   fwrite(&ucharBuf,sizeof(uint8_t),1,out);
   ucharBuf = rawdata.numSpOpened; //number of spectra to write
   fwrite(&ucharBuf,sizeof(uint8_t),1,out);
