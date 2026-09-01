@@ -1512,14 +1512,12 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           if(rangeVal > drawing.scaleLevelMax[i]){
             rangeVal = drawing.scaleLevelMax[i];
           }
-          int32_t numTickUsed = 0;
           if(rangeVal >= 1000.){
             //logarithmic scale ticks in base-10
             float tickVal = powf(10.0f,(float)(getNSigf(drawing.scaleLevelMax[i],10.0)));
             while((tickVal > drawing.scaleLevelMin[i])&&(tickVal >= 1.0f)){
               drawYAxisTick(tickVal, i, cr, width, height, plotFontSize, drawGridLines);
               tickVal /= 10.0f;
-              numTickUsed++;
             }
           }else{
             //logarithmic scale ticks in base-2
@@ -1527,7 +1525,6 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
             while((tickVal > drawing.scaleLevelMin[i])&&(tickVal >= 1.0f)){
               drawYAxisTick(tickVal, i, cr, width, height, plotFontSize, drawGridLines);
               tickVal /= 2.0f;
-              numTickUsed++;
             }
           }
         }
@@ -1580,7 +1577,6 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           nsigf10 = getNSigf(drawing.scaleLevelMax[0],10.0);
         else
           nsigf10 = getNSigf(drawing.scaleLevelMax[0],10.0) - getNSigf(drawing.scaleLevelMin[0],10.0);
-        int32_t numTickUsed = 0;
         //printf("nsigf10: %i\n",nsigf10);
         if(nsigf10 >= 3){
           //logarithmic scale ticks in base-10
@@ -1588,7 +1584,6 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           while((tickVal > drawing.scaleLevelMin[0])&&(tickVal >= 1.0f)){
             drawYAxisTick(tickVal, 0, cr, width, height, plotFontSize, drawGridLines);
             tickVal /= 10.0f;
-            numTickUsed++;
           }
         }else{
           //logarithmic scale ticks in base-2
@@ -1596,7 +1591,6 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
           while((tickVal > drawing.scaleLevelMin[0])&&(tickVal >= 1.0f)){
             drawYAxisTick(tickVal, 0, cr, width, height, plotFontSize, drawGridLines);
             tickVal /= 2.0f;
-            numTickUsed++;
           }
         }
       }else{

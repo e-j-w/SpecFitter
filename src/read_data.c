@@ -101,6 +101,10 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
 
   if(fread(&ucharBuf, sizeof(uint8_t), 1, inp)!=1){fclose(inp); return 0;}
   uint8_t format = ucharBuf;
+  if(format > JF3_MAX_VERSION){
+    printf("ERROR: invalid version of .jf3 file format (%u).\n", format);
+    return 0;
+  }
   //printf(".jf3 file format: %u\n",format);
   if(format>=3){
     //version 3+ of file format (double precision values in spectra)
