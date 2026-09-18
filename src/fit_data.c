@@ -640,7 +640,7 @@ void performGausFit(){
       j = nextp[l];
       beta[l] += diff * derivs[j] / dat;
       for(m = 0; m <= l; ++m){
-        alpha[m][l] += (double)derivs[j] * (double)derivs[nextp[m]] / dat;
+        alpha[m][l] += (derivs[j] * derivs[nextp[m]]) / dat;
       }
     }
   }

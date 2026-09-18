@@ -222,7 +222,7 @@ int isSpSelected(const int32_t spNum){
 double getUncalVal(const double val){
   if(calpar.calpar[2] != 0.){
     //use quadratic equation
-    double b24ac = calpar.calpar[1]*calpar.calpar[1] - (4*calpar.calpar[2]*(calpar.calpar[0] - val));
+    double b24ac = (double)(calpar.calpar[1])*(double)(calpar.calpar[1]) - (4.0*calpar.calpar[2]*(calpar.calpar[0] - val));
     if(b24ac < 0.0){
       printf("getUncalVal - invalid quadratic calibration!\n");
       return 0.0;
