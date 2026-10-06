@@ -16,6 +16,8 @@ int writeSavedFits(FILE *out){
     fwrite(&rawdata.savedFitPar[i].fitStartCh,sizeof(rawdata.savedFitPar[i].fitStartCh),1,out);
     fwrite(&rawdata.savedFitPar[i].fitEndCh,sizeof(rawdata.savedFitPar[i].fitEndCh),1,out);
     fwrite(&rawdata.savedFitPar[i].fitMidCh,sizeof(rawdata.savedFitPar[i].fitMidCh),1,out);
+    fwrite(&rawdata.savedFitPar[i].fitExclStartCh,sizeof(rawdata.savedFitPar[i].fitExclStartCh),1,out);
+    fwrite(&rawdata.savedFitPar[i].fitExclEndCh,sizeof(rawdata.savedFitPar[i].fitExclEndCh),1,out);
     fwrite(&rawdata.savedFitPar[i].ndf,sizeof(rawdata.savedFitPar[i].ndf),1,out);
     fwrite(&rawdata.savedFitPar[i].fitPeakInitGuess,sizeof(rawdata.savedFitPar[i].fitPeakInitGuess),1,out);
     fwrite(&rawdata.savedFitPar[i].fitPeakFreePos,sizeof(rawdata.savedFitPar[i].fitPeakFreePos),1,out);
@@ -48,6 +50,8 @@ int writeSavedFits(FILE *out){
     fwrite(&rawdata.savedFitPar[i].prevFitNumPeaks,sizeof(rawdata.savedFitPar[i].prevFitNumPeaks),1,out);
     fwrite(&rawdata.savedFitPar[i].prevFitStartCh,sizeof(rawdata.savedFitPar[i].prevFitStartCh),1,out);
     fwrite(&rawdata.savedFitPar[i].prevFitEndCh,sizeof(rawdata.savedFitPar[i].prevFitEndCh),1,out);
+    fwrite(&rawdata.savedFitPar[i].prevFitExclStartCh,sizeof(rawdata.savedFitPar[i].prevFitExclStartCh),1,out);
+    fwrite(&rawdata.savedFitPar[i].prevFitExclEndCh,sizeof(rawdata.savedFitPar[i].prevFitExclEndCh),1,out);
     fwrite(&rawdata.savedFitPar[i].prevFitPeakInitGuess,sizeof(rawdata.savedFitPar[i].prevFitPeakInitGuess),1,out);
     fwrite(&rawdata.savedFitPar[i].prevFitWidths,sizeof(rawdata.savedFitPar[i].prevFitWidths),1,out);
     fwrite(&rawdata.savedFitPar[i].fittingSp,sizeof(rawdata.savedFitPar[i].fittingSp),1,out);
@@ -55,7 +59,7 @@ int writeSavedFits(FILE *out){
   return 0;
 }
 
-//routine to write a .jf3 file
+//function to write a .jf3 file
 //header containing: file format version number (uint8_t), number of spectra (uint8_t), label for each spactrum (each 256 element char array),
 //number of comments (uint8_t), individual comments (comment sp (char), ch (int32), y-val (float32), followed by a 256 element char array for the comment itself)
 //spectrum data is compressed using a basic RLE method: packet header (signed char) specifying number of elements to repeat, then the element as a 32-bit float
@@ -322,7 +326,7 @@ int writeJF3(const char *filename, double inpHist[NSPECT][S32K]){
   return 0;
 }
 
-//routine to export a RadWare compatible file
+//function to export a RadWare compatible file
 //exportMode: 0=write displayed spectrum, 1=write all imported spectra
 int exportSPE(const char *filePrefix, const int exportMode, const int rebin){
   
@@ -467,7 +471,7 @@ int exportSPE(const char *filePrefix, const int exportMode, const int rebin){
   return 0;
 }
 
-//routine to export an .fmca file (S32K float values per spectrum)
+//function to export an .fmca file (S32K float values per spectrum)
 //exportMode: 0=write displayed spectrum, 1=write all imported spectra
 int exportFMCA(const char *filePrefix, const int exportMode, const int rebin){
   
@@ -545,7 +549,7 @@ int exportFMCA(const char *filePrefix, const int exportMode, const int rebin){
   return 0;
 }
 
-//routine to export a .dmca file (S32K double values per spectrum)
+//function to export a .dmca file (S32K double values per spectrum)
 //exportMode: 0=write displayed spectrum, 1=write all imported spectra
 int exportDMCA(const char *filePrefix, const int exportMode, const int rebin){
   
@@ -623,7 +627,7 @@ int exportDMCA(const char *filePrefix, const int exportMode, const int rebin){
   return 0;
 }
 
-//routine to export a plaintext file
+//function to export a plaintext file
 //exportMode: 0=write displayed spectrum, 1=write all imported spectra
 int exportTXT(const char *filePrefix, const int exportMode, const int rebin){
   

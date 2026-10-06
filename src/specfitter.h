@@ -16,7 +16,7 @@
 #include "lin_eq_solver.h"
 #include "utils.h"
 
-#define JF3_MAX_VERSION 8 //current maximum .jf3 version understood by the app
+#define JF3_MAX_VERSION 9 //current maximum .jf3 version understood by the app
 
 #define BIG_NUMBER    1E30
 #define SMALL_NUMBER -1E30
@@ -157,6 +157,7 @@ gchar *currentFolderSelection; //folder selection for file choosers
 //fitting globals
 typedef struct {
   int32_t fitStartCh, fitEndCh, fitMidCh; //upper and lower channel bounds for fitting, and middle channel
+  int32_t fitExclStartCh, fitExclEndCh; //region to excude from the fit (for background-only fits)
   int32_t ndf; //DOF for fit
   float fitPeakInitGuess[MAX_FIT_PK]; //initial guess of peak positions, in channels
   uint8_t fitPeakFreePos[MAX_FIT_PK]; //whether to fix or free peak positions
@@ -194,6 +195,7 @@ typedef struct {
   uint8_t weightMode; //uses values from fit_weight_mode_enum: 0=weight using data (properly weighting for background subtraction), 1=weight using fit, 2=no weights
   uint8_t prevFitNumPeaks; //number of peaks in the previous fit
   int32_t prevFitStartCh, prevFitEndCh;
+  int32_t prevFitExclStartCh, prevFitExclEndCh;
   float prevFitPeakInitGuess[MAX_FIT_PK]; //previous fit guess of peak positions, in channels
   long double prevFitWidths[MAX_FIT_PK];
   uint8_t fittingSp; //uses values from fit_state_enum: 0=not fitting, 1=selecting limits, 2=selecting peaks, 3=fitting, 4,5=refining fit, 6=fitted (display fit)
@@ -289,6 +291,8 @@ enum fit_type_enum{FITTYPE_SYMMETRIC, FITTYPE_SKEWED, FITTYPE_BGONLY, FITTYPE_SU
 enum peak_width_mode_enum{PEAKWIDTHMODE_FREE, PEAKWIDTHMODE_RELATIVE, PEAKWIDTHMODE_PREVIOUS, PEAKWIDTHMODE_MANUAL, PEAKWIDTHMODE_ENUM_LENGTH};
 enum fit_weight_mode_enum{FITWEIGHT_DATA, FITWEIGHT_FIT, FITWEIGHT_NONE, FITWEIGHT_ENUM_LENGTH};
 enum fit_par_enum{FITPAR_BGCONST,FITPAR_BGLIN,FITPAR_BGQUAD,FITPAR_R,FITPAR_BETA,FITPAR_STEP,FITPAR_POS1,FITPAR_WIDTH1,FITPAR_AMP1,FITPAR_ENUM_LENGTH};
-enum fit_state_enum{FITSTATE_NOTFITTING, FITSTATE_SETTINGLIMITS, FITSTATE_SETTINGPEAKS, FITSTATE_FITTING, FITSTATE_FITCOMPLETE, FITSTATE_FITCOMPLETEDUBIOUS, FITSTATE_ENUM_LENGTH};
+enum fit_state_enum{FITSTATE_NOTFITTING, FITSTATE_SETTINGLIMITS, FITSTATE_SETTINGEXCLREGION, 
+  FITSTATE_SETTINGPEAKS, FITSTATE_FITTING, FITSTATE_FITCOMPLETE, 
+  FITSTATE_FITCOMPLETEDUBIOUS, FITSTATE_ENUM_LENGTH};
 enum view_mode_enum{VIEWTYPE_NONE, VIEWTYPE_SUMMED, VIEWTYPE_OVERLAY_COMMON, VIEWTYPE_OVERLAY_INDEPENDENT, VIEWTYPE_STACKED, VIEWTYPE_SAVEDFIT_OFSP, VIEWTYPE_SAVEDFIT_OFVIEW, VIEWTYPE_ENUM_LENGTH};
 enum value_drawmode_enum{VALUE_DATA, VALUE_PLUSERR, VALUE_MINUSERR, VALUE_ENUM_LENGTH};

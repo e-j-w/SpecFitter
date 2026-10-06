@@ -48,6 +48,25 @@ gboolean update_gui_fit_state(){
       gtk_label_set_text(fit_info_label,"Right-click on spectrum at approximate peak position(s).");
       gtk_widget_set_sensitive(GTK_WIDGET(fit_manualpeak_button),TRUE);
       break;
+    case FITSTATE_SETTINGEXCLREGION:
+      gtk_widget_set_sensitive(GTK_WIDGET(open_button),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(append_button),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_button),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(multiplot_button),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(spectrum_selector),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_fit_button),FALSE);
+      gtk_widget_set_sensitive(GTK_WIDGET(fit_manualpeak_button),FALSE);
+      if(rawdata.dispFitPar.prevFitStartCh == -1){
+        gtk_label_set_text(fit_info_label,"Right-click on spectrum to set lower and upper bounds for a region to exclude from the fit.");
+        gtk_widget_set_sensitive(GTK_WIDGET(fit_refit_button),FALSE);
+      }else{
+        gtk_label_set_text(fit_info_label,"Right-click on spectrum to set lower and upper bounds for a region to exclude from the fit.\n\nOr, click 'Re-fit' to use the previous fit region and peak position(s).");
+        gtk_widget_set_sensitive(GTK_WIDGET(fit_refit_button),TRUE);
+      }
+      gtk_widget_show(GTK_WIDGET(fit_button_box));
+      gtk_widget_hide(GTK_WIDGET(fit_display_button_box));
+      gtk_revealer_set_reveal_child(revealer_info_panel, TRUE);
+      break;
     case FITSTATE_SETTINGLIMITS:
       gtk_widget_set_sensitive(GTK_WIDGET(open_button),FALSE);
       gtk_widget_set_sensitive(GTK_WIDGET(append_button),FALSE);

@@ -502,6 +502,32 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
         }
         gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
         break;
+      case FITSTATE_SETTINGEXCLREGION:
+        //setup exclusion region for background only fits
+        if(rawdata.dispFitPar.fitExclEndCh < 0){
+          if(rawdata.dispFitPar.fitExclStartCh < 0){
+            rawdata.dispFitPar.fitExclStartCh = (int)cursorChan;
+          }else{
+            if(cursorChan > rawdata.dispFitPar.fitExclStartCh){
+              rawdata.dispFitPar.fitExclEndCh = (int)cursorChan;
+            }else if(cursorChan < rawdata.dispFitPar.fitExclStartCh){
+              rawdata.dispFitPar.fitExclEndCh = rawdata.dispFitPar.fitExclStartCh; //swap
+              rawdata.dispFitPar.fitExclStartCh = (int)cursorChan;
+            }
+          }
+        }
+        //check if both limits have been set
+        if((rawdata.dispFitPar.fitExclStartCh >= 0)&&(rawdata.dispFitPar.fitExclEndCh >=0)){
+          printf("Exclusion region: channel %i through %i\n",rawdata.dispFitPar.fitExclStartCh,rawdata.dispFitPar.fitExclEndCh);
+          if(rawdata.dispFitPar.fitType != FITTYPE_BGONLY){
+            printf("WARNING: set exclusion region for non-background-only fit!\n");
+          }
+          //background only fit, start the fit right away
+          on_fit_fit_button_clicked(); //gui.c
+          update_gui_fit_state();
+        }
+        gtk_widget_queue_draw(GTK_WIDGET(spectrum_drawing_area));
+        break;
       case FITSTATE_SETTINGLIMITS:
         //setup fitting limit
         if(rawdata.dispFitPar.fitEndCh < 0){
@@ -519,8 +545,11 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
         //check if both limits have been set
         if((rawdata.dispFitPar.fitStartCh >= 0)&&(rawdata.dispFitPar.fitEndCh >=0)){
           printf("Fit limits: channel %i through %i\n",rawdata.dispFitPar.fitStartCh,rawdata.dispFitPar.fitEndCh);
-          if((rawdata.dispFitPar.fitType == FITTYPE_BGONLY)||(rawdata.dispFitPar.fitType == FITTYPE_SUMREGION)){
-            //background only or sum region fit, start the fit right away
+          if(rawdata.dispFitPar.fitType == FITTYPE_BGONLY){
+            //background only fit, setup the exclusion region
+            rawdata.dispFitPar.fittingSp = FITSTATE_SETTINGEXCLREGION;
+          }else if(rawdata.dispFitPar.fitType == FITTYPE_SUMREGION){
+            //sum region fit, start the fit right away
             on_fit_fit_button_clicked(); //gui.c
           }else{
             rawdata.dispFitPar.fittingSp = FITSTATE_SETTINGPEAKS;
@@ -1923,6 +1952,26 @@ void drawSpectrum(cairo_t *cr, const float width, const float height, const floa
       if(cursorPos>=0){
         cairo_set_line_width(cr, 2.0*scaleFactor);
         cairo_set_source_rgb(cr, 0.5, 0.5, 0.5);
+        cairo_move_to(cr, cursorPos, -YORIGIN);
+        cairo_line_to(cr, cursorPos, -height);
+        cairo_stroke(cr);
+      }
+    }
+    if(rawdata.dispFitPar.fitExclStartCh >= 0){
+      float cursorPos = getXPosFromCh((float)(rawdata.dispFitPar.fitExclStartCh),width);
+      if(cursorPos>=0){
+        cairo_set_line_width(cr, 2.0*scaleFactor);
+        cairo_set_source_rgb(cr, 0.9, 0.3, 0.3);
+        cairo_move_to(cr, cursorPos, -YORIGIN);
+        cairo_line_to(cr, cursorPos, -height);
+        cairo_stroke(cr);
+      }
+    }
+    if(rawdata.dispFitPar.fitExclEndCh >= 0){
+      float cursorPos = getXPosFromCh((float)(rawdata.dispFitPar.fitExclEndCh),width);
+      if(cursorPos>=0){
+        cairo_set_line_width(cr, 2.0*scaleFactor);
+        cairo_set_source_rgb(cr, 0.9, 0.3, 0.3);
         cairo_move_to(cr, cursorPos, -YORIGIN);
         cairo_line_to(cr, cursorPos, -height);
         cairo_stroke(cr);

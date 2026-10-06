@@ -2106,6 +2106,8 @@ void on_fit_button_clicked(){
         //set default values
         rawdata.dispFitPar.fitStartCh = -1;
         rawdata.dispFitPar.fitEndCh = -1;
+        rawdata.dispFitPar.fitExclStartCh = -1;
+        rawdata.dispFitPar.fitExclEndCh = -1;
         rawdata.dispFitPar.numFitPeaks = 0;
         rawdata.dispFitPar.numFreePar = 0;
         //update widgets
@@ -2139,6 +2141,8 @@ void on_refit_button_clicked(){
           rawdata.dispFitPar.numFreePar = 0;
           rawdata.dispFitPar.fitStartCh = rawdata.dispFitPar.prevFitStartCh;
           rawdata.dispFitPar.fitEndCh = rawdata.dispFitPar.prevFitEndCh;
+          rawdata.dispFitPar.fitExclStartCh = rawdata.dispFitPar.prevFitExclStartCh;
+          rawdata.dispFitPar.fitExclEndCh = rawdata.dispFitPar.prevFitExclEndCh;
           rawdata.dispFitPar.numFitPeaks = rawdata.dispFitPar.prevFitNumPeaks;
           memcpy(rawdata.dispFitPar.fitPeakInitGuess,rawdata.dispFitPar.prevFitPeakInitGuess,sizeof(rawdata.dispFitPar.prevFitPeakInitGuess));
           on_fit_fit_button_clicked();
@@ -2175,6 +2179,8 @@ void on_fit_fit_button_clicked(){
 void on_fit_refit_button_clicked(){
   rawdata.dispFitPar.fitStartCh = rawdata.dispFitPar.prevFitStartCh;
   rawdata.dispFitPar.fitEndCh = rawdata.dispFitPar.prevFitEndCh;
+  rawdata.dispFitPar.fitExclStartCh = rawdata.dispFitPar.prevFitExclStartCh;
+  rawdata.dispFitPar.fitExclEndCh = rawdata.dispFitPar.prevFitExclEndCh;
   rawdata.dispFitPar.numFitPeaks = rawdata.dispFitPar.prevFitNumPeaks;
   memcpy(rawdata.dispFitPar.fitPeakInitGuess,rawdata.dispFitPar.prevFitPeakInitGuess,sizeof(rawdata.dispFitPar.prevFitPeakInitGuess));
 
@@ -2482,7 +2488,7 @@ void on_preferences_apply_button_clicked(){
   rawdata.dispFitPar.weightMode = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(weight_mode_combobox));
   if(rawdata.dispFitPar.fitType == FITTYPE_BGONLY){
     //background fit only
-    if(rawdata.dispFitPar.fittingSp > FITSTATE_SETTINGLIMITS){
+    if(rawdata.dispFitPar.fittingSp > FITSTATE_SETTINGEXCLREGION){
       //already past the point of fitting, clear the fit
       rawdata.dispFitPar.fittingSp = FITSTATE_NOTFITTING;
     }
@@ -3046,8 +3052,12 @@ void iniitalizeUIElements(){
   rawdata.dispFitPar.inflateErrors = 1;
   rawdata.dispFitPar.fitStartCh = -1;
   rawdata.dispFitPar.fitEndCh = -1;
+  rawdata.dispFitPar.fitExclStartCh = -1;
+  rawdata.dispFitPar.fitExclEndCh = -1;
   rawdata.dispFitPar.prevFitStartCh = -1;
   rawdata.dispFitPar.prevFitEndCh = -1;
+  rawdata.dispFitPar.prevFitExclStartCh = -1;
+  rawdata.dispFitPar.prevFitExclEndCh = -1;
   rawdata.dispFitPar.numFitPeaks = 0;
   rawdata.dispFitPar.fitType = FITTYPE_SYMMETRIC;
   rawdata.dispFitPar.bgType = 2; //default to quadratic BG

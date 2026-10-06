@@ -9,7 +9,7 @@
 //.dmca - double array
 //.C - ROOT macro
 
-//sread fit data element by element,
+//read saved fit data element by element,
 //in order to preserve compatibility for future revisions to the fit data format
 int readSavedFits(FILE *inp, const uint8_t format){
 
@@ -29,6 +29,13 @@ int readSavedFits(FILE *inp, const uint8_t format){
     if(fread(&rawdata.savedFitPar[i].fitStartCh,sizeof(rawdata.savedFitPar[i].fitStartCh),1,inp)!=1){fclose(inp); return 0;}
     if(fread(&rawdata.savedFitPar[i].fitEndCh,sizeof(rawdata.savedFitPar[i].fitEndCh),1,inp)!=1){fclose(inp); return 0;}
     if(fread(&rawdata.savedFitPar[i].fitMidCh,sizeof(rawdata.savedFitPar[i].fitMidCh),1,inp)!=1){fclose(inp); return 0;}
+    if(format >= 9){
+      if(fread(&rawdata.savedFitPar[i].fitExclStartCh,sizeof(rawdata.savedFitPar[i].fitExclStartCh),1,inp)!=1){fclose(inp); return 0;}
+      if(fread(&rawdata.savedFitPar[i].fitExclEndCh,sizeof(rawdata.savedFitPar[i].fitExclEndCh),1,inp)!=1){fclose(inp); return 0;}
+    }else{
+      rawdata.savedFitPar[i].fitExclStartCh = -1;
+      rawdata.savedFitPar[i].fitExclEndCh = -1;
+    }
     if(fread(&rawdata.savedFitPar[i].ndf,sizeof(rawdata.savedFitPar[i].ndf),1,inp)!=1){fclose(inp); return 0;}
     if(fread(&rawdata.savedFitPar[i].fitPeakInitGuess,sizeof(rawdata.savedFitPar[i].fitPeakInitGuess),1,inp)!=1){fclose(inp); return 0;}
     if(format >= 8){
@@ -71,9 +78,21 @@ int readSavedFits(FILE *inp, const uint8_t format){
     if(fread(&rawdata.savedFitPar[i].prevFitNumPeaks,sizeof(rawdata.savedFitPar[i].prevFitNumPeaks),1,inp)!=1){fclose(inp); return 0;}
     if(fread(&rawdata.savedFitPar[i].prevFitStartCh,sizeof(rawdata.savedFitPar[i].prevFitStartCh),1,inp)!=1){fclose(inp); return 0;}
     if(fread(&rawdata.savedFitPar[i].prevFitEndCh,sizeof(rawdata.savedFitPar[i].prevFitEndCh),1,inp)!=1){fclose(inp); return 0;}
+    if(format >= 9){
+      if(fread(&rawdata.savedFitPar[i].prevFitExclStartCh,sizeof(rawdata.savedFitPar[i].prevFitExclStartCh),1,inp)!=1){fclose(inp); return 0;}
+      if(fread(&rawdata.savedFitPar[i].prevFitExclEndCh,sizeof(rawdata.savedFitPar[i].prevFitExclEndCh),1,inp)!=1){fclose(inp); return 0;}
+    }else{
+      rawdata.savedFitPar[i].prevFitExclStartCh = -1;
+      rawdata.savedFitPar[i].prevFitExclEndCh = -1;
+    }
     if(fread(&rawdata.savedFitPar[i].prevFitPeakInitGuess,sizeof(rawdata.savedFitPar[i].prevFitPeakInitGuess),1,inp)!=1){fclose(inp); return 0;}
     if(fread(&rawdata.savedFitPar[i].prevFitWidths,sizeof(rawdata.savedFitPar[i].prevFitWidths),1,inp)!=1){fclose(inp); return 0;}
     if(fread(&rawdata.savedFitPar[i].fittingSp,sizeof(rawdata.savedFitPar[i].fittingSp),1,inp)!=1){fclose(inp); return 0;}
+    if(format < 9){
+      if(rawdata.savedFitPar[i].fittingSp >= FITSTATE_SETTINGEXCLREGION){
+        rawdata.savedFitPar[i].fittingSp++; //added FITSTATE_SETTINGEXCLREGION starting with version 9
+      }
+    }
     /*printf("channel range of fit %u: [%i %i]\n",i,rawdata.savedFitPar[i].fitStartCh,rawdata.savedFitPar[i].fitEndCh);
     printf("fit %u chisq: %Lf\n",i,rawdata.savedFitPar[i].chisq);
     printf("fit %u num fit peaks: %u\n",i,rawdata.savedFitPar[i].numFitPeaks);
@@ -104,8 +123,9 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
   if(format > JF3_MAX_VERSION){
     printf("ERROR: invalid version of .jf3 file format (%u).\n", format);
     return 0;
+  }else{
+    printf("Reading file: %s, with .jf3 format: %u\n",filename,format);
   }
-  //printf(".jf3 file format: %u\n",format);
   if(format>=3){
     //version 3+ of file format (double precision values in spectra)
     if(fread(&ucharBuf, sizeof(uint8_t), 1, inp)!=1){fclose(inp); return 0;}
