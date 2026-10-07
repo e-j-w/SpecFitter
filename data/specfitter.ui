@@ -2552,10 +2552,11 @@ They will then appear on this panel.</property>
                   <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="tooltip-text" translatable="yes">Set the type of fit to perform.
+                    <property name="tooltip-text" translatable="yes">Set the type of fit to perform:
 Gaussian peaks - Fit peaks with a symmetric Guassian shape.
 Skewed peaks - Fit peaks with a shape that is the sum of two Guassians, one of them skewed via convolution with an exponential tail on the low-energy side (can represent incomplete charge collection in a detector).
 Background only - Do not fit any peaks.  Will estimate the area of the region above the background.
+Background, with excluded region - Do not fit any peaks. A region to be excluded from the fit can be set inside the fit window.  Will estimate the area of the excluded region above the background.
 Sum counts - Only show the total number of counts in the fit region.</property>
                     <property name="spacing">10</property>
                     <child>
