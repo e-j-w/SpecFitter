@@ -8,6 +8,8 @@
 int eval(long double *pars, uint8_t *freepars, long double *derivs, int ichan, long double *fit, uint8_t npks, int mode);
 long double evalAreaAboveBG();
 long double evalAreaAboveBGErr();
+long double evalAreaAboveBGInExcl();
+long double evalAreaAboveBGInExclErr();
 
 //update the gui state while/after fitting
 gboolean update_gui_fit_state(){
@@ -199,8 +201,13 @@ gboolean print_fit_results(){
       //background fit only
       getFormattedValAndUncertainty((double)evalAreaAboveBG(),(double)evalAreaAboveBGErr(),fitParStr[0],50,1,guiglobals.roundErrors);
       length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Area above background: %s\n\n",fitParStr[0]);
-    }
-    if(rawdata.dispFitPar.fitType == FITTYPE_SKEWED){
+    }else if(rawdata.dispFitPar.fitType == FITTYPE_BGWITHEXCL){
+      //background fit only
+      getFormattedValAndUncertainty((double)evalAreaAboveBG(),(double)evalAreaAboveBGErr(),fitParStr[0],50,1,guiglobals.roundErrors);
+      length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Area above background: %s\n\n",fitParStr[0]);
+      getFormattedValAndUncertainty((double)evalAreaAboveBGInExcl(),(double)evalAreaAboveBGInExclErr(),fitParStr[0],50,1,guiglobals.roundErrors);
+      length += snprintf(fitResStr+length,(uint64_t)(strSize-length),"Area above background (excluded region): %s\n\n",fitParStr[0]);
+    }else if(rawdata.dispFitPar.fitType == FITTYPE_SKEWED){
       //print peak skew parameters
       if(calpar.calMode == 1){
         getFormattedValAndUncertainty((double)rawdata.dispFitPar.fitParVal[FITPAR_R],(double)rawdata.dispFitPar.fitParErr[FITPAR_R],fitParStr[0],50,1,guiglobals.roundErrors);
@@ -299,6 +306,33 @@ long double evalAreaAboveBGErr(){
   areaErr = sqrtl(areaErr);
   return areaErr;
 }
+
+long double evalAreaAboveBGInExcl(){
+  if(rawdata.dispFitPar.fitExclStartCh >= 0){
+    long double area = 0.;
+    for(int32_t i = rawdata.dispFitPar.fitExclStartCh; i <= rawdata.dispFitPar.fitExclEndCh; i += drawing.contractFactor){
+      area += getSpBinVal(0,i) - evalFitBG(i);
+    }
+    return area;
+  }
+  printf("WARNING: evalAreaAboveBGInExcl - no exclusion region set!\n");
+  return 0.;
+}
+
+long double evalAreaAboveBGInExclErr(){
+  if(rawdata.dispFitPar.fitExclStartCh >= 0){
+    long double areaErr = 0.;
+    for(int32_t i = rawdata.dispFitPar.fitExclStartCh; i <= rawdata.dispFitPar.fitExclEndCh; i += drawing.contractFactor){
+      areaErr += getSpBinVal(0,i) + powl(evalFitBGErr(i),2.);
+    }
+    areaErr = sqrtl(areaErr);
+    return areaErr;
+  }
+  printf("WARNING: evalAreaAboveBGInExclErr - no exclusion region set!\n");
+  return 0.;
+}
+
+
 
 
 //gets the y value for a single fitted peak, sans background
@@ -596,7 +630,7 @@ void performGausFit(){
     printf("Not enough degrees of freedom to fit!\n");
     goto QUIT;
   }
-  if(rawdata.dispFitPar.fitType != FITTYPE_BGONLY){
+  if((rawdata.dispFitPar.fitType != FITTYPE_BGONLY)&&(rawdata.dispFitPar.fitType != FITTYPE_BGWITHEXCL)){
     if(linEq.dim < 2){
       printf("Too many fixed parameters.\n");
       goto QUIT;
@@ -638,6 +672,10 @@ void performGausFit(){
   eval(rawdata.dispFitPar.fitParVal, rawdata.dispFitPar.fitParFree, derivs, 0, &fit, rawdata.dispFitPar.numFitPeaks, -9);
 
   for(i = rawdata.dispFitPar.fitStartCh; i <= rawdata.dispFitPar.fitEndCh; i += drawing.contractFactor){
+    if((rawdata.dispFitPar.fitType == FITTYPE_BGWITHEXCL)&&(rawdata.dispFitPar.fitExclStartCh >= 0)&&(i >= rawdata.dispFitPar.fitExclStartCh)&&(i <= rawdata.dispFitPar.fitExclEndCh)){
+      //in fit exclusion region
+      continue;
+    }
     eval(rawdata.dispFitPar.fitParVal, rawdata.dispFitPar.fitParFree, derivs, i, &fit, rawdata.dispFitPar.numFitPeaks, 1);
     diff = getSpBinVal(0,i) - fit;
     /* weight with fit/data/none */
@@ -750,6 +788,10 @@ void performGausFit(){
     rawdata.dispFitPar.chisq = 0.;
     eval(b, rawdata.dispFitPar.fitParFree, derivs, rawdata.dispFitPar.fitParFree[3], &fit, rawdata.dispFitPar.numFitPeaks, -9);
     for(i = rawdata.dispFitPar.fitStartCh; i <= rawdata.dispFitPar.fitEndCh; i += drawing.contractFactor){
+      if((rawdata.dispFitPar.fitType == FITTYPE_BGWITHEXCL)&&(rawdata.dispFitPar.fitExclStartCh >= 0)&&(i >= rawdata.dispFitPar.fitExclStartCh)&&(i <= rawdata.dispFitPar.fitExclEndCh)){
+        //in fit exclusion region
+        continue;
+      }
       eval(b, rawdata.dispFitPar.fitParFree, derivs, i, &fit, rawdata.dispFitPar.numFitPeaks, 0);
       diff = getSpBinVal(0,i) - fit;
       /* weight with fit/data/none */
@@ -988,6 +1030,8 @@ int startGausFit(){
   memset(rawdata.dispFitPar.fitParErr,0,sizeof(rawdata.dispFitPar.fitParErr));
   rawdata.dispFitPar.prevFitStartCh = rawdata.dispFitPar.fitStartCh;
   rawdata.dispFitPar.prevFitEndCh = rawdata.dispFitPar.fitEndCh;
+  rawdata.dispFitPar.prevFitExclStartCh = rawdata.dispFitPar.fitExclStartCh;
+  rawdata.dispFitPar.prevFitExclEndCh = rawdata.dispFitPar.fitExclEndCh;
   memcpy(rawdata.dispFitPar.prevFitPeakInitGuess,rawdata.dispFitPar.fitPeakInitGuess,sizeof(rawdata.dispFitPar.fitPeakInitGuess));
   rawdata.dispFitPar.fitMidCh = (rawdata.dispFitPar.fitStartCh + rawdata.dispFitPar.fitEndCh) / 2; //used by fitter
 
@@ -1045,7 +1089,7 @@ int startGausFit(){
       break;
   }
   
-  if(rawdata.dispFitPar.fitType != FITTYPE_BGONLY){
+  if((rawdata.dispFitPar.fitType != FITTYPE_BGONLY)&&(rawdata.dispFitPar.fitType != FITTYPE_BGWITHEXCL)){
     //peaks are being used in this fit, set up parameters
 
     //assign initial guesses for non-linear params

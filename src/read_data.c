@@ -52,6 +52,11 @@ int readSavedFits(FILE *inp, const uint8_t format){
     if(fread(&rawdata.savedFitPar[i].numFreePar,sizeof(rawdata.savedFitPar[i].numFreePar),1,inp)!=1){fclose(inp); return 0;}
     if(fread(&rawdata.savedFitPar[i].bgType,sizeof(rawdata.savedFitPar[i].bgType),1,inp)!=1){fclose(inp); return 0;}
     if(fread(&rawdata.savedFitPar[i].fitType,sizeof(rawdata.savedFitPar[i].fitType),1,inp)!=1){fclose(inp); return 0;}
+    if(format < 9){
+      if(rawdata.savedFitPar[i].fitType >= FITTYPE_BGWITHEXCL){
+        rawdata.savedFitPar[i].fitType++; //added FITTYPE_BGWITHEXCL starting with version 9
+      }
+    }
     if(fread(&rawdata.savedFitPar[i].numFitPeaks,sizeof(rawdata.savedFitPar[i].numFitPeaks),1,inp)!=1){fclose(inp); return 0;}
     if(fread(&rawdata.savedFitPar[i].manualWidthVal,sizeof(rawdata.savedFitPar[i].manualWidthVal),1,inp)!=1){fclose(inp); return 0;}
     if(fread(&rawdata.savedFitPar[i].manualWidthOffset,sizeof(rawdata.savedFitPar[i].manualWidthOffset),1,inp)!=1){fclose(inp); return 0;}

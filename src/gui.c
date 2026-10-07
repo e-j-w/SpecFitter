@@ -1,4 +1,4 @@
-/* © J. Williams, 2020-2025 */
+/* © J. Williams, 2020-2026 */
 
 //File contains routines and callbacks for dealing with GTK and
 //the various UI elements used in the program.  Initialization
@@ -43,7 +43,7 @@ void showPreferences(int page){
   }else{
     gtk_revealer_set_reveal_child(skew_parameters_revealer, FALSE);
   }
-  if((rawdata.dispFitPar.fitType == FITTYPE_BGONLY)||(rawdata.dispFitPar.fitType == FITTYPE_SUMREGION)){
+  if((rawdata.dispFitPar.fitType == FITTYPE_BGONLY)||(rawdata.dispFitPar.fitType == FITTYPE_BGWITHEXCL)||(rawdata.dispFitPar.fitType == FITTYPE_SUMREGION)){
     gtk_revealer_set_reveal_child(peak_parameters_revealer, FALSE);
   }else{
     gtk_revealer_set_reveal_child(peak_parameters_revealer, TRUE);
@@ -2415,7 +2415,7 @@ void on_peak_shape_changed(GtkComboBox *combo_box){
     }else{
       gtk_revealer_set_reveal_child(skew_parameters_revealer, FALSE);
     }
-    if((entry == FITTYPE_BGONLY)||(entry == FITTYPE_SUMREGION)){
+    if((entry == FITTYPE_BGONLY)||(entry == FITTYPE_BGWITHEXCL)||(entry == FITTYPE_SUMREGION)){
       gtk_revealer_set_reveal_child(peak_parameters_revealer, FALSE);
     }else{
       gtk_revealer_set_reveal_child(peak_parameters_revealer, TRUE);
@@ -2486,7 +2486,7 @@ void on_preferences_apply_button_clicked(){
   rawdata.dispFitPar.fitType = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox));
   rawdata.dispFitPar.peakWidthMethod = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_width_combobox));
   rawdata.dispFitPar.weightMode = (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(weight_mode_combobox));
-  if(rawdata.dispFitPar.fitType == FITTYPE_BGONLY){
+  if((rawdata.dispFitPar.fitType == FITTYPE_BGONLY)||(rawdata.dispFitPar.fitType == FITTYPE_BGWITHEXCL)){
     //background fit only
     if(rawdata.dispFitPar.fittingSp > FITSTATE_SETTINGEXCLREGION){
       //already past the point of fitting, clear the fit

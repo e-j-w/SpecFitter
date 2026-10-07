@@ -519,8 +519,8 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
         //check if both limits have been set
         if((rawdata.dispFitPar.fitExclStartCh >= 0)&&(rawdata.dispFitPar.fitExclEndCh >=0)){
           printf("Exclusion region: channel %i through %i\n",rawdata.dispFitPar.fitExclStartCh,rawdata.dispFitPar.fitExclEndCh);
-          if(rawdata.dispFitPar.fitType != FITTYPE_BGONLY){
-            printf("WARNING: set exclusion region for non-background-only fit!\n");
+          if(rawdata.dispFitPar.fitType != FITTYPE_BGWITHEXCL){
+            printf("WARNING: set exclusion region for wrong fit type (%u).\n",rawdata.dispFitPar.fitType);
           }
           //background only fit, start the fit right away
           on_fit_fit_button_clicked(); //gui.c
@@ -545,11 +545,11 @@ void on_spectrum_click(GtkWidget *widget, GdkEventButton *event){
         //check if both limits have been set
         if((rawdata.dispFitPar.fitStartCh >= 0)&&(rawdata.dispFitPar.fitEndCh >=0)){
           printf("Fit limits: channel %i through %i\n",rawdata.dispFitPar.fitStartCh,rawdata.dispFitPar.fitEndCh);
-          if(rawdata.dispFitPar.fitType == FITTYPE_BGONLY){
-            //background only fit, setup the exclusion region
+          if(rawdata.dispFitPar.fitType == FITTYPE_BGWITHEXCL){
+            //background with exclusion region fit, setup the exclusion region
             rawdata.dispFitPar.fittingSp = FITSTATE_SETTINGEXCLREGION;
-          }else if(rawdata.dispFitPar.fitType == FITTYPE_SUMREGION){
-            //sum region fit, start the fit right away
+          }else if((rawdata.dispFitPar.fitType == FITTYPE_BGONLY)||(rawdata.dispFitPar.fitType == FITTYPE_SUMREGION)){
+            //background only or sum region fit, start the fit right away
             on_fit_fit_button_clicked(); //gui.c
           }else{
             rawdata.dispFitPar.fittingSp = FITSTATE_SETTINGPEAKS;

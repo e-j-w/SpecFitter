@@ -2579,6 +2579,7 @@ Sum counts - Only show the total number of counts in the fit region.</property>
                           <item id="&lt;Enter ID&gt;" translatable="yes">Gaussian peaks</item>
                           <item translatable="yes">Skewed peaks (low energy tail)</item>
                           <item translatable="yes">Background only</item>
+                          <item translatable="yes">Background, with excluded region</item>
                           <item translatable="yes">Sum counts in region</item>
                         </items>
                       </object>
