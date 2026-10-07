@@ -293,6 +293,21 @@ double getSpBinValRaw(const int32_t spNumRaw, const int32_t bin, const double sc
   return val;
 }
 
+double getSpBinErr2Raw(const int32_t spNumRaw, const int32_t bin, const double scaleFactor, const int32_t contractFactor){
+
+  if(spNumRaw >= NSPECT){
+    return 0;
+  }
+
+  double val = 0.;
+  for(int32_t i=0;i<contractFactor;i++){
+    if((bin+i) < S32K){
+      val += (double)(scaleFactor*scaleFactor*rawdata.hist[spNumRaw][bin+i]);
+    }
+  }
+  return val;
+}
+
 double getSpBinCustomErr2Raw(const int32_t spNumRaw, const int32_t bin, const double scaleFactor, const int32_t contractFactor){
 
   if(spNumRaw >= NSPECT){
@@ -348,6 +363,8 @@ double getSpBinValOrWeight(const int32_t dispSpNum, const int32_t bin, const int
       //no multiplot
       if(getWeight && rawdata.hasCustomErr[drawing.multiPlots[dispSpNum]]){
         val = getSpBinCustomErr2Raw(drawing.multiPlots[dispSpNum],bin,drawing.scaleFactor[drawing.multiPlots[dispSpNum]],drawing.contractFactor);
+      }else if(getWeight){
+        val = getSpBinErr2Raw(drawing.multiPlots[dispSpNum],bin,drawing.scaleFactor[drawing.multiPlots[dispSpNum]],drawing.contractFactor);
       }else{
         val = getSpBinValRaw(drawing.multiPlots[dispSpNum],bin,drawing.scaleFactor[drawing.multiPlots[dispSpNum]],drawing.contractFactor);
       }
