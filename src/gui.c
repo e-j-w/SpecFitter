@@ -2468,8 +2468,10 @@ void on_preferences_button_clicked(){
 
 void on_preferences_apply_button_clicked(){
   if(rawdata.dispFitPar.fitType != (uint8_t)gtk_combo_box_get_active(GTK_COMBO_BOX(peak_shape_combobox))){
-    if(rawdata.dispFitPar.fittingSp >= FITSTATE_FITCOMPLETE){
-      //the fit type was changed, clear the fit
+    //the fit type was changed, clear the fit (if needed)
+    if(((rawdata.dispFitPar.fitType == FITTYPE_BGONLY)||(rawdata.dispFitPar.fitType == FITTYPE_BGWITHEXCL))&&(rawdata.dispFitPar.fittingSp > FITSTATE_SETTINGLIMITS)){
+      rawdata.dispFitPar.fittingSp = FITSTATE_NOTFITTING;
+    }else if(rawdata.dispFitPar.fittingSp >= FITSTATE_FITCOMPLETE){
       rawdata.dispFitPar.fittingSp = FITSTATE_NOTFITTING;
     }
     //prevent re-fitting with a different fit mode

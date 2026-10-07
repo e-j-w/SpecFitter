@@ -130,7 +130,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
     fclose(inp);
     return 0;
   }else{
-    printf("Reading file: %s, with .jf3 format: %u\n",filename,format);
+    printf("Reading file with .jf3 format: %u\n",format);
   }
   if(format>=3){
     //version 3+ of file format (double precision values in spectra)
@@ -256,9 +256,8 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
         printf("ERROR: failed to read fits from input file: %s\n", filename);
         return 0;
       }
-      printf("num saved fits: %i\n",rawdata.numSavedFits);
-
-      //printf("num comments: %i\n",rawdata.numChComments);
+      //printf("Number of saved fits in file: %i\n",rawdata.numSavedFits);
+      //printf("Number of comments in file: %i\n",rawdata.numChComments);
       
       //read spectra
       int8_t scharBuf;
