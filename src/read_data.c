@@ -127,6 +127,7 @@ int readJF3(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
   uint8_t format = ucharBuf;
   if(format > JF3_MAX_VERSION){
     printf("ERROR: invalid version of .jf3 file format (%u).\n", format);
+    fclose(inp);
     return 0;
   }else{
     printf("Reading file: %s, with .jf3 format: %u\n",filename,format);
@@ -742,31 +743,31 @@ int readCHN(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
     printf("Check that the file exists.\n");
     exit(-1);
   }else{
-    if(fread(&fType,sizeof(fType),1,inp) != 1) return 0;
+    if(fread(&fType,sizeof(fType),1,inp) != 1){fclose(inp); return 0;}
     if(fType!=-1){
       printf("ERROR: Input file %s is not a valid .chn file.\n",filename);
       exit(-1);
     }
       
     //read in the .chn file header and do absolutely nothing with it
-    if(fread(&mcaNum, sizeof(mcaNum), 1, inp) != 1) return 0;         // MCA #
-    if(fread(&segment, sizeof(segment), 1, inp) != 1) return 0;         // seg #
-    if(fread(acqTime, sizeof(char), 2, inp) != 2) return 0;            // start time
-    if(fread(&realtime, sizeof(realtime), 1, inp) != 1) return 0;       // real time, 20 ms ticks
-    if(fread(&livetime, sizeof(livetime), 1, inp) != 1) return 0;       // live time, 20 ms ticks
-    if(fread(acqTime, sizeof(char), 2, inp) != 2) return 0;            // start day
-    if(fread(month, sizeof(char), 3, inp) != 3) return 0;               // start month
-    if(fread(acqTime, sizeof(char), 2, inp) != 2) return 0;            // start year
-    if(fread(acqTime, sizeof(char), 1, inp) != 1) return 0;            // century
-    if(fread(acqTime, sizeof(char), 2, inp) != 2) return 0;            // hour
-    if(fread(acqTime, sizeof(char), 2, inp) != 2) return 0;            // minute
-    if(fread(&chanOffset, sizeof(chanOffset), 1, inp) != 1) return 0; // offset
-    if(fread(&numCh, sizeof(numCh), 1, inp) != 1) return 0;     // # channels
+    if(fread(&mcaNum, sizeof(mcaNum), 1, inp) != 1){fclose(inp); return 0;}          // MCA #
+    if(fread(&segment, sizeof(segment), 1, inp) != 1){fclose(inp); return 0;}        // seg #
+    if(fread(acqTime, sizeof(char), 2, inp) != 2){fclose(inp); return 0;}            // start time
+    if(fread(&realtime, sizeof(realtime), 1, inp) != 1){fclose(inp); return 0;}      // real time, 20 ms ticks
+    if(fread(&livetime, sizeof(livetime), 1, inp) != 1){fclose(inp); return 0;}      // live time, 20 ms ticks
+    if(fread(acqTime, sizeof(char), 2, inp) != 2){fclose(inp); return 0;}            // start day
+    if(fread(month, sizeof(char), 3, inp) != 3){fclose(inp); return 0;}              // start month
+    if(fread(acqTime, sizeof(char), 2, inp) != 2){fclose(inp); return 0;}            // start year
+    if(fread(acqTime, sizeof(char), 1, inp) != 1){fclose(inp); return 0;}            // century
+    if(fread(acqTime, sizeof(char), 2, inp) != 2){fclose(inp); return 0;}            // hour
+    if(fread(acqTime, sizeof(char), 2, inp) != 2){fclose(inp); return 0;}            // minute
+    if(fread(&chanOffset, sizeof(chanOffset), 1, inp) != 1){fclose(inp); return 0;}  // offset
+    if(fread(&numCh, sizeof(numCh), 1, inp) != 1){fclose(inp); return 0;}            // # channels
 
     //read in histogram data from the .chn file
     for(int32_t i=0;i<numCh;i++){
       if(i<S32K){
-        if(fread(&chData, sizeof(chData), 1, inp) != 1) return 0;
+        if(fread(&chData, sizeof(chData), 1, inp) != 1){fclose(inp); return 0;} 
         hist[i]=chData;
       }
     }
@@ -864,8 +865,8 @@ int readSPE(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
   }
 
   //read .spe header
-  if(fread(&intBuf,sizeof(int32_t),1,inp)!=1) return 0;
-  if(fread(&spLabel,sizeof(spLabel),1,inp)!=1) return 0;
+  if(fread(&intBuf,sizeof(int32_t),1,inp)!=1){fclose(inp); return 0;}
+  if(fread(&spLabel,sizeof(spLabel),1,inp)!=1){fclose(inp); return 0;}
   if(fread(header, 24, 1, inp) != 1){
     printf("ERROR: Cannot read header from the .spe file: %s\n", filename);
     printf("Verify that the format of the file is correct.\n");
@@ -883,6 +884,7 @@ int readSPE(const char *filename, double outHist[NSPECT][S32K], const uint32_t o
 
   if(outHistStartSp>=NSPECT){
     printf("Cannot open file %s, number of spectra would exceed maximum (%i, %i spectra already open, 1 in file)!\n", filename, NSPECT, outHistStartSp);
+    fclose(inp);
     return -1; //over-import error
   }
 
@@ -1132,7 +1134,9 @@ int readROOT(const char *filename, double outHist[NSPECT][S32K], const uint32_t 
   int32_t ind;
   double val;
   char *str = calloc(1,1024);
+  if(str == NULL){fclose(inp); return 0;}
   char *histName = calloc(1,256);
+  if(histName == NULL){fclose(inp); free(str); return 0;}
   strncpy(histName,"",256);
 
   //read the input file
